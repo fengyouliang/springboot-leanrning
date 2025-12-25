@@ -26,12 +26,12 @@
     </properties>
 
     <modules>
-        <module>boot-basics</module>
-        <module>boot-web-mvc</module>
-        <module>boot-data-jpa</module>
-        <module>boot-actuator</module>
-        <module>boot-testing</module>
-        <module>boot-business-case</module>
+        <module>springboot-basics</module>
+        <module>springboot-web-mvc</module>
+        <module>springboot-data-jpa</module>
+        <module>springboot-actuator</module>
+        <module>springboot-testing</module>
+        <module>springboot-business-case</module>
         <module>spring-core-beans</module>
         <module>spring-core-aop</module>
         <module>spring-core-events</module>

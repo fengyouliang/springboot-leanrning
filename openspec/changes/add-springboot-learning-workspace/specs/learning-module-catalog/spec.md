@@ -9,11 +9,11 @@ The repository SHALL provide a root-level module catalog that lists every learni
 
 ### Requirement: Initial Starter Modules
 At initial bootstrap, the workspace SHALL include the following starter modules:
-- `boot-basics`
-- `boot-web-mvc`
-- `boot-data-jpa`
-- `boot-actuator`
-- `boot-testing`
+- `springboot-basics`
+- `springboot-web-mvc`
+- `springboot-data-jpa`
+- `springboot-actuator`
+- `springboot-testing`
 
 #### Scenario: Verify starter modules exist
 - **WHEN** a learner views the workspace module list
@@ -25,4 +25,3 @@ Each learning module SHALL declare its primary topic in its module `README.md` a
 #### Scenario: Understand module scope quickly
 - **WHEN** a learner reads a module `README.md`
 - **THEN** the primary topic is stated clearly and the examples align with that topic
-

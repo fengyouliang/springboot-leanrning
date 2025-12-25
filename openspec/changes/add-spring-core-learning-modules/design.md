@@ -17,7 +17,7 @@ This workspace is structured as “one module per topic” to help beginners lea
 - Add a shared `common` module at this stage.
 
 ## Decisions
-- **Module naming**: Use `spring-core-*` to distinguish Spring Framework fundamentals from `boot-*` modules.
+- **Module naming**: Use `spring-core-*` to distinguish Spring Framework fundamentals from `springboot-*` modules.
 - **Runtime model**: Each module remains a standalone Spring Boot application for consistency and ease of running (`mvn -pl <module> spring-boot:run`).
 - **No web server by default**: Prefer `spring-boot-starter` over `spring-boot-starter-web` to avoid port conflicts and keep focus on container behavior.
 - **Observability for learning**: Each module should have at least one user-visible behavior (startup logs/console output and/or a minimal test that asserts the behavior).
@@ -33,4 +33,3 @@ Not applicable (additive modules in a learning workspace).
 ## Open Questions
 - Should the Spring Core modules be introduced as a prerequisite sequence in the root README (recommended learning order), or kept as a flat catalog only?
 - Do we want to include an optional fourth module in this change (e.g., `spring-core-resources` or `spring-core-validation`), or keep the starter set strictly to 3 modules?
-

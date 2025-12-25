@@ -16,6 +16,5 @@ A modular workspace (one module per topic) provides a low-friction path to explo
   - `learning-module-catalog`
 - Affected code (apply stage):
   - Root build files (e.g., `pom.xml`) (uses system `mvn`, no Maven Wrapper)
-  - Module directories (`boot-*`) with their own build, code, and docs
+  - Module directories (`springboot-*`) with their own build, code, and docs
   - Root documentation (`README.md`)
-

@@ -57,7 +57,7 @@ To support 15+ experiments per module without a very slow build:
   - a “Debugging / Introspection Tips” section for container-level inspection
 
 ### Capstone Business Case Module
-- Add `boot-business-case` as a “capstone” module with a single clear topic:
+- Add `springboot-business-case` as a “capstone” module with a single clear topic:
   - “Realistic end-to-end flow and how Spring mechanics compose”
 - The module will include:
   - a thin MVC boundary (request → validation → response)
@@ -76,11 +76,11 @@ This is the intended “deep” content focus per module. Each item becomes one 
 - `spring-core-validation`: method validation mechanism, proxying interaction, groups, custom constraints.
 - `spring-core-resources`: `Resource` abstraction, classpath pattern resolution, loading pitfalls, jar vs filesystem behavior.
 - `spring-core-profiles`: profile selection, `@Conditional*` evaluation, property precedence, conditional bean creation.
-- `boot-basics`: `Environment` and property source ordering, configuration property binding and conversion, profile activation.
-- `boot-web-mvc`: validation at boundary, exception mapping, converters/formatters, interceptors/filters, argument resolvers (intro-level).
-- `boot-data-jpa`: entity states, flush behavior, transactional reads, N+1 pitfalls, query methods vs JPQL.
-- `boot-actuator`: endpoint exposure, custom health contributors, info contributors, basics of security/visibility (minimal).
-- `boot-testing`: slice tests vs full context, `@MockBean` boundaries, test configuration patterns.
+- `springboot-basics`: `Environment` and property source ordering, configuration property binding and conversion, profile activation.
+- `springboot-web-mvc`: validation at boundary, exception mapping, converters/formatters, interceptors/filters, argument resolvers (intro-level).
+- `springboot-data-jpa`: entity states, flush behavior, transactional reads, N+1 pitfalls, query methods vs JPQL.
+- `springboot-actuator`: endpoint exposure, custom health contributors, info contributors, basics of security/visibility (minimal).
+- `springboot-testing`: slice tests vs full context, `@MockBean` boundaries, test configuration patterns.
 
 ## Risks / Trade-offs
 - **Internal APIs can shift across Spring versions**: mitigated by pinning to a stable Boot baseline and writing tests against stable public types where possible.
@@ -93,4 +93,3 @@ Additive. Existing passing tests remain passing. Exercises are disabled by defau
 ## Open Questions
 - Should the capstone module include a real HTTP API by default, or prefer a CLI-style runner to avoid additional port management?
 - Do we want a strict convention for experiment naming (e.g., `Lab01_...`) to keep ordering stable in IDEs?
-

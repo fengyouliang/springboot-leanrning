@@ -16,10 +16,10 @@ The goal is to create a beginner-friendly Spring Boot learning repository. The r
 ## Decisions
 - **Build system**: Use Maven multi-module to keep a single root build entry point and align with common Spring Boot learning material.
 - **Baseline**: Pin Spring Boot to `3.5.9` (latest stable 3.x at bootstrap) and standardize on Java `17`.
-- **Layout**: Keep modules flat at repository root (e.g., `boot-web-mvc`).
+- **Layout**: Keep modules flat at repository root (e.g., `springboot-web-mvc`).
 - **Tooling**: Use system-installed Maven (`mvn`) only; do not include Maven Wrapper scripts.
-- **Starter modules**: Bootstrap exactly 5 starter modules (exclude `boot-security` for now).
-- **Module independence**: Each `boot-*` module is a standalone Spring Boot application to reduce cross-module coupling and simplify “run this module” learning.
+- **Starter modules**: Bootstrap exactly 5 starter modules (exclude `springboot-security` for now).
+- **Module independence**: Each `springboot-*` module is a standalone Spring Boot application to reduce cross-module coupling and simplify “run this module” learning.
 - **Shared code**: Avoid a shared `common` module initially; duplication is acceptable for learning and keeps modules self-contained.
 - **Data examples**: Use embedded/in-memory dependencies (e.g., H2) for database modules to avoid external setup.
 - **Documentation**: Keep a root catalog plus per-module README files so learners can quickly choose a topic and follow a consistent run path.
@@ -33,4 +33,3 @@ Not applicable (repository bootstrap from an empty state).
 
 ## Open Questions
 None for this change.
-

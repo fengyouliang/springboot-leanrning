@@ -8,9 +8,8 @@ The root `README.md` SHALL explain the Deep Dive Track conventions (Labs vs `@Di
 - **THEN** the learner can find instructions for running Labs and enabling Exercises
 
 ### Requirement: Root Catalog Includes Capstone Module
-The root `README.md` SHALL include the capstone module `boot-business-case` in the module catalog.
+The root `README.md` SHALL include the capstone module `springboot-business-case` in the module catalog.
 
 #### Scenario: Find the capstone module
 - **WHEN** a learner opens the root `README.md`
-- **THEN** the learner can find `boot-business-case` and navigate to its module README
-
+- **THEN** the learner can find `springboot-business-case` and navigate to its module README

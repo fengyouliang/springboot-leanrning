@@ -13,7 +13,7 @@ This change introduces a consistent, repository-wide **Deep Dive Track** and a p
   - Every module provides **15+ experiments** with a consistent structure.
   - “Labs” remain enabled and always green (happy path + observable mechanism).
   - “Exercises” are provided as `@Disabled` tests that learners can enable manually.
-- Add a new capstone module `boot-business-case` to demonstrate a realistic flow that connects:
+- Add a new capstone module `springboot-business-case` to demonstrate a realistic flow that connects:
   - MVC boundary + Validation
   - transactional service layer
   - Events and listeners
@@ -29,14 +29,13 @@ This change introduces a consistent, repository-wide **Deep Dive Track** and a p
   - `learning-workspace` (workspace-level deep-dive coverage and build guarantees)
   - `learning-module-catalog` (catalog + deep-dive entry points)
   - Module capability specs for all existing modules (topic maps for deep-dive coverage)
-  - `boot-business-case-module` (new capstone module)
+  - `springboot-business-case-module` (new capstone module)
 - Affected code (apply stage):
   - tests and documentation in every module
   - root `README.md` catalog updates (Chinese)
-  - new module `boot-business-case/` (code, tests, README, Maven module wiring)
+  - new module `springboot-business-case/` (code, tests, README, Maven module wiring)
 
 ## Out of Scope
 - External infrastructure (Docker-based dependencies, Kafka, Redis, etc.)
 - Production-grade observability stacks (tracing exporters, metrics backends)
 - Build-system migration (e.g., Maven → Gradle) or adding Maven Wrapper
-

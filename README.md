@@ -26,28 +26,28 @@ mvn -q test
 
 开启练习的方法：打开对应的 `*ExerciseTest`，移除/注释 `@Disabled`，根据测试提示完成实现（或改造），再运行模块测试验证。
 
-- 只构建/测试某个模块（示例：`boot-web-mvc`）：
+- 只构建/测试某个模块（示例：`springboot-web-mvc`）：
 
 ```bash
-mvn -q -pl boot-web-mvc test
+mvn -q -pl springboot-web-mvc test
 ```
 
-- 运行某个模块（示例：`boot-basics`）：
+- 运行某个模块（示例：`springboot-basics`）：
 
 ```bash
-mvn -pl boot-basics spring-boot:run
+mvn -pl springboot-basics spring-boot:run
 ```
 
 ## 模块目录（Catalog）
 
 | 模块 | 主题 | 入口说明 |
 |---|---|---|
-| `boot-basics` | 启动、配置属性、Profiles | [README](boot-basics/README.md) |
-| `boot-web-mvc` | REST Controller、Validation、错误处理 | [README](boot-web-mvc/README.md) |
-| `boot-data-jpa` | Spring Data JPA + H2、Entity、Repository、CRUD | [README](boot-data-jpa/README.md) |
-| `boot-actuator` | Actuator 端点 + 自定义健康检查 | [README](boot-actuator/README.md) |
-| `boot-testing` | 测试基础：`@SpringBootTest`、`@WebMvcTest` 等 | [README](boot-testing/README.md) |
-| `boot-business-case` | Capstone：MVC + Validation + JPA + Tx + Events + AOP | [README](boot-business-case/README.md) |
+| `springboot-basics` | 启动、配置属性、Profiles | [README](springboot-basics/README.md) |
+| `springboot-web-mvc` | REST Controller、Validation、错误处理 | [README](springboot-web-mvc/README.md) |
+| `springboot-data-jpa` | Spring Data JPA + H2、Entity、Repository、CRUD | [README](springboot-data-jpa/README.md) |
+| `springboot-actuator` | Actuator 端点 + 自定义健康检查 | [README](springboot-actuator/README.md) |
+| `springboot-testing` | 测试基础：`@SpringBootTest`、`@WebMvcTest` 等 | [README](springboot-testing/README.md) |
+| `springboot-business-case` | Capstone：MVC + Validation + JPA + Tx + Events + AOP | [README](springboot-business-case/README.md) |
 | `spring-core-beans` | Spring Core：Bean、DI、`@Qualifier`、Scope、生命周期 | [README](spring-core-beans/README.md) |
 | `spring-core-aop` | Spring AOP：代理、Advice、Pointcut、自调用陷阱 | [README](spring-core-aop/README.md) |
 | `spring-core-events` | Spring 事件：发布事件、`@EventListener`、默认同步 | [README](spring-core-events/README.md) |
@@ -56,11 +56,11 @@ mvn -pl boot-basics spring-boot:run
 | `spring-core-tx` | 事务：`@Transactional` 提交/回滚（JDBC + H2） | [README](spring-core-tx/README.md) |
 | `spring-core-profiles` | Profiles/条件装配：`@Profile` + `@ConditionalOnProperty` | [README](spring-core-profiles/README.md) |
 
-> 端口说明：`boot-web-mvc` 默认 `8081`，`boot-actuator` 默认 `8082`，`boot-testing` 默认 `8083`，`boot-business-case` 默认 `8084`。非 Web 模块不监听端口。
+> 端口说明：`springboot-web-mvc` 默认 `8081`，`springboot-actuator` 默认 `8082`，`springboot-testing` 默认 `8083`，`springboot-business-case` 默认 `8084`。非 Web 模块不监听端口。
 
 ## 学习建议
 
-- 先从 `boot-basics` 开始：理解应用启动、配置加载、Profile 切换。
+- 先从 `springboot-basics` 开始：理解应用启动、配置加载、Profile 切换。
 - 每个模块都尽量保持“可运行、可观察、有测试”，按模块 README 的步骤操作即可。
 
 ## 常见问题
