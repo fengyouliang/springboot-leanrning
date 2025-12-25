@@ -1,0 +1,105 @@
+# 10. Spring Boot 自动装配如何影响 Bean（Auto-configuration）
+
+这一章的目标是：把 Spring Boot 的自动装配从“玄学”变成“可解释、可调试、可覆盖”的机制。
+
+你会发现它并不神秘：它本质上就是一套更系统化的 **配置导入（@Import）+ 条件判断（@Conditional...）+ bean 注册**。
+
+## 1. 先说结论：Boot 做了什么？
+
+当你写下 `@SpringBootApplication` 并启动应用时，Boot 至少做了这些与 Bean 相关的事：
+
+1) 创建 `ApplicationContext`
+2) 准备 `Environment`（配置、profiles、属性）
+3) 通过一系列机制把大量“配置类”导入进来（自动配置）
+4) 自动配置类在条件满足时注册大量 bean
+5) 你的显式配置（组件扫描、`@Bean`、`@Import`）与自动配置一起决定最终 bean graph
+
+所以你看到的现象是：
+
+- 你没写某个 bean，但容器里确实有（自动配置注册的）
+- 你写了某个 bean，自动配置反而“没生效”（条件失败，例如 `@ConditionalOnMissingBean` 不成立）
+
+## 2. 自动装配的入口：`@SpringBootApplication` / `@EnableAutoConfiguration`
+
+`@SpringBootApplication` 里包含 `@EnableAutoConfiguration`。
+
+理解上你可以把它当作：
+
+- “请帮我导入一堆自动配置类”
+
+而“导入一堆类”的技术手段，与 [02 章](02-bean-registration.md) 的 `@Import` 思想一致。
+
+## 3. 自动配置类从哪里来？（类清单的来源）
+
+Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这些配置类导入容器。
+
+在 Spring Boot 3.x 的体系里，你会看到类似：
+
+- `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`
+
+> 这类文件本质上是“列出一批配置类”，让 Boot 在启动时统一导入。
+
+你不需要背文件名，但建议知道：
+
+- 自动装配是“可发现”的：starter/依赖带来的 jar 里提供了清单
+- 自动装配是“可控制”的：可以 exclude、可以用条件让它不生效
+
+## 4. 为什么自动配置不是“全都生效”？——条件（Conditions）
+
+自动配置类几乎都带条件，例如（只记语义）：
+
+- `@ConditionalOnClass`：classpath 上存在某个类才装配
+- `@ConditionalOnProperty`：某个配置打开才装配
+- `@ConditionalOnMissingBean`：容器里没有某个 bean 才装配（让用户可覆盖）
+
+所以最终的 bean graph 是：
+
+> 你写的配置 + 自动配置清单 - 条件失败的部分
+
+## 5. 你如何“覆盖”自动配置？
+
+最常见、也最推荐的覆盖方式是：
+
+- 自己提供一个同类型/同语义的 bean
+- 自动配置常用 `@ConditionalOnMissingBean`，因此会自动退让
+
+除此之外还有：
+
+- 用 `exclude` 排除某个自动配置类（更强硬、更危险）
+- 用 properties 控制条件（更温和、更常用）
+
+这也是为什么“看懂条件”比“背自动配置有哪些”更重要。
+
+## 6. 你如何“看见”自动装配做了什么？
+
+学习阶段建议掌握两种手段：
+
+1) **打开调试报告**（Condition Evaluation Report）  
+2) **直接在运行时查询容器**（beans by type/name、BeanDefinition 等）
+
+具体做法放在下一章：[11. 调试与自检](11-debugging-and-observability.md)。
+
+## 7. 在本模块里如何“跑起来验证”
+
+本模块提供了一个专门的 Boot 自动装配实验（Labs），用最小可控的方式把条件生效/失效与覆盖策略跑出来：
+
+- 对应测试：`src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationLabTest.java`
+  - 使用 `ApplicationContextRunner`：更快、更聚焦，不需要启动完整应用
+  - 覆盖点：
+    - `@ConditionalOnProperty`：属性缺失 vs 属性开启
+    - `@ConditionalOnClass`：类存在 vs 类缺失（用 `FilteredClassLoader` 模拟“可选依赖不存在”）
+    - `@ConditionalOnMissingBean`：用户自定义 bean 覆盖（auto-config 自动退让）
+
+运行方式：
+
+```bash
+mvn -pl spring-core-beans test
+```
+
+运行时你会在测试输出里看到以 `OBSERVE:` 开头的少量提示行，解释“哪个条件命中、最终注册/选择了哪个 bean”。
+
+## 8. 与本模块的关系：你应该带走什么
+
+学完本章，你至少要能把下面这句话解释清楚：
+
+> Spring Boot 自动装配不是“替你注入”，而是“替你导入配置并注册 BeanDefinition”，最终依赖注入仍遵循 Spring 容器的解析规则（类型、`@Qualifier`、`@Primary`、scope、生命周期……）。
