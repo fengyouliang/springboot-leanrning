@@ -1,31 +1,4 @@
-# spring-core-beans-module Specification
-
-## Purpose
-Define the learning requirements for the `spring-core-beans` module, focusing on (1) runnable, assertion-based Labs that demonstrate advanced bean registration and Spring Boot auto-configuration mechanisms, and (2) a Chinese deep-dive documentation set (README index + `docs/*.md`) that teaches Spring Bean fundamentals and common pitfalls.
-## Requirements
-### Requirement: Import and Boot Auto-configuration Labs
-The `spring-core-beans` module SHALL include enabled Labs (`*LabTest`) that teach advanced bean registration and Spring Boot auto-configuration mechanisms through runnable experiments with assertions, including:
-- `@Import` importing additional configuration
-- `ImportSelector` selecting imports based on environment/property
-- `ImportBeanDefinitionRegistrar` registering `BeanDefinition` programmatically
-- Spring Boot auto-configuration conditions and override strategies (at least `@ConditionalOnProperty`, `@ConditionalOnClass`, and `@ConditionalOnMissingBean`)
-
-#### Scenario: Run labs by default
-- **WHEN** a learner runs `mvn -q -pl spring-core-beans test`
-- **THEN** the enabled lab tests pass without requiring exercises to be enabled
-
-#### Scenario: Observe auto-configuration outcomes
-- **WHEN** a learner runs the auto-configuration lab tests
-- **THEN** the test output provides a small set of human-readable “what to observe” lines that explain which branch matched and which bean was ultimately selected
-
-### Requirement: `spring-core-beans` Deep-Dive Bean Guide (README index + docs chapters)
-The guide SHALL additionally cover injection and proxying mental-model topics required by the new lab set, including:
-- injection/property population timing and its relationship to `@Autowired`
-- proxying/wrapping as a container mechanism that explains AOP/Tx “must go through proxy” behavior
-
-#### Scenario: Navigate the module by injection/proxying mechanism
-- **WHEN** a learner opens `spring-core-beans/README.md`
-- **THEN** the learner can locate the new injection/proxying Labs via a “Concept → Lab/Test → Code file” map
+## ADDED Requirements
 
 ### Requirement: Injection phase deep-dive labs (bridge to `@Autowired`)
 The `spring-core-beans` module SHALL include at least one additional enabled Lab (`*LabTest`) that teaches the injection/property-population phase through runnable, assertion-based experiments.
@@ -66,3 +39,13 @@ Each chapter SHALL include:
 - **WHEN** a learner opens a new injection/proxying `spring-core-beans/docs/` chapter
 - **THEN** the chapter points to at least one runnable `*LabTest` that demonstrates the described mechanism
 
+## MODIFIED Requirements
+
+### Requirement: `spring-core-beans` Deep-Dive Bean Guide (README index + docs chapters)
+The guide SHALL additionally cover injection and proxying mental-model topics required by the new lab set, including:
+- injection/property population timing and its relationship to `@Autowired`
+- proxying/wrapping as a container mechanism that explains AOP/Tx “must go through proxy” behavior
+
+#### Scenario: Navigate the module by injection/proxying mechanism
+- **WHEN** a learner opens `spring-core-beans/README.md`
+- **THEN** the learner can locate the new injection/proxying Labs via a “Concept → Lab/Test → Code file” map
