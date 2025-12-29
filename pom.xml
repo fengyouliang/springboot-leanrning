@@ -32,6 +32,10 @@
         <module>springboot-actuator</module>
         <module>springboot-testing</module>
         <module>springboot-business-case</module>
+        <module>springboot-security</module>
+        <module>springboot-web-client</module>
+        <module>springboot-async-scheduling</module>
+        <module>springboot-cache</module>
         <module>spring-core-beans</module>
         <module>spring-core-aop</module>
         <module>spring-core-events</module>
@@ -40,4 +44,32 @@
         <module>spring-core-tx</module>
         <module>spring-core-profiles</module>
     </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-toolchain</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[17,)</version>
+                                </requireJavaVersion>
+                                <requireMavenVersion>
+                                    <version>[3.8.0,)</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
