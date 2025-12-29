@@ -1,0 +1,56 @@
+# 14. 顺序（Ordering）：PriorityOrdered / Ordered / 无序
+
+当容器里存在多个 BFPP/BPP 时，“谁先运行”会直接决定最终结果。
+
+对应实验：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansPostProcessorOrderingLabTest.java`
+
+## 1. 规则总览（记住这三层就够）
+
+Spring 在同一类 post-processor 内，常用的排序规则是：
+
+1) `PriorityOrdered`（最优先）
+2) `Ordered`
+3) 没实现顺序接口（最后）
+
+> 这套规则适用于 BFPP 与 BPP（以及很多“插件式扩展点”）。
+
+## 2. BFPP 的顺序：先改谁的定义？
+
+对应测试：
+
+- `SpringCoreBeansPostProcessorOrderingLabTest.beanFactoryPostProcessors_areInvokedInPriorityOrderedThenOrderedThenUnorderedOrder()`
+
+它只断言我们自己注册的三个 BFPP 的相对顺序：
+
+- `bfpp:priority` → `bfpp:ordered` → `bfpp:unordered`
+
+这样做的原因是：
+
+- 容器内部也可能有自己的处理器
+- 断言内部处理器的完整顺序容易随版本变化而变得不稳定
+
+学习重点：**你能控制你自己的扩展点顺序**。
+
+## 3. BPP 的顺序：谁先“动手”改实例？
+
+对应测试：
+
+- `SpringCoreBeansPostProcessorOrderingLabTest.beanPostProcessors_areAppliedInPriorityOrderedThenOrderedThenUnorderedOrder()`
+
+同样只断言我们自己注册的三个 BPP 的相对顺序。
+
+学习重点：
+
+- 多个 BPP 对同一个 bean 做增强时，“顺序”是结果的一部分。
+
+## 4. 常见误解
+
+- **误解：`@Order` 能影响单依赖注入的选择**
+  - 单个依赖（注入一个 `T`）的选择通常看：`@Primary`、`@Qualifier`、beanName 等。
+  - `@Order` 更常见的影响是：集合注入（`List<T>`）、拦截链、处理器链。
+
+## 5. 一句话自检
+
+- 你能解释清楚：为什么我们只断言“相对顺序”，而不去断言“容器内所有处理器的全序列”？
