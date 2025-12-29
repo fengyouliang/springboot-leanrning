@@ -1,17 +1,21 @@
 # springboot-actuator
 
-本模块用于学习 Spring Boot Actuator 的基础用法：
+本模块用于学习 Spring Boot Actuator 的基础用法：暴露常用端点（例如 `/actuator/health`），以及编写一个自定义 `HealthIndicator`。
 
-- 暴露常用 Actuator 端点（例如 `/actuator/health`）
-- 编写一个自定义 `HealthIndicator`
+## 你将学到什么
 
-## 学习目标
-
-- 理解 Actuator 是什么、默认有哪些端点
-- 学会通过配置暴露端点与显示 health 详情
+- Actuator 是什么、默认有哪些端点
+- 通过配置暴露端点与显示 health 详情
 - 自己实现一个健康检查指标并出现在 `/actuator/health` 里
 
-## 运行
+## 前置知识
+
+- 建议先完成 `springboot-basics`（理解配置加载与 profile 切换）
+- 了解 HTTP/JSON 的基本概念
+
+## 关键命令
+
+### 运行
 
 ```bash
 mvn -pl springboot-actuator spring-boot:run
@@ -27,22 +31,39 @@ curl http://localhost:8082/actuator/health
 
 你应该能看到 `components.learning`（或类似字段）出现在 health 输出中。
 
-## 测试
+### 测试
 
 ```bash
 mvn -pl springboot-actuator test
 ```
 
-## Deep Dive（Labs / Exercises）
+## 推荐 docs 阅读顺序
 
-- Labs（默认启用）：
-  - `BootActuatorLabTest`：health/info 的默认行为、custom health indicator
-  - `BootActuatorExposureOverrideLabTest`：通过 properties 改变 endpoint exposure 并验证效果
-- Exercises（默认禁用）：`BootActuatorExerciseTest`（带 `@Disabled`）
+> 本模块暂无 `docs/`，建议按“端点现象 → 配置开关 → 自定义指标 → 测试验证”的顺序学习：
 
-启用 Exercises：打开 `*ExerciseTest`，移除/注释 `@Disabled`，按提示完成后再运行 `mvn -pl springboot-actuator test`。
+1. 先跑起来，访问 `/actuator/health`
+2. 查找 `application.properties` 里与 exposure / health details 相关的配置
+3. 阅读自定义 `HealthIndicator` 的实现（它如何拼出 health 结果）
+4. 对照 Labs：看测试如何验证“端点暴露/覆盖配置”的效果
 
-## 小练习
+## Labs / Exercises 索引（按知识点 / 难度）
+
+> 说明：⭐=入门，⭐⭐=进阶。Exercises 默认 `@Disabled`，建议逐个开启。
+
+| 类型 | 入口 | 知识点 | 难度 | 下一步 |
+| --- | --- | --- | --- | --- |
+| Lab | `src/test/java/com/learning/springboot/bootactuator/BootActuatorLabTest.java` | health/info 默认行为 + 自定义健康检查 | ⭐ | 先用 curl 看 `/actuator/health` 输出 |
+| Lab | `src/test/java/com/learning/springboot/bootactuator/BootActuatorExposureOverrideLabTest.java` | 通过 properties 改变 endpoint exposure 并验证效果 | ⭐⭐ | 回看 exposure 配置与测试断言 |
+| Exercise | `src/test/java/com/learning/springboot/bootactuator/BootActuatorExerciseTest.java` | 按提示做“只在 dev 下显示 details/增加开关”等练习 | ⭐–⭐⭐ | 从“show-details 的 profile 差异”开始 |
+
+## 常见 Debug 路径
+
+- 访问不到端点：先检查是否暴露（exposure include/exclude）以及是否有 base-path
+- 看不到 health details：检查 `management.endpoint.health.show-details`
+- 自定义指标不出现：确认 Bean 是否被注册、命名是否冲突
+- 生产环境暴露风险：先分清“对外暴露”与“内部可观测”，再决定 exposure 范围
+
+## 扩展练习（可选）
 
 - 把自定义健康检查改成：当某个配置项关闭时返回 `DOWN`
 - 只在 `dev` profile 下显示 health details（提示：生产环境不建议默认暴露 details）
