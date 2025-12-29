@@ -1,20 +1,25 @@
 # spring-core-tx
 
-本模块用于学习 **Spring 事务管理**：使用 `@Transactional` + 内嵌 H2 数据库演示提交与回滚。
+本模块用“可运行的最小示例 + 可验证的测试实验（Labs / Exercises）”讲透 **Spring 事务管理**。
 
-包含内容：
+这份 `README.md` 只做索引与导航；更深入的解释请按章节阅读：见 [docs/](docs/)。
 
-- 使用 `@Transactional` 声明式事务
+## 你将学到什么
+
+- `@Transactional` 的声明式事务（本质是 AOP 拦截器）
 - 提交（commit）与回滚（rollback）行为
-- 默认回滚规则：运行时异常会触发回滚
+- 回滚规则：runtime vs checked exception
+- 传播行为：`REQUIRES_NEW` 的独立事务边界
+- 程序化事务：`TransactionTemplate`
 
-## 学习目标
+## 前置知识
 
-- 理解什么是“事务边界”
-- 直观看到 `@Transactional` 对数据库写入的影响
-- 用测试验证回滚行为（插入 + 抛异常 → 最终不落库）
+- 建议先完成 `spring-core-aop`（知道“事务也是代理”更容易理解）
+- 了解 commit/rollback 的基本直觉
 
-## 运行
+## 关键命令
+
+### 运行
 
 ```bash
 mvn -pl spring-core-tx spring-boot:run
@@ -25,27 +30,53 @@ mvn -pl spring-core-tx spring-boot:run
 - Service 在事务内执行一段会抛异常的逻辑，然后检查表行数（回滚）
 - Service 再执行一次成功事务，然后检查表行数（提交）
 
-## 测试
+### 测试
 
 ```bash
 mvn -pl spring-core-tx test
 ```
 
-## Deep Dive（Labs / Exercises）
+## 推荐 docs 阅读顺序（从现象到机制）
 
-- Labs（默认启用）：`SpringCoreTxLabTest`
-  - runtime vs checked exception 回滚规则
-  - `Propagation.REQUIRES_NEW` 行为
-  - `TransactionTemplate` 的程序化事务
-- Exercises（默认禁用）：`SpringCoreTxExerciseTest`（带 `@Disabled`）
+1. [事务边界：你到底在“保护”哪一段代码？](docs/01-transaction-boundary.md)
+2. [`@Transactional` 如何生效：它也是 AOP（也是代理）](docs/02-transactional-proxy.md)
+3. [回滚规则：为什么 checked exception 默认不回滚？](docs/03-rollback-rules.md)
+4. [传播行为：`REQUIRED` vs `REQUIRES_NEW`](docs/04-propagation.md)
+5. [程序化事务：`TransactionTemplate` 的价值](docs/05-transaction-template.md)
+6. [Debug / 观察：如何判断“当前是否真的有事务”？](docs/06-debugging.md)
+7. [常见坑清单（建议反复对照）](docs/90-common-pitfalls.md)
 
-启用 Exercises：打开 `*ExerciseTest`，移除/注释 `@Disabled`，按提示完成后再运行 `mvn -pl spring-core-tx test`。
+## Labs / Exercises 索引（按知识点 / 难度）
 
-## 小练习
+> 说明：⭐=入门，⭐⭐=进阶，⭐⭐⭐=挑战。Exercises 默认 `@Disabled`。
 
-- 把异常改成受检异常（checked exception），观察回滚规则如何变化
-- 添加 `rollbackFor=...` 并更新测试
-- 实现一个 `transfer(from,to,amount)`，并测试失败时不会“丢钱”
+| 类型 | 入口 | 知识点 | 难度 | 推荐阅读 |
+| --- | --- | --- | --- | --- |
+| Lab | `src/test/java/com/learning/springboot/springcoretx/SpringCoreTxLabTest.java` | commit/rollback、回滚规则、传播、模板事务 | ⭐⭐ | `docs/01` → `docs/05` |
+| Exercise | `src/test/java/com/learning/springboot/springcoretx/SpringCoreTxExerciseTest.java` | `REQUIRES_NEW`、自调用陷阱、回滚规则改造等练习 | ⭐⭐–⭐⭐⭐ | `docs/02`、`docs/03`、`docs/90` |
+
+## 概念 → 在本模块哪里能“看见”
+
+| 你要理解的概念 | 去读哪一章 | 去看哪个测试/代码 | 你应该能解释清楚 |
+| --- | --- | --- | --- |
+| commit / rollback 的最小闭环 | [docs/01](docs/01-transaction-boundary.md) | `SpringCoreTxLabTest#commitsOnSuccess` / `#rollsBackOnRuntimeException` + `AccountService` | 为什么“抛异常”会导致不落库 |
+| `@Transactional` 也是 AOP（代理） | [docs/02](docs/02-transactional-proxy.md) | `SpringCoreTxLabTest#transactionalBeansAreProxied` | 事务拦截器在调用链的哪里 |
+| checked exception 回滚规则 | [docs/03](docs/03-rollback-rules.md) | `SpringCoreTxLabTest#checkedExceptionsDoNotRollbackByDefault` | 为什么默认不回滚、如何用 `rollbackFor` 改 |
+| `REQUIRES_NEW` 的独立事务边界 | [docs/04](docs/04-propagation.md) | `SpringCoreTxLabTest#requiresNewCanCommitEvenIfOuterTransactionRollsBack` | 外层回滚时内层为何还能提交 |
+| 程序化事务与 rollback-only | [docs/05](docs/05-transaction-template.md) | `SpringCoreTxLabTest#transactionTemplateAllowsProgrammaticCommitOrRollback` | `setRollbackOnly()` 的真实效果 |
+
+## 常见 Debug 路径
+
+- 先问 Spring：“当前是否真的有事务？” → `TransactionSynchronizationManager.isActualTransactionActive()`
+- 不要只看异常，最终以“数据是否落库”来判断 commit/rollback
+- 观察传播行为时，用不同标记写入（例如 owner=outer/inner），最不容易误判
+
+## 常见坑
+
+- 自调用绕过代理：同类内部调用不会触发事务拦截
+- 异常被 catch 住导致提交：回滚与否取决于异常是否逃逸出边界或是否标记 rollback-only
+- checked exception 默认不回滚：需要显式 `rollbackFor`
+- `REQUIRES_NEW` 拆边界：内层提交/回滚不直接决定外层
 
 ## 参考
 

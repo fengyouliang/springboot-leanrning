@@ -8,13 +8,20 @@
 - 使用 `@ConditionalOnProperty` 进行基于配置项的装配（Spring Boot 自动配置中很常见）
 - 保证每个场景都不会注入歧义（每个场景只存在一个 `GreetingProvider`）
 
-## 学习目标
+## 你将学到什么
 
-- 理解 `@Profile("dev")` 的 Bean 在什么时候会生效
+- `@Profile("dev")` 的 Bean 在什么时候会生效
 - 使用配置项开关（例如 `app.mode=fancy`）切换行为
-- 在测试中验证当前到底注入了哪个 Bean
+- 在测试中验证当前到底注入了哪个 Bean（以及为什么建议用 `ApplicationContextRunner`）
 
-## 运行
+## 前置知识
+
+- 建议先完成 `springboot-basics`（profile/配置加载的直觉）
+- （可选）了解 Spring Boot 的条件注解常见用法（`@ConditionalOnProperty`）
+
+## 关键命令
+
+### 运行
 
 默认（不指定 profile，也不指定额外配置）：
 
@@ -40,20 +47,36 @@ mvn -pl spring-core-profiles spring-boot:run -Dspring-boot.run.arguments=--app.m
 - `app.mode`
 - 当前生效的 `GreetingProvider` 实现类
 
-## 测试
+### 测试
 
 ```bash
 mvn -pl spring-core-profiles test
 ```
 
-## Deep Dive（Labs / Exercises）
+## 推荐 docs 阅读顺序
 
-- Labs（默认启用）：`SpringCoreProfilesLabTest`（基于 `ApplicationContextRunner`，更快、更聚焦）
-- Exercises（默认禁用）：`SpringCoreProfilesExerciseTest`（带 `@Disabled`）
+> 本模块暂无 `docs/`，建议按“先写条件 → 再用 runner 证明”的顺序：
 
-启用 Exercises：打开 `*ExerciseTest`，移除/注释 `@Disabled`，按提示完成后再运行 `mvn -pl spring-core-profiles test`。
+1. 先跑 `SpringCoreProfilesLabTest`：理解每个场景期望注入哪个 `GreetingProvider`
+2. 再回看 `@Profile` / `@ConditionalOnProperty` 的条件写法（以及为什么要避免注入歧义）
+3. 最后回到应用运行：用不同参数组合复现测试中的场景
 
-## 小练习
+## Labs / Exercises 索引（按知识点 / 难度）
+
+> 说明：⭐=入门，⭐⭐=进阶。Exercises 默认 `@Disabled`。
+
+| 类型 | 入口 | 知识点 | 难度 | 下一步 |
+| --- | --- | --- | --- | --- |
+| Lab | `src/test/java/com/learning/springboot/springcoreprofiles/SpringCoreProfilesLabTest.java` | `@Profile`/`@ConditionalOnProperty` + `ApplicationContextRunner` | ⭐⭐ | 把每个场景的“最终注入 Bean”说清楚 |
+| Exercise | `src/test/java/com/learning/springboot/springcoreprofiles/SpringCoreProfilesExerciseTest.java` | 按提示新增 profile/开关/兜底 Bean 并写断言 | ⭐–⭐⭐ | 从“增加 prod provider”开始 |
+
+## 常见 Debug 路径
+
+- 条件不生效：先看 profile/属性是否真的传进来了（`Environment`）
+- 注入歧义：同一场景下出现多个候选 Bean，优先让条件互斥而不是用 `@Primary` 兜底
+- 测试建议：用 `ApplicationContextRunner` 把“场景”做小、做快（比起全量 `@SpringBootTest` 更适合学机制）
+
+## 扩展练习（可选）
 
 - 增加一个 `prod` profile 的 provider，并决定它是否应该覆盖 property toggle 的选择
 - 增加第二个开关（例如 `app.language=en`），并按条件注册 provider

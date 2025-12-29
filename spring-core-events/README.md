@@ -1,19 +1,28 @@
 # spring-core-events
 
-本模块用于学习 **Spring Application Events（应用事件）**：
+本模块用“可运行的最小示例 + 可验证的测试实验（Labs / Exercises）”学习 **Spring Application Events（应用事件）**。
+
+这份 `README.md` 只做索引与导航；更深入的解释请按章节阅读：见 [docs/](docs/)。
+
+## 你将学到什么
 
 - 使用 `ApplicationEventPublisher` 发布事件
-- 使用 `@EventListener` 处理事件
-- 理解默认行为：事件默认是 **同步** 的
+- 使用 `@EventListener` 处理事件（多监听器、`@Order`、condition）
+- payload 事件：发布普通对象（例如 String）也可以被监听
+- 默认同步行为与异常传播
+- 异步监听器：`@Async`（对比启用/不启用 `@EnableAsync`）
+- （练习）异步 multicaster：让事件“默认异步”分发
+- （串线）`@TransactionalEventListener`：after-commit 与事务边界
 
-## 学习目标
+## 前置知识
 
-- 理解应用事件的使用场景（解耦）
-- 能在 Service 中发布一个简单的领域事件
-- 能在 Listener 中处理事件，并产生一个可观察结果
-- 用测试验证事件监听器被正确触发
+- 建议先完成 `spring-core-beans`（理解 Bean/容器即可）
+- 如果要理解 after-commit：建议同时完成 `spring-core-tx`
+- 了解多线程的最小概念（异步 = 可能换线程）
 
-## 运行
+## 关键命令
+
+### 运行
 
 ```bash
 mvn -pl spring-core-events spring-boot:run
@@ -25,31 +34,59 @@ mvn -pl spring-core-events spring-boot:run
 - 监听方收到事件并写入内存审计日志
 - runner 在发布后打印审计日志条目
 
-## 测试
+### 测试
 
 ```bash
 mvn -pl spring-core-events test
 ```
 
-## Deep Dive（Labs / Exercises）
+## 推荐 docs 阅读顺序（从现象到机制）
 
-- Labs（默认启用）：
-  - `SpringCoreEventsLabTest`：多监听器、`@Order`、condition、payload 事件、默认同步
-  - `SpringCoreEventsMechanicsLabTest`：异常传播、`@Async`（启用/不启用）的线程差异
-- Exercises（默认禁用）：`SpringCoreEventsExerciseTest`（带 `@Disabled`）
+1. [事件心智模型：发布与订阅在解耦什么？](docs/01-event-mental-model.md)
+2. [多监听器与顺序：为什么 `@Order` 值得你认真对待？](docs/02-multiple-listeners-and-order.md)
+3. [condition 与 payload：按条件触发与接收普通对象](docs/03-condition-and-payload.md)
+4. [同步与异常传播：为什么监听器抛异常会炸到发布方？](docs/04-sync-and-exceptions.md)
+5. [异步监听器：`@Async` 生效需要什么？](docs/05-async-listener.md)
+6. [异步广播：让事件“默认异步”（multicaster）](docs/06-async-multicaster.md)
+7. [`@TransactionalEventListener`：after-commit 监听器与事务边界](docs/07-transactional-event-listener.md)
+8. [常见坑清单（建议反复对照）](docs/90-common-pitfalls.md)
 
-启用 Exercises：打开 `*ExerciseTest`，移除/注释 `@Disabled`，按提示完成后再运行 `mvn -pl spring-core-events test`。
+## Labs / Exercises 索引（按知识点 / 难度）
 
-## 说明
+> 说明：⭐=入门，⭐⭐=进阶，⭐⭐⭐=挑战。Exercises 默认 `@Disabled`。
 
-- 事件默认是同步的：发布方法会在监听器执行完成后才返回
-- 也可以做异步事件（例如 `@Async` + `@EnableAsync`），但为了保持最小闭环，本模块暂不实现
+| 类型 | 入口 | 知识点 | 难度 | 推荐阅读 |
+| --- | --- | --- | --- | --- |
+| Lab | `src/test/java/com/learning/springboot/springcoreevents/SpringCoreEventsLabTest.java` | 多监听器、`@Order`、condition、payload、默认同步 | ⭐⭐ | `docs/01` → `docs/03` |
+| Lab | `src/test/java/com/learning/springboot/springcoreevents/SpringCoreEventsMechanicsLabTest.java` | 异常传播、`@Async`（启用/不启用）的线程差异 | ⭐⭐ | `docs/04`、`docs/05` |
+| Exercise | `src/test/java/com/learning/springboot/springcoreevents/SpringCoreEventsExerciseTest.java` | 多 listener/顺序/异步 multicaster 等练习 | ⭐⭐–⭐⭐⭐ | `docs/06`、`docs/90` |
 
-## 小练习
+## 概念 → 在本模块哪里能“看见”
 
-- 新增另一个监听器，用不同格式写审计信息
-- 新增第二种事件类型（例如 `UserDeletedEvent`）并处理
-- 让监听器具备幂等性，并说明为什么需要幂等
+| 你要理解的概念 | 去读哪一章 | 去看哪个测试/代码 | 你应该能解释清楚 |
+| --- | --- | --- | --- |
+| 发布事件与最小闭环 | [docs/01](docs/01-event-mental-model.md) | `SpringCoreEventsLabTest#listenerReceivesPublishedEvent` + `UserRegistrationService`/`UserRegisteredListener` | 发布方与监听方如何解耦、如何验证触发 |
+| 多监听器广播 | [docs/02](docs/02-multiple-listeners-and-order.md) | `SpringCoreEventsLabTest#multipleListenersCanObserveTheSameEvent` | 为什么多个监听器都能收到同一事件 |
+| 监听器顺序（`@Order`） | [docs/02](docs/02-multiple-listeners-and-order.md) | `SpringCoreEventsLabTest#orderedListenersFollowOrderAnnotation` | 为什么默认不该依赖顺序、如何做确定性断言 |
+| 条件触发（SpEL） | [docs/03](docs/03-condition-and-payload.md) | `SpringCoreEventsLabTest#conditionalEventListenerOnlyRunsWhenConditionMatches` | condition 如何过滤事件 |
+| payload 事件 | [docs/03](docs/03-condition-and-payload.md) | `SpringCoreEventsLabTest#publishingPlainObjectsAlsoWorks_asPayloadEvents` | 为什么 publish String 也能被监听 |
+| 默认同步线程 | [docs/01](docs/01-event-mental-model.md) | `SpringCoreEventsLabTest#eventsAreSynchronousByDefault` | 默认事件分发发生在发布方线程 |
+| 异常传播 | [docs/04](docs/04-sync-and-exceptions.md) | `SpringCoreEventsMechanicsLabTest#listenerExceptionsPropagateToPublisher_byDefault` | 为什么 listener 抛异常会炸到 publisher |
+| `@Async` 监听器 | [docs/05](docs/05-async-listener.md) | `SpringCoreEventsMechanicsLabTest#asyncListenerRunsOnDifferentThread_whenEnableAsyncIsOn` | `@EnableAsync` 对 `@Async` 的影响 |
+| after-commit 监听器（事务集成） | [docs/07](docs/07-transactional-event-listener.md) | `BootBusinessCaseLabTest#syncListenerRunsEvenWhenTransactionRollsBack_butAfterCommitDoesNot` + `OrderEventListeners` | 为什么回滚时 sync 会执行但 after-commit 不会 |
+
+## 常见 Debug 路径
+
+- 不要只靠控制台输出判断机制：优先写“可断言的观察点”（例如内存 log）
+- 验证异步最稳定的方式是“断言线程名 + CountDownLatch 等待”，而不是靠日志时序
+- 顺序相关断言务必显式 `@Order`，否则很容易学到错误结论
+
+## 常见坑
+
+- 事件默认同步：慢监听器会拖慢发布方
+- 异常默认会传播回发布方：同步事件不是“吞异常机制”
+- 没有 `@EnableAsync` 时 `@Async` 会被忽略
+- 不要依赖默认监听器顺序：需要确定性就用 `@Order`
 
 ## 参考
 
