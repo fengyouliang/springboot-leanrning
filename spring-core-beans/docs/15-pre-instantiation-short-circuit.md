@@ -58,6 +58,36 @@
 - **坑 3：学习可以用，工程里要非常谨慎**
   - 它属于极强的扩展点：一旦用错，系统会变得难以推理。
 
+## 源码锚点（建议从这里下断点）
+
+- `DefaultListableBeanFactory#preInstantiateSingletons`：非 lazy 单例通常在 refresh 期间从这里开始批量创建（本章现象的触发点）
+- `AbstractAutowireCapableBeanFactory#createBean`：创建入口（会先尝试“实例化前短路”）
+- `AbstractAutowireCapableBeanFactory#resolveBeforeInstantiation`：调用 `postProcessBeforeInstantiation` 的关键钩子
+- `InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation`：短路扩展点（在“还没走默认实例化”前直接返回对象）
+- `AbstractAutowireCapableBeanFactory#doCreateBean`：默认创建主流程（短路成功时通常不会走到这里）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansPreInstantiationLabTest.java`
+  - `withoutBeforeInstantiationShortCircuit_refreshFailsAndConstructorWasCalled()`
+  - `postProcessBeforeInstantiation_canShortCircuitDefaultInstantiationPath()`
+
+建议断点：
+
+1) `FailingService` 构造器：对照两段测试，确认“默认路径一定会调用构造器”
+2) 你在 Lab 里实现的 `InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation(...)`：观察它返回的对象（proxy）
+3) `AbstractAutowireCapableBeanFactory#resolveBeforeInstantiation`：观察短路发生在默认实例化之前
+4) `AbstractAutowireCapableBeanFactory#doCreateBean`：在短路成功的测试里，验证这里不会被命中（或不会为目标 bean 执行）
+
+## 排障分流：这是定义层问题还是实例层问题？
+
+- “我写了 before-instantiation 的 BPP，但构造器还是执行了” → **实例层（时机/注册方式）**：BPP 是否在 refresh 前注册？是否真的被当作 BPP 注册进 BeanFactory？（对照 [25](25-programmatic-bpp-registration.md)）
+- “短路后出现 `BeanNotOfRequiredTypeException`” → **实例层（暴露类型）**：返回对象的类型是否与容器期望类型兼容？（JDK proxy 只实现接口）
+- “短路后生命周期回调/注入行为变得反直觉” → **实例层（绕过默认流程）**：你返回对象意味着你可能绕过 `doCreateBean` 的部分阶段（可对照 [17](17-lifecycle-callback-order.md)、[30](30-injection-phase-field-vs-constructor.md)）
+- “我以为这是 AOP/事务专属机制” → **实例层通用机制**：代理/替身的出现不止发生在 AOP（见 [31](31-proxying-phase-bpp-wraps-bean.md)）
+
 ## 5. 一句话自检
 
 - 你能解释清楚：为什么短路后构造器不执行，但 bean 仍然可以被容器拿到并调用吗？

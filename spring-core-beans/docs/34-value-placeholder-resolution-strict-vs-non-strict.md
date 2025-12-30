@@ -84,3 +84,30 @@ Lab 里我们显式设置：
 
 - 调试与自检：如何“看见”容器正在做什么：[11. Debugging and Observability](11-debugging-and-observability.md)
 
+## 源码锚点（建议从这里下断点）
+
+- `AutowiredAnnotationBeanPostProcessor#postProcessProperties`：`@Value` 注入发生的入口之一（它会把字符串交给 BeanFactory 解析）
+- `AbstractBeanFactory#resolveEmbeddedValue`：embedded value resolver 的执行点（non-strict/strict 的差异最终会体现在这里）
+- `AbstractApplicationContext#prepareBeanFactory`：容器在 refresh 过程中安装默认 embedded value resolver 的常见位置
+- `PropertySourcesPlaceholderConfigurer#postProcessBeanFactory`：strict 行为的典型来源（作为 BFPP 提前介入并配置解析器）
+- `Environment#resolvePlaceholders`：默认 non-strict 解析入口（缺失时可能保留 `"${...}"`）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansValuePlaceholderResolutionLabTest.java`
+
+建议断点：
+
+1) `AbstractApplicationContext#prepareBeanFactory`：观察默认 embedded resolver 是何时被装入 BeanFactory 的
+2) `AbstractBeanFactory#resolveEmbeddedValue`：对照 `demo.present` 与 `demo.missing`，观察 non-strict 下为什么会返回原样 `"${...}"`
+3) `PropertySourcesPlaceholderConfigurer#postProcessBeanFactory`：对照 strict 场景，观察它如何改变解析行为（并导致缺失占位符 fail-fast）
+4) `AutowiredAnnotationBeanPostProcessor#postProcessProperties`：观察最终注入点拿到的是“解析后的字符串”还是“原样占位符”
+
+## 排障分流：这是定义层问题还是实例层问题？
+
+- “`@Value("${missing}")` 没失败，值变成原样字符串” → **优先定义层（resolver 语义）**：当前容器可能只装了 non-strict resolver（本章第 2 节）
+- “启用 strict 后启动直接失败” → **定义层（BFPP 提前失败）**：`PropertySourcesPlaceholderConfigurer` 会在实例化前就 fail-fast（本章第 3 节）
+- “`@Value` 完全不生效/字段没被注入” → **优先定义层/基础设施问题**：是否具备注解处理能力？（回看 [12](12-container-bootstrap-and-infrastructure.md)）
+- “值不对但不报错” → **先拆分路径**：确认 property source 是否包含 key，再确认 strict/non-strict（本章第 4 节 + `resolveEmbeddedValue`）

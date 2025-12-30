@@ -89,3 +89,30 @@ JDK 代理的本质是：
 - 自调用陷阱（AOP 版本）：`spring-core-aop/docs/03-self-invocation.md`
 - 事务也是代理（Tx 版本）：`spring-core-tx/docs/02-transactional-proxy.md`
 
+## 源码锚点（建议从这里下断点）
+
+- `AbstractAutowireCapableBeanFactory#initializeBean`：初始化阶段总入口（BPP(before/after) 都从这里被串起来）
+- `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`：最常见的“换成 proxy/wrapper”发生点
+- `BeanPostProcessor#postProcessAfterInitialization`：扩展点入口（AOP/事务/本章实验的最小代理都在这里返回替身对象）
+- `Proxy#newProxyInstance`：JDK 动态代理的生成点（解释为什么类型会变成 `$Proxy...`）
+- `DefaultListableBeanFactory#doResolveDependency`：按类型注入时的候选解析入口（解释“按实现类注入为什么会失败”）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansProxyingPhaseLabTest.java`
+
+建议断点：
+
+1) 你在 Lab 里实现的 `postProcessAfterInitialization(...)`：观察“原始对象”是在哪里被替换成 proxy 的
+2) `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`：观察容器是如何遍历 BPP 并采用返回值作为最终暴露对象的
+3) `SelfInvocationService#outer(...)` 与 `inner(...)`：观察 self-invocation 为什么绕过代理（`this.inner()` 不会再经过 proxy）
+4) `DefaultListableBeanFactory#doResolveDependency`：观察按实现类/按接口注入时，类型匹配链路为什么会分叉
+
+## 排障分流：这是定义层问题还是实例层问题？
+
+- “AOP/事务/拦截器不生效” → **优先实例层（调用链是否走代理）**：入口调用是否发生在 proxy 上？self-invocation 必然绕过（本章第 2 节）
+- “按实现类注入/按实现类 getBean 失败” → **实例层（代理暴露类型）**：JDK proxy 只实现接口（本章第 3 节 + `doResolveDependency`）
+- “我以为容器里的 bean 一定是原始对象” → **实例层机制**：BPP 可以替换最终暴露对象（本章第 1 节 + `applyBeanPostProcessorsAfterInitialization`）
+- “不知道从哪里下断点” → **回到容器时间线**：从 [00](00-deep-dive-guide.md) 的 `initializeBean/doCreateBean` 入口开始定位

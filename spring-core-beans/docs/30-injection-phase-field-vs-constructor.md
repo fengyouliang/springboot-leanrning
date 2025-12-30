@@ -89,3 +89,31 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansInjectionPhaseLabTest test
 - AOP（代理心智模型）：`spring-core-aop/docs/01-aop-proxy-mental-model.md`
 - 事务也是代理：`spring-core-tx/docs/02-transactional-proxy.md`
 
+## 源码锚点（建议从这里下断点）
+
+- `AutowiredAnnotationBeanPostProcessor#determineCandidateConstructors`：决定“用哪个构造器做 constructor injection”的关键入口
+- `AbstractAutowireCapableBeanFactory#autowireConstructor`：构造器注入的核心路径（解析参数依赖并实例化）
+- `AbstractAutowireCapableBeanFactory#populateBean`：属性填充阶段入口（field/method injection 的舞台）
+- `InstantiationAwareBeanPostProcessor#postProcessProperties`：属性填充阶段的扩展点（`AutowiredAnnotationBeanPostProcessor` 正是靠它处理 field injection）
+- `AutowiredAnnotationBeanPostProcessor#postProcessProperties`：`@Autowired/@Value` 等注解注入的直接入口（最适合下断点）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansInjectionPhaseLabTest.java`
+
+建议断点（把“阶段感”走一遍即可）：
+
+1) `FieldInjectedTarget` 构造器：观察此时 `@Autowired` 字段必然还是 `null`
+2) `AutowiredAnnotationBeanPostProcessor#postProcessProperties`：观察容器在属性填充阶段为字段赋值
+3) `FieldInjectedTarget#init(@PostConstruct)`：观察 init 阶段依赖已可用
+4) `AutowiredAnnotationBeanPostProcessor#determineCandidateConstructors`：观察 constructor injection 为什么能在构造器内拿到依赖（先选构造器再解析参数）
+5) `AbstractAutowireCapableBeanFactory#autowireConstructor`：观察构造器参数依赖的解析与实例化路径
+
+## 排障分流：这是定义层问题还是实例层问题？
+
+- “构造器里访问 field injection 字段为 null” → **这是实例层阶段差异（预期）**：field injection 在实例化之后才发生（本章第 1 节）
+- “constructor injection 没走到带参构造器/选错构造器” → **实例层（构造器解析）**：看 `determineCandidateConstructors` 与 `autowireConstructor`（本章源码锚点）
+- “`@Autowired/@Value` 完全不生效” → **优先定义层/基础设施问题**：注解处理器是否注册？（见 [12](12-container-bootstrap-and-infrastructure.md)）
+- “注入发生了但候选选择不符合预期” → **实例层（依赖解析）**：转到 [03](03-dependency-injection-resolution.md)/[33](33-autowire-candidate-selection-primary-priority-order.md)

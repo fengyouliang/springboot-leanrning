@@ -41,6 +41,35 @@
 - **坑 2：过度使用导致容器拓扑不透明**
   - 学习阶段可以用它做实验；工程里请谨慎。
 
+## 源码锚点（建议从这里下断点）
+
+- `RootBeanDefinition#getDependsOn`：`dependsOn` 元数据来源（最终挂在 BeanDefinition 上）
+- `AbstractBeanFactory#doGetBean`：创建 bean 之前会先处理 `dependsOn`（先 `getBean(dep)` 再创建当前 bean）
+- `DefaultSingletonBeanRegistry#registerDependentBean`：记录依赖关系（影响销毁顺序、依赖图可观测性）
+- `DefaultListableBeanFactory#preInstantiateSingletons`：非 lazy 单例批量创建期间也会触发 `dependsOn` 的顺序保证
+- `DefaultSingletonBeanRegistry#isDependent`：容器用于判断依赖关系/避免重复依赖处理的辅助入口
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansDependsOnLabTest.java`
+  - `dependsOn_forcesInitializationOrder_evenWithoutDirectDependencies()`
+
+建议断点：
+
+1) `Second` / `First` 的构造器或 init 回调：观察最终的创建/初始化顺序
+2) `RootBeanDefinition#getDependsOn`：确认 `second` 的定义上确实声明了 dependsOn
+3) `AbstractBeanFactory#doGetBean`：观察创建 `second` 前会先触发 `getBean("first")`
+4) `DefaultSingletonBeanRegistry#registerDependentBean`：观察容器把这条“隐式依赖”记录进依赖关系表
+
+## 排障分流：这是定义层问题还是实例层问题？
+
+- “我设置了 dependsOn，但顺序没变” → **优先定义层**：`dependsOn` 是否真的写进 `BeanDefinition`？beanName 是否写对？（看 `getDependsOn`）
+- “我用 dependsOn 想让 `first` 自动注入到 `second`” → **不是注入问题，是概念误用**：dependsOn 只管顺序，不管 DI（回看本章开头）
+- “启动/关闭顺序很怪，像是有隐式依赖” → **定义层 + 依赖关系问题**：排查 `dependsOn`/工厂内部注册的依赖（结合 [11](11-debugging-and-observability.md) 观察 bean 图）
+- “出现依赖环（dependsOn A → B → A）” → **定义层问题**：这属于人为引入的拓扑环，建议回避而不是依赖容器“救场”
+
 ## 4. 一句话自检
 
 - 你能解释清楚：dependsOn 解决的是什么问题？（初始化顺序，不是注入）

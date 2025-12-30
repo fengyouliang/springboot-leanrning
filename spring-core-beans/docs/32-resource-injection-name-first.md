@@ -90,3 +90,30 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
 - 注入发生在容器的哪个阶段：[`postProcessProperties` 与 field vs constructor](30-injection-phase-field-vs-constructor.md)
 - 注解能力从哪来：[`registerAnnotationConfigProcessors`](12-container-bootstrap-and-infrastructure.md)
 
+## 源码锚点（建议从这里下断点）
+
+- `AnnotationConfigUtils#registerAnnotationConfigProcessors`：把 `CommonAnnotationBeanPostProcessor` 等基础设施装进容器的入口
+- `CommonAnnotationBeanPostProcessor#postProcessProperties`：处理 `@Resource` 注入的关键阶段（属性填充阶段）
+- `AbstractAutowireCapableBeanFactory#populateBean`：属性填充主流程（`@Autowired/@Resource` 都在这里发生）
+- `AbstractBeanFactory#doGetBean`：name-first 的常见落点（`@Resource` 往往会先按 beanName 走 name-based lookup）
+- `DefaultListableBeanFactory#doResolveDependency`：当 name 找不到或需要按 type 兜底时，会回到 type-based 候选解析
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansResourceInjectionLabTest.java`
+
+建议断点：
+
+1) `AnnotationConfigUtils#registerAnnotationConfigProcessors`：对照“注册前/注册后”差异，确认 `CommonAnnotationBeanPostProcessor` 是否存在
+2) `CommonAnnotationBeanPostProcessor#postProcessProperties`：观察 `@Resource` 是如何把 name/type 解析翻译成实际赋值动作的
+3) `AbstractBeanFactory#doGetBean`：观察 name-first 时的 beanName 解析（字段名 / `@Resource(name=...)`）
+4) （可选）`DefaultListableBeanFactory#doResolveDependency`：观察 type 兜底在多候选下为什么仍可能歧义
+
+## 排障分流：这是定义层问题还是实例层问题？
+
+- “`@Resource` 字段一直为 null” → **优先定义层/基础设施问题**：容器是否注册了 `CommonAnnotationBeanPostProcessor`？（看 `registerAnnotationConfigProcessors`）
+- “注入到了错误的 bean / name 对不上” → **实例层（name-first 解析）**：字段名/显式 name 是否真的对应 beanName？（本章第 2 节）
+- “name 找不到后兜底 type 还是报多候选” → **实例层（候选解析）**：转到 [33](33-autowire-candidate-selection-primary-priority-order.md) 的选择规则
+- “以为它等价于 `@Autowired`” → **概念差异**：`@Resource` 默认 name-first，`@Autowired` 默认 type-first（对照 [03](03-dependency-injection-resolution.md)）

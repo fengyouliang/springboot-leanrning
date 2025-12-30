@@ -81,3 +81,30 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
 - DI 解析总览：`@Qualifier/@Primary` 的基本语义：[03. 依赖注入解析](03-dependency-injection-resolution.md)
 - 如果你在看容器扩展点顺序（BPP/BFPP）：顺序体系更复杂（另一个层面）：[14. 顺序：PriorityOrdered / Ordered / 无序](14-post-processor-ordering.md)
 
+## 源码锚点（建议从这里下断点）
+
+- `DefaultListableBeanFactory#doResolveDependency`：单依赖注入的主入口（候选收集 → 选胜者 → 注入）
+- `DefaultListableBeanFactory#determineAutowireCandidate`：从多个候选里挑一个（会综合 qualifier/primary/priority/name 等）
+- `DefaultListableBeanFactory#determinePrimaryCandidate`：`@Primary` 胜出的关键分支
+- `DefaultListableBeanFactory#determineHighestPriorityCandidate`：`@Priority` 参与 tie-break 的关键分支
+- `AnnotationAwareOrderComparator#sort`：集合注入排序入口（`@Order/@Priority/Ordered` 影响的是这里）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
+
+建议断点：
+
+1) `DefaultListableBeanFactory#doResolveDependency`：对照单依赖注入场景，观察候选集合与最终胜者
+2) `DefaultListableBeanFactory#determinePrimaryCandidate`：观察 `@Primary` 为什么能压过 `@Priority`
+3) `DefaultListableBeanFactory#determineHighestPriorityCandidate`：在没有 `@Primary/@Qualifier` 时观察 `@Priority` 如何打破平局
+4) `AnnotationAwareOrderComparator#sort`：对照集合注入场景，观察 `@Order` 只影响排序，不影响单依赖选择
+
+## 排障分流：这是定义层问题还是实例层问题？
+
+- “`NoUniqueBeanDefinitionException`（候选太多）” → **实例层（候选选择失败）**：`@Order` 不会帮你选胜者；用 `@Qualifier/@Primary/@Priority`（本章 + `doResolveDependency`）
+- “集合注入顺序不稳定/不符合预期” → **实例层（排序）**：看 `AnnotationAwareOrderComparator#sort`（本章第 3 节）
+- “我以为 `@Priority` 会影响一切注入场景” → **实例层规则差异**：它既可能参与单依赖 tie-break，也会影响集合排序，但优先级低于 `@Primary`（本章第 2/3 节）
+- “候选选择行为跟想象不一致” → **先确认注入点类型**：单依赖 vs 集合是两套规则（本章第 1 节）

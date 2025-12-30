@@ -58,6 +58,38 @@
 - **坑 2：在 proxy 上调用 `toString()` / `equals()` 触发真实创建**
   - 学习阶段尽量不要依赖日志；用断言固定“构造器是否被调用”。
 
+## 源码锚点（建议从这里下断点）
+
+- `DefaultListableBeanFactory#preInstantiateSingletons`：refresh 时批量创建非 lazy 单例（lazy-init bean 会被跳过）
+- `AbstractBeanFactory#doGetBean`：第一次 `getBean(...)` 触发真正创建（lazy-init 的典型入口）
+- `DefaultListableBeanFactory#doResolveDependency`：依赖解析入口（解释“lazy bean 仍可能因为被依赖而提前创建”）
+- `ContextAnnotationAutowireCandidateResolver#getLazyResolutionProxyIfNecessary`：注入点 `@Lazy` 的关键（决定是否注入一个懒代理）
+- `AbstractAutowireCapableBeanFactory#createBean`：创建入口（对照“什么时候真的 new 出目标对象”）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansLazyLabTest.java`
+  - `lazyInitBean_isNotInstantiatedDuringRefresh_butCreatedOnFirstGetBean()`
+  - `lazyInitDoesNotHelpIfAConsumerEagerlyDependsOnTheBean()`
+  - `lazyInjectionPoint_canDeferCreationOfLazyBeanUntilFirstUse()`
+
+建议断点：
+
+1) lazy 目标 bean 的构造器：作为“到底什么时候创建”的最直观观察点
+2) `DefaultListableBeanFactory#preInstantiateSingletons`：在 refresh 期间观察 lazy-init bean 是否被跳过
+3) `AbstractBeanFactory#doGetBean`：第一次按 name/type 取 bean 时触发创建的路径
+4) `ContextAnnotationAutowireCandidateResolver#getLazyResolutionProxyIfNecessary`：观察注入点 `@Lazy` 是如何变成 proxy 的
+5) `DefaultListableBeanFactory#doResolveDependency`：在“consumer 依赖 lazy bean”的测试里观察为什么会提前创建
+
+## 排障分流：这是定义层问题还是实例层问题？
+
+- “我标了 lazy-init，但 bean 还是在启动时创建” → **优先实例层（依赖链）**：是否有非 lazy 的 consumer 直接依赖它？（本章第 2 节 + `doResolveDependency`）
+- “我在注入点加了 `@Lazy`，但仍然提前创建” → **优先实例层（proxy 触发点）**：是不是调用了会触发真实解析的方法（如 `toString/equals`）或其他路径提前拿到了目标 bean？
+- “我以为 `@Lazy` 会影响 beanDefinition 的 lazy-init” → **优先定义层澄清**：注入点 `@Lazy` 与 beanDefinition `lazy-init` 是两种语义（本章第 3 节）
+- “看到的是 proxy 类型而不是目标类” → **实例层（代理语义）**：这是注入点 `@Lazy` 的本质（对照 [31](31-proxying-phase-bpp-wraps-bean.md)）
+
 ## 5. 一句话自检
 
 - 你能解释清楚：为什么“lazy-init 的 bean”仍可能在 refresh 期间被创建吗？

@@ -48,6 +48,7 @@ Exercises 默认禁用：打开 `*ExerciseTest`，移除/注释 `@Disabled`，�
 
 ## 推荐 docs 阅读顺序（从“能解释清楚”到“理解机制”）
 
+0. [深挖指南：把“Bean 三层模型”落到源码与断点](docs/00-deep-dive-guide.md)
 1. [Bean 心智模型：BeanDefinition vs 实例](docs/01-bean-mental-model.md)
 2. [Bean 注册入口：扫描、@Bean、@Import、registrar](docs/02-bean-registration.md)
 3. [依赖注入解析：类型/名称/@Qualifier/@Primary](docs/03-dependency-injection-resolution.md)

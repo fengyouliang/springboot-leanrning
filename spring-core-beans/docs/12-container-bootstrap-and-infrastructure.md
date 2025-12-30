@@ -64,6 +64,42 @@
 - **误解 3：把“容器没装处理器”当成业务 bug**
   - 学机制时请优先问：当前容器有没有注册对应的 BFPP/BPP？
 
+## 源码锚点（建议从这里下断点）
+
+- `AbstractApplicationContext#refresh`：容器启动总入口；你能在这里建立“先装处理器、再建实例”的时间线
+- `AnnotationConfigUtils#registerAnnotationConfigProcessors`：把让注解生效的一组 BFPP/BPP 注册进容器（本章的关键动作）
+- `ConfigurationClassPostProcessor#postProcessBeanDefinitionRegistry`：解析 `@Configuration/@Bean/@Import` 并注册额外的 `BeanDefinition`
+- `AutowiredAnnotationBeanPostProcessor#postProcessProperties`：属性填充阶段处理 `@Autowired/@Value`（没注册它就不会注入）
+- `InitDestroyAnnotationBeanPostProcessor#postProcessBeforeInitialization`：处理 `@PostConstruct/@PreDestroy`（`CommonAnnotationBeanPostProcessor` 基于它）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBootstrapInternalsLabTest.java`
+  - `withoutAnnotationConfigProcessors_autowiredAndPostConstructAreNotApplied()`
+  - `registerAnnotationConfigProcessors_enablesAutowiredAndPostConstruct()`
+
+建议断点（按从“现象”到“机制”的顺序）：
+
+1) `SpringCoreBeansBootstrapInternalsLabTest` 的两段测试方法内：对照“注册 processors 前后”的行为差异
+2) `AnnotationConfigUtils#registerAnnotationConfigProcessors`：确认哪些基础设施处理器被注册进了 `BeanDefinitionRegistry`
+3) `ConfigurationClassPostProcessor#postProcessBeanDefinitionRegistry`：观察 `@Configuration/@Bean` 是在什么时候被解析成定义的
+4) `AutowiredAnnotationBeanPostProcessor#postProcessProperties`：观察 field/method 注入发生在“属性填充阶段”，而不是构造阶段
+5) `InitDestroyAnnotationBeanPostProcessor#postProcessBeforeInitialization`：观察 `@PostConstruct` 触发点（发生在 init 回调链里）
+
+你应该看到：
+
+- 不注册 processors：上述 3/4/5 的断点不会命中，注入/回调不会发生
+- 注册 processors：断点会命中，`@Autowired` 字段被赋值，`@PostConstruct` 被调用
+
+## 排障分流：这是定义层问题还是实例层问题？
+
+- “`@Autowired/@Resource/@PostConstruct` 全都不生效/字段一直是 null” → **优先定义层/基础设施问题**：你是否注册了 annotation processors？（回到本章 Lab）
+- “`@Bean` 方法写了但容器里没有这个 bean” → **优先定义层问题**：配置类是否被 `ConfigurationClassPostProcessor` 解析？（可对照 [02](02-bean-registration.md) 与本章断点）
+- “注入生效了但选错候选/候选太多” → **优先实例层（依赖解析）问题**：看 `DefaultListableBeanFactory#doResolveDependency`（见 [03](03-dependency-injection-resolution.md) / [33](33-autowire-candidate-selection-primary-priority-order.md)）
+- “拿到的对象形态不对（proxy/替身）” → **优先实例层（BPP/代理）问题**：看 [31](31-proxying-phase-bpp-wraps-bean.md) 与 [00](00-deep-dive-guide.md)
+
 ## 4. 一句话自检
 
 - 你能解释清楚：`@Autowired`/`@PostConstruct`/`@Bean` 分别依赖哪些处理器让它们生效吗？

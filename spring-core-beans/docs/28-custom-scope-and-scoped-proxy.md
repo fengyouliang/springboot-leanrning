@@ -62,6 +62,39 @@ Spring 的 scope 机制是可扩展的：你可以注册自定义 scope。
 - **坑 2：scoped proxy 的调试成本**
   - 你看到的对象类型是 proxy，不是目标类；需要学会区分。
 
+## 源码锚点（建议从这里下断点）
+
+- `AbstractBeanFactory#registerScope`：注册自定义 scope 的入口（没有注册就不会走 scope 分发）
+- `AbstractBeanFactory#doGetBean`：按 scope 分发的主入口（singleton/prototype/custom scope 都会在这里分流）
+- `SimpleThreadScope#get`：thread scope 的核心（同线程缓存、跨线程隔离）
+- `ObjectProvider#getObject`：provider 的延迟解析入口（每次调用都回到容器重新解析目标）
+- `ScopedProxyFactoryBean#getObject`：scoped proxy 的生成入口（注入的是 proxy，调用时再定位目标）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansCustomScopeLabTest.java`
+  - `threadScope_createsOneInstancePerThread_whenAccessedDirectly()`
+  - `injectingThreadScopedBeanIntoSingleton_withoutProxy_freezesTheTargetAtInjectionTime()`
+  - `objectProvider_honorsThreadScope_whenUsedInsideSingleton()`
+  - `scopedProxy_honorsThreadScope_whenInjectedIntoSingleton()`
+
+建议断点：
+
+1) `AbstractBeanFactory#registerScope`：确认 thread scope 的注册发生在 refresh 之前
+2) `SimpleThreadScope#get`：在同线程/不同线程获取时观察缓存命中与新建
+3) direct injection 的 consumer 构造器/字段赋值点：观察“只取一次”导致冻结
+4) `ObjectProvider#getObject`：观察 provider 每次调用都会触发一次新的解析（回到 `doGetBean`）
+5) `ScopedProxyFactoryBean#getObject`（可选）：观察 proxy 生成与调用时的目标定位
+
+## 排障分流：这是定义层问题还是实例层问题？
+
+- “thread scope 没起作用/所有线程都拿到同一个实例” → **优先定义层（scope 注册）**：是否真的 `registerScope("thread", ...)`？（看 `registerScope`）
+- “把 scoped bean 注入 singleton 后总是同一个实例” → **实例层（注入时机）**：这是 direct injection 的冻结效应；用 provider 或 scoped proxy（本章第 2/3/4 节）
+- “调试时看到的类型是 proxy，不是目标类” → **实例层（代理语义）**：这是 scoped proxy 的预期形态（对照 [31](31-proxying-phase-bpp-wraps-bean.md)）
+- “想当然认为 scope 会自动传播到注入点” → **概念澄清**：scope 管的是“容器如何取对象”，不自动改变注入点的解析次数（本章第 5 节）
+
 ## 6. 一句话自检
 
 - 你能解释清楚：为什么 direct injection 会让 thread scope 失效？
