@@ -48,4 +48,4 @@
 ## 4. Validation
 
 - [x] 4.1 运行模块测试：`mvn -q -pl spring-core-beans test`
-- [ ] 4.2（可选）运行全仓库测试：`mvn -q test`
+- [x] 4.2（可选）运行全仓库测试：`mvn -q test`
