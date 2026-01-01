@@ -44,6 +44,18 @@ mvn -pl spring-core-beans spring-boot:run
 mvn -pl spring-core-beans test
 ```
 
+只跑一个测试类 / 方法（用于断点深挖更舒服）：
+
+```bash
+# 跑一个测试类
+mvn -pl spring-core-beans -Dtest=SpringCoreBeansContainerLabTest test
+
+# 跑一个测试方法
+mvn -pl spring-core-beans -Dtest=SpringCoreBeansContainerLabTest#beanDefinitionIsNotTheBeanInstance test
+```
+
+> 提示：如果你想“启动后挂起，等待 IDE attach”，可以加 `-Dmaven.surefire.debug`（默认监听 5005）。
+
 Exercises 默认禁用：打开 `*ExerciseTest`，移除/注释 `@Disabled`，按提示完成后再运行测试。
 
 ## 推荐 docs 阅读顺序（从“能解释清楚”到“理解机制”）
@@ -83,8 +95,9 @@ Exercises 默认禁用：打开 `*ExerciseTest`，移除/注释 `@Disabled`，�
 32. [`@Resource` 注入：为什么它更像“按名称找 Bean”？](docs/32-resource-injection-name-first.md)
 33. [候选选择 vs 顺序：`@Primary` / `@Priority` / `@Order` 到底各管什么？](docs/33-autowire-candidate-selection-primary-priority-order.md)
 34. [`@Value("${...}")` 占位符解析：默认 non-strict vs strict fail-fast](docs/34-value-placeholder-resolution-strict-vs-non-strict.md)
-35. [常见坑清单（建议反复对照）](docs/90-common-pitfalls.md)
-36. [自测题：你是否真的理解了？](docs/99-self-check.md)
+35. [BeanDefinition 的合并（MergedBeanDefinition）：RootBeanDefinition 从哪里来？](docs/35-merged-bean-definition.md)
+36. [常见坑清单（建议反复对照）](docs/90-common-pitfalls.md)
+37. [自测题：你是否真的理解了？](docs/99-self-check.md)
 
 ## 概念地图（注入相关：从“选候选”到“值怎么解析”）
 
@@ -93,6 +106,11 @@ Exercises 默认禁用：打开 `*ExerciseTest`，移除/注释 `@Disabled`，�
 - `@Resource`（name-first）与 `CommonAnnotationBeanPostProcessor` → [docs/32](docs/32-resource-injection-name-first.md) → `SpringCoreBeansResourceInjectionLabTest`
 - 候选选择 vs 顺序：`@Primary/@Priority/@Order` → [docs/33](docs/33-autowire-candidate-selection-primary-priority-order.md) → `SpringCoreBeansAutowireCandidateSelectionLabTest`
 - `@Value("${...}")` 占位符：embedded value resolver（non-strict）vs placeholder configurer（strict）→ [docs/34](docs/34-value-placeholder-resolution-strict-vs-non-strict.md) → `SpringCoreBeansValuePlaceholderResolutionLabTest`
+
+## 概念地图（深挖/排障：从“报错”到“断点入口”）
+
+- BeanDefinition 合并（merged `RootBeanDefinition`）→ [docs/35](docs/35-merged-bean-definition.md) → `SpringCoreBeansMergedBeanDefinitionLabTest`
+- 排障：异常 → 断点入口（候选集合/最终注入/依赖关系）→ [docs/11](docs/11-debugging-and-observability.md) → `SpringCoreBeansBeanGraphDebugLabTest`
 
 ## Labs / Exercises 索引（按知识点 / 难度）
 
@@ -118,6 +136,7 @@ Exercises 默认禁用：打开 `*ExerciseTest`，移除/注释 `@Disabled`，�
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansResolvableDependencyLabTest.java` | ResolvableDependency：能注入但不是 bean | ⭐⭐ | `docs/20` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansContextHierarchyLabTest.java` | parent/child context 可见性与覆盖边界 | ⭐⭐ | `docs/21` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanNameAliasLabTest.java` | beanName 与 alias 解析 | ⭐⭐ | `docs/22` |
+| Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanGraphDebugLabTest.java` | 排障：候选集合 + 最终注入 + 依赖关系（bean graph） | ⭐⭐ | `docs/11`、`docs/03` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanDefinitionOverridingLabTest.java` | BeanDefinition 覆盖（同名冲突策略） | ⭐⭐ | `docs/24` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansSmartInitializingSingletonLabTest.java` | `afterSingletonsInstantiated` 的时机（lazy 与非 lazy） | ⭐⭐⭐ | `docs/26` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansSmartLifecycleLabTest.java` | `SmartLifecycle`：start/stop 与 phase 顺序 | ⭐⭐⭐ | `docs/27` |
@@ -125,6 +144,7 @@ Exercises 默认禁用：打开 `*ExerciseTest`，移除/注释 `@Disabled`，�
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansFactoryBeanDeepDiveLabTest.java` | FactoryBean 深潜：类型匹配与缓存语义 | ⭐⭐⭐ | `docs/23` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansFactoryBeanEdgeCasesLabTest.java` | FactoryBean 边界：getObjectType 返回 null | ⭐⭐⭐ | `docs/29` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansContainerLabTest.java` | BFPP/BPP、`@Configuration`、`FactoryBean`、循环依赖等“容器机制” | ⭐⭐⭐ | `docs/06` → `docs/09` |
+| Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansMergedBeanDefinitionLabTest.java` | BeanDefinition 合并：merged `RootBeanDefinition` + `MergedBeanDefinitionPostProcessor` 时机 | ⭐⭐⭐ | `docs/35`、`docs/01`、`docs/00` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansImportLabTest.java` | `@Import` / `ImportSelector` / registrar（高级注册入口） | ⭐⭐⭐ | `docs/02` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationLabTest.java` | Boot 自动装配（条件生效/失效、覆盖策略） | ⭐⭐⭐ | `docs/10`、`docs/11` |
 | Exercise | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansExerciseTest.java` | 按提示补齐/改造容器行为练习 | ⭐⭐–⭐⭐⭐ | 先跑完相关 Labs 再做 |
@@ -136,6 +156,8 @@ Exercises 默认禁用：打开 `*ExerciseTest`，移除/注释 `@Disabled`，�
 
 | 你要理解的概念 | 去读哪一章 | 去看哪个测试/代码 | 你应该能解释清楚 |
 | --- | --- | --- | --- |
+| 排障：异常 → 断点入口（候选集合/最终注入/依赖关系） | [docs/11](docs/11-debugging-and-observability.md) | `src/test/java/.../SpringCoreBeansBeanGraphDebugLabTest.java` | 如何从报错快速跳到 `doResolveDependency/getSingleton/preInstantiateSingletons` |
+| BeanDefinition 合并（merged `RootBeanDefinition`） | [docs/35](docs/35-merged-bean-definition.md) | `src/test/java/.../SpringCoreBeansMergedBeanDefinitionLabTest.java` | registry 的原始定义如何合并为最终 `RootBeanDefinition`，以及为什么存在 merged-definition hook |
 | “注解为什么能工作”（基础设施处理器） | [docs/12](docs/12-container-bootstrap-and-infrastructure.md) | `src/test/java/.../SpringCoreBeansBootstrapInternalsLabTest.java` | `@Autowired/@PostConstruct/@Bean` 不是魔法，而是 BFPP/BPP 的产物 |
 | 注入阶段：field vs constructor 的关键差异 | [docs/30](docs/30-injection-phase-field-vs-constructor.md) | `src/test/java/.../SpringCoreBeansInjectionPhaseLabTest.java` | 为什么 field injection 在构造器里一定是 null、而 constructor injection 在构造器里可用 |
 | 代理/替换阶段：为什么“必须走代理才生效” | [docs/31](docs/31-proxying-phase-bpp-wraps-bean.md) | `src/test/java/.../SpringCoreBeansProxyingPhaseLabTest.java` | BPP 如何把 bean 换成 proxy、为什么自调用绕过、为什么按实现类拿不到 |

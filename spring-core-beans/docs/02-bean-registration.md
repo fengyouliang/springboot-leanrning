@@ -144,3 +144,5 @@ mvn -pl spring-core-beans test
 2) 写一个最小 `ImportSelector`，根据某个系统属性决定导入 `UpperCaseTextFormatter` 还是 `LowerCaseTextFormatter`
 
 你会直观感受到：“注册入口决定了最终有哪些 BeanDefinition”，而不是“运行时魔法注入”。
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansImportLabTest.java`
+推荐断点：`ConfigurationClassPostProcessor#processConfigBeanDefinitions`、`ClassPathBeanDefinitionScanner#doScan`、`DefaultListableBeanFactory#registerBeanDefinition`

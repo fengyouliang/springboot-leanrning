@@ -81,6 +81,94 @@
 - “系统里出现很难追踪的代理/增强行为” → **实例层可观测性问题**：优先从 BPP 列表与注册方式入手（也可对照 [31](31-proxying-phase-bpp-wraps-bean.md)）
 - “把这类手工注册当成常规手段到处用” → **设计风险**：它会绕开容器默认排序与可观测性，建议仅用于框架/基础设施层
 
+## 源码最短路径（call chain）
+
+> 目标：当你遇到“我明明实现了 `Ordered`，为什么顺序不生效 / 代理叠加顺序不对”时，用最短调用链确认：你到底走的是“容器自动发现+排序”还是“手工注册绕过排序”。
+
+### 1) 手工注册路径（绕过容器排序）
+
+你在代码里直接调用：
+
+- `DefaultListableBeanFactory#addBeanPostProcessor(bpp)`
+
+它会把 bpp 直接塞进 `beanFactory.getBeanPostProcessors()` 列表里：
+
+- **这个动作发生在 refresh 之前**
+- **不会触发 `AnnotationAwareOrderComparator` 排序**
+- **因此顺序只由“注册顺序”决定**
+
+### 2) 容器自动发现+排序路径（走 `registerBeanPostProcessors`）
+
+- `AbstractApplicationContext#refresh`
+  - `PostProcessorRegistrationDelegate#registerBeanPostProcessors`
+    - 收集 `BeanPostProcessor` 类型的 beanName
+    - 创建对应的 BPP 实例
+    - `AnnotationAwareOrderComparator#sort(...)`（按 `PriorityOrdered` → `Ordered` → others 排序）
+    - `DefaultListableBeanFactory#addBeanPostProcessor(...)`（把排序后的 BPP 注册进 BeanFactory）
+
+### 3) BPP 真正“开始影响结果”的位置（执行点）
+
+当某个目标 bean 被创建时：
+
+- `AbstractAutowireCapableBeanFactory#doCreateBean`
+  - `populateBean`（注入发生在这里）
+  - `initializeBean`
+    - `applyBeanPostProcessorsBeforeInitialization`
+    - `applyBeanPostProcessorsAfterInitialization`（很多代理/包装发生在这里）
+
+一句话记住核心：
+
+- **最终执行顺序 = `beanFactory.getBeanPostProcessors()` 的列表顺序**  
+  你只要把这个列表看清楚，大多数“顺序为什么这样”的问题就会瞬间收敛。
+
+## 固定观察点（watch list）
+
+> 目标：在 debugger 里用固定观察点回答：谁先注册、谁先执行、顺序由谁决定。
+
+### 1) 先看最终列表（最重要）
+
+在任何位置（尤其是 `registerBeanPostProcessors` 之后）watch/evaluate：
+
+- `beanFactory.getBeanPostProcessors()`：**这就是最终执行顺序**
+  - 程序化注册的 BPP 通常在更前面（因为更早加入列表）
+  - 容器自动发现的 BPP 在 refresh 中期才加入列表
+
+### 2) 看容器排序的输入/输出（只对“自动发现”生效）
+
+在 `PostProcessorRegistrationDelegate#registerBeanPostProcessors` 里 watch/evaluate：
+
+- `postProcessorNames`：按类型收集到的候选集合
+- `AnnotationAwareOrderComparator#sort(...)` 的输入与输出（候选顺序如何变成最终顺序）
+
+### 3) 看执行点（只看你的目标 bean）
+
+在 `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization` 里建议：
+
+- 给断点加条件：`beanName.equals("target")`（或你的目标 beanName）
+- watch `result`（或等价变量）：是否被替换为 proxy/wrapper（见 [31](31-proxying-phase-bpp-wraps-bean.md)）
+
+## 反例（counterexample）
+
+**反例：我让“手工注册的 BPP”实现了 `PriorityOrdered/Ordered`，但它还是不按 order 排序。**
+
+最小复现入口（必现）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansProgrammaticBeanPostProcessorLabTest.java`
+  - `programmaticBppExecutionOrder_isRegistrationOrder_notOrderedInterface()`
+
+你在断点里应该看到什么（用于纠错）：
+
+- 两个 programmatic BPP 都实现了 `PriorityOrdered`，并且 `getOrder()` 值不同
+- 但由于它们是通过 `addBeanPostProcessor` 直接进列表：
+  - 不会经过 `registerBeanPostProcessors` 的排序
+  - 因此执行顺序只按注册顺序：`first` → `second`
+
+如果你碰到的是“某个 bean 完全没被 BPP 处理”，也常见于另一个更隐蔽的坑：
+
+- **在 BDRPP/BFPP 阶段 `getBean()` 触发过早实例化**，导致该 bean 在“没有 BPP 的世界”里先被创建出来（见 [13](13-bdrpp-definition-registration.md) 的反例）
+
 ## 4. 一句话自检
 
 - 你能解释清楚：为什么手工注册的 BPP 不受 Ordered 影响吗？（提示：容器不会再对它排序，只按注册顺序调用）
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansProgrammaticBeanPostProcessorLabTest.java`
+推荐断点：`AbstractBeanFactory#addBeanPostProcessor`、`PostProcessorRegistrationDelegate#registerBeanPostProcessors`、`AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`

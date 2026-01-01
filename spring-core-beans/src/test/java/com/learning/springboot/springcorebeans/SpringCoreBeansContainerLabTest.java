@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +100,8 @@ class SpringCoreBeansContainerLabTest {
     @Test
     void circularDependencyWithConstructorsFailsFast() {
         assertThatThrownBy(() -> new AnnotationConfigApplicationContext(ConstructorCycleConfig.class))
-                .isInstanceOf(BeanCreationException.class);
+                .isInstanceOf(BeanCreationException.class)
+                .hasRootCauseInstanceOf(BeanCurrentlyInCreationException.class);
     }
 
     @Test

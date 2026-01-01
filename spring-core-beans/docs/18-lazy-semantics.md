@@ -94,3 +94,5 @@
 
 - 你能解释清楚：为什么“lazy-init 的 bean”仍可能在 refresh 期间被创建吗？
 - 你能解释清楚：注入点 `@Lazy` 的本质是“注入 proxy”吗？
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansLazyLabTest.java`
+推荐断点：`AbstractBeanFactory#doGetBean`、`DefaultListableBeanFactory#preInstantiateSingletons`、`ContextAnnotationAutowireCandidateResolver#getLazyResolutionProxyIfNecessary`

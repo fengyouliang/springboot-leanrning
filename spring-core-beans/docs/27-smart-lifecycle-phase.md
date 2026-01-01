@@ -77,3 +77,5 @@
 ## 4. 一句话自检
 
 - 你能解释清楚：为什么 stop 顺序是反向的吗？（提示：避免先停掉依赖者）
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansSmartLifecycleLabTest.java`
+推荐断点：`DefaultLifecycleProcessor#startBeans`、`DefaultLifecycleProcessor#stopBeans`、`SmartLifecycle#start`

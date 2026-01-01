@@ -97,4 +97,5 @@
 3) “`ObjectProvider` 和 `@Lookup` 的差别是什么？”
 
 下一章我们把 scope 与生命周期合起来讲：什么时候创建、什么时候初始化、什么时候销毁。
-
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansLabTest.java`
+推荐断点：`AbstractBeanFactory#doGetBean`、`DefaultSingletonBeanRegistry#getSingleton`、`DefaultListableBeanFactory#doResolveDependency`

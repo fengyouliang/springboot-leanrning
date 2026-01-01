@@ -25,7 +25,23 @@
 - 先初始化 `first`
 - 再初始化 `second`
 
-## 2. 常见用法（了解即可，别滥用）
+## 2. 写法入口：`@DependsOn` / `BeanDefinition#setDependsOn(...)` / XML `depends-on`
+
+`dependsOn` 本质是 **BeanDefinition 上的一段元数据**（最终体现在 `RootBeanDefinition#getDependsOn()`）。
+
+因此它可以从多种“写法入口”进入容器，语义一致：
+
+- **注解方式：`@DependsOn("first")`**
+  - 可用在 `@Component` 类上（扫描注册时写入定义）。
+  - 也可用在 `@Bean` 方法上（配置类解析时写入定义）。
+- **编程式注册：`BeanDefinition#setDependsOn(...)`**
+  - 本仓库的实验用的就是这种（见 `SpringCoreBeansDependsOnLabTest`）。
+- **XML：`<bean depends-on="first">`**
+  - 现在工程里少见，但底层仍是同一套 `dependsOn` 语义。
+
+> 结论：你关注的不是“写法”，而是 `BeanDefinition` 上最终有没有这段 `dependsOn` 元数据。
+
+## 3. 常见用法（了解即可，别滥用）
 
 你可能会在一些“基础设施”里看到它：
 
@@ -33,13 +49,118 @@
 
 但一般业务代码不推荐依赖它，因为它会让依赖关系“隐形”。
 
-## 3. 常见坑
+## 4. 常见坑
 
 - **坑 1：把 dependsOn 当成 DI 手段**
   - dependsOn 不会把 `first` 注入到 `second` 里。
 
 - **坑 2：过度使用导致容器拓扑不透明**
   - 学习阶段可以用它做实验；工程里请谨慎。
+
+- **坑 3：人为引入 dependsOn 环（A → B → A）会 fail-fast**
+  - 这属于“定义层人为制造拓扑环”，容器一般不会替你“救场”。
+  - 最小复现（建议断点跑一遍）：`SpringCoreBeansDependsOnLabTest.dependsOn_cycle_failsFast()`
+
+## 5. 容器内部结构：`dependentBeanMap` / `dependenciesForBeanMap`
+
+这一章你真正要“写进肌肉记忆”的不是 `dependsOn` 这个 API，而是容器内部那两张表（它们解释了很多“为什么顺序会这样”的问题）：
+
+- `dependentBeanMap`：**谁依赖我**（key 是被依赖者，value 是依赖者集合）
+  - 形态：`dependencyBeanName -> Set<dependentBeanName>`
+- `dependenciesForBeanMap`：**我依赖谁**（key 是依赖者，value 是被依赖者集合）
+  - 形态：`beanName -> Set<dependencyBeanName>`
+
+你可以把它记成一个对称关系（非常好背）：
+
+> 如果 A 依赖 B，那么：  
+> `dependentBeanMap[B]` 里会出现 A，`dependenciesForBeanMap[A]` 里会出现 B。
+
+更关键的一点：**这条依赖边不只来自 `dependsOn`**，还可能来自真实注入依赖（例如 `@Autowired`、`ref` 属性等）。
+所以当你用 debugger 看依赖表时，经常会发现：
+
+- 依赖边比你手写的 dependsOn 多（这是正常的）
+- 关闭顺序也会同时受到“dependsOn + 注入依赖”影响（这也是工程里不建议滥用 dependsOn 的原因之一）
+
+> 实用补充：除了看内部 map，你也可以直接用 API 做自检：
+>
+> - `beanFactory.getDependenciesForBean(beanName)`：我依赖谁（更像 `dependenciesForBeanMap` 的视角）
+> - `beanFactory.getDependentBeans(beanName)`：谁依赖我（更像 `dependentBeanMap` 的视角）
+>
+> 如果你想把“依赖边”做成可观测闭环（候选集合 vs 最终依赖边），推荐先看 [11](11-debugging-and-observability.md) 的固定观察点。
+
+## 6. 销毁顺序：为什么关闭时顺序“反过来”？
+
+初始化阶段，`dependsOn` 看起来是“先 dependency 再 dependent”：
+
+- 创建 `second` 之前先 `getBean("first")`
+
+但销毁阶段，容器必须保证：**不要在依赖者还在用的时候先把依赖销毁掉**，因此会按依赖边做反向销毁：
+
+- **先销毁 dependent（依赖者）**
+- **再销毁 dependency（被依赖者）**
+
+也就是说：
+
+- `second dependsOn first`  
+  ⇒ 关闭时会先销毁 `second`，再销毁 `first`
+
+这条规则的“落点”就在 `dependentBeanMap` 上：销毁逻辑会先取 `dependentBeanMap["first"]`，先销毁所有依赖 `first` 的 bean。
+
+## 6.1 交互：dependsOn 会强行拉起 lazy-init（`@Lazy` / `lazyInit`）
+
+一个很容易误判的点是：
+
+- 你把 dependency 标成了 `lazy-init`
+- 但它仍然在启动（refresh）阶段被创建了
+
+结论写死：
+
+- `lazy-init` 的语义是：“**没人要它的时候**，容器不主动创建它”
+- `dependsOn` 的语义是：“**创建当前 bean 之前**，必须先 `getBean(dep)`”
+
+因此：只要 dependent 被创建（refresh 预实例化 / 运行时 `getBean` 触发都算），dependency 就会被强行拉起——即使 dependency 是 lazy。
+
+最小复现（可断言）：
+
+- `SpringCoreBeansDependsOnLabTest.dependsOn_triggersLazyDependencyInstantiation()`
+
+你在断点里应该看到什么（用于纠错）：
+
+- `AbstractBeanFactory#doGetBean("dependent")` 读取 `dependsOn=["lazyDependency"]`
+- 在创建 `dependent` 之前先执行 `getBean("lazyDependency")`（lazy 被强行拉起）
+- `DefaultSingletonBeanRegistry#registerDependentBean("lazyDependency","dependent")` 记录依赖边（这条边也会影响销毁顺序）
+
+## 6.2 机制边界：为什么 dependsOn 不会影响 DI 候选选择？
+
+很多误用来自把“顺序”当成“注入选择”。这两件事发生在 **不同阶段**：
+
+- `dependsOn`：发生在 **创建前置**（`doGetBean` 里处理 `dependsOn`，先 `getBean(dep)` 再创建当前 bean）
+- DI 候选选择：发生在 **注入解析**（`doResolveDependency` 里按 `@Qualifier/@Primary/@Priority` 等规则收敛）
+
+所以：
+
+- `dependsOn` 不能帮你“选中哪个候选”
+- 它只是在“当前 bean 要开始创建之前”，强制确保某些 bean 已创建
+
+把这个边界分清，你就能避免一个经典误判：
+
+- “我给 A dependsOn B，是不是就会把 B 注入给 A？” → 不是（回到本章开头）
+
+相关章节：
+
+- DI 收敛规则：[03](03-dependency-injection-resolution.md)、[33](33-autowire-candidate-selection-primary-priority-order.md)
+
+## 6.3 写入时机对照：`dependsOn` 这段元数据是何时写进 `BeanDefinition` 的？
+
+你不需要背内部实现，但建议形成一个定位策略：**先判断当前 bean 的“注册入口”是哪一种**。
+
+- `@DependsOn` 用在 `@Component/@Service` 类上：**扫描注册阶段**写入该类对应的 `BeanDefinition`
+- `@DependsOn` 用在 `@Bean` 方法上：**配置类解析阶段**写入该 `@Bean` 方法生成的 `BeanDefinition`
+- 编程式注册：`BeanDefinition#setDependsOn(...)`：**注册时就写入**（本仓库 Labs 使用这一种，最直观）
+
+无论入口是哪一种，最终你都应该在 debugger 里用同一个观察点确认：
+
+- `RootBeanDefinition#getDependsOn()`（定义上是否真的有这段元数据）
 
 ## 源码锚点（建议从这里下断点）
 
@@ -55,6 +176,9 @@
 
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansDependsOnLabTest.java`
   - `dependsOn_forcesInitializationOrder_evenWithoutDirectDependencies()`
+  - `dependsOn_triggersLazyDependencyInstantiation()`（dependsOn × lazy-init）
+  - `dependsOn_affectsDestroyOrder_viaDependentBeanMap()`（销毁顺序反序）
+  - `dependsOn_cycle_failsFast()`（dependsOn 拓扑环）
 
 建议断点：
 
@@ -70,6 +194,58 @@
 - “启动/关闭顺序很怪，像是有隐式依赖” → **定义层 + 依赖关系问题**：排查 `dependsOn`/工厂内部注册的依赖（结合 [11](11-debugging-and-observability.md) 观察 bean 图）
 - “出现依赖环（dependsOn A → B → A）” → **定义层问题**：这属于人为引入的拓扑环，建议回避而不是依赖容器“救场”
 
-## 4. 一句话自检
+## 源码最短路径（call chain）
+
+> 目标：给你“最短可跟栈”，把 dependsOn 如何写进依赖表、依赖表如何影响销毁顺序串起来。
+
+初始化阶段（创建 `second` 时触发 `dependsOn("first")`）：
+
+- `AbstractBeanFactory#doGetBean("second")`
+  - `getMergedLocalBeanDefinition("second")`
+  - `RootBeanDefinition#getDependsOn`（读出 `["first"]`）
+  - `DefaultSingletonBeanRegistry#registerDependentBean("first", "second")`（把依赖边写进两张表）
+  - `getBean("first")`（先确保 dependency 已创建）
+  - `createBean("second")`（再创建当前 bean）
+
+销毁阶段（关闭 context 时，先销毁 dependent 再销毁 dependency）：
+
+- `DefaultSingletonBeanRegistry#destroySingletons`
+  - `destroyBean("first")`
+    - 读取 `dependentBeanMap["first"]` 得到 `{ "second", ... }`
+    - 递归销毁所有 dependent（先销毁 `second`）
+    - 再销毁 `first`
+
+## 固定观察点（watch list）
+
+建议在 `registerDependentBean(...)` 与 `destroySingletons(...)` 里 watch/evaluate：
+
+- `dependentBeanMap`：谁依赖我（销毁顺序的关键依据）
+- `dependenciesForBeanMap`：我依赖谁（用于查询/诊断也很直观）
+- `dependentBeanMap.get("first")`：当前被依赖者有哪些 dependents（集合里出现谁就意味着“先销毁谁”）
+- `dependenciesForBeanMap.get("second")`：当前 bean 依赖哪些 dependencies（集合里出现谁就意味着“创建前要先 getBean 谁”）
+
+> 小技巧：很多依赖边是“创建过程中动态注册”的（不是你在代码里显式写出来的），所以看这两张表往往比“猜依赖”更可靠。
+
+## 反例（counterexample）
+
+**反例：我只写了 dependsOn，为什么依赖图里出现了更多依赖？为什么关闭顺序不像我想的那样“只按 dependsOn”？**
+
+最小复现入口（建议你对比两个实验的输出/断点）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansDependsOnLabTest.java`
+  - `dependsOn_forcesInitializationOrder_evenWithoutDirectDependencies()`
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanGraphDebugLabTest.java`
+  - `dumpBeanGraph_candidatesAndRecordedDependencies_helpTroubleshootWhyItsInjected()`
+
+你在断点里应该看到什么（用于纠错）：
+
+- 除了 `dependsOn`，容器在“解析引用/完成注入”时也会调用 `registerDependentBean(...)` 记录依赖边  
+  ⇒ 依赖图里出现更多边，并不代表你写错了 dependsOn，而是容器在记录“真实被注入/被引用”的依赖。
+- 因为销毁顺序依赖 `dependentBeanMap`，所以**关闭顺序会同时受 dependsOn 与真实注入依赖影响**  
+  ⇒ 工程里滥用 dependsOn 会让拓扑更难解释（这也是本章一开始就强调“别滥用”的原因）。
+
+## 7. 一句话自检
 
 - 你能解释清楚：dependsOn 解决的是什么问题？（初始化顺序，不是注入）
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansDependsOnLabTest.java`
+推荐断点：`DefaultSingletonBeanRegistry#registerDependentBean`、`DefaultListableBeanFactory#preInstantiateSingletons`、`AbstractBeanFactory#doGetBean`

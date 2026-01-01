@@ -21,6 +21,32 @@
 
 ## 2. getEarlyBeanReference：为什么需要它？
 
+如果你只关注“循环依赖能不能启动”，你会以为 early reference 只是“救活 setter 循环”的技巧。
+
+但对读者 C 来说，真正关键的是这句话：
+
+> **getEarlyBeanReference 解决的不是“引用能不能拿到”，而是“拿到的引用是否已经是最终形态（proxy/wrapper）”。**
+
+为什么这很重要？
+
+- 很多框架能力（AOP/事务/异步/缓存/安全）都会在 BPP 阶段把 bean 包装成 proxy（见 docs/31）。
+- 循环依赖场景下，A 在创建中需要注入 B，B 也在创建中需要注入 A。
+- 为了“救活”，容器会把 A 的一个引用提前暴露给 B（early exposure）。
+
+问题来了：如果你提前暴露的是 **原始对象**，但最终对外暴露的是 **proxy**，那么：
+
+- B 持有的是原始对象引用（绕过 proxy）
+- 其他地方拿到的是 proxy
+- 同一个 bean 在系统里出现两种形态 → 行为不一致、排障困难
+
+`getEarlyBeanReference` 就是为了解决这个“early 与 final 不一致”的根源问题：让框架能在“提前暴露”时就给出代理版引用，从而让依赖方拿到的就是最终形态。
+
+### 2.1 你应该把它与哪几个点一起记？
+
+- `SmartInstantiationAwareBeanPostProcessor#getEarlyBeanReference`：给出 early proxy 的扩展点
+- `BeanPostProcessor#postProcessAfterInitialization`：给出 final proxy 的常见扩展点
+- 三层缓存：`singletonFactories`/`earlySingletonObjects`/`singletonObjects`（见 docs/09）
+
 如果没有 getEarlyBeanReference，setter 循环依赖通常会用“原始对象引用”去填充依赖。
 
 但真实系统里经常存在“包装/代理”需求（典型就是 AOP）：
@@ -103,7 +129,72 @@
 - “循环依赖解决了但拿到的类型变了（proxy）” → **实例层（代理语义）**：这是为了保证“最终暴露形态一致”，与 AOP/事务心智模型一致（见 [31](31-proxying-phase-bpp-wraps-bean.md)）
 - “以为这只和循环依赖有关” → **实例层通用机制**：early reference 是为了解决“创建中暴露引用”，但核心仍是 BPP 能改变 bean 形态（见 [00](00-deep-dive-guide.md)）
 
+## 源码最短路径（call chain）
+
+> 目标：在循环依赖场景下，把“三级缓存（singleton/early/factory）”与“raw vs wrapped 检查点”放回同一条最短调用链。
+
+一条最常见、最有价值的最短栈（以 setter 循环依赖为例）：
+
+- `AbstractAutowireCapableBeanFactory#doCreateBean("alpha", ...)`
+  - `DefaultSingletonBeanRegistry#addSingletonFactory("alpha", ...)`  
+    - **这里把 `singletonFactory` 放进三级缓存（为 early reference 做准备）**
+  - `populateBean(...)`（开始属性填充，触发对 `beta` 的依赖解析与创建）
+    - `doResolveDependency(...)` / `getBean("beta")`
+      - `doCreateBean("beta", ...)`
+        - `populateBean(...)`（beta 需要注入 alpha）
+          - `DefaultSingletonBeanRegistry#getSingleton("alpha", ...)`  
+            - **这里命中 early reference 分支（从三级缓存拿 early 引用）**
+            - `AbstractAutowireCapableBeanFactory#getEarlyBeanReference(...)`（如果有 `SmartInstantiationAwareBeanPostProcessor`，会走到这里）
+- `initializeBean(...)`（BPP after-init 可能会把 bean 替换成 proxy/wrapper）
+- `doCreateBean(...)` 尾部的“raw vs wrapped”一致性检查  
+  - **如果 early 引用是 raw，但最终暴露对象是 wrapped/proxy，容器可能会失败（fail fast）**
+
+你只要把这条链路走通一次，就能把“三级缓存到底解决什么”与“为什么会有 raw vs wrapped 不一致”串成一条线。
+
+## 固定观察点（watch list）
+
+> 目标：在 `getSingleton` 与 `doCreateBean` 里，只看这些结构/变量，就能判断当前处于哪一层缓存、以及是否发生 raw vs wrapped 不一致。
+
+建议在 `DefaultSingletonBeanRegistry#getSingleton(...)` 里 watch/evaluate：
+
+- `singletonObjects`：一级缓存（完全初始化后的单例）
+- `earlySingletonObjects`：二级缓存（提前暴露的 early singleton reference）
+- `singletonFactories`：三级缓存（`ObjectFactory`，用于按需创建 early reference）
+- `isSingletonCurrentlyInCreation(beanName)`：是否处于创建中（决定 early 分支是否可能发生）
+
+建议在 `AbstractAutowireCapableBeanFactory#doCreateBean(...)` 尾部 watch/evaluate：
+
+- `earlySingletonReference`：early 引用（如果发生了循环依赖/提前暴露，这里通常不为 null）
+- `exposedObject`：最终暴露对象（可能已经被 after-init BPP 替换成 proxy）
+- `hasDependentBean(beanName)` + `getDependentBeans(beanName)`：是否已有其他 bean 拿到过 early/raw 引用（决定是否触发 fail-fast）
+
+> 小技巧：当你看到异常提示里出现 “raw version / wrapped” 关键词时，几乎可以直接定位到这个尾部检查点。
+
+## 反例（counterexample）
+
+**反例：我按“实现类”注入，但最终容器暴露的是 JDK proxy（wrapped），类型直接对不上。**
+
+最小复现入口（必现，且错误信息直给“expected type vs actual proxy type”）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansEarlyReferenceLabTest.java`
+  - `injectingConcreteTypeFailsWhenFinalBeanIsJdkProxy_duringCircularDependency()`
+
+你在断点里应该看到什么（用于纠错）：
+
+- 你的注入点是 `ConcreteAlphaImpl`（实现类）
+- 但容器最终暴露的 bean 可能是 JDK proxy（例如 `$Proxy...`，只实现接口）
+- 因此注入阶段会直接失败：`BeanNotOfRequiredTypeException`（通常被 `UnsatisfiedDependencyException` 包一层）
+
+正确做法（本章实验的成功路径）：
+
+- 优先按接口注入（让 proxy 仍然满足类型约束），并把“调用链必须走代理”的心智模型打牢（见 [31](31-proxying-phase-bpp-wraps-bean.md)）
+- 如果你确实必须按实现类注入：你需要 class-based proxy（或避免用会改变暴露类型的代理策略）
+- 如果你在循环依赖场景还希望 early 与 final 形态一致：实现 `SmartInstantiationAwareBeanPostProcessor#getEarlyBeanReference(...)` 并保证 after-init 返回同一个 proxy  
+  ⇒ 参见 `getEarlyBeanReference_canProvideEarlyProxyDuringCircularDependencyResolution()`
+
 ## 5. 一句话自检
 
 - 你能解释清楚：为什么循环依赖场景下，容器需要一个“提前暴露的引用”？
 - 你能解释清楚：`getEarlyBeanReference` 为什么必须跟“代理/包装”一起讲？
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansEarlyReferenceLabTest.java`
+推荐断点：`DefaultSingletonBeanRegistry#getSingleton`、`AbstractAutowireCapableBeanFactory#getEarlyBeanReference`、`SmartInstantiationAwareBeanPostProcessor#getEarlyBeanReference`

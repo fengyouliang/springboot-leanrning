@@ -99,3 +99,5 @@ Spring 的 scope 机制是可扩展的：你可以注册自定义 scope。
 
 - 你能解释清楚：为什么 direct injection 会让 thread scope 失效？
 - 你能解释清楚：ObjectProvider 与 scoped proxy 的差别吗？
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansCustomScopeLabTest.java`
+推荐断点：`AbstractBeanFactory#doGetBean`、`SimpleThreadScope#get`、`ScopedProxyFactoryBean#getObject`

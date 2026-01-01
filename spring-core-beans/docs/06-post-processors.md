@@ -73,6 +73,9 @@
 
 因为 BPP 有机会把实例替换成代理。
 
+在真实项目里，这个“代理/增强”的典型实现就是 AutoProxyCreator（AOP/事务/缓存/安全等最终都会走到“BPP 替换 bean”这一层）。  
+对应完整版本的容器主线与断点导航：见 `spring-core-aop/docs/07-autoproxy-creator-mainline.md`。
+
 ## 3. 顺序（Ordering）：为什么同一个扩展点里顺序也很重要
 
 多个 BFPP/BPP 同时存在时，顺序会决定最终效果。
@@ -87,6 +90,57 @@ Spring 通常用这些规则决定顺序：
 
 - 顺序是可控的
 - 顺序问题会导致“某些增强没生效 / 生效得很奇怪”
+
+## 3.1 你必须补齐的第三类：`BeanDefinitionRegistryPostProcessor`（BDRPP）
+
+很多人只分 BFPP 与 BPP，但真正做源码级排障时，你需要补齐第三类：
+
+- **BDRPP：改的是“注册表”（registry）**
+  - 能新增/删除/修改 `BeanDefinition`
+  - 发生得更早：在 BFPP 之前（因此影响面更大）
+  - 典型代表：`ConfigurationClassPostProcessor`（它让 `@Configuration/@Bean/@ComponentScan` 等能工作）
+
+一旦你能分清这三类，你就能回答一类非常常见的问题：
+
+> “这个 bean 到底是在什么时候、被谁注册进来的？”
+
+## 3.2 源码级时间线：refresh 里它们到底在哪发生？
+
+你可以把它们粗略放进 `AbstractApplicationContext#refresh` 的时间线（只记住关键点即可）：
+
+1. **invoke BFPP/BDRPP**：先让“定义”稳定下来（能注册/改 BeanDefinition）
+2. **register BPP**：把所有 BPP 注册进容器（后面创建 bean 时会用到）
+3. **finishBeanFactoryInitialization**：开始创建非 lazy 的 singleton（此时 BPP 会大量介入）
+
+这也是为什么：
+
+- BFPP/BDRPP 更像“编译期改元数据”
+- BPP 更像“运行期改对象/换代理”
+
+## 3.3 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+建议用这些测试把“时机”变成手感（每个都对应非常典型的真实问题）：
+
+- BFPP 影响定义，再影响实例：
+  - `SpringCoreBeansContainerLabTest#beanFactoryPostProcessorCanModifyBeanDefinitionBeforeInstantiation`
+- BPP 影响实例（甚至换成代理）：
+  - `SpringCoreBeansContainerLabTest#beanPostProcessorCanModifyBeanInstanceAfterInitialization`
+- 顺序规则（PriorityOrdered/Ordered/无序）：
+  - `SpringCoreBeansPostProcessorOrderingLabTest`
+- BDRPP 能在注册阶段加定义：
+  - `SpringCoreBeansRegistryPostProcessorLabTest`
+- 手工注册 BPP 的顺序陷阱：
+  - `SpringCoreBeansProgrammaticBeanPostProcessorLabTest`
+
+### 3.4 推荐断点（够用版）
+
+- 入口时间线：
+  - `AbstractApplicationContext#refresh`
+  - `PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`
+  - `PostProcessorRegistrationDelegate#registerBeanPostProcessors`
+- 创建单个 bean 的主线（看 BPP 介入位置）：
+  - `AbstractAutowireCapableBeanFactory#doCreateBean`
+  - `AbstractAutowireCapableBeanFactory#initializeBean`
 
 ## 4. 典型误用与坑
 
@@ -108,4 +162,5 @@ BFPP 本该在“定义层”工作，如果你在里面直接拿 bean（实例�
 学习阶段建议把 BPP 当作“理解容器机制”的窗口，而不是“解决业务问题的日常手段”。
 
 下一章我们看一个特别常见、也特别容易误解的点：`@Configuration(proxyBeanMethods=...)`。
-
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansContainerLabTest.java`
+推荐断点：`PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`、`PostProcessorRegistrationDelegate#registerBeanPostProcessors`、`AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`

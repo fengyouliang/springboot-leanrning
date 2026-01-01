@@ -13,6 +13,35 @@
 
 ## 1. 现象：getBeanNamesForType(..., allowEagerInit=false) 找不到 unknownValue
 
+这类现象非常“反直觉”，但它背后是一个很合理的设计取舍：
+
+- `allowEagerInit=false` 的含义是：**为了性能与避免副作用，不要为了“类型判断”去创建 bean**。
+- 对于 `FactoryBean` 来说，product 的类型往往只能在实例化 factory 后才能确定。
+- 如果你的 `FactoryBean#getObjectType()` 又返回 `null`，容器在“不允许提前实例化”的前提下，就没有足够信息来做 type matching。
+
+所以你看到的结果就会是：
+
+- **按类型发现失败**：`getBeanNamesForType(SomeType, ..., allowEagerInit=false)` 找不到
+- **按名字仍然可用**：`getBean("unknownValue")` 依然能创建并返回 product
+
+这不是 bug，而是“元数据不足 + 不允许 eager init”共同导致的必然结果。
+
+### 1.1 为什么真实项目里经常遇到？
+
+很多框架/基础设施在启动时会做“按类型扫描”，但又必须避免触发大量 bean 初始化（否则启动时间不可控、还可能触发外部连接）：
+
+- 因此它们经常走 `allowEagerInit=false` 的路径
+- 你的 `FactoryBean` 如果不能提供稳定的 `getObjectType()`，就会出现“扫描不到”的情况
+
+### 1.2 解决策略（按推荐优先级）
+
+1. **优先：让 `getObjectType()` 返回稳定、明确的类型**
+   - 这是最符合 Spring 预期的做法
+2. **次选：减少按类型发现对它的依赖**
+   - 能按名字注入/获取的场景，显式按名字处理（但要权衡可维护性）
+3. **了解即可：通过更激进的 eager init 策略换取可发现性**
+   - 在一些场景可以通过允许提前初始化来推断类型，但要非常谨慎：这会把“类型判断”变成“可能触发实例化”，引入副作用与性能风险
+
 对应测试：
 
 - `SpringCoreBeansFactoryBeanEdgeCasesLabTest.factoryBeanWithNullObjectType_isNotDiscoverableByTypeWithoutEagerInit_butCanStillBeRetrievedByName()`
@@ -81,3 +110,5 @@
 ## 4. 一句话自检
 
 - 你能解释清楚：为什么 allowEagerInit=false 时容器不能“猜”出 unknownValue 的类型吗？
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansFactoryBeanEdgeCasesLabTest.java`
+推荐断点：`AbstractBeanFactory#getType`、`DefaultListableBeanFactory#getBeanNamesForType`、`FactoryBeanRegistrySupport#getTypeForFactoryBean`

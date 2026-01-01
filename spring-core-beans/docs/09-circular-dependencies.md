@@ -80,6 +80,37 @@ setter 注入在某些情况下能让环跑起来，但会：
 - 增加半初始化风险
 - 让 bug 更隐蔽
 
+## 源码锚点（建议从这里下断点）
+
+如果你想把“为什么 setter 有时能救、constructor 基本救不了”彻底打穿，建议至少跑一次三层缓存断点闭环：
+
+- 取单例总入口：`DefaultSingletonBeanRegistry#getSingleton`
+  - 重点观察：是否命中 `singletonObjects` / `earlySingletonObjects` / `singletonFactories`
+- 创建 bean 主线：`AbstractAutowireCapableBeanFactory#doCreateBean`
+  - 重点观察：什么时候会 `addSingletonFactory`（提前暴露），什么时候才 `addSingleton`（完全初始化后）
+- 注入阶段：`AbstractAutowireCapableBeanFactory#populateBean`
+  - 重点观察：setter 注入为什么可能在“对象未完全初始化”时先拿到一个引用
+
+> 你不需要背三层缓存的字段名，但你必须能解释：**容器为了打断循环，允许在对象未完全初始化时先暴露一个引用**，并且这件事只对 singleton 才有意义。
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+建议直接从这些测试方法开始（每个都对应一个经典结论）：
+
+- 构造器循环为什么失败：
+  - `SpringCoreBeansContainerLabTest#circularDependencyWithConstructorsFailsFast`
+- setter 循环为什么可能成功（early singleton exposure）：
+  - `SpringCoreBeansContainerLabTest#circularDependencyWithSettersMaySucceedViaEarlySingletonExposure`
+- 代理介入时，early reference 为什么更关键：
+  - `SpringCoreBeansEarlyReferenceLabTest#getEarlyBeanReference_canProvideEarlyProxyDuringCircularDependencyResolution`
+
+## Boot vs Framework：你必须知道的“默认策略差异”
+
+- 纯 Spring Framework 的 `DefaultListableBeanFactory` 默认允许 circular references（因此 setter 场景经常“能救”）
+- Spring Boot 会在启动时基于配置设置 `allowCircularReferences`（默认更严格），因此同样的设计在 Boot 下可能直接 fail-fast
+
+这也是为什么工程实践里更推荐“从设计上消除环”，而不是依赖容器救场：一旦默认策略变化，你的系统就可能在升级/换环境时突然启动失败。
+
 ## 4. 一句话自检
 
 你应该能回答：
@@ -89,4 +120,5 @@ setter 注入在某些情况下能让环跑起来，但会：
 3) “为什么循环依赖在架构上通常是坏味道？”
 
 下一章我们把这些概念和 Spring Boot 联系起来：自动装配如何“加入更多 bean”，从而让依赖图变复杂。
-
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansContainerLabTest.java`
+推荐断点：`DefaultSingletonBeanRegistry#getSingleton`、`DefaultSingletonBeanRegistry#addSingletonFactory`、`AbstractAutowireCapableBeanFactory#doCreateBean`

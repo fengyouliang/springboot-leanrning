@@ -8,6 +8,28 @@
 
 ## 1. 一个可断言的顺序（比看日志更可靠）
 
+读者 C 的目标不是“背顺序”，而是：**当你看到一个对象行为不对时，能判断它到底处在生命周期的哪一段、被哪些扩展点改过**。
+
+下面给一个“够你排障”的顺序表（把它当成 `initializeBean` 周边的时间线）：
+
+1. 实例化（constructor / factory method）
+2. 属性填充（依赖注入）→ `populateBean`
+3. Aware 回调（`BeanNameAware`/`BeanFactoryAware` 等）
+4. `BeanPostProcessor#postProcessBeforeInitialization`
+5. `@PostConstruct`（由 `InitDestroyAnnotationBeanPostProcessor` 触发）
+6. `InitializingBean#afterPropertiesSet`
+7. 自定义 initMethod（`@Bean(initMethod=...)`）
+8. `BeanPostProcessor#postProcessAfterInitialization`（代理/包装经常在这里发生，见 docs/31）
+
+销毁阶段（容器关闭时，singleton 才会默认触发）：
+
+1. `DestructionAwareBeanPostProcessor#postProcessBeforeDestruction`
+2. `@PreDestroy`（同样由注解后处理器触发）
+3. `DisposableBean#destroy`
+4. 自定义 destroyMethod（`@Bean(destroyMethod=...)`）
+
+> 注意：顺序表的意义是“能定位”，不是“每次都一模一样”。当 BPP 数量与排序变化时（见 docs/14、docs/25），你看到的实际调用栈会变化，但大方向依然稳定。
+
 对应测试：
 
 - `SpringCoreBeansLifecycleCallbackOrderLabTest.singletonLifecycleCallbacks_happenInAStableOrderAroundInitialization()`
@@ -96,3 +118,5 @@ prototype 的语义是：
 
 - 你能解释清楚：为什么 `postProcessAfterInitialization` 一定发生在 init callbacks 之后吗？
 - 你能解释清楚：为什么 prototype 默认不会触发 `@PreDestroy` 吗？
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
+推荐断点：`AbstractAutowireCapableBeanFactory#initializeBean`、`BeanPostProcessor#postProcessBeforeInitialization`、`DisposableBeanAdapter#destroy`

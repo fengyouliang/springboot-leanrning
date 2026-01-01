@@ -71,3 +71,5 @@
 ## 4. 一句话自检
 
 - 你能解释清楚：alias 解决的是什么问题？（更灵活的名称入口，而不是复制对象）
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanNameAliasLabTest.java`
+推荐断点：`DefaultListableBeanFactory#registerAlias`、`DefaultListableBeanFactory#canonicalName`、`AbstractBeanFactory#doGetBean`

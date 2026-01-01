@@ -103,3 +103,5 @@ mvn -pl spring-core-beans test
 学完本章，你至少要能把下面这句话解释清楚：
 
 > Spring Boot 自动装配不是“替你注入”，而是“替你导入配置并注册 BeanDefinition”，最终依赖注入仍遵循 Spring 容器的解析规则（类型、`@Qualifier`、`@Primary`、scope、生命周期……）。
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationLabTest.java`
+推荐断点：`AutoConfigurationImportSelector#selectImports`、`ConditionEvaluator#shouldSkip`、`DefaultListableBeanFactory#registerBeanDefinition`

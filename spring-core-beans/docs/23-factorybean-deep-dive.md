@@ -23,6 +23,39 @@
 
 ## 2. product 也参与“按类型查找”
 
+这件事之所以容易让人困惑，是因为你脑子里常有两个“bean”：
+
+- **factory**：实现了 `FactoryBean` 的那个对象（它自己也是 bean）
+- **product**：`FactoryBean#getObject()` 生产出来的对象（它才是默认暴露给业务的 bean）
+
+当你做“按类型查找/注入”时（例如 `getBean(SomeType.class)` 或 `@Autowired SomeType`），Spring 的默认语义是：
+
+> **把 FactoryBean 当作“生产线”，按类型匹配的是 product 的类型。**
+
+### 2.1 product 类型从哪里来？
+
+容器需要回答一个问题：这个工厂“生产什么类型”？
+
+- 首选：`FactoryBean#getObjectType()`
+- 如果 `getObjectType()` 信息不足（返回 `null`），某些查找路径会选择 **不去实例化 factory**（尤其 `allowEagerInit=false` 时），于是你会看到“按类型找不到但按名字能拿到”的现象（见 docs/29）。
+
+### 2.2 为什么不要把 getObjectType 当成“随便写写”
+
+工程里最常见的坑之一：
+
+- `getObjectType()` 返回 `null` / 不稳定（偶尔变）
+- 或者为了推断类型去做昂贵/有副作用的动作
+
+后果是：
+
+- 注入解析结果变得不可预测
+- 一些框架能力（例如按类型扫描注册）会表现为“偶现缺 bean”
+
+建议：
+
+- 能返回明确类型就返回明确类型
+- 如果确实无法确定，至少在文档/注释中说明原因，并配套测试覆盖边界（本模块已提供，见 docs/29 + Lab）
+
 因为 FactoryBean 会声明：
 
 - `getObjectType()`：它生产的对象类型
@@ -93,3 +126,5 @@
 
 - 你能解释清楚：为什么 `&beanName` 可以拿到 factory 自己吗？
 - 你能解释清楚：`isSingleton()` 控制的是“product 是否缓存”而不是“factory 是否单例”吗？
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansFactoryBeanDeepDiveLabTest.java`
+推荐断点：`AbstractBeanFactory#getType`、`AbstractBeanFactory#getObjectForBeanInstance`、`FactoryBeanRegistrySupport#getObjectFromFactoryBean`

@@ -22,6 +22,28 @@
 
 ## 2. 本模块的实验：一对比就明白
 
+建议先把“现象”做成可断言的闭环（别靠日志猜）：
+
+- 对比入口（直接从测试方法开始打断点）：
+  - `SpringCoreBeansContainerLabTest#configurationProxyBeanMethodsTruePreservesSingletonSemanticsForBeanMethodCalls`
+  - `SpringCoreBeansContainerLabTest#configurationProxyBeanMethodsFalseAllowsDirectMethodCallToCreateExtraInstance`
+- 你要观察的不是“能不能注入”，而是 **配置类内部 `@Bean` 方法互相调用时：返回的是容器 singleton，还是一个新的 Java 对象**。
+
+### 2.1 你到底在对比什么？
+
+两种模式都能把 `@Bean` 注册进容器；差异在于：**配置类自身是否会被增强（enhance）**，从而拦截 `@Bean` 方法调用。
+
+- `@Configuration(proxyBeanMethods=true)`（默认）
+  - 配置类会被 CGLIB 增强（你常会在类名里看到 `$$SpringCGLIB$$`）。
+  - 在同一个配置类里，`@Bean` 方法互相调用时，会被拦截并改成 **从容器取 bean**。
+  - 结果：你在 `@Bean` 方法里调用另一个 `@Bean` 方法，仍能保持 singleton 语义（同一个实例）。
+- `@Configuration(proxyBeanMethods=false)`
+  - 配置类不会拦截 `@Bean` 方法调用。
+  - 在配置类内部互相调用 `@Bean` 方法，本质就是 **普通 Java 方法调用**。
+  - 结果：你可能 new 出“额外对象”，即使容器里的对应 bean 依然是 singleton。
+
+> 关键点：`proxyBeanMethods=false` 不是“Bean 变多例”，而是“你在配置类里手写的互调绕过了容器语义”。
+
 对应测试：
 
 - `SpringCoreBeansContainerLabTest.configurationProxyBeanMethodsTruePreservesSingletonSemanticsForBeanMethodCalls()`
@@ -51,9 +73,26 @@ ConfigB configB(ConfigA a) {
 
 这也是 Spring Boot / 自动配置里非常常见的写法：性能更好、语义更清晰。
 
-## 4. 你应该能回答的 2 个问题
+## 4. 源码锚点（建议从这里下断点）
+
+如果你想把 `proxyBeanMethods` 的本质打穿（读者 C 目标），建议至少走一遍下面的断点闭环：
+
+- 配置类解析与增强入口：
+  - `ConfigurationClassPostProcessor#postProcessBeanFactory`
+  - `ConfigurationClassEnhancer#enhance`
+- `@Bean` 方法拦截入口（proxyBeanMethods=true 才会走到）：
+  - `ConfigurationClassEnhancer.BeanMethodInterceptor#intercept`（内部类名可能随版本略有变化）
+
+### 4.1 推荐观察点（watch list）
+
+- 配置类 bean 的运行时 class：是否出现 `$$SpringCGLIB$$`
+- `@Bean` 方法互调时的调用栈：是否进入 `BeanMethodInterceptor`
+
+## 5. 你应该能回答的 2 个问题
 
 1) `proxyBeanMethods` 影响的到底是什么？（提示：不是“这个 bean 是否是单例”，而是“配置类里方法调用会不会走容器”）
 2) 为什么在大规模应用里，经常把 `proxyBeanMethods` 设为 false？
 
 下一章我们讲另一个“名字相同但拿到的东西不同”的概念：`FactoryBean`。
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansContainerLabTest.java`
+推荐断点：`ConfigurationClassPostProcessor#postProcessBeanFactory`、`ConfigurationClassEnhancer#enhance`

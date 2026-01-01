@@ -111,3 +111,5 @@ Lab 里我们显式设置：
 - “启用 strict 后启动直接失败” → **定义层（BFPP 提前失败）**：`PropertySourcesPlaceholderConfigurer` 会在实例化前就 fail-fast（本章第 3 节）
 - “`@Value` 完全不生效/字段没被注入” → **优先定义层/基础设施问题**：是否具备注解处理能力？（回看 [12](12-container-bootstrap-and-infrastructure.md)）
 - “值不对但不报错” → **先拆分路径**：确认 property source 是否包含 key，再确认 strict/non-strict（本章第 4 节 + `resolveEmbeddedValue`）
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansValuePlaceholderResolutionLabTest.java`
+推荐断点：`PropertySourcesPlaceholderConfigurer#postProcessBeanFactory`、`AbstractBeanFactory#resolveEmbeddedValue`、`AutowiredAnnotationBeanPostProcessor#postProcessProperties`

@@ -102,9 +102,166 @@ Exercises 里也专门有题让你把 `@Qualifier` 改成 `@Primary` 来体会�
 2) 容器里有哪些候选？
 3) 缺少的限定条件是什么？（`@Qualifier` / `@Primary` / beanName 等）
 
-本模块的 lab 已经覆盖：
+本模块的 labs 已经覆盖（建议按顺序跑一遍，能明显缩短你“从报错到断点”的时间）：
 
-- `SpringCoreBeansLabTest.usesQualifierToResolveMultipleBeans()`
+- `SpringCoreBeansLabTest.usesQualifierToResolveMultipleBeans()`：最小 `@Qualifier` 场景
+- `SpringCoreBeansAutowireCandidateSelectionLabTest.orderAnnotation_doesNotResolveSingleInjectionAmbiguity()`：最小 “候选太多（NoUnique）” 场景
+- `SpringCoreBeansBeanGraphDebugLabTest.dumpBeanGraph_candidatesAndRecordedDependencies_helpTroubleshootWhyItsInjected()`：把“候选集合 → 最终注入谁 → 依赖边”打印出来
+
+下面三段是把这章写成“调试手册”的关键：你可以不背规则，但要能在断点里**用固定观察点快速收敛**。
+
+## 7. 源码级：候选选择的决策树（determineAutowireCandidate）
+
+如果你的目标是“能定位真实项目里为什么注入的是它 / 为什么歧义”，你必须掌握这一点：
+
+> 单个依赖注入的核心不是“按类型找”，而是：**先收集候选（type match），再用一组规则缩小候选（candidate selection）**。
+
+下面给一个源码级、可直接对照断点的决策树（你可以把它当作 `DefaultListableBeanFactory#determineAutowireCandidate` 的“可复述版本”）：
+
+### 7.1 收集候选（collect）
+
+目标：把“可能的 bean”都收集起来（此时不保证唯一）。
+
+常见入口与参与者（按你打断点的顺序）：
+
+- `DefaultListableBeanFactory#resolveDependency`
+- `DefaultListableBeanFactory#doResolveDependency`
+- `DefaultListableBeanFactory#findAutowireCandidates`
+- `AutowireCandidateResolver#isAutowireCandidate`（会参与 qualifier 判断）
+
+你要建立的直觉：
+
+- type matching 不是只看“实现类/接口”，还会考虑泛型、`FactoryBean` 的 product 类型、是否允许 eager init 等因素（见 docs/23、docs/29）。
+- 收集到的候选通常是一个 `Map<String, Object>`：key 是 beanName，value 可能是实例，也可能是类型/占位（取决于是否 eager resolve）。
+
+### 7.2 缩小候选（narrow down）
+
+目标：把候选压到 1 个；如果压不下来，就抛 `NoUniqueBeanDefinitionException`。
+
+缩小规则（按常见优先级理解即可；源码里会更细）：
+
+1. **限定符（Qualifier）先过滤**
+   - 注入点有 `@Qualifier` 时，候选必须匹配它（不是“注解存在就行”，是要匹配 qualifier 值/属性）。
+2. **名字匹配（byName）通常会在某些路径上成为强信号**
+   - 例如注入点名字与 beanName 相同，会成为候选优先项（尤其 `@Resource` 是 name-first，见 docs/32）。
+3. **`@Primary` 解决“默认实现”**
+   - 多实现时，如果恰好有一个 primary，它通常直接胜出。
+4. **`@Priority`/Ordered（谨慎理解）**
+   - 它能在某些“单注入 tie-break”场景起作用，但**不能替代** `@Primary`/`@Qualifier`（并且不同场景优先级不同，必须用实验验证）。
+5. **仍不唯一 → 明确失败**
+   - 失败并不是坏事：它迫使你把依赖关系写清楚，而不是让容器“猜”。
+
+### 7.3 最终返回值：resolveDependency 返回的到底是什么？
+
+- 单依赖：返回一个 bean（或一个代理对象，见 docs/31）
+- 可选依赖：可能返回 `null`、`Optional.empty()`，或者 `ObjectProvider`（延迟到你真正调用 `getObject()` 才解析）
+- 集合依赖：返回“所有匹配候选”的集合，并且会排序（`@Order`/`Ordered`），见下一章的集合注入部分
+
+## 8. 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+建议你把“规则”变成“手感”：直接跑这些测试方法，并按顺序打断点观察候选变化：
+
+- `SpringCoreBeansAutowireCandidateSelectionLabTest#orderAnnotation_doesNotResolveSingleInjectionAmbiguity`
+- `SpringCoreBeansAutowireCandidateSelectionLabTest#primaryOverridesPriority_forSingleInjection`
+- `SpringCoreBeansAutowireCandidateSelectionLabTest#priorityAnnotation_canBreakTieForSingleInjection_whenNoPrimaryOrQualifier`
+- `SpringCoreBeansAutowireCandidateSelectionLabTest#orderAnnotation_affectsCollectionInjectionOrder`
+
+**推荐断点（够用版）：**
+
+- `DefaultListableBeanFactory#doResolveDependency`
+- `DefaultListableBeanFactory#findAutowireCandidates`
+- `DefaultListableBeanFactory#determineAutowireCandidate`
+- `QualifierAnnotationAutowireCandidateResolver#isAutowireCandidate`（或其子类）
+
+**推荐观察点（watch list）：**
+
+- `dependencyDescriptor.getDependencyType()`（注入点需要什么类型）
+- `dependencyDescriptor.getAnnotations()`（注入点有哪些限定信息）
+- `matchingBeans` / `candidates`（候选集合怎么被缩小）
+- `autowiredBeanNames`（最终注入了哪些 beanName）
+
+## 9. 排障速查：从异常到下一步断点
+
+当你在真实项目里遇到注入失败，建议用“异常 → 下一步断点”的方式快速定位：
+
+- `NoSuchBeanDefinitionException`：先看是否压根没有候选
+  - 断点：`findAutowireCandidates` 是否返回空
+- `NoUniqueBeanDefinitionException`：候选>1，缩不下来
+  - 断点：`determineAutowireCandidate` 为什么没有选中
+  - 快速修复：加 `@Qualifier`（精确）或 `@Primary`（默认实现）
+- `UnsatisfiedDependencyException`：外层包装异常
+  - 先展开 root cause，通常还是上面两类
+
+## 源码最短路径（call chain）
+
+> 目标：从入口到“候选收敛”的关键分支，给你一条最短可跟的栈路径（不要求把全链路单步到底）。
+
+你在 IDE 里最常见的两个入口：
+
+1) field/method 注入入口（属性填充阶段）  
+   `AutowiredAnnotationBeanPostProcessor#postProcessProperties`
+2) constructor 注入入口（实例化阶段）  
+   `ConstructorResolver#autowireConstructor`（最终也会走到依赖解析）
+
+两条入口最终都会汇合到依赖解析主干：
+
+- `DefaultListableBeanFactory#resolveDependency`
+  - `DefaultListableBeanFactory#doResolveDependency`
+    - **（特殊通道）** `resolvableDependencies` 命中：直接返回（见 [20](20-resolvable-dependency.md)）
+    - **（集合通道）** `resolveMultipleBeans(...)`：`List/Map/ObjectProvider` 等不会走“选唯一候选”的逻辑
+    - **（普通通道）** `findAutowireCandidates(...)`：先按类型收集候选集合
+      - `determineAutowireCandidate(...)`：再按规则收敛到唯一候选（`@Qualifier/@Primary/@Priority/beanName` 等）
+    - `getBean(candidateName)`：拿到最终注入的实例，并记录依赖边（`dependentBeanMap` / `dependenciesForBeanMap`，见 [19](19-depends-on.md)）
+
+如果你只想把“候选如何收敛”看清楚，优先在这两个点停住即可：
+
+- `DefaultListableBeanFactory#doResolveDependency`
+- `DefaultListableBeanFactory#determineAutowireCandidate`
+
+## 固定观察点（watch list）
+
+> 目标：你每次停在 `doResolveDependency` 都只看这几项，就能快速回答“候选有哪些、为什么选它、为什么失败”。
+
+建议在 `doResolveDependency(...)` 里 watch/evaluate：
+
+- `descriptor.getDependencyType()`：注入点要什么类型（最重要）
+- `descriptor.getDependencyName()`：注入点的名字（字段名/参数名；在“按名称收敛”分支会用到）
+- `descriptor.isRequired()`：是否必填（决定是否允许返回 null）
+- `this.resolvableDependencies`：是否有“能注入但不是 bean”的特殊依赖（命中则直接返回）
+- `matchingBeans` / `findAutowireCandidates(...)` 的返回值：**候选集合**（by type 的结果）
+- `matchingBeans.keySet()`：候选 beanName 列表（先别急着看实例）
+- `autowireCandidateResolver`：候选筛选器（`@Qualifier` 的关键逻辑通常在这里）
+- `autowiredBeanNames`：容器最终记录的“本次依赖解析涉及到哪些 beanName”（用于依赖图）
+
+建议在 `determineAutowireCandidate(...)` 里重点看这些“收敛点”：
+
+- `determinePrimaryCandidate(...)`：是否存在 `@Primary`
+- `determineHighestPriorityCandidate(...)`：是否有 `@Priority` 参与 tie-break
+- `descriptor.getDependencyName()` / `matchesBeanName(...)`：是否出现“按名称收敛”（很多人会误以为是随机）
+
+> 小技巧：`doResolveDependency` 命中次数很高时，先加条件断点（例如 `descriptor.getDependencyType() == Worker.class`），再看调用栈与变量。
+
+## 反例（counterexample）
+
+**反例：我给 bean 加了 `@Order(1)`，以为就会优先被注入，但还是 NoUnique。**
+
+最小复现入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
+  - `orderAnnotation_doesNotResolveSingleInjectionAmbiguity()`
+
+你在断点里应该看到什么（用于纠错）：
+
+- `findAutowireCandidates(...)` 的 `matchingBeans` 里仍然会有多个候选（因为它是按类型收集出来的）
+- `determineAutowireCandidate(...)` 不会因为 `@Order` 给你选出唯一候选（它处理的是“选谁”，`@Order` 处理的是“集合怎么排”）
+- 最终抛出 `NoUniqueBeanDefinitionException`（候选太多，容器拒绝“静默注错”）
+
+把这个反例看懂，你就能把三件事分清：
+
+- 单依赖注入：`@Qualifier/@Primary/@Priority`（见 [33](33-autowire-candidate-selection-primary-priority-order.md)）
+- 集合注入排序：`@Order/@Priority/Ordered`
+- “能注入但不是 bean”：`resolvableDependencies`（见 [20](20-resolvable-dependency.md)）
 
 下一章我们会把 “候选是怎么创建出来的” 和 “什么时候创建” 结合起来讲：Scope。
-
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanGraphDebugLabTest.java`
+推荐断点：`DefaultListableBeanFactory#doResolveDependency`、`DefaultListableBeanFactory#determineAutowireCandidate`、`AutowiredAnnotationBeanPostProcessor#postProcessProperties`
