@@ -17,6 +17,22 @@ Spring AOP 学习最关键的不是“会写一个 `@Aspect`”，而是建立�
 3. **AOP 的本质是“在调用链上插一段逻辑”**
    - `@Around` 最直观：`joinPoint.proceed()` 前后都能做事（计时、鉴权、日志、事务等）。
 
+## 2. 容器视角：AOP 不是“改类”，而是 BPP 把 Bean 换成 Proxy
+
+当你把 AOP 放回到 IoC 容器里看，会更清晰：
+
+- Bean 的创建过程里会执行很多 `BeanPostProcessor`
+- AOP 的关键基础设施（AutoProxyCreator）就是一个 **BeanPostProcessor**
+- 它会在初始化后阶段判断：这个 bean 是否需要被增强？如果需要，就 **返回一个 proxy** 作为“最终暴露的 bean”
+
+这也是为什么：
+
+- 你注入到业务里的对象可能不是你写的实现类
+- `getClass()`/类型匹配/调试栈会出现你没写过的 proxy 类
+- 同一套 proxy 限制会同时影响 AOP、事务（`@Transactional`）、缓存（`@Cacheable`）等（它们底层都离不开 proxy）
+
+> 深挖入口：如果你想在源码里“看见”这一段，建议先读 [00 深挖指南](00-deep-dive-guide.md)。
+
 ## 在本模块如何验证（建议先跑这个）
 
 运行测试：
@@ -29,6 +45,31 @@ mvn -pl spring-core-aop test
 
 - `SpringCoreAopLabTest#tracedBusinessServiceIsAnAopProxy`：证明注入的 bean 是代理
 - `SpringCoreAopLabTest#adviceIsAppliedToTracedMethod`：证明 `@Traced` 方法被 `TracingAspect` 拦截
+
+## 源码锚点（建议从这里下断点）
+
+如果你只想抓主线，不想在 AOP 源码里迷路，这几个断点足够覆盖 80% 的理解与排障：
+
+- proxy 产生（容器阶段）：
+  - `AbstractAutoProxyCreator#postProcessAfterInitialization`
+  - `AbstractAutoProxyCreator#wrapIfNecessary`
+- advice 链执行（调用阶段）：
+  - `JdkDynamicAopProxy#invoke` / `CglibAopProxy.DynamicAdvisedInterceptor#intercept`
+  - `ReflectiveMethodInvocation#proceed`
+
+### 推荐观察点（watch list）
+
+- `beanName`：你在看哪个 bean 的代理决策
+- `AopUtils.isAopProxy(bean)` / `AopUtils.isJdkDynamicProxy(bean)` / `AopUtils.isCglibProxy(bean)`：最终形态
+- `interceptorsAndDynamicMethodMatchers`：这次调用的拦截器链条（顺序非常关键）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+建议你按这个顺序跑（每个都能快速闭环）：
+
+1. `SpringCoreAopLabTest#tracedBusinessServiceIsAnAopProxy`：先确认“你拿到的是 proxy”
+2. `SpringCoreAopLabTest#adviceIsAppliedToTracedMethod`：再确认“advice 确实包住了方法调用”
+3. `SpringCoreAopLabTest#selfInvocationDoesNotTriggerAdviceForInnerMethod`：最后确认“call path 决定是否拦截”
 
 ## 对照代码（最小闭环）
 
@@ -43,3 +84,21 @@ mvn -pl spring-core-aop test
 
 > **这次调用有没有走代理？**
 
+## 排障分流：这是调用路径问题，还是匹配/限制问题？
+
+当你遇到 “AOP 没生效” 的问题，建议先用分流思路避免走弯路：
+
+1. **调用路径（call path）**
+   - 是否自调用？是否绕过 Spring 容器（`new` 出来/静态方法）？
+2. **匹配（pointcut）**
+   - 切点是否命中？是否命中到了你以为的方法？
+3. **代理限制（proxy limits）**
+   - final/private/static/构造期调用 等边界是否踩中？
+
+把问题落到这三类里，你就会发现排障会稳定很多。
+
+## 下一步（把理解推进到“源码级可复述”）
+
+- 想看清 AOP 作为容器扩展点的主线：AutoProxyCreator/Advisor/Advice/Pointcut → 见 [docs/07](07-autoproxy-creator-mainline.md)
+- 想系统掌握 pointcut 表达式并避免误判（execution/within/this/target/...）→ 见 [docs/08](08-pointcut-expression-system.md)
+- 想看懂“多切面/多代理叠加与顺序”（AOP/Tx/Cache/Security）→ 见 [docs/09](09-multi-proxy-stacking.md)

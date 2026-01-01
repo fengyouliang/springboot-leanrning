@@ -25,6 +25,17 @@
 2. **必须在 AOP 调用链上下文中调用**
    - 也就是：你需要先进入一个被 AOP 拦截的方法（在 advice 链里），此时 `currentProxy()` 才有意义
 
+### 1) 为什么它会“只有在 advice 链里才可用”？
+
+你可以把它理解成：AOP 在执行 advice 链时会把“当前代理”放进一个 thread-local 里。
+
+所以：
+
+- 没有进入 advice 链 → thread-local 没被设置 → 取不到 currentProxy
+- 换线程（例如 `@Async`） → thread-local 不会自动传播 → 也可能取不到/取错
+
+这也是为什么它更像一个“调试/理解机制”的工具，而不是日常业务代码的默认选择。
+
 ## 在本模块的练习入口
 
 看 `SpringCoreAopExerciseTest#exercise_makeSelfInvocationTriggerAdvice`：
@@ -41,3 +52,14 @@
 
 > 把需要被拦截的逻辑抽到另一个 Spring Bean，通过注入调用。
 
+### 一个更工程化的替代方案：自注入（或 ObjectProvider）
+
+如果你确实需要“在同一个类里触发 AOP”，更推荐的写法通常是：
+
+- 让类依赖自己（注入自己这个 bean），必要时配合 `@Lazy` 来避免循环依赖
+- 或注入 `ObjectProvider<SelfInvocationExampleService>`，在需要时再获取 proxy 并调用
+
+它们的共同点是：
+
+- 仍然走“通过容器拿到的 bean 引用”，因此会经过 proxy
+- 不依赖 `AopContext` 的 thread-local 语义

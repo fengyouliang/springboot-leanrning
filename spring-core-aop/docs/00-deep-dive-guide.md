@@ -1,0 +1,233 @@
+# 00. 深挖指南：把“代理是怎么来的、advice 链怎么跑”落到源码与断点
+
+这章的目标很明确：**把 AOP 从“我会写 @Aspect”升级为“我能在源码里看见它、并能定位问题”**。
+
+> 你不需要背源码，但你需要一张“不会迷路的导航图”。
+
+## 0. 准备工作：把深挖做成可重复的实验
+
+### 0.1 推荐运行方式（精确到方法）
+
+```bash
+# 跑整个 aop 模块测试
+mvn -pl spring-core-aop test
+
+# 只跑一个测试类（断点更舒服）
+mvn -pl spring-core-aop -Dtest=SpringCoreAopProxyMechanicsLabTest test
+
+# 只跑一个测试方法（最推荐）
+mvn -pl spring-core-aop -Dtest=SpringCoreAopProxyMechanicsLabTest#jdkDynamicProxyIsUsedForInterfaceBasedBeans_whenProxyTargetClassIsFalse test
+```
+
+> 提示：如果你需要“启动后挂起等待 IDE attach”，可以加 `-Dmaven.surefire.debug`（默认监听 5005）。
+
+### 0.2 一个高收益习惯：断点先加“降噪条件”
+
+Spring AOP 相关断点会被非常频繁地命中（尤其是 BPP 与匹配逻辑），建议一开始就加过滤条件：
+
+- 只看你关心的 beanName（例如 `tracedBusinessService`、`selfInvocationExampleService`）
+- 或只看你关心的包名（例如 `com.learning.springboot.springcoreaop`）
+
+## 1. 深挖时最容易迷路的点（以及正确抓手）
+
+### 1.1 不要试图“背 AOP 源码”，要抓住 3 条主线
+
+1. **代理是怎么产生的？（容器阶段）**
+   - AOP 不是“改你写的类”，而是在创建 bean 时由 `BeanPostProcessor` 把它包装成 proxy。
+2. **advice 链是怎么执行的？（调用阶段）**
+   - 代理对象接管方法调用 → 组装拦截器链 → `proceed()` 一层层执行。
+3. **为什么我以为会拦截，结果没拦截？（匹配与边界）**
+   - call path 是否走 proxy
+   - pointcut 是否命中
+   - 代理类型与语言限制（JDK/CGLIB、final/private/self-invocation）
+
+> 你会发现：只要这三条主线抓稳，AOP 的“细节”会自动归位。  
+> 想把 AOP 放回容器视角（AutoProxyCreator/Advisor 主线）：见 [docs/07](07-autoproxy-creator-mainline.md)。
+
+## 2. 一张“最小源码导航图”（建议贴在脑子里）
+
+### 2.1 容器阶段：proxy 在哪里被创建？
+
+你只需要记住一句话：
+
+> **AOP 的 proxy 通常在 `postProcessAfterInitialization` 阶段产生。**
+
+最短导航（够用版）：
+
+- `AbstractApplicationContext#refresh`（启动主线）
+  - 注册并排序 BPP：`PostProcessorRegistrationDelegate#registerBeanPostProcessors`
+  - 创建 bean：`AbstractAutowireCapableBeanFactory#doCreateBean`
+    - 初始化：`AbstractAutowireCapableBeanFactory#initializeBean`
+      - BPP after-init：`BeanPostProcessor#postProcessAfterInitialization`
+        - AOP 关键入口：`AbstractAutoProxyCreator#postProcessAfterInitialization`
+
+如果你想把“候选 Advisor 如何筛选、为什么这个 bean 会/不会被代理”也看清楚，继续补齐这两个抓手（命中频繁，建议加条件断点只看目标 beanName）：
+
+- `AbstractAdvisorAutoProxyCreator#findEligibleAdvisors`
+- `AopUtils#canApply`
+
+### 2.2 调用阶段：advice 链是怎么跑起来的？
+
+代理类型不同，入口不同，但核心一致：
+
+- **JDK proxy：** `JdkDynamicAopProxy#invoke`
+- **CGLIB proxy：** `CglibAopProxy.DynamicAdvisedInterceptor#intercept`
+
+之后都会走到：
+
+- `DefaultAdvisorChainFactory#getInterceptorsAndDynamicInterceptionAdvice`（组装拦截器链）
+- `ReflectiveMethodInvocation#proceed`（执行链条）
+
+而你的 `@Around` 通常会落到类似下面的类（名称可能随版本略有变化）：
+
+- `AspectJAroundAdvice#invoke`
+- `MethodInvocationProceedingJoinPoint#proceed`
+
+## 3. 断点清单：你想“看见什么”，就打哪一类断点
+
+### 3.1 看清“代理是怎么来的”（proxy creation）
+
+推荐断点（从外到内）：
+
+- `AbstractAutoProxyCreator#postProcessAfterInitialization`
+- `AbstractAutoProxyCreator#wrapIfNecessary`
+- `AbstractAutoProxyCreator#createProxy`
+- `DefaultAopProxyFactory#createAopProxy`（选择 JDK vs CGLIB）
+
+推荐观察点（watch list）：
+
+- `beanName`
+- `beanClass` / `AopProxyUtils.ultimateTargetClass(bean)`
+- `specificInterceptors` / `advisors` 数量（这个 bean 为什么需要 proxy？）
+
+对应 Lab：
+
+- `SpringCoreAopLabTest#tracedBusinessServiceIsAnAopProxy`
+- `SpringCoreAopProxyMechanicsLabTest#jdkDynamicProxyIsUsedForInterfaceBasedBeans_whenProxyTargetClassIsFalse`
+- `SpringCoreAopProxyMechanicsLabTest#cglibProxyIsUsedForClassBasedBeans_whenProxyTargetClassIsTrue`
+- `SpringCoreAopAutoProxyCreatorInternalsLabTest`（看 BPP 主线：AutoProxyCreator 何时注册、如何产生 proxy）
+
+### 3.2 看清“advice 链怎么执行”（advisor chain）
+
+推荐断点：
+
+- `DefaultAdvisorChainFactory#getInterceptorsAndDynamicInterceptionAdvice`
+- `ReflectiveMethodInvocation#proceed`
+
+推荐观察点：
+
+- `interceptorsAndDynamicMethodMatchers`（拦截器链条的实际顺序）
+- `currentInterceptorIndex`（链条执行到哪里了）
+
+对应 Lab：
+
+- `SpringCoreAopLabTest#adviceIsAppliedToTracedMethod`
+- `SpringCoreAopProxyMechanicsLabTest#adviceOrderingCanBeControlledWithOrderAnnotation`
+- `SpringCoreAopProceedNestingLabTest`（看 `proceed()` 的 before/after 嵌套结构）
+
+### 3.3 看清“自调用为什么不拦截”（call path）
+
+推荐断点：
+
+- `JdkDynamicAopProxy#invoke` / `CglibAopProxy.DynamicAdvisedInterceptor#intercept`（看看 inner 调用有没有进入这里）
+
+对应 Lab：
+
+- `SpringCoreAopLabTest#selfInvocationDoesNotTriggerAdviceForInnerMethod`
+- `SpringCoreAopExerciseTest#exercise_makeSelfInvocationTriggerAdvice`（开启 exposeProxy 后对比）
+
+### 3.4 看清“pointcut 为什么命中/不命中”（尤其 this vs target）
+
+推荐断点：
+
+- `AopUtils#canApply`（适用性判断常见落点）
+- `DefaultAdvisorChainFactory#getInterceptorsAndDynamicInterceptionAdvice`（最终链条组装，能看到“这次调用到底挂了哪些拦截器”）
+
+对应 Lab：
+
+- `SpringCoreAopPointcutExpressionsLabTest`（重点：this vs target 在 JDK/CGLIB 下的差异）
+
+配套章节：
+
+- pointcut 表达式系统：见 [docs/08](08-pointcut-expression-system.md)
+
+### 3.5 看清“多 advisor vs 多层 proxy（套娃）”
+
+观察建议：
+
+- `bean instanceof Advised`：能否拿到 advisors
+- `((Advised) bean).getAdvisors()`：同一个 proxy 上挂了哪些增强（AOP/Tx/Cache/Security 的本质入口）
+- `((Advised) bean).getTargetSource().getTarget()`：target 是否还是 proxy（判断是否套娃）
+- `AopProxyUtils.ultimateTargetClass(bean)`：追最终目标类型
+
+对应 Lab：
+
+- `SpringCoreAopMultiProxyStackingLabTest`
+
+配套章节：
+
+- 多代理叠加与顺序：见 [docs/09](09-multi-proxy-stacking.md)
+- 真实项目叠加 Debug Playbook：见 [docs/10](10-real-world-stacking-playbook.md)
+
+## 4. 推荐的“深挖练习”（每个练习都能在 30 分钟内闭环）
+
+### 练习 A：看一次“proxy 是怎么被包出来的”
+
+跑：`SpringCoreAopLabTest#tracedBusinessServiceIsAnAopProxy`
+
+目标：
+
+- 你能在断点里看到：目标对象 → 经过 AutoProxyCreator → 最终变成 proxy
+- 你能解释：为什么最终注入到业务里的 bean 可能不是你写的那个 class
+
+### 练习 B：看一次“advice 链条”
+
+跑：`SpringCoreAopProxyMechanicsLabTest#adviceOrderingCanBeControlledWithOrderAnnotation`
+
+目标：
+
+- 你能在 `interceptorsAndDynamicMethodMatchers` 里看到链条顺序
+- 你能解释 `@Order(1)` 与 `@Order(2)` 谁在外层、谁先执行
+
+### 练习 C：看一次“pointcut 从 @annotation 换到 execution”
+
+跑：`SpringCoreAopExerciseTest#exercise_changePointcutStyle`
+
+目标：
+
+- 你能用测试证明：切点范围变了
+- 你能解释“太宽/太窄”会导致怎样的误判
+
+### 练习 D：看一次“this vs target”（JDK vs CGLIB 误判最常见）
+
+跑：`SpringCoreAopPointcutExpressionsLabTest`
+
+目标：
+
+- 你能用断言证明：JDK proxy 下 `this(实现类)` 不命中但 `target(实现类)` 命中
+- 你能解释：为什么 “代理类型” 会直接改变 pointcut 的命中结果
+
+### 练习 E：看一次“多 advisor vs 多层 proxy（套娃）”
+
+跑：`SpringCoreAopMultiProxyStackingLabTest`
+
+目标：
+
+- 你能区分：同一个 proxy 上挂多个 advisors（主流形态） vs 多层 proxy 套娃（特殊但要能识别）
+- 你能解释：顺序问题到底属于 BPP 顺序还是 advisor 顺序（不要混）
+
+### 练习 F：看一次“真实基础设施叠加”（Tx/Cache/Security 同链路）
+
+跑：`SpringCoreAopRealWorldStackingLabTest`
+
+目标：
+
+- 你能用断言证明：未授权会被阻断、缓存命中会短路、目标方法内事务处于激活状态
+- 你能在断点里复述：链条组装 → proceed 嵌套 → 哪一层负责鉴权/缓存/事务
+
+## 5. 读完本章你应该获得什么
+
+- 你知道 proxy 在容器的哪个阶段产生（BPP after-init）
+- 你知道 advice 链执行的入口与关键断点
+- 你能把“不拦截”的问题分流成：call path / 匹配 / 代理限制 三大类
+- 你能进一步识别：单 proxy 多 advisors vs 多层 proxy（套娃），并知道该去哪组断点验证
