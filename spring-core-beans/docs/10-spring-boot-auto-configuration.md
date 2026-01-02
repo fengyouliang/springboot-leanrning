@@ -75,6 +75,28 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
   - `conditionalOnProperty_matchesWhenPropertyIsMissing_ifMatchIfMissingIsTrue`
   - `conditionalOnProperty_doesNotMatchWhenPropertyIsExplicitlyFalse_evenIfMatchIfMissingIsTrue`
 
+### 4.2 `@ConditionalOnBean`：为什么“运行时有 bean，但条件仍不生效”？（顺序/时机）
+
+这个问题很适合用来区分“背概念”与“理解容器/自动装配时机”的人：
+
+- 你在容器里确实能看到某个 bean（运行时存在）
+- 但另一个 auto-config 上的 `@ConditionalOnBean(ThatBean)` 却没有 match（导致 dependent bean 缺失）
+
+这通常不是“Spring 乱了”，而是你没把两个概念分开：
+
+1) **条件评估发生在注册阶段**（不是应用 fully refreshed 后）
+2) **auto-configuration 的导入/处理顺序**会影响“当下能否看见某个 bean/定义”
+
+所以你应该能回答：
+
+- 为什么“最终容器状态”不能反推“条件评估当时的状态”？
+- 如何把这种顺序/时机敏感，变成确定性行为？（答案通常是：`@AutoConfiguration(after/before=...)`）
+
+复现入口（可断言）：
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationOrderingLabTest.java`
+  - `conditionalOnBean_canFailAcrossAutoConfigurations_whenOrderingIsNotDefined`
+  - `autoConfigurationAfter_canMakeCrossAutoConfigConditionsDeterministic_evenIfImportOrderIsReversed`
+
 ## 5. 你如何“覆盖”自动配置？
 
 最常见、也最推荐的覆盖方式是：

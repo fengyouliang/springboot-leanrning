@@ -15,6 +15,7 @@
 | 202601020725 | enhance_spring_core_fundamentals | Enhancement | ✅Completed | [202601020725_enhance_spring_core_fundamentals](2026-01/202601020725_enhance_spring_core_fundamentals/) |
 | 202601020934 | spring_core_beans_learning_route | Enhancement | ✅Completed | [202601020934_spring_core_beans_learning_route](2026-01/202601020934_spring_core_beans_learning_route/) |
 | 202601021002 | spring_core_beans_auto_config_ordering | Enhancement | ✅Completed | [202601021002_spring_core_beans_auto_config_ordering](2026-01/202601021002_spring_core_beans_auto_config_ordering/) |
+| 202601021023 | spring_core_beans_auto_config_exercises | Enhancement | ✅Completed | [202601021023_spring_core_beans_auto_config_exercises](2026-01/202601021023_spring_core_beans_auto_config_exercises/) |
 
 ---
 
@@ -29,3 +30,4 @@
 - [202601020725_enhance_spring_core_fundamentals](2026-01/202601020725_enhance_spring_core_fundamentals/) - spring-core-beans：面试点落位到正文小节 + 补齐可断言复现入口
 - [202601020934_spring_core_beans_learning_route](2026-01/202601020934_spring_core_beans_learning_route/) - spring-core-beans：README 学习路线与 Start Here + 注入歧义 Lab/Exercise
 - [202601021002_spring_core_beans_auto_config_ordering](2026-01/202601021002_spring_core_beans_auto_config_ordering/) - spring-core-beans：auto-configuration 顺序依赖 + matchIfMissing（三态）最小复现 + 文档/索引同步
+- [202601021023_spring_core_beans_auto_config_exercises](2026-01/202601021023_spring_core_beans_auto_config_exercises/) - spring-core-beans：auto-configuration Exercises 深挖（matchIfMissing 三态 / 条件报告 helper / 顺序确定化）

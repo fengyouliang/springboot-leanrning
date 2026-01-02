@@ -47,3 +47,4 @@
 - [202601020725_enhance_spring_core_fundamentals](../../history/2026-01/202601020725_enhance_spring_core_fundamentals/) - ✅ 已执行：把“新增面试点”嵌入正文对应小节，并补齐可断言复现入口（BeanFactory vs ApplicationContext/Aware/泛型匹配坑/CGLIB 对照）
 - [202601020934_spring_core_beans_learning_route](../../history/2026-01/202601020934_spring_core_beans_learning_route/) - ✅ 已执行：补齐 README 学习路线与 Start Here（含 refresh 主线一页纸/运行态观察点），并新增注入歧义 Lab + 对应 Exercise
 - [202601021002_spring_core_beans_auto_config_ordering](../../history/2026-01/202601021002_spring_core_beans_auto_config_ordering/) - ✅ 已执行：补齐 matchIfMissing（三态）与自动配置顺序依赖（after/before）Lab，并把面试点落到 docs/10 与 docs/11 的正文入口
+- [202601021023_spring_core_beans_auto_config_exercises](../../history/2026-01/202601021023_spring_core_beans_auto_config_exercises/) - ✅ 已执行：深化 Boot 自动装配 Exercises（matchIfMissing 三态 / 顺序确定化 / 条件报告 helper），并在 docs/10 条件正文补齐 `@ConditionalOnBean` 顺序/时机差异小节
