@@ -32,6 +32,16 @@
 - **在定义层动手**：例如 BFPP（`BeanFactoryPostProcessor`）可以改 `BeanDefinition`
 - **在实例层动手**：例如 BPP（`BeanPostProcessor`）可以包一层代理/修改对象
 
+### 面试常问：BeanDefinition / 原始实例 / 最终暴露对象（三层心智模型）
+
+- 题目：`BeanDefinition`、bean instance、最终 `getBean()` 拿到的对象分别是什么？它们之间有什么关系？
+- 追问：为什么说“最终拿到的对象可能不是你写的那个类的实例”？这通常发生在容器的哪个阶段？
+- 复现入口（建议先跑再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansContainerLabTest.java`
+    - `beanDefinitionIsNotTheBeanInstance()`
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansProxyingPhaseLabTest.java`
+    - `beanPostProcessorCanReturnAProxyAsTheFinalExposedBean_andSelfInvocationStillBypassesTheProxy()`
+
 ## 3. BeanFactory vs ApplicationContext：责任边界
 
 很多学习资料把它们混在一起讲，导致初学者误以为它们是“同一个东西的不同名字”。
@@ -43,6 +53,19 @@
   - 事件发布（ApplicationEventPublisher）
   - 环境（Environment）
   - 更丰富的自动检测与装配逻辑（配合各种后处理器）
+
+### 面试常问：BeanFactory vs ApplicationContext（层次与 refresh 主线）
+
+- 题目：两者核心差异是什么？为什么 `ApplicationContext` 更适合“应用”，而 `BeanFactory` 更偏“底层容器”？
+- 追问：
+  - `ApplicationContext#refresh` 相比“只用 BeanFactory”，额外做了哪些事？（事件、多语言、资源加载、环境等）
+  - 这些能力分别插入到 `AbstractApplicationContext#refresh` 的哪几个步骤？你会怎么下断点证明？
+- 复现入口（可断言 + 可断点，建议从这里 step into `refresh()`）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanFactoryVsApplicationContextLabTest.java`
+    - `beanFactory_isTheCoreContainer_withoutApplicationLevelFacilities()`
+    - `applicationContext_addsEventsMessagesAndResources_andHooksThemIntoRefresh()`
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBootstrapInternalsLabTest.java`
+    - `registerAnnotationConfigProcessors_enablesAutowiredAndPostConstruct()`
 
 在 Spring Boot 应用中，你基本总是在使用 `ApplicationContext`（因为 Boot 启动时创建的就是它的某个实现）。
 

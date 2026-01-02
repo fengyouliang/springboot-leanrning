@@ -105,6 +105,8 @@
 
 如果你想把条件报告当成“可查询的数据结构”（更适合进阶学习、也更容易做成最小复现），见本章第 11 节与 `SpringCoreBeansConditionEvaluationReportLabTest`。
 
+> 进阶提醒：当你遇到 `@ConditionalOnBean` 这类“依赖另一个自动配置里注册的 bean”的场景时，除了看报告本身，还要考虑**条件评估时机**与**自动配置顺序**（after/before 元数据）。对应最小复现见 `SpringCoreBeansAutoConfigurationOrderingLabTest`，并对照 [10](10-spring-boot-auto-configuration.md) 的顺序依赖小节。
+
 ## 6. 日志：把容器行为“吵”出来
 
 当你需要更细粒度地看依赖注入/bean 创建细节时，可以临时提高日志级别（建议只在学习/调试时使用）：
@@ -157,10 +159,11 @@ mvn -pl spring-core-beans spring-boot:run
 
 你会在输出中看到这些线索：
 
-- `qualifier.formatterImplementation=...`
-- `prototype.direct.sameId=...`
-- `prototype.provider.differentId=...`
-- `lifecycle.initialized=...`
+- `BEANS:textFormatters=...` / `BEANS:formattingService.injectedFormatter=...`
+- `BEANS:prototype.direct.sameId=...`
+- `BEANS:prototype.provider.differentId=...`
+- `BEANS:lifecycle.postConstructCalled=...`
+- `BEANS:beanDefinitionCount=...`
 
 如果这些输出与你的理解不一致，优先回到：
 
@@ -250,3 +253,95 @@ var outcomes = report.getConditionAndOutcomesBySource().get(AutoConfig.class.get
 - 反向过滤（只看业务 bean）：`!beanName.startsWith("org.springframework.")`
 
 > 小技巧：如果你不确定 `beanName` 是什么，先用 `getBeanDefinitionNames()` 或 `getBeansOfType()` 把名字找出来，再回到断点加条件。
+
+## 13. IoC/DI 与生命周期 Debug Playbook（最小断点闭环）
+
+> 目标：给你一套“遇到现象就能立刻落到断点入口”的固定套路。每条 playbook 都绑定本仓库的最小复现入口（建议先跑通再下断点）。
+
+### 13.1 现象：`@Autowired/@PostConstruct/@Bean` 不生效（注解为什么能工作？）
+
+复现入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBootstrapInternalsLabTest.java`
+  - `withoutAnnotationConfigProcessors_autowiredAndPostConstructAreNotApplied()`
+  - `registerAnnotationConfigProcessors_enablesAutowiredAndPostConstruct()`
+
+推荐断点（按顺序）：
+
+1) `AnnotationConfigUtils#registerAnnotationConfigProcessors`（基础设施处理器注册入口）
+2) `PostProcessorRegistrationDelegate#registerBeanPostProcessors`（BPP 何时进入主线）
+3) `AutowiredAnnotationBeanPostProcessor#postProcessProperties`（`@Autowired` 的解析与注入发生点）
+4) `CommonAnnotationBeanPostProcessor#postProcessBeforeInitialization`（`@PostConstruct` 的触发点）
+
+你应该能解释清楚：
+
+- 注解能力不是“语法自带”，而是容器在 refresh 主线里注册了 BFPP/BPP 才成立
+
+### 13.2 现象：单依赖注入歧义（候选太多）/ 为什么最终注入的是它？
+
+复现入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansInjectionAmbiguityLabTest.java`
+  - `singleInjectionFailsFast_whenMultipleCandidatesExist_andNoPrimaryOrQualifierIsPresent()`
+  - `primary_canResolveSingleInjectionAmbiguity_byChoosingTheDefaultWinner()`
+  - `qualifier_canResolveSingleInjectionAmbiguity_byExplicitlySelectingTheTargetBean()`
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
+  - `orderAnnotation_doesNotResolveSingleInjectionAmbiguity()`
+
+推荐断点（闭环版）：
+
+1) `DefaultListableBeanFactory#doResolveDependency`（依赖解析主入口）
+2) `DefaultListableBeanFactory#findAutowireCandidates`（候选收集：Map<beanName, candidate>）
+3) `DefaultListableBeanFactory#determineAutowireCandidate`（候选收敛：@Qualifier/@Primary/@Priority/name）
+4) `QualifierAnnotationAutowireCandidateResolver#isAutowireCandidate`（Qualifier 过滤与匹配）
+
+你应该能解释清楚：
+
+- `@Order` 管的是“集合注入排序”，不是“单依赖候选收敛”
+- 依赖解析的硬核主线就是：候选收集 → 候选收敛 → 最终注入
+
+### 13.3 现象：生命周期回调顺序说不清（Aware/BPP/@PostConstruct/afterPropertiesSet 谁先谁后？）
+
+复现入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
+  - `singletonLifecycleCallbacks_happenInAStableOrderAroundInitialization()`
+
+推荐断点（闭环版）：
+
+1) `AbstractAutowireCapableBeanFactory#doCreateBean`（创建主线）
+2) `AbstractAutowireCapableBeanFactory#populateBean`（注入发生点）
+3) `AbstractAutowireCapableBeanFactory#initializeBean`（Aware + init callbacks 串联点）
+4) `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInitialization/AfterInitialization`（BPP 两个切面）
+
+你应该能解释清楚：
+
+- Aware 发生在 initialize 阶段，且会早于 init callbacks（因此能在 `@PostConstruct` 之前拿到容器信息）
+- prototype 的销毁默认不由容器托管（对照同一个类里的 prototype 测试）
+
+### 13.4 现象：这个 bean 为什么变成 proxy？是谁把它换掉了？
+
+复现入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanCreationTraceLabTest.java`
+  - `beanCreationTrace_recordsPhases_andExposesProxyReplacement()`
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansProxyingPhaseLabTest.java`
+  - `beanPostProcessorCanReturnAProxyAsTheFinalExposedBean_andSelfInvocationStillBypassesTheProxy()`
+
+推荐断点（闭环版）：
+
+1) `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`
+2) 你自己的 `BeanPostProcessor#postProcessAfterInitialization`（或 AOP/Tx 的 AutoProxyCreator）
+
+你应该能解释清楚：
+
+- proxy/替换不只是 AOP/事务的“魔法”，而是容器在实例阶段允许 BPP 返回“另一个对象”作为最终暴露对象
+
+## 面试常问（排障方法论：先分层再下断点）
+
+- 常问：遇到“注解不生效/bean 不存在/注入错了/对象变成 proxy”你怎么排查？
+  - 答题要点：先分层：定义层（注册/条件/顺序）vs 实例层（注入/生命周期/代理）；再用最小上下文/最小复现把现象固化为断言。
+- 常见追问：如何定位“是谁把对象换成了 proxy”？
+  - 答题要点：从 `initializeBean` → `applyBeanPostProcessorsAfterInitialization` 追到具体 BPP；再回到 BPP 的注册顺序与匹配条件（Advisor/类型/注解）。
+- 常见追问：条件装配导致 bean 有/没有怎么定位？
+  - 答题要点：看 ConditionEvaluationReport（或 `--debug`）；先回答“为什么 match/why skip”，再看是否被用户 bean 覆盖或被排除。

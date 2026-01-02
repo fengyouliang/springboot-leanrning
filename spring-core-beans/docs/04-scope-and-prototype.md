@@ -99,3 +99,10 @@
 下一章我们把 scope 与生命周期合起来讲：什么时候创建、什么时候初始化、什么时候销毁。
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansLabTest.java`
 推荐断点：`AbstractBeanFactory#doGetBean`、`DefaultSingletonBeanRegistry#getSingleton`、`DefaultListableBeanFactory#doResolveDependency`
+
+## 面试常问（prototype 注入陷阱）
+
+- 常问：`prototype` 的真实语义是什么？为什么“prototype 注入 singleton”会像单例？
+  - 答题要点：prototype 的语义是“每次向容器要都是新的”；但注入发生在 singleton 创建时，只解析一次导致实例被“冻结”。
+- 常见追问：怎么修复？`ObjectProvider` / `@Lookup` / scoped proxy 什么时候用？
+  - 答题要点：需要“每次用都新”→ provider/lookup；需要“按上下文动态解析”→ scoped proxy；关键是让解析发生在“使用时”，不是“创建 singleton 时”。

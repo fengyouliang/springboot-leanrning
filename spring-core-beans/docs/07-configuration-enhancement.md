@@ -96,3 +96,10 @@ ConfigB configB(ConfigA a) {
 下一章我们讲另一个“名字相同但拿到的东西不同”的概念：`FactoryBean`。
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansContainerLabTest.java`
 推荐断点：`ConfigurationClassPostProcessor#postProcessBeanFactory`、`ConfigurationClassEnhancer#enhance`
+
+## 面试常问（`@Configuration(proxyBeanMethods=...)` 的语义）
+
+- 常问：`proxyBeanMethods=true/false` 有什么差异？为什么 `false` 可能出现“额外实例”？
+  - 答题要点：`true` 时配置类被增强，`@Bean` 方法互调会被拦截并走容器缓存，保持单例语义；`false` 时互调是普通 Java 调用，可能 new 出额外对象。
+- 常见追问：在工程里如何避免误用？
+  - 答题要点：避免在 `@Bean` 方法体内直接调用另一个 `@Bean` 方法；优先使用方法参数注入或构造注入，让依赖解析回到容器。

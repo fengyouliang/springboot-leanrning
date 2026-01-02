@@ -164,3 +164,10 @@ BFPP 本该在“定义层”工作，如果你在里面直接拿 bean（实例�
 下一章我们看一个特别常见、也特别容易误解的点：`@Configuration(proxyBeanMethods=...)`。
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansContainerLabTest.java`
 推荐断点：`PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`、`PostProcessorRegistrationDelegate#registerBeanPostProcessors`、`AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`
+
+## 面试常问（BFPP / BPP / BDRPP）
+
+- 常问：BFPP、BPP、BDRPP 分别是什么？分别能做什么？
+  - 答题要点：BDRPP 能在“注册阶段”新增定义；BFPP 能在实例化前修改定义；BPP 介入实例创建链路，能改实例，甚至替换成 proxy。
+- 常见追问：为什么很多 BFPP 建议写成 `static @Bean`？
+  - 答题要点：避免过早实例化配置类/减少循环依赖与顺序陷阱；更贴近“定义层扩展点”的职责。

@@ -4,6 +4,45 @@
 
 这份 `README.md` 只做索引与导航；更深入的解释请按章节阅读：见 [docs/](docs/)。
 
+## Start Here（5 分钟闭环）
+
+> 目标：把“我大概懂了”变成“我能用断言证明 + 能解释 + 能下断点”。
+
+1) 跑一个最小闭环（推荐从这里开始）
+
+```bash
+mvn -pl spring-core-beans -Dtest=SpringCoreBeansLabTest test
+```
+
+你应该能解释清楚：
+
+- 为什么 `@Qualifier` 能解决多实现注入歧义
+- 为什么 prototype 注入 singleton 会“看起来像单例”（以及如何修复）
+- `@PostConstruct` 为什么会在容器启动时运行
+
+2) 跑一个“容器机制”闭环（把概念放回容器主线）
+
+```bash
+mvn -pl spring-core-beans -Dtest=SpringCoreBeansContainerLabTest test
+```
+
+你应该能解释清楚：
+
+- `BeanDefinition`（定义）与 bean instance（实例）不是同一个概念对象
+- BFPP（改定义）与 BPP（改实例/可能换成 proxy）分别发生在什么阶段
+
+3) 开始深挖（用断点建立“阶段感”，而不是背规则）
+
+- 从这里开始读：[`docs/00-deep-dive-guide.md`](docs/00-deep-dive-guide.md)
+
+## 学习路线（入门→进阶→深挖）
+
+| 层级 | 目标 | 推荐入口（固定） | 你应该能解释清楚什么 |
+| --- | --- | --- | --- |
+| 入门 | 建立直觉与可断言结论 | `SpringCoreBeansLabTest` | Qualifier/Scope/生命周期的“外部行为”为什么是这样 |
+| 进阶 | 把概念放回容器主线 | `SpringCoreBeansContainerLabTest` | 定义层 vs 实例层、BFPP vs BPP、为什么最终暴露对象可能是 proxy |
+| 深挖 | 断点地图 + 排障闭环 | `docs/00-deep-dive-guide.md` | 能从异常/现象定位到正确断点入口，并用观察点收敛原因 |
+
 ## 你将学到什么
 
 - Bean 的心智模型：`BeanDefinition`（定义） vs Bean instance（实例）
@@ -37,6 +76,17 @@
 ```bash
 mvn -pl spring-core-beans spring-boot:run
 ```
+
+运行时你可以观察到 `BeansDemoRunner` 的结构化输出（统一前缀 `BEANS:`）。建议把“看到的现象”与“可断言入口”绑定起来：
+
+- `BEANS:textFormatters` / `BEANS:formattingService.injectedFormatter`：多实现注入如何被确定化  
+  - 对照：`docs/03` → `SpringCoreBeansLabTest.usesQualifierToResolveMultipleBeans()`
+- `BEANS:prototype.direct.sameId` / `BEANS:prototype.provider.differentId`：prototype 注入 singleton 的坑与修复方式  
+  - 对照：`docs/04` → `SpringCoreBeansLabTest.demonstratesPrototypeScopeBehavior()`
+- `BEANS:lifecycle.postConstructCalled`：`@PostConstruct` 的时机（init 阶段）  
+  - 对照：`docs/05` / `docs/17` → `SpringCoreBeansLabTest.postConstructRunsDuringContextInitialization()`
+- `BEANS:beanDefinitionCount`：容器里“定义”的数量（帮助你建立“定义层”直觉）  
+  - 对照：`docs/01` / `docs/12`（把它放回 refresh 主线理解）
 
 ### 测试
 
@@ -99,9 +149,24 @@ Exercises 默认禁用：打开 `*ExerciseTest`，移除/注释 `@Disabled`，�
 36. [常见坑清单（建议反复对照）](docs/90-common-pitfalls.md)
 37. [自测题：你是否真的理解了？](docs/99-self-check.md)
 
+## 容器主线（refresh call chain）一页纸
+
+> 目标：把你在 docs 里读到的概念，放回 `AbstractApplicationContext#refresh` 的阶段里理解；否则你永远只能“背知识点”，讲不清“它插在主线的哪里”。
+
+| 阶段（粗粒度） | 你应该看见什么 | 关键锚点（建议断点） | 对应 docs | 对应 Lab/Test |
+| --- | --- | --- | --- | --- |
+| 注册定义 | 配置输入被解析为 BeanDefinition | `ConfigurationClassPostProcessor` / `BeanDefinitionRegistry` | `docs/02`、`docs/12` | `SpringCoreBeansBootstrapInternalsLabTest` |
+| 执行 BFPP/BDRPP | “改定义/加定义”发生在实例化之前 | `PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors` | `docs/06`、`docs/13`、`docs/14` | `SpringCoreBeansContainerLabTest`、`SpringCoreBeansRegistryPostProcessorLabTest` |
+| 注册 BPP | BPP 顺序决定后续行为（甚至影响 proxy/短路） | `PostProcessorRegistrationDelegate#registerBeanPostProcessors` | `docs/06`、`docs/14`、`docs/25` | `SpringCoreBeansPostProcessorOrderingLabTest`、`SpringCoreBeansProgrammaticBeanPostProcessorLabTest` |
+| 创建/注入/初始化 | instantiate → populate → initialize 的主线与观察点 | `AbstractAutowireCapableBeanFactory#doCreateBean` / `populateBean` / `initializeBean` | `docs/05`、`docs/17`、`docs/30` | `SpringCoreBeansBeanCreationTraceLabTest`、`SpringCoreBeansInjectionPhaseLabTest`、`SpringCoreBeansLifecycleCallbackOrderLabTest` |
+| proxy/替换 | 最终暴露对象可能在多个点被替换成 proxy | `postProcessBeforeInstantiation` / `getEarlyBeanReference` / `postProcessAfterInitialization` | `docs/15`、`docs/16`、`docs/31` | `SpringCoreBeansPreInstantiationLabTest`、`SpringCoreBeansEarlyReferenceLabTest`、`SpringCoreBeansProxyingPhaseLabTest` |
+| refresh 收尾 | 事件/多语言/资源等“应用层能力”在主线里完成装配 | `AbstractApplicationContext#finishRefresh` | `docs/01`、`docs/12` | `SpringCoreBeansBeanFactoryVsApplicationContextLabTest` |
+| 关闭与销毁 | destroy callbacks 的触发时机与顺序 | `DefaultSingletonBeanRegistry#destroySingletons` | `docs/05`、`docs/17` | `SpringCoreBeansLifecycleCallbackOrderLabTest` |
+
 ## 概念地图（注入相关：从“选候选”到“值怎么解析”）
 
 - DI 解析：类型/名称/Qualifier/Primary → [docs/03](docs/03-dependency-injection-resolution.md) → `SpringCoreBeansLabTest`
+- 注入歧义（NoUnique）与确定化修复：`@Primary/@Qualifier` → [docs/03](docs/03-dependency-injection-resolution.md) / [docs/33](docs/33-autowire-candidate-selection-primary-priority-order.md) → `SpringCoreBeansInjectionAmbiguityLabTest`
 - 注入发生在哪个阶段：field vs constructor、`postProcessProperties` → [docs/30](docs/30-injection-phase-field-vs-constructor.md) → `SpringCoreBeansInjectionPhaseLabTest`
 - `@Resource`（name-first）与 `CommonAnnotationBeanPostProcessor` → [docs/32](docs/32-resource-injection-name-first.md) → `SpringCoreBeansResourceInjectionLabTest`
 - 候选选择 vs 顺序：`@Primary/@Priority/@Order` → [docs/33](docs/33-autowire-candidate-selection-primary-priority-order.md) → `SpringCoreBeansAutowireCandidateSelectionLabTest`
@@ -111,18 +176,33 @@ Exercises 默认禁用：打开 `*ExerciseTest`，移除/注释 `@Disabled`，�
 
 - BeanDefinition 合并（merged `RootBeanDefinition`）→ [docs/35](docs/35-merged-bean-definition.md) → `SpringCoreBeansMergedBeanDefinitionLabTest`
 - 排障：异常 → 断点入口（候选集合/最终注入/依赖关系）→ [docs/11](docs/11-debugging-and-observability.md) → `SpringCoreBeansBeanGraphDebugLabTest`
+- 代理定位闭环：最终暴露对象是哪里被换成 proxy 的？→ [docs/11](docs/11-debugging-and-observability.md) / [docs/31](docs/31-proxying-phase-bpp-wraps-bean.md) → `SpringCoreBeansBeanCreationTraceLabTest` / `SpringCoreBeansProxyingPhaseLabTest`
 
 ## Labs / Exercises 索引（按知识点 / 难度）
 
 > 说明：⭐=入门，⭐⭐=进阶，⭐⭐⭐=挑战。Exercises 默认 `@Disabled`。
 
+### 推荐先跑这几个（新手不迷路）
+
+- `SpringCoreBeansLabTest`：Qualifier/Scope/生命周期的最小闭环（入门第一站）
+- `SpringCoreBeansContainerLabTest`：定义层 vs 实例层（BFPP/BPP/循环依赖等主线现象）
+- `SpringCoreBeansBeanCreationTraceLabTest`：实例创建时间线（instantiate → populate → initialize → proxy 替换）
+- `SpringCoreBeansBootstrapInternalsLabTest`：为什么注解能工作（基础设施处理器）
+- `SpringCoreBeansAutowireCandidateSelectionLabTest`：`@Primary/@Priority/@Order` 的边界（别把排序当成选择）
+- `SpringCoreBeansLifecycleCallbackOrderLabTest`：生命周期回调顺序 + prototype 不销毁
+
 | 类型 | 入口 | 知识点 | 难度 | 推荐阅读 |
 | --- | --- | --- | --- | --- |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansLabTest.java` | Qualifier/Scope/生命周期等“外部行为”验证 | ⭐⭐ | `docs/03`、`docs/04`、`docs/05` |
+| Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanCreationTraceLabTest.java` | 实例创建时间线：instantiate → populate → initialize → proxy 替换 | ⭐⭐⭐ | `docs/05`、`docs/30`、`docs/31` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBootstrapInternalsLabTest.java` | 容器启动基础设施：为什么注解能工作 | ⭐⭐⭐ | `docs/12` |
+| Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanFactoryVsApplicationContextLabTest.java` | BeanFactory vs ApplicationContext：事件/多语言/资源加载等能力边界 | ⭐⭐ | `docs/01`、`docs/12` |
+| Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAwareInfrastructureLabTest.java` | Aware 的基础设施：哪些是容器直接调，哪些依赖处理器（BPP） | ⭐⭐ | `docs/05`、`docs/12` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansInjectionPhaseLabTest.java` | 注入阶段：field vs constructor、`postProcessProperties`、`@PostConstruct` 时机 | ⭐⭐⭐ | `docs/30`、`docs/12` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansResourceInjectionLabTest.java` | `@Resource`：name-first 注入 + 为什么需要 processors | ⭐⭐ | `docs/32`、`docs/12` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutowireCandidateSelectionLabTest.java` | 单依赖候选选择 vs 集合顺序：`@Primary/@Priority/@Order` | ⭐⭐ | `docs/33`、`docs/03` |
+| Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansInjectionAmbiguityLabTest.java` | 注入歧义最小复现：NoUnique fail-fast + `@Primary/@Qualifier` 修复对照 | ⭐⭐ | `docs/03`、`docs/33` |
+| Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansGenericTypeMatchingPitfallsLabTest.java` | 泛型 type matching 坑：ResolvableType 匹配 vs proxy 丢失泛型信息 | ⭐⭐⭐ | `docs/03`、`docs/23`、`docs/29` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansValuePlaceholderResolutionLabTest.java` | `@Value("${...}")` 占位符解析：non-strict vs strict fail-fast | ⭐⭐⭐ | `docs/34`、`docs/06`、`docs/12` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansProxyingPhaseLabTest.java` | 代理/替换阶段：BPP 返回 proxy、自调用绕过、按接口 vs 实现类获取 | ⭐⭐⭐ | `docs/31` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansRegistryPostProcessorLabTest.java` | BDRPP 动态注册定义 + 与 BFPP 的关系 | ⭐⭐⭐ | `docs/13` |
@@ -147,6 +227,8 @@ Exercises 默认禁用：打开 `*ExerciseTest`，移除/注释 `@Disabled`，�
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansMergedBeanDefinitionLabTest.java` | BeanDefinition 合并：merged `RootBeanDefinition` + `MergedBeanDefinitionPostProcessor` 时机 | ⭐⭐⭐ | `docs/35`、`docs/01`、`docs/00` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansImportLabTest.java` | `@Import` / `ImportSelector` / registrar（高级注册入口） | ⭐⭐⭐ | `docs/02` |
 | Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationLabTest.java` | Boot 自动装配（条件生效/失效、覆盖策略） | ⭐⭐⭐ | `docs/10`、`docs/11` |
+| Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansConditionEvaluationReportLabTest.java` | 条件报告：ConditionEvaluationReport 可查询 + `matchIfMissing` 缺省语义 | ⭐⭐–⭐⭐⭐ | `docs/11`、`docs/10` |
+| Lab | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationOrderingLabTest.java` | 自动配置顺序依赖：`@ConditionalOnBean` 时机差异 + `after/before` 确定化 | ⭐⭐–⭐⭐⭐ | `docs/10` |
 | Exercise | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansExerciseTest.java` | 按提示补齐/改造容器行为练习 | ⭐⭐–⭐⭐⭐ | 先跑完相关 Labs 再做 |
 | Exercise | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansContainerInternalsExerciseTest.java` | 深水区练习：custom scope / lifecycle / factorybean | ⭐⭐⭐ | `docs/27` → `docs/29` |
 | Exercise | `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansImportExerciseTest.java` | 按提示做 import/registrar 练习 | ⭐⭐⭐ | 先跑 Import Lab 再做练习 |
@@ -173,12 +255,14 @@ Exercises 默认禁用：打开 `*ExerciseTest`，移除/注释 `@Disabled`，�
 | beanName 与 alias | [docs/22](docs/22-bean-names-and-aliases.md) | `src/test/java/.../SpringCoreBeansBeanNameAliasLabTest.java` | alias 只是名字映射，不是复制实例 |
 | FactoryBean 深潜（`&`、类型匹配、缓存） | [docs/23](docs/23-factorybean-deep-dive.md) | `src/test/java/.../SpringCoreBeansFactoryBeanDeepDiveLabTest.java` + `src/test/java/.../SpringCoreBeansContainerLabTest.java` | product vs factory、`isSingleton()` 的缓存语义 |
 | BeanDefinition 覆盖（同名冲突策略） | [docs/24](docs/24-bean-definition-overriding.md) | `src/test/java/.../SpringCoreBeansBeanDefinitionOverridingLabTest.java` | 覆盖开关控制的是同名定义冲突，不是按类型注入选择 |
+| Boot 自动装配：条件报告与顺序依赖 | [docs/10](docs/10-spring-boot-auto-configuration.md) + [docs/11](docs/11-debugging-and-observability.md) | `src/test/java/.../SpringCoreBeansConditionEvaluationReportLabTest.java` + `src/test/java/.../SpringCoreBeansAutoConfigurationOrderingLabTest.java` | 你能解释“为什么 match/why skip”、为什么“运行时有 bean 但条件仍不生效”、以及如何用 after/before 把行为确定化 |
 | 手工添加 BeanPostProcessor（顺序陷阱） | [docs/25](docs/25-programmatic-bpp-registration.md) | `src/test/java/.../SpringCoreBeansProgrammaticBeanPostProcessorLabTest.java` | 手工注册 BPP 会更早执行，并且不按 Ordered 排序 |
 | SmartInitializingSingleton（afterSingletonsInstantiated） | [docs/26](docs/26-smart-initializing-singleton.md) | `src/test/java/.../SpringCoreBeansSmartInitializingSingletonLabTest.java` | 为什么它发生在非 lazy 单例创建完成之后 |
 | SmartLifecycle（phase） | [docs/27](docs/27-smart-lifecycle-phase.md) | `src/test/java/.../SpringCoreBeansSmartLifecycleLabTest.java` | start 升序、stop 反序，phase 的意义 |
 | 自定义 scope + scoped proxy（thread） | [docs/28](docs/28-custom-scope-and-scoped-proxy.md) | `src/test/java/.../SpringCoreBeansCustomScopeLabTest.java` | 为什么 direct injection 会冻结实例、如何用 provider/proxy 修复 |
 | FactoryBean 边界：getObjectType=null | [docs/29](docs/29-factorybean-edge-cases.md) | `src/test/java/.../SpringCoreBeansFactoryBeanEdgeCasesLabTest.java` | 为什么 type-based 扫描在 allowEagerInit=false 时会错过它 |
 | `@Qualifier` 解决多实现注入 | [docs/03](docs/03-dependency-injection-resolution.md) | `src/main/java/.../FormattingService.java`、`src/main/java/.../*TextFormatter.java`、`src/test/java/.../SpringCoreBeansLabTest.java` | 为什么会歧义、如何指定注入目标、如何验证注入结果 |
+| 注入歧义（NoUnique）与确定化修复 | [docs/03](docs/03-dependency-injection-resolution.md) / [docs/33](docs/33-autowire-candidate-selection-primary-priority-order.md) | `src/test/java/.../SpringCoreBeansInjectionAmbiguityLabTest.java` | 候选太多为什么 fail-fast、`@Primary`（默认胜者） vs `@Qualifier`（显式选择） |
 | prototype 注入 singleton 的“看起来像单例” | [docs/04](docs/04-scope-and-prototype.md) | `src/main/java/.../DirectPrototypeConsumer.java`、`src/main/java/.../ProviderPrototypeConsumer.java`、`src/main/java/.../PrototypeIdGenerator.java` | prototype 的语义是“每次向容器要都是新的”，而不是“每次方法调用都是新的” |
 | `@PostConstruct` 何时运行（基础版） | [docs/05](docs/05-lifecycle-and-callbacks.md) | `src/main/java/.../LifecycleLogger.java`、`src/test/java/.../SpringCoreBeansLabTest.java` | 容器启动阶段发生了什么、回调在什么时机触发 |
 | `@Import` / `ImportSelector` / registrar（高级注册入口） | [docs/02](docs/02-bean-registration.md) | `src/test/java/.../SpringCoreBeansImportLabTest.java` | 配置类解析阶段到底导入了什么、ImportSelector 如何决定导入列表、registrar 如何直接注册 BeanDefinition |

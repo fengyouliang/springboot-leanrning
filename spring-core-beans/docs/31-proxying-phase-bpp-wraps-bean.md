@@ -61,6 +61,26 @@ JDK 代理的本质是：
 - “为什么我 `getBean(实现类.class)` 突然拿不到了？”
 - “为什么我按实现类注入会报错，但按接口注入没问题？”
 
+### 面试常问：容器最终暴露对象与类型系统陷阱（JDK vs CGLIB）
+
+- 题目：为什么 JDK 代理下按实现类取 bean 会失败？CGLIB 下又为什么“可能成功”？两者分别对注入点类型有什么要求？
+- 追问：
+  - 你如何判断一个 bean 是否被代理？如果被代理了，它是 JDK proxy 还是 class-based proxy？
+  - 你如何定位“是哪个 `BeanPostProcessor` 把它换掉了”？请给出从 `initializeBean` 到 `applyBeanPostProcessorsAfterInitialization` 的断点闭环。
+- 复现入口（可断言 + 可断点）：
+  - JDK proxy 导致“按实现类获取失败”：
+    - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansProxyingPhaseLabTest.java`
+      - `whenABeanIsWrappedAsJdkProxy_lookupByConcreteClassMayBecomeUnavailable()`
+  - class-based proxy（CGLIB）下“按实现类获取仍可能可用”（类型是子类）：
+    - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansProxyingPhaseLabTest.java`
+      - `whenABeanIsWrappedAsCglibProxy_lookupByConcreteClassMayStillWork()`
+  - JDK proxy 导致“按实现类注入失败”（在循环依赖场景更直观）：
+    - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansEarlyReferenceLabTest.java`
+      - `injectingConcreteTypeFailsWhenFinalBeanIsJdkProxy_duringCircularDependency()`
+  - “是谁把它换掉了”的最短闭环（记录 BPP before/after 与最终类型差异）：
+    - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanCreationTraceLabTest.java`
+      - `beanCreationTrace_recordsPhases_andExposesProxyReplacement()`
+
 ## 4. 你必须掌握的“3 个替换点”（否则你永远讲不清代理什么时候出现）
 
 很多“我以为注入的是 X，结果拿到的是 proxy”的问题，本质都是没分清：**BPP 能在多个阶段把对象“换掉”**。

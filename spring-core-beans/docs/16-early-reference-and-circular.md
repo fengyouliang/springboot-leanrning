@@ -47,6 +47,24 @@
 - `BeanPostProcessor#postProcessAfterInitialization`：给出 final proxy 的常见扩展点
 - 三层缓存：`singletonFactories`/`earlySingletonObjects`/`singletonObjects`（见 docs/09）
 
+### 面试常问：单例三级缓存 / early reference / 代理形态一致性
+
+- 题目：Spring 解决 setter 循环依赖的关键机制是什么？为什么构造器循环依赖基本无解？
+- 追问：
+  - 三级缓存分别是什么（概念上）？为什么 `singletonFactories` 是“工厂”而不是直接缓存对象？
+  - 引入代理（AOP/事务）后，为什么必须把 early reference 和 `getEarlyBeanReference` 一起讲？不然会出现什么“对象形态不一致”的问题？
+- 复现入口（可断言 + 可断点）：
+  - setter vs constructor 循环依赖（基础现象）：
+    - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansContainerLabTest.java`
+      - `circularDependencyWithConstructorsFailsFast()`
+      - `circularDependencyWithSettersMaySucceedViaEarlySingletonExposure()`
+  - early proxy（解决 raw vs wrapped 不一致）：
+    - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansEarlyReferenceLabTest.java`
+      - `getEarlyBeanReference_canProvideEarlyProxyDuringCircularDependencyResolution()`
+  - proxy 类型陷阱（按实现类注入/获取失败）：
+    - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansEarlyReferenceLabTest.java`
+      - `injectingConcreteTypeFailsWhenFinalBeanIsJdkProxy_duringCircularDependency()`
+
 如果没有 getEarlyBeanReference，setter 循环依赖通常会用“原始对象引用”去填充依赖。
 
 但真实系统里经常存在“包装/代理”需求（典型就是 AOP）：

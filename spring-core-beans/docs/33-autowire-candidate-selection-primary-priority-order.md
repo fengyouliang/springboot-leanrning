@@ -25,6 +25,18 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
 | 单依赖注入（single injection） | `private final T t;` / `T` 参数 | 必须选出 **唯一** 候选，否则应失败 |
 | 集合注入（collection injection） | `List<T>` / `Map<String, T>` / `ObjectProvider<T>` | 把所有候选注入进来，并且尽量有“稳定顺序” |
 
+### 面试常问：单注入 vs 集合注入（不要把排序当成选择）
+
+- 题目：`@Primary` / `@Priority` / `@Order` 分别解决什么问题？哪些只影响“集合顺序”，哪些会影响“单依赖候选收敛”？
+- 追问：
+  - 为什么 `@Order` 不能解决“单注入歧义”（`NoUniqueBeanDefinitionException`）？你如何用断点证明它根本不参与 `determineAutowireCandidate`？
+  - `@Primary` 与 `@Priority` 谁优先？在没有 `@Primary/@Qualifier` 时，`@Priority` 为什么有时能“打破平局”？
+- 复现入口（可断言）：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
+  - 单注入歧义：`orderAnnotation_doesNotResolveSingleInjectionAmbiguity()`
+  - `@Primary` vs `@Priority`：`primaryOverridesPriority_forSingleInjection()`
+  - tie-break：`priorityAnnotation_canBreakTieForSingleInjection_whenNoPrimaryOrQualifier()`
+  - 集合顺序：`orderAnnotation_affectsCollectionInjectionOrder()`
+
 ## 2. 单依赖注入：**解决的是“选谁”**
 
 当容器里有多个同类型候选时（`T` 有多个 bean），你需要的是 **候选选择规则**，常见工具是：

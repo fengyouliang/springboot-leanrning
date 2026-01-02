@@ -119,3 +119,10 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
 - “以为它等价于 `@Autowired`” → **概念差异**：`@Resource` 默认 name-first，`@Autowired` 默认 type-first（对照 [03](03-dependency-injection-resolution.md)）
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansResourceInjectionLabTest.java`
 推荐断点：`CommonAnnotationBeanPostProcessor#postProcessProperties`、`CommonAnnotationBeanPostProcessor#autowireResource`、`DefaultListableBeanFactory#doResolveDependency`
+
+## 面试常问（`@Resource` vs `@Autowired`）
+
+- 常问：`@Resource` 与 `@Autowired` 的核心差异是什么？
+  - 答题要点：`@Resource` 更偏 name-first（字段名/指定 name），`@Autowired` 更偏 type-first；两者由不同的 BPP 处理，语义与排障路径不同。
+- 常见追问：为什么很多团队更推荐“构造注入 + `@Autowired`（可省略）”？
+  - 答题要点：依赖显式、可测试性更好；避免 name-first 在重构字段/beanName 时引入隐性回归。

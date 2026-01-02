@@ -273,6 +273,23 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansContainerLabTest#beanDefinitionI
 
 ## 4. 推荐的“深挖练习”（每个练习都能在 30 分钟内闭环）
 
+### 练习 0：把“容器主线时间线”走通一次（强烈推荐作为第一条）
+
+1) 只跑一个测试方法（它把阶段用 events 固化成了断言）：
+   - `SpringCoreBeansBeanCreationTraceLabTest.beanCreationTrace_recordsPhases_andExposesProxyReplacement()`
+2) 建议断点（够用版）：
+   - `AbstractApplicationContext#refresh`（从主线入口开始认路）
+   - `PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`（BFPP/BDRPP 在哪里发生）
+   - `AbstractAutowireCapableBeanFactory#doCreateBean`（实例创建主线）
+   - `AbstractAutowireCapableBeanFactory#populateBean`（注入发生点）
+   - `AbstractAutowireCapableBeanFactory#initializeBean`（Aware/BPP/init callbacks）
+   - `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`（最常见的 proxy/替换发生点）
+3) 你应该得到的“阶段感”：
+   - instantiate → populate → initialize 的顺序是稳定的
+   - BPP 的返回值会成为“最终暴露对象”（因此类型/行为可能变化）
+
+这个练习跑通后，你再去看 docs/06/12/14/31/16/15，会非常顺。
+
 ### 练习 A：从 BeanDefinition 到实例（最适合刚开始深挖）
 
 1) 运行 `spring-core-beans` 的测试（只跑一个类也行）

@@ -21,6 +21,8 @@ class SpringCoreBeansAutoConfigurationExerciseTest {
 
                         参考：
                         - `spring-core-beans/src/test/java/.../SpringCoreBeansAutoConfigurationLabTest.java`
+                        - `spring-core-beans/src/test/java/.../SpringCoreBeansConditionEvaluationReportLabTest.java`（matchIfMissing 三态）
+                        - `spring-core-beans/src/test/java/.../SpringCoreBeansAutoConfigurationOrderingLabTest.java`（顺序/时机类问题的最小复现写法）
                         - `spring-core-beans/docs/10-spring-boot-auto-configuration.md`
                         """)
                 .isFalse();

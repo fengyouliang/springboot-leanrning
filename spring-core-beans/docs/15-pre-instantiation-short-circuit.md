@@ -93,3 +93,10 @@
 - 你能解释清楚：为什么短路后构造器不执行，但 bean 仍然可以被容器拿到并调用吗？
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansPreInstantiationLabTest.java`
 推荐断点：`AbstractAutowireCapableBeanFactory#resolveBeforeInstantiation`、`AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInstantiation`、`AbstractAutowireCapableBeanFactory#createBeanInstance`
+
+## 面试常问（实例化前短路的风险）
+
+- 常问：`postProcessBeforeInstantiation` 能做什么？为什么它是高危扩展点？
+  - 答题要点：可以在实例化前直接返回替身/proxy，短路后续创建流程；风险是打破注入/初始化回调的直觉，引入“看似没执行构造但对象可用”的误判。
+- 常见追问：怎么证明某个 bean 命中了短路？断点怎么下？
+  - 答题要点：以 `resolveBeforeInstantiation` 为入口，沿着 `applyBeanPostProcessorsBeforeInstantiation` 找到具体哪个 `InstantiationAwareBeanPostProcessor` 返回了替身。

@@ -10,6 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.ApplicationContext;
 
 @SpringBootTest
@@ -108,6 +111,38 @@ class SpringCoreBeansExerciseTest {
     }
 
     @Test
+    @Disabled("练习：复现并修复“单注入歧义”（NoUniqueBeanDefinitionException），用 @Primary 或 @Qualifier 让注入结果确定化")
+    void exercise_fixSingleInjectionAmbiguity_withPrimaryOrQualifier() {
+        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
+            context.register(InjectionAmbiguityExerciseConfiguration.class);
+            context.refresh();
+
+            AmbiguityConsumer consumer = context.getBean(AmbiguityConsumer.class);
+
+            assertThat(consumer.workerId())
+                    .as("""
+                            练习：修复单依赖注入歧义（multiple candidates）。
+
+                            当前状态：
+                            - 这个 context 里有两个 `Worker` 候选
+                            - `AmbiguityConsumer` 只注入一个 `Worker`，因此 refresh 会 fail-fast
+
+                            你的目标：
+                            - 用 `@Primary`（默认胜者）或 `@Qualifier`（显式选择）修复歧义
+                            - 让 context 能 refresh，并让这个断言变绿
+
+                            建议入口（先看可运行版本，再回来做练习）：
+                            - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansInjectionAmbiguityLabTest.java`
+
+                            建议阅读：
+                            - `spring-core-beans/docs/03-dependency-injection-resolution.md`
+                            - `spring-core-beans/docs/33-autowire-candidate-selection-primary-priority-order.md`
+                            """)
+                    .isEqualTo("primary");
+        }
+    }
+
+    @Test
     @Disabled("练习：让 providerPrototypeConsumer 连续两次返回相同 id（提示：把 PrototypeIdGenerator 改为 singleton），并更新预期")
     void exercise_changePrototypeScopeAndUpdateExpectations() {
         UUID provider1 = providerPrototypeConsumer.newId();
@@ -126,5 +161,34 @@ class SpringCoreBeansExerciseTest {
                         - `spring-core-beans/docs/04-scope-and-prototype.md`
                         """)
                 .isEqualTo(provider2);
+    }
+
+    interface Worker {
+        String id();
+    }
+
+    record AmbiguityConsumer(Worker worker) {
+        String workerId() {
+            return worker.id();
+        }
+    }
+
+    @Configuration
+    private static final class InjectionAmbiguityExerciseConfiguration {
+
+        @Bean
+        Worker primaryWorker() {
+            return () -> "primary";
+        }
+
+        @Bean
+        Worker secondaryWorker() {
+            return () -> "secondary";
+        }
+
+        @Bean
+        AmbiguityConsumer ambiguityConsumer(Worker worker) {
+            return new AmbiguityConsumer(worker);
+        }
     }
 }

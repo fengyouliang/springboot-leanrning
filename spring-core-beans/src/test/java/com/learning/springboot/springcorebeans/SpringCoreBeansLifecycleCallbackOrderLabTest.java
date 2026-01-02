@@ -17,6 +17,8 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
@@ -48,6 +50,7 @@ class SpringCoreBeansLifecycleCallbackOrderLabTest {
                 "constructor",
                 "aware:beanName=recordingBean",
                 "aware:beanFactory",
+                "aware:applicationContext",
                 "bpp:beforeInit",
                 "postConstruct",
                 "afterPropertiesSet",
@@ -127,7 +130,7 @@ class SpringCoreBeansLifecycleCallbackOrderLabTest {
         }
     }
 
-    static class RecordingBean implements BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
+    static class RecordingBean implements BeanNameAware, BeanFactoryAware, ApplicationContextAware, InitializingBean, DisposableBean {
 
         private final LifecycleEvents events;
 
@@ -144,6 +147,11 @@ class SpringCoreBeansLifecycleCallbackOrderLabTest {
         @Override
         public void setBeanFactory(BeanFactory beanFactory) {
             events.add("aware:beanFactory");
+        }
+
+        @Override
+        public void setApplicationContext(ApplicationContext applicationContext) {
+            events.add("aware:applicationContext");
         }
 
         @PostConstruct

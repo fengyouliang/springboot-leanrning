@@ -120,3 +120,10 @@ prototype 的语义是：
 - 你能解释清楚：为什么 prototype 默认不会触发 `@PreDestroy` 吗？
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
 推荐断点：`AbstractAutowireCapableBeanFactory#initializeBean`、`BeanPostProcessor#postProcessBeforeInitialization`、`DisposableBeanAdapter#destroy`
+
+## 面试常问（生命周期回调顺序）
+
+- 常问：初始化阶段的回调顺序是什么？BPP before/after-init 与 `@PostConstruct` 谁先谁后？
+  - 答题要点：constructor → aware → populate（注入）→ BPP before-init → `@PostConstruct` → `afterPropertiesSet` → initMethod → BPP after-init。
+- 常见追问：为什么 prototype 默认不会走销毁回调（`@PreDestroy`）？
+  - 答题要点：prototype 的生命周期末端默认不由容器托管；容器负责创建，但不负责统一回收（除非自定义 scope/显式销毁）。

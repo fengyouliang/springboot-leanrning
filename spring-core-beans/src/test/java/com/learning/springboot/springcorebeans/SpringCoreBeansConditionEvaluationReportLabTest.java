@@ -17,6 +17,9 @@ class SpringCoreBeansConditionEvaluationReportLabTest {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(PropertyGatedAutoConfiguration.class));
 
+    private final ApplicationContextRunner defaultEnabledRunner = new ApplicationContextRunner()
+            .withConfiguration(AutoConfigurations.of(MatchIfMissingAutoConfiguration.class));
+
     @Test
     void conditionEvaluationReport_recordsNoMatchWhenPropertyIsMissing() {
         contextRunner.run(context -> {
@@ -63,7 +66,55 @@ class SpringCoreBeansConditionEvaluationReportLabTest {
                 });
     }
 
+    @Test
+    void conditionalOnProperty_matchesWhenPropertyIsMissing_ifMatchIfMissingIsTrue() {
+        defaultEnabledRunner.run(context -> {
+            assertThat(context).hasSingleBean(DefaultEnabledFeature.class);
+            assertThat(context.getBean(DefaultEnabledFeature.class).origin()).isEqualTo("enabled-by-default");
+
+            ConditionEvaluationReport report = ConditionEvaluationReport.get(context.getBeanFactory());
+            ConditionEvaluationReport.ConditionAndOutcomes outcomes = report.getConditionAndOutcomesBySource()
+                    .get(MatchIfMissingAutoConfiguration.class.getName());
+
+            assertThat(outcomes).isNotNull();
+            assertThat(outcomes.isFullMatch()).isTrue();
+
+            System.out.println("OBSERVE: matchIfMissing=true => missing property still matches (DefaultEnabledFeature is registered)");
+        });
+    }
+
+    @Test
+    void conditionalOnProperty_doesNotMatchWhenPropertyIsExplicitlyFalse_evenIfMatchIfMissingIsTrue() {
+        defaultEnabledRunner
+                .withPropertyValues("demo.default.enabled=false")
+                .run(context -> {
+                    assertThat(context).doesNotHaveBean(DefaultEnabledFeature.class);
+
+                    ConditionEvaluationReport report = ConditionEvaluationReport.get(context.getBeanFactory());
+                    ConditionEvaluationReport.ConditionAndOutcomes outcomes = report.getConditionAndOutcomesBySource()
+                            .get(MatchIfMissingAutoConfiguration.class.getName());
+
+                    assertThat(outcomes).isNotNull();
+                    assertThat(outcomes.isFullMatch()).isFalse();
+
+                    System.out.println("OBSERVE: demo.default.enabled=false => condition does NOT match even if matchIfMissing=true");
+                });
+    }
+
+    @Test
+    void conditionalOnProperty_matchesWhenPropertyIsTrue_evenIfMatchIfMissingIsTrue() {
+        defaultEnabledRunner
+                .withPropertyValues("demo.default.enabled=true")
+                .run(context -> {
+                    assertThat(context).hasSingleBean(DefaultEnabledFeature.class);
+                    assertThat(context.getBean(DefaultEnabledFeature.class).origin()).isEqualTo("enabled-by-default");
+                });
+    }
+
     record DemoFeature(String origin) {
+    }
+
+    record DefaultEnabledFeature(String origin) {
     }
 
     @AutoConfiguration
@@ -74,5 +125,13 @@ class SpringCoreBeansConditionEvaluationReportLabTest {
             return new DemoFeature("enabled-by-property");
         }
     }
-}
 
+    @AutoConfiguration
+    @ConditionalOnProperty(prefix = "demo.default", name = "enabled", havingValue = "true", matchIfMissing = true)
+    static class MatchIfMissingAutoConfiguration {
+        @Bean
+        DefaultEnabledFeature defaultEnabledFeature() {
+            return new DefaultEnabledFeature("enabled-by-default");
+        }
+    }
+}

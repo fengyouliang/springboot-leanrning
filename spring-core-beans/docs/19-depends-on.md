@@ -249,3 +249,10 @@
 - 你能解释清楚：dependsOn 解决的是什么问题？（初始化顺序，不是注入）
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansDependsOnLabTest.java`
 推荐断点：`DefaultSingletonBeanRegistry#registerDependentBean`、`DefaultListableBeanFactory#preInstantiateSingletons`、`AbstractBeanFactory#doGetBean`
+
+## 面试常问（`dependsOn` 的边界）
+
+- 常问：`dependsOn` 能解决什么问题？能不能解决注入歧义？
+  - 答题要点：`dependsOn` 只控制初始化顺序（谁先创建），不改变 DI 候选选择规则；注入歧义要用 `@Qualifier/@Primary` 或条件装配解决。
+- 常见追问：什么时候必须用 `dependsOn`？
+  - 答题要点：外部资源/生命周期强依赖（例如必须先初始化某个基础设施再创建业务 bean）时，用它强制顺序更直观。

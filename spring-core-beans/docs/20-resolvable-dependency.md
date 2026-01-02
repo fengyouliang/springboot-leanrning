@@ -239,3 +239,10 @@
 - 你能解释清楚：为什么它能被注入，但不能被 `getBean(type)` 拿到吗？
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansResolvableDependencyLabTest.java`
 推荐断点：`AbstractApplicationContext#prepareBeanFactory`、`DefaultListableBeanFactory#doResolveDependency`、`AbstractBeanFactory#doGetBean`
+
+## 面试常问（ResolvableDependency 的边界）
+
+- 常问：`registerResolvableDependency` 是什么？为什么“能注入但不是 Bean”？
+  - 答题要点：它注册在依赖解析表里，不会变成 `BeanDefinition`/bean；因此可 autowire，但 `getBean(type)` 不一定存在。
+- 常见追问：什么时候应该用它，而不是 `@Bean`？
+  - 答题要点：适合“容器基础对象/上下文对象”的注入（更像基础设施）；业务对象仍应通过 `BeanDefinition` 管理，避免隐藏生命周期与可观测性问题。

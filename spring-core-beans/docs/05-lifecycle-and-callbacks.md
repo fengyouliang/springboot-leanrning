@@ -36,6 +36,43 @@
 
 > 重要提醒：`@PostConstruct/@PreDestroy` 不是 Java 语法“自带”的生命周期，它依赖容器注册了对应的后处理器；这也是为什么理解 docs/06（post-processors）与 docs/12（基础设施处理器）非常关键。
 
+### 1.2 Aware 系列回调：真实作用、触发者与发生时机
+
+很多人把 Aware 理解成“知道自己叫什么名字”，但对原理/框架岗来说，更关键的是：
+
+- **它发生在生命周期的哪一段？**
+- **是谁触发（调用）这些回调的？**
+- **如果容器不具备对应的基础设施，会发生什么？**
+
+你需要把 Aware 分成两类理解（这是面试追问的关键分界线）：
+
+1) **BeanFactory 直接调用的 Aware（更底层、更稳定）**
+   - 典型：`BeanNameAware` / `BeanFactoryAware` / `BeanClassLoaderAware`
+   - 发生点：`AbstractAutowireCapableBeanFactory#initializeBean` 内部的 `invokeAwareMethods`
+   - 时机：发生在 init callbacks 之前（因此能在 `@PostConstruct/afterPropertiesSet/initMethod` 前拿到容器基础信息）
+2) **通过“基础设施处理器（BPP）”触发的 Aware（ApplicationContext 能力的一部分）**
+   - 典型：`ApplicationContextAware` / `EnvironmentAware` / `ResourceLoaderAware` / `MessageSourceAware` 等
+   - 触发者：`ApplicationContextAwareProcessor`（它本质是一个 `BeanPostProcessor`，由 `ApplicationContext` 在 refresh 过程中注册）
+   - 结论：如果你只是在底层 `BeanFactory` 里用（没有注册对应处理器），这些 Aware 回调就不会发生
+
+这里还有一个容易说错的点（面试官很爱追）：  
+**Aware 发生在“初始化（initialize）阶段”，不是“属性填充（populate）阶段”。**  
+也就是说：依赖注入通常已经完成（字段/构造器参数已经有值），Aware 是在此基础上把“容器信息”补给 bean，然后才进入 `@PostConstruct` 等 init 回调链路。
+
+#### 面试常问：Aware 系列接口的真实作用与时机
+
+- 题目：`BeanNameAware/BeanFactoryAware/ApplicationContextAware` 分别在生命周期哪一段触发？为什么它们要发生在 init callbacks 之前？
+- 追问：
+  - Aware 是谁调用的？哪些是容器直接调的，哪些依赖基础设施处理器（BPP）？
+  - 如果某个“容器”不注册 `ApplicationContextAwareProcessor` 会怎样？你如何用断点/断言证明？
+- 复现入口（可断言 + 可断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
+    - `singletonLifecycleCallbacks_happenInAStableOrderAroundInitialization()`
+  - “没有基础设施处理器就不会触发”的最小对照：
+    - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAwareInfrastructureLabTest.java`
+      - `beanFactoryAware_isInvokedByBeanFactory_butApplicationContextAware_needsAnInfrastructureProcessor()`
+      - `applicationContextAware_isInvokedByInfrastructureBeanPostProcessor()`
+
 把一个 bean 的创建过程粗略拆成：
 
 1) 实例化（constructor）

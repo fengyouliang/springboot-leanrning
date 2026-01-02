@@ -151,6 +151,25 @@ Exercises 里也专门有题让你把 `@Qualifier` 改成 `@Primary` 来体会�
 5. **仍不唯一 → 明确失败**
    - 失败并不是坏事：它迫使你把依赖关系写清楚，而不是让容器“猜”。
 
+### 面试常问：依赖解析的“源码级决策树”（候选收集 → 候选收敛 → 最终注入）
+
+- 题目：依赖解析的关键调用链是什么？请按“候选收集 → 候选收敛 → 最终注入”描述主线。
+- 追问：
+  - `findAutowireCandidates(...)` 与 `determineAutowireCandidate(...)` 各自解决什么问题？你会在哪两个方法下断点证明“为什么最终注入的是它”？
+  - 泛型注入（`List<Foo>` / `Foo<Bar>`）在 type matching 上有哪些坑？为什么有时“看起来同类型”却匹配不上？（提示：raw type、FactoryBean product type、代理导致的类型信息丢失/不一致）
+- 复现入口（建议按顺序跑 + 下断点）：
+  - 候选收集/依赖边记录：
+    - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanGraphDebugLabTest.java`
+      - `dumpBeanGraph_candidatesAndRecordedDependencies_helpTroubleshootWhyItsInjected()`
+  - 候选收敛（`@Primary/@Priority/@Order` 的差异）：
+    - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
+      - `orderAnnotation_doesNotResolveSingleInjectionAmbiguity()`
+      - `primaryOverridesPriority_forSingleInjection()`
+      - `priorityAnnotation_canBreakTieForSingleInjection_whenNoPrimaryOrQualifier()`
+  - 泛型匹配坑（“看起来同类型”却匹配不上）：
+    - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansGenericTypeMatchingPitfallsLabTest.java`
+      - `genericTypeMatching_canFailWhenCandidateLosesGenericInformation_likeJdkProxySingleton()`
+
 ### 7.3 最终返回值：resolveDependency 返回的到底是什么？
 
 - 单依赖：返回一个 bean（或一个代理对象，见 docs/31）

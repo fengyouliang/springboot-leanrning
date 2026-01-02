@@ -84,3 +84,10 @@
 - 你能解释清楚：覆盖开关控制的是“同名 BeanDefinition”冲突，而不是“按类型注入”的选择规则吗？
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanDefinitionOverridingLabTest.java`
 推荐断点：`DefaultListableBeanFactory#registerBeanDefinition`、`DefaultListableBeanFactory#getBeanDefinition`、`AbstractBeanFactory#getMergedLocalBeanDefinition`
+
+## 面试常问（overriding 与注入歧义不是一回事）
+
+- 常问：BeanDefinition overriding 是什么？它解决什么问题？
+  - 答题要点：解决“同名 BeanDefinition 冲突”的定义层问题；开关控制是否允许后注册覆盖先注册。
+- 常见追问：它和“按类型注入选择（多候选）”是什么关系？
+  - 答题要点：几乎无关：注入歧义是“同类型多候选怎么收敛”；overriding 是“同名定义冲突怎么处理”。不要混用概念。

@@ -194,3 +194,16 @@
 - 你能解释清楚：`@Autowired`/`@PostConstruct`/`@Bean` 分别依赖哪些处理器让它们生效吗？
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBootstrapInternalsLabTest.java`
 推荐断点：`AnnotationConfigUtils#registerAnnotationConfigProcessors`、`ConfigurationClassPostProcessor#processConfigBeanDefinitions`、`AutowiredAnnotationBeanPostProcessor#postProcessProperties`
+
+## 面试常问（容器启动与注解为何生效）
+
+1) 你能按“refresh 主线”复述 Spring 容器启动时序吗？
+- 答题要点：先准备 `BeanFactory`，再运行 BFPP/BDRPP（定义层），再注册 BPP（实例层拦截链基础），最后 `preInstantiateSingletons` 创建非 lazy 单例。
+- 常见追问：BFPP/BPP 各自“能改什么/不能改什么”？为什么“代理/替身”通常发生在 BPP 阶段？
+
+2) 为什么 `@Autowired` / `@PostConstruct` / `@Bean` 能工作？如果没有 annotation processors 会怎样？
+- 答题要点：注解只是元数据；`ConfigurationClassPostProcessor` 解析 `@Bean/@Import` 注册定义；`AutowiredAnnotationBeanPostProcessor` 做注入；`CommonAnnotationBeanPostProcessor` 处理 `@PostConstruct/@PreDestroy/@Resource`。
+- 常见追问：`GenericApplicationContext` vs `AnnotationConfigApplicationContext` 行为差异的根因是什么？Spring Boot 如何“默认装好”这套基础设施？
+
+3) 面试官让你“给一个断点闭环”，你会怎么打断点证明上面两点？
+- 答题要点：从 `AbstractApplicationContext#refresh` 入手，串 `PostProcessorRegistrationDelegate` 的 BFPP/BPP 两段，再落到 `AutowiredAnnotationBeanPostProcessor#postProcessProperties` 与 init 回调处理器。

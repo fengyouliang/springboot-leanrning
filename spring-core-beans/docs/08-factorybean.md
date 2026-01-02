@@ -108,3 +108,12 @@
 下一章我们讲一个更偏“容器内部”的现象：循环依赖。
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansContainerLabTest.java`
 推荐断点：`AbstractBeanFactory#getObjectForBeanInstance`、`FactoryBeanRegistrySupport#getObjectFromFactoryBean`、`AbstractBeanFactory#doGetBean`
+
+## 面试常问（FactoryBean）
+
+- 常问：`FactoryBean` 是什么？为什么 `getBean("x")` 拿到的是 product 而不是 factory？
+  - 答题要点：`FactoryBean<T>` 是“工厂 bean”；默认通过 beanName 暴露的是它生产的 product；用 `&beanName` 才能拿到 factory 本身。
+- 常见追问：`isSingleton()` 决定缓存的是什么？
+  - 答题要点：决定 product 的缓存语义（缓存的是 product 不是 factory）；这会影响你观测到的“是不是同一个对象”。
+- 常见追问：`getObjectType()` 返回 `null` 有什么坑？为什么 `allowEagerInit=false` 会放大它？
+  - 答题要点：会影响 type-based 查找与条件装配（例如 `@ConditionalOnMissingBean`）；需要时对照 [23](23-factorybean-deep-dive.md) 与 [29](29-factorybean-edge-cases.md) 深挖。

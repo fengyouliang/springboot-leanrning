@@ -96,3 +96,10 @@
 - 你能解释清楚：注入点 `@Lazy` 的本质是“注入 proxy”吗？
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansLazyLabTest.java`
 推荐断点：`AbstractBeanFactory#doGetBean`、`DefaultListableBeanFactory#preInstantiateSingletons`、`ContextAnnotationAutowireCandidateResolver#getLazyResolutionProxyIfNecessary`
+
+## 面试常问（`@Lazy` 的两种语义）
+
+- 常问：`lazy-init` 与注入点 `@Lazy` 有什么本质差别？
+  - 答题要点：`lazy-init` 是定义层的“延迟创建策略”；注入点 `@Lazy` 更像“注入一个延迟解析的代理/提供者”，把真正解析推迟到首次使用。
+- 常见追问：为什么标了 lazy-init 仍可能在 refresh 时被创建？
+  - 答题要点：被 eager 依赖/被提前触发（例如非 lazy 单例依赖它）时仍会创建；排障要找“谁触发了依赖解析”。

@@ -120,7 +120,10 @@ mvn -pl springboot-basics spring-boot:run
 
 ### Bean / IoC 容器
 
-- ⭐⭐⭐ `spring-core-beans/README.md`：IoC 容器与 Bean 机制总入口（含完整 Labs/Exercises 与 container internals 深潜）
+- ⭐⭐⭐ `spring-core-beans/README.md`：IoC 容器与 Bean 机制总入口（含学习路线、Start Here、完整 Labs/Exercises 与 container internals 深潜）
+- ⭐⭐ `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansLabTest.java`：Start Here（最小闭环，建议命令：`mvn -pl spring-core-beans -Dtest=SpringCoreBeansLabTest test`）
+- ⭐⭐ `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansContainerLabTest.java`：容器机制闭环（定义层/实例层/BFPP/BPP/循环依赖，建议命令：`mvn -pl spring-core-beans -Dtest=SpringCoreBeansContainerLabTest test`）
+- ⭐⭐ `spring-core-beans/docs/00-deep-dive-guide.md`：断点地图与深挖练习（从一个入口测试走完整主线）
 
 ### AOP / 代理
 

@@ -47,3 +47,10 @@
 - [ ] 完成至少 1 个 Exercise：移除 `@Disabled` → 根据提示实现 → 让测试变绿
 - [ ] 给自己写一段总结（3–10 行）：这个模块最关键的“机制结论”是什么？最容易踩的坑是什么？
 
+### spring-core-beans（最小闭环建议）
+
+- [ ] 跑 Start Here：`mvn -pl spring-core-beans -Dtest=SpringCoreBeansLabTest test`
+- [ ] 跑容器机制闭环：`mvn -pl spring-core-beans -Dtest=SpringCoreBeansContainerLabTest test`
+- [ ] 读深挖指南并完成一个练习：`spring-core-beans/docs/00-deep-dive-guide.md`（建议从“练习 0”开始）
+- [ ] 完成一个 Exercise：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansExerciseTest.java`（任选一个移除 `@Disabled`）
+- [ ] （可选）运行并观察：`mvn -pl spring-core-beans spring-boot:run`（关注 `BEANS:` 前缀的关键输出）

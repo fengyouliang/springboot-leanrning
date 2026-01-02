@@ -56,6 +56,25 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
 
 > 你写的配置 + 自动配置清单 - 条件失败的部分
 
+### 4.1 `matchIfMissing`：缺省值语义（面试高频坑）
+
+很多人背得出 `@ConditionalOnProperty`，但一到 `matchIfMissing` 就容易“凭感觉答题”。
+
+你只要记住一句话：
+
+> `matchIfMissing=true` 不是“没配置就不生效”，而是“没配置也算匹配”。
+
+典型语义（只看行为）：
+
+- property 缺失：如果 `matchIfMissing=true`，条件依然匹配（默认开启特性）
+- property=false：明确关闭（条件不匹配）
+- property=true：明确开启（条件匹配）
+
+复现入口（可断言）：
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansConditionEvaluationReportLabTest.java`
+  - `conditionalOnProperty_matchesWhenPropertyIsMissing_ifMatchIfMissingIsTrue`
+  - `conditionalOnProperty_doesNotMatchWhenPropertyIsExplicitlyFalse_evenIfMatchIfMissingIsTrue`
+
 ## 5. 你如何“覆盖”自动配置？
 
 最常见、也最推荐的覆盖方式是：
@@ -81,7 +100,7 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
 
 ## 7. 在本模块里如何“跑起来验证”
 
-本模块提供了一个专门的 Boot 自动装配实验（Labs），用最小可控的方式把条件生效/失效与覆盖策略跑出来：
+本模块提供了几组 Boot 自动装配实验（Labs），用最小可控的方式把“条件生效/失效、覆盖、定位、顺序”跑出来：
 
 - 对应测试：`src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationLabTest.java`
   - 使用 `ApplicationContextRunner`：更快、更聚焦，不需要启动完整应用
@@ -89,6 +108,16 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
     - `@ConditionalOnProperty`：属性缺失 vs 属性开启
     - `@ConditionalOnClass`：类存在 vs 类缺失（用 `FilteredClassLoader` 模拟“可选依赖不存在”）
     - `@ConditionalOnMissingBean`：用户自定义 bean 覆盖（auto-config 自动退让）
+
+- 对应测试：`src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansConditionEvaluationReportLabTest.java`
+  - 覆盖点：
+    - 把 Condition Evaluation Report 当成“可查询数据结构”（而不是只会开 `--debug`）
+    - `matchIfMissing=true` 的缺省值语义（missing/false/true 三态）
+
+- 对应测试：`src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationOrderingLabTest.java`
+  - 覆盖点：
+    - 自动配置之间的顺序依赖：为什么某些 `@ConditionalOnBean` 会“看起来没生效”
+    - 如何用 `@AutoConfiguration(after/before=...)` 把行为确定化（避免依赖“列表顺序/文件顺序/记忆”）
 
 运行方式：
 
@@ -103,5 +132,28 @@ mvn -pl spring-core-beans test
 学完本章，你至少要能把下面这句话解释清楚：
 
 > Spring Boot 自动装配不是“替你注入”，而是“替你导入配置并注册 BeanDefinition”，最终依赖注入仍遵循 Spring 容器的解析规则（类型、`@Qualifier`、`@Primary`、scope、生命周期……）。
-对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationLabTest.java`
-推荐断点：`AutoConfigurationImportSelector#selectImports`、`ConditionEvaluator#shouldSkip`、`DefaultListableBeanFactory#registerBeanDefinition`
+对应 Lab/Test：
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationLabTest.java`
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansConditionEvaluationReportLabTest.java`
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationOrderingLabTest.java`
+
+推荐断点（按“从入口到决策”）：
+- 自动配置入口：`AutoConfigurationImportSelector#selectImports`
+- 条件评估主线：`ConditionEvaluator#shouldSkip`
+- 条件细节（Bean 条件）：`OnBeanCondition#getMatchOutcome`
+- 注册定义：`DefaultListableBeanFactory#registerBeanDefinition`
+
+## 面试常问（自动配置与条件装配怎么定位）
+
+- 常问：Spring Boot 自动装配到底做了什么？它和依赖注入是什么关系？
+  - 答题要点：自动装配本质是“按条件导入配置并注册 BeanDefinition”；注入仍走 Spring 容器的依赖解析规则（type/qualifier/primary/scope/lifecycle）。
+- 常见追问：当一个 bean “有/没有”时，你怎么解释与定位？
+  - 答题要点：看 `ConditionEvaluator#shouldSkip` 的条件评估；结合 ConditionEvaluationReport（或 `--debug`）回答“为什么 match/why skip”，再看是否被用户定义 bean 覆盖、是否被排除自动配置。
+
+- 常问：`matchIfMissing=true` 到底是什么意思？它会造成什么坑？
+  - 答题要点：缺省即匹配（默认开启），当你以为“没配就关闭”时会踩坑；要能讲清 missing/false/true 三态行为。
+  - 复现入口：`SpringCoreBeansConditionEvaluationReportLabTest`（missing/false/true 三态）
+- 常问：为什么某个 `@ConditionalOnBean` 看起来没生效？（明明运行时 bean 已存在）
+  - 追问：你如何解释“条件评估时机”与“容器最终状态”的差异？如何把它变成确定性行为？
+  - 答题要点：条件评估发生在注册阶段；跨自动配置依赖必须考虑顺序与 after/before 元数据；用 `ConditionEvaluationReport` + `OnBeanCondition#getMatchOutcome` 定位“为什么不 match”。
+  - 复现入口：`SpringCoreBeansAutoConfigurationOrderingLabTest`（失败对照 + after 修复）
