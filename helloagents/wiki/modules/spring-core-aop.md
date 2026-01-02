@@ -8,7 +8,7 @@
 
 - **Responsibility:** 提供 AOP 的最小可运行示例与测试实验，帮助理解代理行为与切面生效边界。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-01
+- **Last Updated:** 2026-01-02
 
 ## Specifications
 
@@ -18,6 +18,7 @@
 
 #### Scenario: advice 生效与自调用差异
 - 直接调用与内部自调用的行为差异可被稳定断言
+- `spring-boot:run` 可观察代理类型与自调用现象（结构化前缀 `AOP:`）
 
 ### Requirement: AOP 源码级深化（能解释 + 能断点 + 能定位问题）
 **Module:** spring-core-aop
@@ -66,3 +67,4 @@
 - [202601010804_spring-core-aop-deep-dive](../../history/2026-01/202601010804_spring-core-aop-deep-dive/) - ✅ 已执行：新增深挖指南/自测题，扩写 01-06/90，补齐源码级断点与排障闭环
 - [202601010845_beans-aop-deep-dive-v2](../../history/2026-01/202601010845_beans-aop-deep-dive-v2/) - ✅ 已执行：新增 07-09（AutoProxyCreator 主线/pointcut/多代理叠加），并新增 Labs 覆盖 proceed 嵌套、this vs target、多 advisor vs 套娃 proxy
 - [202601011121_aop-real-stacking-labs](../../history/2026-01/202601011121_aop-real-stacking-labs/) - ✅ 已执行：新增 10（真实叠加 Debug Playbook）与集成 Lab（Tx/Cache/Method Security），补齐“真实叠加”断点与排障闭环
+- [202601021322_complete_spring_core_fundamentals_remaining](../../history/2026-01/202601021322_complete_spring_core_fundamentals_remaining/) - ✅ 已执行：补齐 `AopDemoRunner` 结构化输出（proxyType/targetClass/自调用现象）并同步进度清单入口

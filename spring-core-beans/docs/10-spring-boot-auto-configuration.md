@@ -44,6 +44,24 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
 - 自动装配是“可发现”的：starter/依赖带来的 jar 里提供了清单
 - 自动装配是“可控制”的：可以 exclude、可以用条件让它不生效
 
+### 3.1 自动配置如何排序？（after/before 主线）
+
+很多人以为 auto-config 的顺序是“文件顺序/列表顺序/记忆顺序”，但真实情况更接近：
+
+- Boot 会对 auto-config 列表做排序（处理 `@AutoConfiguration(after/before=...)` 这类依赖关系）
+- 这一步发生在“导入并处理配置类”的主线里
+- 排序结果会直接影响后续条件评估与最终注册（尤其是跨 auto-config 的条件/覆盖场景）
+
+学习阶段你不需要背排序实现，但你要能做到：
+
+1) 能观测排序结果（排序后 class 序列是什么）  
+2) 能解释排序为什么会影响条件/覆盖  
+3) 能给出断点入口（从排序到条件评估）
+
+复现入口（可断言）：
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationImportOrderingLabTest.java`
+
+
 ## 4. 为什么自动配置不是“全都生效”？——条件（Conditions）
 
 自动配置类几乎都带条件，例如（只记语义）：
@@ -140,6 +158,24 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
 - Bean 条件细节：`OnBeanCondition#getMatchOutcome`
 - refresh 主线定位：`AbstractApplicationContext#refresh` → `invokeBeanFactoryPostProcessors`
 
+### 5.2 覆盖/back-off 场景矩阵：重复候选 → 注入失败 → 两类修复
+
+把面试题翻译成工程问题通常是：
+
+- 为什么容器里会有两个同类型候选？（auto-config 没退让 / 覆盖太晚 / 注册了两份）
+- 为什么有时应用能启动、有时会直接挂？（取决于是否存在“单注入点”触发候选收敛）
+- 你怎么修复？（两条路径：**确定化选择** vs **让退让真正发生**）
+
+题目：当容器里出现两个 `DemoGreeting` 候选时，单注入为什么会 fail-fast？
+
+追问：你有哪些修复方式？分别有什么 trade-off？
+
+1) `@Primary/@Qualifier`：让注入变成确定性选择（候选可能仍然有多个）  
+2) 让 back-off 生效：确保覆盖 bean 在条件评估前就可见（更干净）
+
+复现入口（可断言）：
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationOverrideMatrixLabTest.java`
+
 ## 6. 你如何“看见”自动装配做了什么？
 
 学习阶段建议掌握两种手段：
@@ -148,6 +184,21 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
 2) **直接在运行时查询容器**（beans by type/name、BeanDefinition 等）
 
 具体做法放在下一章：[11. 调试与自检](11-debugging-and-observability.md)。
+
+### 6.1 Bean 来源追踪：这个 bean 到底是谁注册的？
+
+当你看到一个 beanName（或一个注入点类型），你必须能回答：
+
+- 它来自哪一个配置类/auto-config？
+- 是 `@Bean` 工厂方法注册的，还是“直接类定义/扫描”注册的？
+- 为什么它会在容器里出现（条件 match 了吗？有没有覆盖/back-off）？
+
+最通用的入口是：**看 BeanDefinition**。
+
+复现入口（可断言）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanDefinitionOriginLabTest.java`
+  - 用 `BeanDefinitionOriginDumper` 输出 beanDefinition 的 class/factoryMethod/resource/source/role 等关键信息
 
 ## 7. 在本模块里如何“跑起来验证”
 
@@ -175,6 +226,18 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
     - back-off 的判断时机：为什么你“写了覆盖 Bean”但 auto-config 没退让
     - 用 early/late registrar 对照把“时机差异”跑成可断言结论，并给出断点闭环入口
 
+- 对应测试：`src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationImportOrderingLabTest.java`
+  - 覆盖点：
+    - after/before 的排序主线：排序后 class 序列如何影响后续的条件与注册
+
+- 对应测试：`src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanDefinitionOriginLabTest.java`
+  - 覆盖点：
+    - BeanDefinition 来源追踪：factory method vs direct class、resource/source 元信息
+
+- 对应测试：`src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationOverrideMatrixLabTest.java`
+  - 覆盖点：
+    - 重复候选矩阵：NoUnique fail-fast + 两类修复（primary/qualifier vs back-off）
+
 运行方式：
 
 ```bash
@@ -193,6 +256,9 @@ mvn -pl spring-core-beans test
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansConditionEvaluationReportLabTest.java`
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationOrderingLabTest.java`
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationBackoffTimingLabTest.java`
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationImportOrderingLabTest.java`
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanDefinitionOriginLabTest.java`
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationOverrideMatrixLabTest.java`
 
 推荐断点（按“从入口到决策”）：
 - 自动配置入口：`AutoConfigurationImportSelector#selectImports`
@@ -214,3 +280,13 @@ mvn -pl spring-core-beans test
   - 追问：你如何解释“条件评估时机”与“容器最终状态”的差异？如何把它变成确定性行为？
   - 答题要点：条件评估发生在注册阶段；跨自动配置依赖必须考虑顺序与 after/before 元数据；用 `ConditionEvaluationReport` + `OnBeanCondition#getMatchOutcome` 定位“为什么不 match”。
   - 复现入口：`SpringCoreBeansAutoConfigurationOrderingLabTest`（失败对照 + after 修复）
+
+- 常问：这个 bean 到底是谁注册的？（来自哪个 auto-config / 哪个 @Bean 方法？）
+  - 追问：你如何在不看一堆日志的情况下快速定位？
+  - 答题要点：看 BeanDefinition（factoryBeanName/factoryMethodName/resource/source/role），再结合条件报告定位“为什么出现”。
+  - 复现入口：`SpringCoreBeansBeanDefinitionOriginLabTest`（BeanDefinitionOriginDumper）
+
+- 常问：为什么容器里会出现两个同类型候选？为什么有时能启动、有时会因为 NoUnique 直接挂？
+  - 追问：你有哪些修复方式？怎么选？
+  - 答题要点：重复候选不一定立刻炸；只要出现单注入点就会触发候选收敛并 fail-fast。修复分两类：`@Primary/@Qualifier` 确定化选择（候选仍可能多个） vs 让 auto-config back-off 生效（更干净）。
+  - 复现入口：`SpringCoreBeansAutoConfigurationOverrideMatrixLabTest`

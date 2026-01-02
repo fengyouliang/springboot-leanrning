@@ -3,33 +3,42 @@ package com.learning.springboot.springcoretx;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Component
 public class TxDemoRunner implements ApplicationRunner {
 
     private final AccountRepository accountRepository;
     private final AccountService accountService;
+    private final TxIntrospectionService txIntrospectionService;
 
-    public TxDemoRunner(AccountRepository accountRepository, AccountService accountService) {
+    public TxDemoRunner(
+            AccountRepository accountRepository,
+            AccountService accountService,
+            TxIntrospectionService txIntrospectionService
+    ) {
         this.accountRepository = accountRepository;
         this.accountService = accountService;
+        this.txIntrospectionService = txIntrospectionService;
     }
 
     @Override
     public void run(ApplicationArguments args) {
         System.out.println("== spring-core-tx ==");
 
+        System.out.println("TX:transactionActive.outside=" + TransactionSynchronizationManager.isActualTransactionActive());
+        System.out.println("TX:transactionActive.insideTransactionalMethod=" + txIntrospectionService.isTransactionActive());
+
         accountRepository.deleteAll();
 
         try {
             accountService.createTwoAccountsThenFail();
         } catch (IllegalStateException ex) {
-            System.out.println("expected exception: " + ex.getMessage());
+            System.out.println("TX:rollback.expectedException=" + ex.getMessage());
         }
-        System.out.println("after rollback, accountCount=" + accountRepository.count());
+        System.out.println("TX:afterRollback.accountCount=" + accountRepository.count());
 
         accountService.createTwoAccounts();
-        System.out.println("after commit, accountCount=" + accountRepository.count());
+        System.out.println("TX:afterCommit.accountCount=" + accountRepository.count());
     }
 }
-

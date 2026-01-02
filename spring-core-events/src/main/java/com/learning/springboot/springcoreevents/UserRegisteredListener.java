@@ -16,7 +16,7 @@ public class UserRegisteredListener {
     public void onUserRegistered(UserRegisteredEvent event) {
         String entry = "userRegistered:" + event.username();
         auditLog.add(entry);
-        System.out.println("EventListener received: " + entry);
+        System.out.println("EVENTS:listener.thread=" + Thread.currentThread().getName());
+        System.out.println("EVENTS:listener.entry=" + entry);
     }
 }
-

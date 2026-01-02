@@ -53,6 +53,7 @@ mvn -pl spring-core-tx test
 | 类型 | 入口 | 知识点 | 难度 | 推荐阅读 |
 | --- | --- | --- | --- | --- |
 | Lab | `src/test/java/com/learning/springboot/springcoretx/SpringCoreTxLabTest.java` | commit/rollback、回滚规则、传播、模板事务 | ⭐⭐ | `docs/01` → `docs/05` |
+| Lab | `src/test/java/com/learning/springboot/springcoretx/SpringCoreTxSelfInvocationPitfallLabTest.java` | 自调用绕过事务（最小复现）+ 拆分 Bean 修复对比 | ⭐⭐ | `docs/02`、`docs/90` |
 | Exercise | `src/test/java/com/learning/springboot/springcoretx/SpringCoreTxExerciseTest.java` | `REQUIRES_NEW`、自调用陷阱、回滚规则改造等练习 | ⭐⭐–⭐⭐⭐ | `docs/02`、`docs/03`、`docs/90` |
 
 ## 概念 → 在本模块哪里能“看见”
@@ -61,6 +62,7 @@ mvn -pl spring-core-tx test
 | --- | --- | --- | --- |
 | commit / rollback 的最小闭环 | [docs/01](docs/01-transaction-boundary.md) | `SpringCoreTxLabTest#commitsOnSuccess` / `#rollsBackOnRuntimeException` + `AccountService` | 为什么“抛异常”会导致不落库 |
 | `@Transactional` 也是 AOP（代理） | [docs/02](docs/02-transactional-proxy.md) | `SpringCoreTxLabTest#transactionalBeansAreProxied` | 事务拦截器在调用链的哪里 |
+| 自调用绕过事务（同类内部调用） | [docs/02](docs/02-transactional-proxy.md) | `SpringCoreTxSelfInvocationPitfallLabTest#selfInvocationBypassesTransactional_onInnerMethod` | 为什么 `this.inner()` 不走代理、如何做最小规避 |
 | checked exception 回滚规则 | [docs/03](docs/03-rollback-rules.md) | `SpringCoreTxLabTest#checkedExceptionsDoNotRollbackByDefault` | 为什么默认不回滚、如何用 `rollbackFor` 改 |
 | `REQUIRES_NEW` 的独立事务边界 | [docs/04](docs/04-propagation.md) | `SpringCoreTxLabTest#requiresNewCanCommitEvenIfOuterTransactionRollsBack` | 外层回滚时内层为何还能提交 |
 | 程序化事务与 rollback-only | [docs/05](docs/05-transaction-template.md) | `SpringCoreTxLabTest#transactionTemplateAllowsProgrammaticCommitOrRollback` | `setRollbackOnly()` 的真实效果 |

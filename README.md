@@ -38,10 +38,6 @@ mvn -q -pl springboot-web-mvc test
 mvn -pl springboot-basics spring-boot:run
 ```
 
-## 学习进度（打卡入口）
-
-- 学习清单（建议按模块打卡）：`docs/progress.md`
-
 ## Debug 工具箱（遇到红测/异常时）
 
 - 常用命令：
@@ -124,6 +120,9 @@ mvn -pl springboot-basics spring-boot:run
 - ⭐⭐ `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansLabTest.java`：Start Here（最小闭环，建议命令：`mvn -pl spring-core-beans -Dtest=SpringCoreBeansLabTest test`）
 - ⭐⭐ `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansContainerLabTest.java`：容器机制闭环（定义层/实例层/BFPP/BPP/循环依赖，建议命令：`mvn -pl spring-core-beans -Dtest=SpringCoreBeansContainerLabTest test`）
 - ⭐⭐ `spring-core-beans/docs/00-deep-dive-guide.md`：断点地图与深挖练习（从一个入口测试走完整主线）
+- ⭐⭐ `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationImportOrderingLabTest.java`：Boot 自动装配导入/排序主线（after/before 顺序 + 条件可见性）
+- ⭐⭐ `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationOverrideMatrixLabTest.java`：覆盖/back-off 场景矩阵（NoUnique → 两类修复路径）
+- ⭐ `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanDefinitionOriginLabTest.java`：定位 Bean 来源（谁注册的/从哪来/工厂方法 vs 直接类）
 
 ### AOP / 代理
 
@@ -134,6 +133,7 @@ mvn -pl springboot-basics spring-boot:run
 ### 事务（Tx）
 
 - ⭐⭐ `spring-core-tx/src/test/java/com/learning/springboot/springcoretx/SpringCoreTxLabTest.java`：边界/回滚/传播/模板
+- ⭐⭐ `spring-core-tx/src/test/java/com/learning/springboot/springcoretx/SpringCoreTxSelfInvocationPitfallLabTest.java`：自调用绕过事务最小复现 + 修复对比
 - （练习）`spring-core-tx/src/test/java/com/learning/springboot/springcoretx/SpringCoreTxExerciseTest.java`
 
 ### 事件（Events）

@@ -17,6 +17,8 @@
 | 202601021002 | spring_core_beans_auto_config_ordering | Enhancement | ✅Completed | [202601021002_spring_core_beans_auto_config_ordering](2026-01/202601021002_spring_core_beans_auto_config_ordering/) |
 | 202601021023 | spring_core_beans_auto_config_exercises | Enhancement | ✅Completed | [202601021023_spring_core_beans_auto_config_exercises](2026-01/202601021023_spring_core_beans_auto_config_exercises/) |
 | 202601021041 | spring_core_beans_auto_config_backoff_debug | Enhancement | ✅Completed | [202601021041_spring_core_beans_auto_config_backoff_debug](2026-01/202601021041_spring_core_beans_auto_config_backoff_debug/) |
+| 202601021144 | spring_core_beans_auto_config_mainline_debug | Enhancement | ✅Completed | [202601021144_spring_core_beans_auto_config_mainline_debug](2026-01/202601021144_spring_core_beans_auto_config_mainline_debug/) |
+| 202601021322 | complete_spring_core_fundamentals_remaining | Enhancement | ✅Completed | [202601021322_complete_spring_core_fundamentals_remaining](2026-01/202601021322_complete_spring_core_fundamentals_remaining/) |
 
 ---
 
@@ -33,3 +35,5 @@
 - [202601021002_spring_core_beans_auto_config_ordering](2026-01/202601021002_spring_core_beans_auto_config_ordering/) - spring-core-beans：auto-configuration 顺序依赖 + matchIfMissing（三态）最小复现 + 文档/索引同步
 - [202601021023_spring_core_beans_auto_config_exercises](2026-01/202601021023_spring_core_beans_auto_config_exercises/) - spring-core-beans：auto-configuration Exercises 深挖（matchIfMissing 三态 / 条件报告 helper / 顺序确定化）
 - [202601021041_spring_core_beans_auto_config_backoff_debug](2026-01/202601021041_spring_core_beans_auto_config_backoff_debug/) - spring-core-beans：auto-config back-off/覆盖排障闭环（early/late registrar 时机差异对照）
+- [202601021144_spring_core_beans_auto_config_mainline_debug](2026-01/202601021144_spring_core_beans_auto_config_mainline_debug/) - spring-core-beans：Boot 自动装配主线与排障可观察性补齐（import/排序主线 Lab + BeanDefinition 来源追踪 + 覆盖/back-off 矩阵）
+- [202601021322_complete_spring_core_fundamentals_remaining](2026-01/202601021322_complete_spring_core_fundamentals_remaining/) - AOP/Events/Tx：补齐 DemoRunner 结构化输出、Events 异常传播演示、Tx 自调用陷阱 Lab 与 progress 打卡入口
