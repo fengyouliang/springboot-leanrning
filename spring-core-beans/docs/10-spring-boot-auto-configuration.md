@@ -111,6 +111,35 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
 
 这也是为什么“看懂条件”比“背自动配置有哪些”更重要。
 
+### 5.1 back-off 的判断时机：为什么“我写了 Bean 但没有退让”？（排障闭环）
+
+一个非常常见的工程现象：
+
+- 你写了“同类型”的覆盖 bean（或者你以为你写了）
+- 但 auto-config 并没有 back-off（导致容器里出现两个同类型 bean，后续注入可能歧义/非预期）
+
+面试官最喜欢追问你能不能把它解释成“时机问题”，而不是背一句“用 @ConditionalOnMissingBean”。
+
+题目：`@ConditionalOnMissingBean` 的判断到底发生在什么时候？它是看“最终容器状态”吗？
+
+追问（加分点）：
+
+1) 为什么“运行时 bean 已存在”不能推出“当时条件就能看到它”？
+2) 哪些方式会让覆盖 bean 出现得太晚？（例如某些 `BeanDefinitionRegistryPostProcessor` 在 `ConfigurationClassPostProcessor` 之后注册定义）
+3) 你如何用断点证明：条件评估发生在 refresh 前半段（注册阶段），而不是 after refresh？
+
+复现入口（可断言）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationBackoffTimingLabTest.java`
+  - `lateBeanDefinitionRegistration_canBypassConditionalOnMissingBean_andCauseDuplicateCandidates`
+  - `earlyBeanDefinitionRegistration_runsBeforeConfigurationClassPostProcessor_soAutoConfigurationBacksOffDeterministically`
+
+推荐断点（从现象到闭环）：
+
+- 条件评估入口：`ConditionEvaluator#shouldSkip`
+- Bean 条件细节：`OnBeanCondition#getMatchOutcome`
+- refresh 主线定位：`AbstractApplicationContext#refresh` → `invokeBeanFactoryPostProcessors`
+
 ## 6. 你如何“看见”自动装配做了什么？
 
 学习阶段建议掌握两种手段：
@@ -141,6 +170,11 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
     - 自动配置之间的顺序依赖：为什么某些 `@ConditionalOnBean` 会“看起来没生效”
     - 如何用 `@AutoConfiguration(after/before=...)` 把行为确定化（避免依赖“列表顺序/文件顺序/记忆”）
 
+- 对应测试：`src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationBackoffTimingLabTest.java`
+  - 覆盖点：
+    - back-off 的判断时机：为什么你“写了覆盖 Bean”但 auto-config 没退让
+    - 用 early/late registrar 对照把“时机差异”跑成可断言结论，并给出断点闭环入口
+
 运行方式：
 
 ```bash
@@ -158,6 +192,7 @@ mvn -pl spring-core-beans test
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationLabTest.java`
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansConditionEvaluationReportLabTest.java`
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationOrderingLabTest.java`
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansAutoConfigurationBackoffTimingLabTest.java`
 
 推荐断点（按“从入口到决策”）：
 - 自动配置入口：`AutoConfigurationImportSelector#selectImports`
