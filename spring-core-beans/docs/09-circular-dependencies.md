@@ -93,6 +93,95 @@ setter 注入在某些情况下能让环跑起来，但会：
 
 > 你不需要背三层缓存的字段名，但你必须能解释：**容器为了打断循环，允许在对象未完全初始化时先暴露一个引用**，并且这件事只对 singleton 才有意义。
 
+## 源码解析：三层缓存（三级缓存）在源码里是怎么“救火”的
+
+很多资料把循环依赖讲成一句话：“Spring 用三级缓存解决了 setter 循环依赖”。这句话如果不落到源码细节，容易产生两个误解：
+
+1) 以为“任何循环依赖都能救”  
+2) 以为“三级缓存只是个数据结构技巧”，忽略了它真正的语义：**允许 early reference（早期引用）出现**
+
+### 1) `getSingleton` 的三层命中逻辑（精简伪代码）
+
+你在断点里看到的三层缓存通常对应这三类语义（字段名不必背，但建议能识别）：
+
+- `singletonObjects`：完全初始化完成的单例（最终成品）
+- `earlySingletonObjects`：早期引用（半成品/可能是代理）
+- `singletonFactories`：`ObjectFactory<?>`（用来“延迟生成 early reference”）
+
+精简伪代码（足够对照断点理解）：
+
+```text
+getSingleton(beanName, allowEarlyReference):
+  singleton = singletonObjects.get(beanName)
+  if (singleton == null && isSingletonCurrentlyInCreation(beanName)):
+     singleton = earlySingletonObjects.get(beanName)
+     if (singleton == null && allowEarlyReference):
+        factory = singletonFactories.get(beanName)
+        if (factory != null):
+           singleton = factory.getObject()                // 关键：创建 early reference
+           earlySingletonObjects.put(beanName, singleton) // 放入二级缓存
+           singletonFactories.remove(beanName)            // 移除三级工厂
+  return singleton
+```
+
+这个逻辑解释了“setter 循环为什么可能成功”：
+
+- B 创建过程中需要 A 时，A 可能已经“创建了一半”，但还没初始化完成
+- `getSingleton(..., allowEarlyReference=true)` 会允许从 factory 里拿到 A 的 early reference（可能是 raw，也可能是 proxy）
+- B 先拿到一个能用的引用把环跑起来，等 A 后续初始化完成再替换到一级缓存
+
+### 2) early singleton exposure 是在 `doCreateBean` 哪一步发生的？
+
+对应到实例创建主线（`AbstractAutowireCapableBeanFactory#doCreateBean`），early exposure 的窗口期大致是：
+
+1) bean 实例已经创建出来（instantiate 已完成）
+2) 但还没有执行完整的 populate + initialize（因此仍然是“半成品”）
+3) 若允许循环依赖，容器会提前注册一个 `singletonFactory`，其 `getObject()` 通常会调用 `getEarlyBeanReference(...)`
+
+因此你会看到一个很关键的事实：
+
+- **循环依赖不是“注入阶段的魔法”，而是“实例创建阶段刻意留出的窗口”**
+
+### 3) 代理介入时为什么更关键：`getEarlyBeanReference`
+
+如果最终暴露对象会被代理（尤其是 JDK 代理），循环依赖里就会出现一个危险点：
+
+- B 先注入了 raw A（具体类实例）
+- 但 A 初始化完成后被 BPP 包装成了 proxy（最终暴露对象变了）
+- 这会导致“raw 注入 vs 最终暴露对象”不一致，出现类型不匹配或行为不一致
+
+为了解决这类问题，Spring 提供了 early reference 的扩展点：
+
+- `SmartInstantiationAwareBeanPostProcessor#getEarlyBeanReference`
+
+本模块的实验（`SpringCoreBeansEarlyReferenceLabTest`）用最小代码把这件事讲透：
+
+```java
+static class EarlyProxyingPostProcessor implements SmartInstantiationAwareBeanPostProcessor {
+    @Override
+    public Object getEarlyBeanReference(Object bean, String beanName) {
+        // 在循环依赖窗口期提前返回 proxy，避免 raw 注入
+        ...
+    }
+}
+```
+
+你把这段代码与上面的 `getSingleton` 伪代码对照，就会明白：
+
+- 三级缓存不是“缓存技巧”，它承载的是“early reference 的时机与语义”
+- `getEarlyBeanReference` 决定了 early reference 是 raw 还是 proxy
+
+## 必要时用仓库 src 代码复现两类环（最小片段）
+
+**构造器循环（fail-fast）**：`SpringCoreBeansContainerLabTest`（最小片段）
+
+```java
+record CycleA(CycleB cycleB) {}
+record CycleB(CycleA cycleA) {}
+```
+
+**setter 循环（可能成功）**：同一文件里用 `@Autowired` setter 形成环，容器通过 early exposure 让引用先跑起来。
+
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 
 建议直接从这些测试方法开始（每个都对应一个经典结论）：

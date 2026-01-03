@@ -138,3 +138,84 @@
 到这里为止，你就不再是“懂概念”，而是能把问题定位到：定义层（注册/顺序/条件）还是实例层（注入/代理/回调）。
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansContainerLabTest.java`
 推荐断点：`DefaultListableBeanFactory#getBeanDefinition`、`AbstractBeanFactory#getMergedLocalBeanDefinition`、`AbstractAutowireCapableBeanFactory#doCreateBean`
+
+## 8. 源码解析：把“三层心智模型”落到 Spring 主线
+
+这一节的目标是：你不需要背 Spring 源码，但你必须能把“inputs/definitions/instances”准确映射到**哪类类名、哪段主线、哪几个关键方法**，否则遇到代理/循环依赖/后处理器时会迷路。
+
+> 说明：这里不粘贴 Spring Framework 的大段源码（噪声大且易过拟合版本）。采用“方法名 + 调用链 + 关键状态 + 精简伪代码”的方式解释机制。
+
+### 8.1 definitions：BeanDefinition 存在哪里、什么时候会“变”
+
+**核心落点：`DefaultListableBeanFactory`（DLBF）是定义层的“仓库”。**
+
+- `BeanDefinition` 的注册入口最终都会落到：`BeanDefinitionRegistry#registerBeanDefinition`
+- 对 DLBF 来说，最重要的事实是：它内部维护了“beanName → BeanDefinition”的映射（你不需要背字段名，但要知道它存在且会在早期被大量写入）。
+
+为什么你有时会看到“同一个 beanName 的定义好像变了”？常见原因是：
+
+1) **原始定义（raw definition）会被“合并”**：例如 parent/child、`@Bean` 方法元信息等会合成 `RootBeanDefinition`（对应你在 docs/35 看到的 merged definition）
+2) **定义会被 BFPP/BDRPP 改写**：发生在实例化之前（refresh 很早期），因此你在 `doCreateBean` 里看到的可能已经不是“最初注册进去的那份 definition”
+
+一个非常实用的分界线：
+
+- `getBeanDefinition(beanName)` 更像“读原始登记信息”
+- `getMergedBeanDefinition(beanName)` 更像“读最终配方（包含合并/补全后的元信息）”
+
+### 8.2 instances：实例创建的主线在哪里（instantiate → populate → initialize）
+
+**实例层主线基本都收敛在：`AbstractAutowireCapableBeanFactory#doCreateBean`。**
+
+你可以把它当作一个非常稳定的“阶段框架”（精简伪代码）：
+
+```text
+doCreateBean(beanName, mbd):
+  beanInstance = createBeanInstance(...)          // instantiate
+  if (isSingleton && allowCircular && inCreation):
+     addSingletonFactory(beanName, () -> getEarlyBeanReference(...)) // early exposure
+  populateBean(beanName, mbd, beanInstance)       // populate (DI happens here)
+  exposedObject = initializeBean(beanName, beanInstance, mbd)        // initialize
+  registerDisposableIfNecessary(beanName, beanInstance, mbd)         // destroy hooks
+  return exposedObject
+```
+
+把这条主线记住，你就能把很多“现象”放回正确阶段：
+
+- 注入报错（NoSuch/NoUnique）通常是在 `populateBean` 的依赖解析过程中爆出来的（见 docs/03）
+- 生命周期回调链（Aware/@PostConstruct/afterPropertiesSet/initMethod）发生在 `initializeBean`（见 docs/05）
+- 循环依赖的 early reference 发生在“实例已经有了，但还没 initialize 完”的窗口期（见 docs/09、docs/16）
+
+### 8.3 最终暴露对象：为什么 getBean() 拿到的可能不是“原始实例”
+
+**关键结论：容器返回的是“最终暴露对象（exposed object）”，它可能在多个点被替换/包装。**
+
+常见的三类替换点（只记住它们存在即可，后续章节会分别深挖）：
+
+1) **实例化前短路**：`resolveBeforeInstantiation` → `postProcessBeforeInstantiation`（见 docs/15）
+2) **early reference**：`getEarlyBeanReference`（循环依赖窗口期，见 docs/16）
+3) **初始化后替换**：`postProcessAfterInitialization`（最常见的代理产生点，见 docs/31）
+
+这也是为什么你在排障时不能只问“这个类有没有被 new”，而要问：
+
+- “最终暴露对象是什么类型？（接口代理/类代理/原始类？）”
+- “它在哪个阶段被替换的？（pre/early/after-init）”
+
+### 8.4 必要时用仓库 src 代码把它“看见”（最小片段）
+
+**例 1：definition != instance（定义层对象和实例层对象不是一个概念）**
+
+来自 `spring-core-beans/src/test/java/.../SpringCoreBeansContainerLabTest.java`（最小片段）：
+
+```java
+try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SimpleBeanConfig.class)) {
+    BeanDefinition beanDefinition = context.getBeanFactory().getBeanDefinition("exampleBean");
+    ExampleBean bean = context.getBean(ExampleBean.class);
+}
+```
+
+**例 2：最终暴露对象可被 BPP 替换成 proxy（按接口能拿到、按实现类可能拿不到）**
+
+来自 `spring-core-beans/src/test/java/.../SpringCoreBeansBeanCreationTraceLabTest.java`：
+
+- 它会在 after-initialization 阶段返回一个 JDK proxy（只实现接口）
+- 因此 `context.getBean(WorkService.class)` 成功，但按具体类取可能失败（典型“最终暴露对象 != 原始实例”）

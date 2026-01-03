@@ -281,6 +281,81 @@ Exercises 里也专门有题让你把 `@Qualifier` 改成 `@Primary` 来体会�
 - 集合注入排序：`@Order/@Priority/Ordered`
 - “能注入但不是 bean”：`resolvableDependencies`（见 [20](20-resolvable-dependency.md)）
 
+## 源码解析补充：`doResolveDependency` 的关键分支（伪代码）
+
+上面的“候选收集与收敛”讲的是主干逻辑，但你在真实项目里常遇到的“为什么它没走到 findAutowireCandidates？”通常是因为在更早的分支就返回了。
+
+下面给一份**足够贴近断点观察**的精简伪代码（只保留关键分叉，不追求逐行一致）：
+
+```text
+resolveDependency(descriptor):
+  // A) 特殊依赖：不是 bean，但允许注入（例如 BeanFactory/ApplicationContext）
+  if (resolvableDependencies 命中):
+     return 直接返回
+
+  // B) 值注入（@Value / 占位符 / SpEL）：由候选解析器提供 suggested value
+  if (resolver.getSuggestedValue(descriptor) != null):
+     return convertIfNecessary(...)
+
+  // C) “按名称”直接命中（字段名/参数名 或 resolver 建议名）
+  if (dependencyName 或 suggestedName 能唯一命中且类型匹配):
+     return getBean(name)
+
+  // D) 多元素依赖：数组/集合/Map/Stream/Provider
+  if (isArrayOrCollectionOrMapOrStream(descriptor)):
+     return resolveMultipleBeans(...)
+  if (isObjectFactoryOrObjectProvider(descriptor)):
+     return DependencyObjectProvider(...) // 延迟到 getObject()/getIfAvailable() 再解析
+
+  // E) 普通单依赖：按类型收集候选，再确定化选择
+  candidates = findAutowireCandidates(...)
+  if (candidates 为空):
+     if (required) throw NoSuchBeanDefinitionException
+     else return null/Optional.empty
+
+  candidateName = determineAutowireCandidate(candidates, descriptor)
+  if (candidateName 为空):
+     throw NoUniqueBeanDefinitionException
+  return getBean(candidateName)
+```
+
+你可以把它当作一张“排障分叉图”：
+
+- 如果你在 `doResolveDependency` 里没看到候选集合的变化，先检查是不是命中 A/B/C/D 之一提前返回了
+- 真正的“多候选如何选”只发生在 E 分支里
+
+## 必要时用仓库 src 代码把分支差异讲清楚（最小片段）
+
+下面这段来自 `spring-core-beans/src/test/java/.../SpringCoreBeansAutowireCandidateSelectionLabTest.java`，它同时覆盖了：
+
+- `@Order`：只影响集合注入顺序（List/Stream）
+- `@Primary/@Priority`：影响单依赖“选谁”
+
+（最小片段，省略无关方法体）：
+
+```java
+interface Worker { String id(); }
+
+@Order(0)
+static class FirstOrderedWorker implements Worker { ... }
+
+@Order(1)
+static class SecondOrderedWorker implements Worker { ... }
+
+static class OrderedWorkersConsumer {
+    OrderedWorkersConsumer(List<Worker> workers) { ... } // 集合注入：会排序
+}
+
+static class SingleWorkerConsumer {
+    SingleWorkerConsumer(Worker worker) { ... } // 单依赖：@Order 不参与“选谁”
+}
+```
+
+有了这段代码，你在源码断点里就很容易对照：
+
+- 集合注入会走 `resolveMultipleBeans(...)` 分支 → 然后按 order 排序
+- 单依赖注入会走 `findAutowireCandidates(...)` → `determineAutowireCandidate(...)` 分支 → 不会因为 `@Order` 变成唯一候选
+
 下一章我们会把 “候选是怎么创建出来的” 和 “什么时候创建” 结合起来讲：Scope。
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansBeanGraphDebugLabTest.java`
 推荐断点：`DefaultListableBeanFactory#doResolveDependency`、`DefaultListableBeanFactory#determineAutowireCandidate`、`AutowiredAnnotationBeanPostProcessor#postProcessProperties`

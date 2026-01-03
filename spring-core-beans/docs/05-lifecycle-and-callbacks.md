@@ -36,6 +36,88 @@
 
 > 重要提醒：`@PostConstruct/@PreDestroy` 不是 Java 语法“自带”的生命周期，它依赖容器注册了对应的后处理器；这也是为什么理解 docs/06（post-processors）与 docs/12（基础设施处理器）非常关键。
 
+### 1.3 源码解析：`initializeBean` 的回调链路（精简伪代码）
+
+你不需要逐行背 Spring 源码，但**必须能把“回调顺序”落到一个稳定的方法骨架**，否则遇到 BPP/代理介入时很难解释“为什么是这个顺序”。
+
+在 Spring Framework 里，初始化阶段的骨架非常稳定（精简伪代码）：
+
+```text
+initializeBean(beanName, bean, mbd):
+  invokeAwareMethods(beanName, bean)                      // BeanNameAware/BeanFactoryAware 等
+  bean = applyBeanPostProcessorsBeforeInitialization(...) // 这里可能触发 @PostConstruct
+  invokeInitMethods(beanName, bean, mbd)                  // afterPropertiesSet / initMethod
+  bean = applyBeanPostProcessorsAfterInitialization(...)  // 这里经常产生 proxy（最终暴露对象）
+  return bean
+```
+
+几个“不要说错”的点（框架岗常追问）：
+
+1) **Aware 发生在 init callbacks 之前**：因为很多 init 逻辑需要先拿到 beanName/BeanFactory 等容器信息  
+2) **`@PostConstruct` 发生在 before-init BPP 链路中**：它不是 `initializeBean` 的“硬编码步骤”，而是由一个 BPP 触发  
+3) **after-init 可能返回代理**：因此“最终暴露对象”可能不是原始实例（这也是为什么生命周期与代理经常被放在一起讲）
+
+### 1.4 源码解析：销毁链路（singleton 的 destroy 主线）
+
+销毁不是“某个注解自动执行”，它同样是一条容器主线：
+
+1) `AbstractApplicationContext#close` / `doClose`
+2) `DefaultSingletonBeanRegistry#destroySingletons`
+3) `DisposableBeanAdapter#destroy`（把各种 destroy 方式统一成一个适配器）
+
+精简伪代码（帮助你在断点里认路）：
+
+```text
+destroySingletons():
+  for each disposableBean:
+    invokeDestructionAwareBeanPostProcessorsBeforeDestruction(...)
+    invoke @PreDestroy (JSR-250)
+    invoke DisposableBean#destroy
+    invoke custom destroyMethod (e.g., @Bean(destroyMethod=...))
+```
+
+对应到工程结论就是：
+
+- singleton：容器负责销毁（因此你能看到 @PreDestroy）
+- prototype：容器通常不负责销毁（因此你“看不到 @PreDestroy”，见下文的 Lab）
+
+### 1.5 必要时用仓库 src 代码把“顺序”固化成可断言结论
+
+本模块的 `SpringCoreBeansLifecycleCallbackOrderLabTest` 就是把上面的骨架变成可重复实验：
+
+1) 它用一个 `RecordingBeanPostProcessor` 在 before/after-init 打点
+2) bean 本身同时实现 Aware、InitializingBean、DisposableBean，并声明 `@PostConstruct/@PreDestroy`
+3) 最后断言事件顺序（你不需要看日志，直接看断言即可）
+
+最小片段（省略无关实现）：
+
+```java
+assertThat(events).containsExactly(
+        "constructor",
+        "aware:beanName=recordingBean",
+        "aware:beanFactory",
+        "aware:applicationContext",
+        "bpp:beforeInit",
+        "postConstruct",
+        "afterPropertiesSet",
+        "initMethod",
+        "bpp:afterInit",
+        "preDestroy",
+        "destroy",
+        "destroyMethod"
+);
+```
+
+以及一个更贴近应用直觉的例子（`src/main/java`）：
+
+```java
+@Component
+public class LifecycleLogger {
+    @PostConstruct void onInit() { ... }
+    @PreDestroy void onDestroy() { ... }
+}
+```
+
 ### 1.2 Aware 系列回调：真实作用、触发者与发生时机
 
 很多人把 Aware 理解成“知道自己叫什么名字”，但对原理/框架岗来说，更关键的是：

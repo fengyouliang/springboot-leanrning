@@ -146,3 +146,105 @@ mvn -pl spring-core-beans test
 你会直观感受到：“注册入口决定了最终有哪些 BeanDefinition”，而不是“运行时魔法注入”。
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansImportLabTest.java`
 推荐断点：`ConfigurationClassPostProcessor#processConfigBeanDefinitions`、`ClassPathBeanDefinitionScanner#doScan`、`DefaultListableBeanFactory#registerBeanDefinition`
+
+## 9. 源码解析：这些“注册入口”最终如何落到 BeanDefinitionRegistry
+
+这一节把“入口名字”翻译成“Spring 源码主线”：
+
+- 你写下的扫描 / `@Bean` / `@Import` / registrar，最终都会在**定义层**变成 `BeanDefinition`，并通过 `BeanDefinitionRegistry` 写入容器
+- 在 `AnnotationConfigApplicationContext` 这类典型容器里，定义层的核心推进者是：`ConfigurationClassPostProcessor`（它本质是一个 BDRPP）
+
+> 说明：这里的“源码解析”以 Spring Framework 的稳定主线为准，不对某个小版本的内部细节做强绑定。
+
+### 9.1 总主线（从 refresh 到“定义入库”）
+
+在容器启动时，配置解析与定义注册发生在 refresh 的早期阶段（定义层）：
+
+1) `AbstractApplicationContext#refresh`
+2) `PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`
+3) `ConfigurationClassPostProcessor#postProcessBeanDefinitionRegistry`
+4) `ConfigurationClassPostProcessor#processConfigBeanDefinitions`
+
+你只要抓住一个事实就够了：**`ConfigurationClassPostProcessor` 会把“各种 inputs”解析成 BeanDefinition 并注册。**
+
+### 9.2 扫描（`@ComponentScan` / stereotype）到底是谁在扫
+
+扫描并不是“Spring 启动时自动扫一遍 classpath”，而是：
+
+- 配置类解析阶段发现了 `@ComponentScan`（或隐式的扫描配置）
+- 然后调用扫描器把候选类转成 `BeanDefinition` 并注册
+
+关键参与者（记住名字用于搜索/断点即可）：
+
+- `ComponentScanAnnotationParser`（解析 `@ComponentScan` 元信息）
+- `ClassPathBeanDefinitionScanner#doScan`（真正执行扫描）
+- `ClassPathScanningCandidateComponentProvider`（找到候选）
+- `BeanNameGenerator`（决定默认 beanName）
+
+仓库中的扫描示例（`src/main/java`，最小片段）：
+
+```java
+@Component("upperFormatter")
+public class UpperCaseTextFormatter implements TextFormatter { ... }
+```
+
+它最终会变成一个“基于 class 的 BeanDefinition”（一般能在 definition 中看到 beanClassName，以及 resource/source 的元信息）。
+
+### 9.3 `@Configuration` + `@Bean`：为什么说“@Bean 先变成定义，后执行工厂方法”
+
+`@Bean` 方法本质上是“一个工厂方法定义”。在定义层它会被记录为：
+
+- beanName（默认是方法名）
+- factoryBeanName（哪个配置类提供）
+- factoryMethodName（哪个方法创建）
+
+关键参与者：
+
+- `ConfigurationClassParser`：把配置输入解析成配置模型
+- `ConfigurationClassBeanDefinitionReader`：把模型“落到 BeanDefinitionRegistry”
+
+仓库中的 `@Bean` 示例（`src/test/java`，最小片段）：
+
+```java
+@Configuration
+static class ImportedConfiguration {
+    @Bean
+    ImportedMarker importedMarker() { ... }
+}
+```
+
+你在 `BeanDefinition` 上看到 `factoryMethodName=importedMarker` 时，就应该立刻联想到：**这是“工厂方法定义”，并不是“扫描出来的类定义”。**
+
+### 9.4 `@Import` / ImportSelector / Registrar：为什么它们像“框架魔法入口”
+
+`@Import` 发生在配置类解析阶段，它会把“额外配置来源”拼进同一条定义注册主线里。
+
+你只需要掌握三种模式的本质差异：
+
+1) **import 配置类**：把另一个配置类当作输入（最终它的 `@Bean` 也会变成 BeanDefinition）
+2) **import selector**：在解析阶段返回“要导入的配置类列表”（Boot 自动装配是它的加强版：DeferredImportSelector）
+3) **import registrar**：直接拿到 `BeanDefinitionRegistry`，用代码注册任意定义（最强也最容易滥用）
+
+仓库中的 registrar 示例（`src/test/java`，最小片段）：
+
+```java
+static class RegisteredMessageRegistrar implements ImportBeanDefinitionRegistrar {
+    @Override
+    public void registerBeanDefinitions(AnnotationMetadata meta, BeanDefinitionRegistry registry) { ... }
+}
+```
+
+你可以把 registrar 记成一句话：**它跳过“注解到定义”的自动推导过程，直接把定义写进容器。**
+
+### 9.5 真实排障：如何从 BeanDefinition 反推“注册入口”
+
+当你问“这个 bean 到底是谁注册的？”时，优先从 `BeanDefinition` 这几项入手：
+
+- `beanClassName`：更像扫描/直接类定义
+- `factoryBeanName + factoryMethodName`：几乎可以肯定来自 `@Bean` 工厂方法
+- `resourceDescription`：很多情况下能提示来自哪个配置资源
+- `source`：可能是注解元数据/方法元数据（用于进一步追根）
+
+本模块已有可复用的小工具（测试辅助类）可以 dump 这些信息：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/BeanDefinitionOriginDumper.java`
