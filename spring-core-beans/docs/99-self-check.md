@@ -75,3 +75,18 @@
 - `src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansExerciseTest.java`
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansLabTest.java`
 推荐断点：`DefaultListableBeanFactory#doResolveDependency`、`AbstractAutowireCapableBeanFactory#doCreateBean`、`AbstractAutowireCapableBeanFactory#initializeBean`
+
+## G. First Pass（10 个最小闭环入口，按 Lab 自测）
+
+如果你不想一次性把整套章节都读完，想先把“主线 + 常见坑点”跑通一遍，可以按下面 10 个入口做自测：每个入口只要求你写 1–2 句结论（定义层/实例层/时机/顺序/断点入口）。
+
+1) 定义层 vs 实例层：`SpringCoreBeansContainerLabTest#beanDefinitionIsNotTheBeanInstance`
+2) refresh 阶段感：从 `AbstractApplicationContext#refresh` 走一遍 BFPP/BPP 的关键阶段（同上测试即可）
+3) 注册入口：`SpringCoreBeansBootstrapInternalsLabTest`（配合 [02](02-bean-registration.md)）
+4) 注入歧义：`SpringCoreBeansInjectionAmbiguityLabTest`
+5) 候选选择边界：`SpringCoreBeansAutowireCandidateSelectionLabTest`
+6) prototype 注入陷阱：`SpringCoreBeansLabTest`（prototype 相关用例）
+7) 生命周期回调顺序：`SpringCoreBeansLifecycleCallbackOrderLabTest`
+8) post-processor 职责边界：`SpringCoreBeansRegistryPostProcessorLabTest` + `SpringCoreBeansPostProcessorOrderingLabTest`
+9) early reference：`SpringCoreBeansEarlyReferenceLabTest`
+10) 排障断点入口：`SpringCoreBeansExceptionNavigationLabTest` / `SpringCoreBeansBeanGraphDebugLabTest`

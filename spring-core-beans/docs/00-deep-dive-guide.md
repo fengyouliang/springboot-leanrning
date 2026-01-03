@@ -46,6 +46,55 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansContainerLabTest#beanDefinitionI
 - `beanName.equals("alpha") || beanName.equals("beta")`
 - `beanName.startsWith("org.springframework.")`（反向过滤：排除 Spring 自己的）
 
+### 0.3 先跑一遍“First Pass”（不新增章节文件版）
+
+如果你现在的目标是“先把主线跑通”，而不是立刻深挖每个细节，可以按下面 10 个最小实验走一遍。
+
+约束很简单：**每一步只要求你写 1–2 句可复述结论**（定义层/实例层/时机/顺序/断点入口），不要求背源码。
+
+运行方式（推荐精确到方法，噪声最小）：
+
+```bash
+mvn -pl spring-core-beans -Dtest=<TestClass>#<testMethod> test
+```
+
+10 个最小实验清单（按“先建立阶段感，再补边界”的顺序）：
+
+1) 定义层 vs 实例层：`BeanDefinition != bean instance`  
+   - 入口：`SpringCoreBeansContainerLabTest#beanDefinitionIsNotTheBeanInstance`  
+   - 你要写：两句话说明“定义层/实例层”，以及“为什么最终 `getBean()` 可能不是原始实例（proxy）”
+
+2) refresh 6 步粗粒度流程图（1 行/步即可）  
+   - 入口：任意能 refresh 的最小 Lab（同上即可）  
+   - 你要画：注册定义 → BFPP/BDRPP → 注册 BPP → 创建单例 → 收尾事件（抓住阶段边界即可）
+
+3) BeanDefinition 从哪里来（列 3 条入口 + 各 1 句定位方法）  
+   - 入口：阅读 [02](02-bean-registration.md) + 跑 `SpringCoreBeansBootstrapInternalsLabTest`  
+   - 你要写：扫描 / `@Bean` / `@Import`（selector/registrar）各自如何落到 registry
+
+4) 注入歧义：用 `@Primary` 与 `@Qualifier` 各修一次并解释差异  
+   - 入口：`SpringCoreBeansInjectionAmbiguityLabTest`
+
+5) 候选选择 vs 排序/链路：别把 `@Order` 当“选谁注入”  
+   - 入口：`SpringCoreBeansAutowireCandidateSelectionLabTest`  
+   - 你要写：`@Primary/@Priority/@Order` 哪些影响“单依赖选择”，哪些影响“集合/链路顺序”
+
+6) prototype 注入 singleton 的坑：为什么“看起来像单例”？给出 1 个修复方案  
+   - 入口：`SpringCoreBeansLabTest`（prototype 相关用例）
+
+7) 生命周期：`@PostConstruct` 触发时机 + prototype 销毁语义（各 1 句）  
+   - 入口：`SpringCoreBeansLifecycleCallbackOrderLabTest`
+
+8) 三类 post-processor：BDRPP / BFPP / BPP 各自“改什么/什么时候改”  
+   - 入口：`SpringCoreBeansRegistryPostProcessorLabTest` + `SpringCoreBeansPostProcessorOrderingLabTest`
+
+9) early reference：哪类循环依赖可能被缓解？构造器循环为何通常无解？  
+   - 入口：`SpringCoreBeansEarlyReferenceLabTest`
+
+10) 排障闭环：从异常信息找到 1 个“最有效”的断点入口，并解释为什么  
+   - 入口：`SpringCoreBeansExceptionNavigationLabTest` / `SpringCoreBeansBeanGraphDebugLabTest`  
+   - 你要写：注入失败优先看 `doResolveDependency`；代理/替换优先看 `doCreateBean`/`postProcessAfterInitialization`
+
 ---
 
 ## 1. 深挖时最容易迷路的点（以及正确抓手）
