@@ -7,6 +7,10 @@
 ### Changed
 - `spring-core-beans`：补齐模块 README 学习路线（Start Here/入门→进阶→深挖/refresh 主线一页纸/运行态观察点），新增“注入歧义最小复现”Lab + 对应 Exercise，并增强 `BeansDemoRunner` 的 `BEANS:` 结构化输出；同时同步根 README 与 progress 打卡入口。
 - `spring-core-beans`：把“新增面试点”按主题嵌入到 docs/01、03、05、16、31、33 的正文对应小节，并补齐可断言复现入口（新增 BeanFactory vs ApplicationContext / Aware 基础设施 / 泛型匹配坑 Labs；扩展 proxy 章节增加 CGLIB vs JDK 对照与 BPP 定位闭环）。
+- `spring-core-beans`：在 docs/01、02、03、05、09 增补 Spring 源码解析（refresh 主线/ConfigurationClassPostProcessor 注册入口/`doResolveDependency` 候选收敛/`doCreateBean` 生命周期/三级缓存循环依赖），并补充最小仓库 src 代码片段辅助理解。
+- `spring-core-beans`：继续深化 docs/06 与 docs/12（PostProcessors/容器启动基础设施）：补齐 `PostProcessorRegistrationDelegate` 两段算法的源码级解释，并新增“static @Bean BFPP”最小可运行 Lab 用于解释早实例化与顺序陷阱。
+- `spring-core-beans`：把 docs/14（Ordering）与 docs/25（programmatic BPP 注册）补成“算法级 + 可复现”版本：补齐分段执行/排序器规则/internal BPP 重新注册，以及 `addBeanPostProcessor` 的 list 语义与“BPP 不会 retroactive”的时机陷阱；同时增强 ordering Lab 覆盖 order 数值与 @Order 反例。
+- `spring-core-beans`：移除误添加的 `docs/00-first-pass-learning-loop.md` 并清理引用；同时把可执行的“First Pass（10 个最小实验入口）”融入 `docs/00-deep-dive-guide.md` 与 `docs/99-self-check.md`，避免额外文件带来的重复编号与噪声。
 - `spring-core-beans`：深化 Boot 自动装配章节（docs/10）：补齐 `matchIfMissing` 三态语义与自动配置顺序依赖（after/before）最小复现 Lab，并在 docs/11 与 README 的索引表同步入口。
 - `spring-core-beans`：深化 Boot 自动装配 Exercises：新增 matchIfMissing 三态与 `@ConditionalOnBean` 顺序/时机差异的练习题，并提供“条件报告可查询”的 helper 练习，确保所有面试点落位到 docs/10 对应正文小节。
 - `spring-core-beans`：补齐 auto-config back-off/覆盖排障闭环：新增 early/late registrar 对照 Lab，解释“为什么写了覆盖 Bean 但没退让”的真实原因，并把入口落位到 docs/10 的“覆盖”正文小节。

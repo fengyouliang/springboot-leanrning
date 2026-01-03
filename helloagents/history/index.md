@@ -19,6 +19,11 @@
 | 202601021041 | spring_core_beans_auto_config_backoff_debug | Enhancement | ✅Completed | [202601021041_spring_core_beans_auto_config_backoff_debug](2026-01/202601021041_spring_core_beans_auto_config_backoff_debug/) |
 | 202601021144 | spring_core_beans_auto_config_mainline_debug | Enhancement | ✅Completed | [202601021144_spring_core_beans_auto_config_mainline_debug](2026-01/202601021144_spring_core_beans_auto_config_mainline_debug/) |
 | 202601021322 | complete_spring_core_fundamentals_remaining | Enhancement | ✅Completed | [202601021322_complete_spring_core_fundamentals_remaining](2026-01/202601021322_complete_spring_core_fundamentals_remaining/) |
+| 202601030641 | spring-core-beans-first-pass | Enhancement | [-]Not Executed | [202601030641_spring-core-beans-first-pass](2026-01/202601030641_spring-core-beans-first-pass/) |
+| 202601030652 | spring-core-beans-source-deep-dive | Enhancement | ✅Completed | [202601030652_spring-core-beans-source-deep-dive](2026-01/202601030652_spring-core-beans-source-deep-dive/) |
+| 202601030731 | spring-core-beans-post-processors-bootstrap-source-deepening | Enhancement | ✅Completed | [202601030731_spring-core-beans-post-processors-bootstrap-source-deepening](2026-01/202601030731_spring-core-beans-post-processors-bootstrap-source-deepening/) |
+| 202601030752 | spring-core-beans-ordering-programmatic-bpp-deepening | Enhancement | ✅Completed | [202601030752_spring-core-beans-ordering-programmatic-bpp-deepening](2026-01/202601030752_spring-core-beans-ordering-programmatic-bpp-deepening/) |
+| 202601031327 | first-pass-content-merge-into-existing-docs | Enhancement | ✅Completed | [202601031327_first-pass-content-merge-into-existing-docs](2026-01/202601031327_first-pass-content-merge-into-existing-docs/) |
 
 ---
 
@@ -37,3 +42,8 @@
 - [202601021041_spring_core_beans_auto_config_backoff_debug](2026-01/202601021041_spring_core_beans_auto_config_backoff_debug/) - spring-core-beans：auto-config back-off/覆盖排障闭环（early/late registrar 时机差异对照）
 - [202601021144_spring_core_beans_auto_config_mainline_debug](2026-01/202601021144_spring_core_beans_auto_config_mainline_debug/) - spring-core-beans：Boot 自动装配主线与排障可观察性补齐（import/排序主线 Lab + BeanDefinition 来源追踪 + 覆盖/back-off 矩阵）
 - [202601021322_complete_spring_core_fundamentals_remaining](2026-01/202601021322_complete_spring_core_fundamentals_remaining/) - AOP/Events/Tx：补齐 DemoRunner 结构化输出、Events 异常传播演示、Tx 自调用陷阱 Lab 与 progress 打卡入口
+- [202601030641_spring-core-beans-first-pass](2026-01/202601030641_spring-core-beans-first-pass/) - spring-core-beans：First Pass 学习清单（已撤回，不再保留额外 docs 闭环文件）
+- [202601030652_spring-core-beans-source-deep-dive](2026-01/202601030652_spring-core-beans-source-deep-dive/) - spring-core-beans：docs/01/02/03/05/09 补齐 Spring 源码解析（主线/注册/注入/生命周期/循环依赖）并补充最小 src 片段辅助理解
+- [202601030731_spring-core-beans-post-processors-bootstrap-source-deepening](2026-01/202601030731_spring-core-beans-post-processors-bootstrap-source-deepening/) - spring-core-beans：继续深化 docs/06/12（PostProcessors 算法与注解基础设施 bootstrap），新增 static @Bean BFPP 最小复现 Lab
+- [202601030752_spring-core-beans-ordering-programmatic-bpp-deepening](2026-01/202601030752_spring-core-beans-ordering-programmatic-bpp-deepening/) - spring-core-beans：补齐 docs/14/25（Ordering + programmatic BPP 注册）源码算法级解析，并增强 ordering Lab 覆盖 order 数值与 @Order 反例
+- [202601031327_first-pass-content-merge-into-existing-docs](2026-01/202601031327_first-pass-content-merge-into-existing-docs/) - spring-core-beans：将 First Pass 的最小实验入口融入 docs/00 与 docs/99（不新增独立文件）
