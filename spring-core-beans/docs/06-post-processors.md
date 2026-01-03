@@ -117,7 +117,124 @@ Spring 通常用这些规则决定顺序：
 - BFPP/BDRPP 更像“编译期改元数据”
 - BPP 更像“运行期改对象/换代理”
 
-## 3.3 断点闭环（用本仓库 Lab/Test 跑一遍）
+## 3.3 源码解析：`PostProcessorRegistrationDelegate` 的两段核心算法
+
+这一节的目标是把你前面记住的结论（BDRPP 更早、BFPP 改定义、BPP 改实例、顺序受 PriorityOrdered/Ordered 影响），落到 Spring 源码里最核心的两段逻辑：
+
+1) `invokeBeanFactoryPostProcessors`：**定义层**（registry/factory）post-processors 的执行算法  
+2) `registerBeanPostProcessors`：**实例层**（BeanPostProcessor）链路的注册算法
+
+你不需要逐行背源码，但你必须能回答：“为什么它这么设计？这个设计会造成哪些现象/坑？”
+
+### 3.3.1 `invokeBeanFactoryPostProcessors`：为什么 BDRPP 会“先 registry 再 factory”，还要“反复扫描”
+
+这个方法的设计动机其实很朴素：
+
+- **BDRPP 有能力在 registry 阶段注册新的 BeanDefinition**
+- 而新注册的 BeanDefinition 里，可能又包含新的 BDRPP/BFPP
+- 因此必须先把 registry 相关的事情跑到“稳定”（否则定义层永远不确定）
+
+精简伪代码（足够对照断点理解，不追求逐行一致）：
+
+```text
+invokeBeanFactoryPostProcessors(beanFactory):
+  // 0) 先执行“外部手工注册”的 processors（例如 context.addBeanFactoryPostProcessor）
+
+  // 1) 处理 BeanDefinitionRegistryPostProcessor（BDRPP）
+  processed = set()
+
+  // 1.1) PriorityOrdered BDRPP：可能注册新的 BDRPP，因此需要循环扫描
+  repeat:
+    current = find BDRPP names not in processed and implementing PriorityOrdered
+    instantiate + sort(current)
+    invoke postProcessBeanDefinitionRegistry on each
+    processed.addAll(current)
+  until no more
+
+  // 1.2) Ordered BDRPP（同理可能注册新的 BDRPP）
+  repeat ... Ordered ...
+
+  // 1.3) Unordered BDRPP（同理）
+  repeat ... remaining ...
+
+  // 1.4) registry 阶段结束后，再统一调用所有 BDRPP 的 postProcessBeanFactory
+
+  // 2) 再处理普通 BeanFactoryPostProcessor（BFPP）
+  bfpp = find BFPP names not in processed
+  group by PriorityOrdered / Ordered / unordered
+  instantiate + sort each group, then invoke postProcessBeanFactory
+```
+
+你从这段伪代码应该得到 3 个稳定结论（非常重要）：
+
+1) **BDRPP 的 `postProcessBeanDefinitionRegistry` 可能会多轮执行**：不是因为 Spring “爱绕”，而是为了把 registry 稳定下来  
+2) **BDRPP 的 registry 回调一定发生在 BFPP 之前**：否则 BFPP 可能看不到新注册的定义（或改不到正确的定义）  
+3) **“顺序接口”在这里才真正产生决定性作用**：PriorityOrdered/Ordered/无序不是装饰，而是直接改变执行顺序
+
+### 3.3.2 `registerBeanPostProcessors`：为什么 BPP 也要分组注册？为什么会出现“没被所有 BPP 处理”的警告？
+
+`BeanPostProcessor` 属于实例层扩展点，但它的注册同样发生在 refresh 的中前段：因为后面一旦进入 `preInstantiateSingletons`，大量 bean 会被创建，必须先把 BPP 链准备好。
+
+精简伪代码（同样只保留关键分叉）：
+
+```text
+registerBeanPostProcessors(beanFactory):
+  names = getBeanNamesForType(BeanPostProcessor)
+
+  // A) 先注册一个“检查器”（BeanPostProcessorChecker）
+  //    用于提示：某些 bean 在 BPP 链尚未完整时就被创建了，因此无法被所有 BPP 处理
+
+  // B) 分三组：PriorityOrdered / Ordered / unordered
+  //    先注册 PriorityOrdered，再注册 Ordered，最后注册无序
+  //    注意：注册过程会 instantiate BPP（BPP 本身也是 bean）
+
+  // C) internal BPP 往往会被最后再补一遍（确保排序稳定）
+```
+
+“为什么会出现没被所有 BPP 处理”的现象？根因只有一句话：
+
+> **BPP 是“创建时拦截链”，不是“创建后补丁”。**  
+> 某个 bean 如果在 BPP 链未完整时就被创建，那么后续 BPP 不会 retroactively 生效。
+
+这也是为什么 docs/06 的坑 4.1 会出现：如果你在 BDRPP/BFPP 阶段（定义层）就 `getBean()`，就可能把某些 bean 提前创建出来，导致它错过后续 BPP（包括代理、@Autowired/@PostConstruct 等处理器）。
+
+### 3.3.3 为什么很多 BFPP/BPP 建议写成 `static @Bean`（源码级原因 + 最小复现）
+
+你在资料里经常看到一句建议：
+
+> “BFPP/BPP 这种 post-processor 类型的 @Bean，尽量声明为 `static`。”
+
+这不是编码风格偏好，而是一个非常具体的时机问题：
+
+- BFPP/BDRPP 的实例会在 `invokeBeanFactoryPostProcessors` 阶段被创建
+- 如果 BFPP 是一个 **non-static `@Bean` 工厂方法**，Spring 为了调用这个方法，就必须先实例化配置类（`@Configuration` bean）
+- 但配置类此时被创建得太早，会错过后续注册的普通 BPP（因为 BPP 链还没完整）
+- 如果 BFPP 是 **static `@Bean` 工厂方法**，Spring 可以直接调用静态工厂方法创建 BFPP，不需要提前实例化配置类，从而避免该配置类“过早出生”
+
+本模块提供了最小可运行复现（事件断言，不依赖日志）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansStaticBeanFactoryPostProcessorLabTest.java`
+
+你可以把它当作面试题的“可证据化答案”：  
+**non-static BFPP 迫使配置类早实例化 ⇒ 配置类错过普通 BPP ⇒ 行为/增强出现顺序陷阱。**
+
+最小片段（对比关键点：static vs non-static）：
+
+```java
+@Configuration
+static class NonStaticBfppConfig {
+    @Bean
+    BeanFactoryPostProcessor bfpp() { ... } // 需要先实例化配置类才能调用工厂方法
+}
+
+@Configuration
+static class StaticBfppConfig {
+    @Bean
+    static BeanFactoryPostProcessor bfpp() { ... } // 不需要实例化配置类即可创建 BFPP
+}
+```
+
+## 3.4 断点闭环（用本仓库 Lab/Test 跑一遍）
 
 建议用这些测试把“时机”变成手感（每个都对应非常典型的真实问题）：
 
@@ -132,7 +249,7 @@ Spring 通常用这些规则决定顺序：
 - 手工注册 BPP 的顺序陷阱：
   - `SpringCoreBeansProgrammaticBeanPostProcessorLabTest`
 
-### 3.4 推荐断点（够用版）
+### 3.5 推荐断点（够用版）
 
 - 入口时间线：
   - `AbstractApplicationContext#refresh`

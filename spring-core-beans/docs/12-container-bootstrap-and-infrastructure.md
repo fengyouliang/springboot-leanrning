@@ -40,6 +40,50 @@
 
 - `SpringCoreBeansBootstrapInternalsLabTest.registerAnnotationConfigProcessors_enablesAutowiredAndPostConstruct()`
 
+### 1.3 源码解析：为什么 `AnnotationConfigApplicationContext` “默认就有注解能力”？
+
+你前面看到的结论是：
+
+- `GenericApplicationContext` 默认不处理 `@Autowired/@PostConstruct/@Bean/...`
+- 手工调用 `AnnotationConfigUtils.registerAnnotationConfigProcessors(context)` 后，注解才“生效”
+
+但真实项目里你经常并没有手工调用这句——因为你用的是 `AnnotationConfigApplicationContext`（以及 Spring Boot 创建的各种 `ApplicationContext` 实现），它们在 bootstrap 阶段就把这套基础设施装配好了。
+
+**关键点：注解能力不是“refresh 时突然出现的”，而是容器在构造/初始化阶段就把一组 internal processors 注册到了 registry。**
+
+#### 1.3.1 关键链路：context 构造器 → reader → registerAnnotationConfigProcessors
+
+精简伪代码（只保留关键动作，不追求逐行一致）：
+
+```text
+new AnnotationConfigApplicationContext():
+  reader = new AnnotatedBeanDefinitionReader(this.registry)
+  scanner = new ClassPathBeanDefinitionScanner(this.registry)
+
+AnnotatedBeanDefinitionReader(registry):
+  AnnotationConfigUtils.registerAnnotationConfigProcessors(registry)
+```
+
+因此你在 `AnnotationConfigApplicationContext` 里天然就会看到那几个 internal processors 的 BeanDefinition（例如 internalAutowiredAnnotationProcessor 等），而 `GenericApplicationContext` 不会。
+
+#### 1.3.2 重要的时机差异：“注册进 registry” ≠ “已经生效”
+
+这是一个非常高频的误区：很多人看到 registry 里有这些 internal processors，就以为注解已经“能用”。
+
+更准确的说法是：
+
+1) `registerAnnotationConfigProcessors` 做的是 **定义层动作**：把处理器“作为 BeanDefinition 注册进 registry”
+2) 它们真正“生效”需要经历 refresh 的两个关键阶段：
+   - `invokeBeanFactoryPostProcessors`：`ConfigurationClassPostProcessor`（BDRPP）在这里解析 `@Configuration/@Bean/@Import`，把 `@Bean` 变成更多 BeanDefinition
+   - `registerBeanPostProcessors`：`AutowiredAnnotationBeanPostProcessor` / `CommonAnnotationBeanPostProcessor` 在这里被实例化并加入 BeanFactory 的 BPP 列表
+3) 等后续进入 bean 创建主线（`populateBean` / `initializeBean`）时：
+   - `@Autowired/@Resource` 才会在属性填充阶段被处理
+   - `@PostConstruct` 才会在初始化回调链里被触发
+
+你把这一段与 docs/06 的 `PostProcessorRegistrationDelegate` 两段算法对起来，就能得到一个稳定排障结论：
+
+- **registry 里有处理器，但 BeanFactory 的 BPP 列表里没有它 ⇒ 注解不会生效**
+
 ## 2. `@Bean` 为什么能“变成 BeanDefinition”？
 
 很多人以为：
@@ -48,7 +92,7 @@
 
 但实际上：
 
-- 如果没有 `ConfigurationClassPostProcessor`（一个 BFPP），`@Bean` 方法根本不会被解析成额外的 `BeanDefinition`
+- 如果没有 `ConfigurationClassPostProcessor`（一个 BDRPP，同时也是 BFPP），`@Bean` 方法根本不会被解析成额外的 `BeanDefinition`
 
 对应测试（同一个 config class，两种容器启动方式得到不同结果）：
 
