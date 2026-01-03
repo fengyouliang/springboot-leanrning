@@ -12,6 +12,8 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.annotation.Order;
 import org.springframework.context.support.GenericApplicationContext;
 
 class SpringCoreBeansPostProcessorOrderingLabTest {
@@ -36,6 +38,23 @@ class SpringCoreBeansPostProcessorOrderingLabTest {
     }
 
     @Test
+    void beanFactoryPostProcessors_withDifferentOrderValues_areSortedAscendingWithinOrderedGroup() {
+        List<String> events = new ArrayList<>();
+
+        try (GenericApplicationContext context = new GenericApplicationContext()) {
+            context.registerBean("orderedBfpp10", OrderedValueBfpp.class, () -> new OrderedValueBfpp(events, "bfpp:ordered10", 10));
+            context.registerBean("orderedBfpp0", OrderedValueBfpp.class, () -> new OrderedValueBfpp(events, "bfpp:ordered0", 0));
+            context.refresh();
+        }
+
+        System.out.println("OBSERVE: within the Ordered phase, smaller order value runs first");
+        assertThat(events).containsExactly(
+                "bfpp:ordered0",
+                "bfpp:ordered10"
+        );
+    }
+
+    @Test
     void beanPostProcessors_areAppliedInPriorityOrderedThenOrderedThenUnorderedOrder() {
         List<String> events = new ArrayList<>();
 
@@ -53,6 +72,46 @@ class SpringCoreBeansPostProcessorOrderingLabTest {
                 "bpp:priority",
                 "bpp:ordered",
                 "bpp:unordered"
+        );
+    }
+
+    @Test
+    void beanPostProcessors_withDifferentOrderValues_areSortedAscendingWithinOrderedGroup() {
+        List<String> events = new ArrayList<>();
+
+        try (GenericApplicationContext context = new GenericApplicationContext()) {
+            context.registerBean("orderedBpp10", OrderedValueBpp.class, () -> new OrderedValueBpp(events, "bpp:ordered10", 10));
+            context.registerBean("orderedBpp0", OrderedValueBpp.class, () -> new OrderedValueBpp(events, "bpp:ordered0", 0));
+
+            context.registerBean(Target.class);
+            context.refresh();
+        }
+
+        System.out.println("OBSERVE: within the Ordered phase, BeanPostProcessors are sorted by getOrder() ascending");
+        assertThat(events).containsExactly(
+                "bpp:ordered0",
+                "bpp:ordered10"
+        );
+    }
+
+    @Test
+    void beanPostProcessors_annotatedWithOrderButNotOrdered_areNotSorted_andFollowRegistrationOrder() {
+        List<String> events = new ArrayList<>();
+
+        try (GenericApplicationContext context = new GenericApplicationContext()) {
+            context.getDefaultListableBeanFactory().setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+
+            context.registerBean("annotated10Bpp", AnnotatedOrder10Bpp.class, () -> new AnnotatedOrder10Bpp(events));
+            context.registerBean("annotated0Bpp", AnnotatedOrder0Bpp.class, () -> new AnnotatedOrder0Bpp(events));
+
+            context.registerBean(Target.class);
+            context.refresh();
+        }
+
+        System.out.println("OBSERVE: @Order alone does not move a BeanPostProcessor into the Ordered phase; non-Ordered BPPs keep registration order");
+        assertThat(events).containsExactly(
+                "bpp:annotated10",
+                "bpp:annotated0"
         );
     }
 
@@ -164,5 +223,86 @@ class SpringCoreBeansPostProcessorOrderingLabTest {
     }
 
     static class Target {
+    }
+
+    static class OrderedValueBfpp implements BeanFactoryPostProcessor, Ordered {
+        private final List<String> events;
+        private final String event;
+        private final int order;
+
+        OrderedValueBfpp(List<String> events, String event, int order) {
+            this.events = events;
+            this.event = event;
+            this.order = order;
+        }
+
+        @Override
+        public int getOrder() {
+            return order;
+        }
+
+        @Override
+        public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+            events.add(event);
+        }
+    }
+
+    static class OrderedValueBpp implements BeanPostProcessor, Ordered {
+        private final List<String> events;
+        private final String event;
+        private final int order;
+
+        OrderedValueBpp(List<String> events, String event, int order) {
+            this.events = events;
+            this.event = event;
+            this.order = order;
+        }
+
+        @Override
+        public int getOrder() {
+            return order;
+        }
+
+        @Override
+        public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+            if (bean instanceof Target) {
+                events.add(event);
+            }
+            return bean;
+        }
+    }
+
+    @Order(10)
+    static class AnnotatedOrder10Bpp implements BeanPostProcessor {
+        private final List<String> events;
+
+        AnnotatedOrder10Bpp(List<String> events) {
+            this.events = events;
+        }
+
+        @Override
+        public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+            if (bean instanceof Target) {
+                events.add("bpp:annotated10");
+            }
+            return bean;
+        }
+    }
+
+    @Order(0)
+    static class AnnotatedOrder0Bpp implements BeanPostProcessor {
+        private final List<String> events;
+
+        AnnotatedOrder0Bpp(List<String> events) {
+            this.events = events;
+        }
+
+        @Override
+        public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+            if (bean instanceof Target) {
+                events.add("bpp:annotated0");
+            }
+            return bean;
+        }
     }
 }

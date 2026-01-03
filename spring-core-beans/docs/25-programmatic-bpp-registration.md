@@ -41,7 +41,65 @@
 
 这能解释很多工程里遇到的“我明明写了 order，但为什么不生效？”
 
-## 3. 什么时候会用到？
+## 3. 源码解析：`addBeanPostProcessor` 的语义就是“改 list”，因此不会触发排序
+
+很多人会误以为：既然我实现了 `Ordered/PriorityOrdered`，那 Spring 总会在某个时刻“帮我排一下序”。
+
+但对 programmatic 注册来说，事实恰好相反：
+
+> **`addBeanPostProcessor` 不负责排序，它只负责把对象放进 `beanFactory.getBeanPostProcessors()` 这个 list。**
+
+在 Spring 源码里（`AbstractBeanFactory#addBeanPostProcessor`），它的核心语义非常直接：
+
+```text
+addBeanPostProcessor(bpp):
+  synchronized(beanPostProcessors):
+    beanPostProcessors.remove(bpp)   // 如果已存在，先移除旧位置
+    beanPostProcessors.add(bpp)      // 永远追加到末尾
+```
+
+你从这个实现立刻能推导出两个稳定结论（也是本章两个测试的根因）：
+
+1) **执行顺序 = list 顺序**：它只会“越早 add 越靠前”，不会“越小 order 越靠前”
+2) **重复 add 会把它挪到最后**：因为 remove+add 的语义是“重新追加”
+
+对照容器自动发现路径：
+
+- 容器的排序发生在 `PostProcessorRegistrationDelegate#registerBeanPostProcessors`
+- 容器做的是：**先 sort，再按排序结果逐个 add 进 list**
+
+而你手工 add 的 BPP：
+
+- **根本不会进入 `registerBeanPostProcessors` 的排序输入集合**
+- 所以它当然也不会被容器排序
+
+## 4. 时机陷阱：BPP 不会 retroactive，只影响“之后创建”的 bean
+
+这一条在工程里比“Ordered 不生效”更常见，但很多人会把它误诊成“顺序问题”。
+
+核心事实只有一句话：
+
+> **BPP 是“创建时拦截链”，不是“创建后补丁”。**
+
+因此无论你是：
+
+- 手工 `addBeanPostProcessor`
+- 还是让容器自动发现并注册 BPP
+
+只要某个 bean 在 BPP 链完整之前就已经被创建出来，它就会错过后续 BPP（包括代理、增强、标记等）。
+
+本仓库的可运行复现（不是 programmatic add，但解释的是同一条“时机规律”）：
+
+- `SpringCoreBeansRegistryPostProcessorLabTest.getBeanDuringPostProcessing_instantiatesTooEarly_andSkipsLaterBeanPostProcessors()`
+  - 在 BDRPP/BFPP 阶段 `getBean()` 触发“过早实例化”
+  - 结果：early bean 不是 eligible for getting processed by all BPPs（后续 BPP 不会补上）
+
+把这一条理解清楚，你就能在排障时快速分流：
+
+- **顺序问题**：BPP 都注册了，但包裹/增强顺序不对 → 看 `beanFactory.getBeanPostProcessors()` 的 list 顺序
+- **时机问题**：bean 在 BPP 链完整前就被创建 → 看“是谁太早触发了 getBean/注入/FactoryMethod”
+
+## 5. 什么时候会用到？
 
 学习阶段你只要知道它存在即可；工程里典型使用场景是：
 
@@ -167,7 +225,7 @@
 
 - **在 BDRPP/BFPP 阶段 `getBean()` 触发过早实例化**，导致该 bean 在“没有 BPP 的世界”里先被创建出来（见 [13](13-bdrpp-definition-registration.md) 的反例）
 
-## 4. 一句话自检
+## 6. 一句话自检
 
 - 你能解释清楚：为什么手工注册的 BPP 不受 Ordered 影响吗？（提示：容器不会再对它排序，只按注册顺序调用）
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansProgrammaticBeanPostProcessorLabTest.java`

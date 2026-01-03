@@ -16,11 +16,71 @@ Spring 在同一类 post-processor 内，常用的排序规则是：
 
 > 这套规则适用于 BFPP 与 BPP（以及很多“插件式扩展点”）。
 
+## 1.1 源码解析：真正参与排序的“不是接口名”，而是 comparator 的比较规则
+
+你在脑子里需要同时放下 2 个概念（后面会反复用到）：
+
+1) **分组**：`PriorityOrdered` / `Ordered` / others（三段分组是“宏观规则”）
+2) **组内排序**：比较 `order` 值（`getOrder()` / `@Order` / `@Priority`）（这是“微观规则”）
+
+`PriorityOrdered` 与 `Ordered` 的意义不只是“标签”，而是会直接改变执行/注册阶段的分段流程；而在同一段内部，最终顺序取决于 comparator 计算出来的 order 值。
+
+### 1.1.1 `AnnotationAwareOrderComparator`：order 值解析规则（精简伪代码）
+
+Spring 里最常见的 comparator 是 `AnnotationAwareOrderComparator`，它是 `OrderComparator` 的增强版：在 `Ordered` 之外，还会读取 `@Order` 与 `@Priority`。
+
+精简伪代码（只保留最稳定的规则）：
+
+```text
+findOrder(obj):
+  if obj implements Ordered:
+    return obj.getOrder()            // 注意：接口优先级最高，会覆盖注解值
+
+  if obj (class/type) has @Order:
+    return @Order.value
+
+  if obj (class/type) has @Priority:
+    return @Priority.value
+
+  return null
+
+compare(o1, o2):
+  if o1 is PriorityOrdered and o2 is not: return -1
+  if o2 is PriorityOrdered and o1 is not: return  1
+
+  order1 = findOrder(o1) ?? LOWEST_PRECEDENCE
+  order2 = findOrder(o2) ?? LOWEST_PRECEDENCE
+  return Integer.compare(order1, order2)  // 数字越小越靠前
+```
+
+你只要记住两个结论就够：
+
+- **`Ordered#getOrder()` 比注解更强**：实现了接口就以接口为准
+- **order 值越小越靠前**：`HIGHEST_PRECEDENCE` 最靠前，`LOWEST_PRECEDENCE` 最靠后
+
+### 1.1.2 Spring 到底用哪个 comparator 排序？
+
+在 `PostProcessorRegistrationDelegate#sortPostProcessors` 里，Spring 的策略是：
+
+1) 如果 `beanFactory` 是 `DefaultListableBeanFactory` 且设置了 `dependencyComparator` → 用它
+2) 否则回退到 `OrderComparator.INSTANCE`（只认 `Ordered/PriorityOrdered`，**不认 `@Order`**）
+
+因此如果你在一个“只用 BeanFactory、不走 ApplicationContext”的极简场景里发现 `@Order` 不生效，通常不是你记错了规则，而是你根本没用到 `AnnotationAwareOrderComparator`。
+
+另外还有一个经常被忽略的点（很容易“学会了 comparator，却还是踩坑”）：
+
+- 对 BFPP/BDRPP/BPP 来说，`PostProcessorRegistrationDelegate` 的“分段”判断是按 **接口类型**（`PriorityOrdered/Ordered`）做的
+- **`@Order` 本身不会把你归到 Ordered 段**：如果你既没实现 `Ordered`，也没进入任何会被 sort 的列表，那么 `@Order` 再小也不会影响执行顺序
+
+本模块提供了一个“反直觉但很重要”的可复现反例（只用 `@Order`，不实现 `Ordered`）：  
+`SpringCoreBeansPostProcessorOrderingLabTest.beanPostProcessors_annotatedWithOrderButNotOrdered_areNotSorted_andFollowRegistrationOrder()`
+
 ## 2. BFPP 的顺序：先改谁的定义？
 
 对应测试：
 
 - `SpringCoreBeansPostProcessorOrderingLabTest.beanFactoryPostProcessors_areInvokedInPriorityOrderedThenOrderedThenUnorderedOrder()`
+- `SpringCoreBeansPostProcessorOrderingLabTest.beanFactoryPostProcessors_withDifferentOrderValues_areSortedAscendingWithinOrderedGroup()`
 
 它只断言我们自己注册的三个 BFPP 的相对顺序：
 
@@ -33,17 +93,113 @@ Spring 在同一类 post-processor 内，常用的排序规则是：
 
 学习重点：**你能控制你自己的扩展点顺序**。
 
+### 2.1 源码解析：`invokeBeanFactoryPostProcessors` 的分段执行算法（精简伪代码）
+
+本章不是让你去背源码，而是让你能回答一个“工程上最关键”的问题：
+
+> **为什么 Spring 要用多轮扫描 + 多段列表，而不是“一次性收集→一次性排序→一次性执行”？**
+
+答案就在源码注释里（原话大意）：为了严格遵守 `PriorityOrdered/Ordered` 的契约，**不能在错误的时机 `getBean()` 把 processor 实例化出来**，也不能把它们以错误顺序注册进容器。
+
+精简伪代码（突出“分段 + 防重复 + BDRPP 循环发现”的结构）：
+
+```text
+invokeBeanFactoryPostProcessors(beanFactory, externalBfpps):
+  processed = set() // 记录 beanName，避免重复执行
+
+  if beanFactory is BeanDefinitionRegistry:
+    // A) 先处理 external processors（手工 add 进来的）
+    externalRegistryProcessors = []
+    externalRegularProcessors = []
+    for pp in externalBfpps:
+      if pp is BDRPP:
+        pp.postProcessBeanDefinitionRegistry(registry)
+        externalRegistryProcessors.add(pp)
+      else:
+        externalRegularProcessors.add(pp)
+
+    // B) 再处理作为 bean 定义存在的 BDRPP：PriorityOrdered -> Ordered -> others
+    //    关键点：每一段都可能“注册新的 BDRPP”，所以需要循环扫描直到稳定
+    repeat:
+      current = find BDRPP names not in processed and is PriorityOrdered
+      instantiate(current); sort(current); invoke postProcessBeanDefinitionRegistry
+      processed.addAll(current)
+    until stable
+    repeat Ordered...
+    repeat others...
+
+    // C) registry 阶段结束后，统一调用所有 BDRPP 的 postProcessBeanFactory
+    invoke postProcessBeanFactory on all BDRPPs invoked so far
+    invoke postProcessBeanFactory on externalRegularProcessors
+
+  else:
+    invoke postProcessBeanFactory on externalBfpps
+
+  // D) 最后处理普通 BFPP：PriorityOrdered -> Ordered -> others
+  names = getBeanNamesForType(BFPP)
+  split names into (PriorityOrdered, Ordered, others), skip processed
+  instantiate + sort each group, then invoke postProcessBeanFactory
+```
+
+你从这段伪代码应该得到两个“顺序的本质”：
+
+- **顺序的第一性来源是“分段执行”**：`PriorityOrdered` 的那一段一定比 `Ordered` 更早
+- **第二性来源是“组内排序”**：组内由 comparator 决定（order 越小越靠前；是否认 `@Order` 取决于 comparator）
+
 ## 3. BPP 的顺序：谁先“动手”改实例？
 
 对应测试：
 
 - `SpringCoreBeansPostProcessorOrderingLabTest.beanPostProcessors_areAppliedInPriorityOrderedThenOrderedThenUnorderedOrder()`
+- `SpringCoreBeansPostProcessorOrderingLabTest.beanPostProcessors_withDifferentOrderValues_areSortedAscendingWithinOrderedGroup()`
 
 同样只断言我们自己注册的三个 BPP 的相对顺序。
 
 学习重点：
 
 - 多个 BPP 对同一个 bean 做增强时，“顺序”是结果的一部分。
+
+### 3.1 源码解析：`registerBeanPostProcessors` 先排序再注册，但最后还会“挪动 internal BPP”
+
+`registerBeanPostProcessors` 的关键不是“执行 BPP”（执行发生在 bean 创建时），而是：
+
+1) **决定 BPP 列表的最终顺序**（`beanFactory.getBeanPostProcessors()` 的 list 顺序）
+2) **在 refresh 中前段把它们注册好**，确保后续 bean 创建能走完整链路
+
+精简伪代码（突出“分组注册 + internal BPP 重新注册到最后”）：
+
+```text
+registerBeanPostProcessors(beanFactory):
+  names = getBeanNamesForType(BeanPostProcessor)
+
+  // A) 先塞一个 checker：提示“有 bean 在 BPP 链还没完整时被创建了”
+  addBeanPostProcessor(new BeanPostProcessorChecker(...))
+
+  // B) 三段分组：PriorityOrdered -> Ordered -> others
+  //    注意：这里会 getBean() 实例化 BPP（BPP 本身也是 bean）
+  priority = []
+  orderedNames = []
+  nonOrderedNames = []
+  internal = [] // MergedBeanDefinitionPostProcessor
+
+  for name in names:
+    if typeMatch(name, PriorityOrdered): instantiate; priority.add(pp); if pp is internal: internal.add(pp)
+    else if typeMatch(name, Ordered): orderedNames.add(name)
+    else: nonOrderedNames.add(name)
+
+  sort(priority); addAll(priority)
+
+  ordered = instantiate(orderedNames); sort(ordered); addAll(ordered)
+  nonOrdered = instantiate(nonOrderedNames); addAll(nonOrdered)
+
+  // C) 最后：把 internal BPP 再注册一次（借助 addBeanPostProcessor 的 “remove then add to end” 语义）
+  sort(internal); addAll(internal) // internal 统一被挪到 list 尾部
+```
+
+这段逻辑直接解释两个常见现象：
+
+- 为什么“顺序”会影响代理/包装的叠加结果：因为 **BPP list 的顺序就是调用顺序**
+- 为什么有些 BPP 看起来“明明 PriorityOrdered 但又在后面”：因为它可能属于 internal BPP，被最后重新注册挪到了尾部（它仍然会在 internal 组内按 order 排序）
 
 ## 4. 常见误解
 
