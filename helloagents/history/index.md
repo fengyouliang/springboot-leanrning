@@ -29,6 +29,7 @@
 | 202601032124 | spring-core-beans-src-part-grouping | Refactor | ✅Completed | [202601032124_spring-core-beans-src-part-grouping](2026-01/202601032124_spring-core-beans-src-part-grouping/) |
 | 202601041013 | spring-core-beans-src-part-naming | Refactor | ✅Completed | [202601041013_spring-core-beans-src-part-naming](2026-01/202601041013_spring-core-beans-src-part-naming/) |
 | 202601041046 | spring-core-part-structure-sync | Refactor | ✅Completed | [202601041046_spring-core-part-structure-sync](2026-01/202601041046_spring-core-part-structure-sync/) |
+| 202601041358 | springboot-part-structure-sync | Refactor | ✅Completed | [202601041358_springboot-part-structure-sync](2026-01/202601041358_springboot-part-structure-sync/) |
 
 ---
 
@@ -57,3 +58,4 @@
 - [202601032124_spring-core-beans-src-part-grouping](2026-01/202601032124_spring-core-beans-src-part-grouping/) - spring-core-beans：src/main 与 src/test 按 docs Part 分组（分包 + testsupport），并同步修复文档源码路径引用
 - [202601041013_spring-core-beans-src-part-naming](2026-01/202601041013_spring-core-beans-src-part-naming/) - spring-core-beans：将分组目录命名语义化（partXX → partXX_<topic>），进一步对齐 docs Part
 - [202601041046_spring-core-part-structure-sync](2026-01/202601041046_spring-core-part-structure-sync/) - 将 spring-core-beans 的 Part 结构（docs + src/main + src/test）同步到其他 spring-core-* 模块，并修复跨模块引用与路径一致性问题
+- [202601041358_springboot-part-structure-sync](2026-01/202601041358_springboot-part-structure-sync/) - 将 Part 结构（docs + src/test + src/main 最小分组）推广到全部 springboot-* 模块，并同步修复 README/docs 引用与路径一致性问题
