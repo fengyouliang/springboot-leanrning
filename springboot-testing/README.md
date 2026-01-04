@@ -41,11 +41,17 @@ mvn -pl springboot-testing test
 
 ## 推荐 docs 阅读顺序
 
-> 本模块暂无 `docs/`，建议按“先切片 → 再全量 → 再谈覆盖”的顺序：
+（docs 目录页：[`docs/README.md`](docs/README.md)）
 
-1. 先看 `GreetingControllerWebMvcLabTest`：为什么 slice test 快、依赖如何 mock
-2. 再看 `GreetingControllerSpringBootLabTest`：完整上下文下的端到端行为
-3. 最后看 `BootTestingMockBeanLabTest`：在 full context 里用 `@MockBean` 替换真实 Bean
+1. 导读：`docs/part-00-guide/00-deep-dive-guide.md`
+2. Slice vs Full Context：`docs/part-01-testing/01-slice-and-mocking.md`
+3. 常见坑清单：`docs/appendix/90-common-pitfalls.md`
+4. 自测题：`docs/appendix/99-self-check.md`
+
+对应的可运行实验（先跑后读）：
+- `src/test/java/com/learning/springboot/boottesting/part01_testing/GreetingControllerWebMvcLabTest.java`
+- `src/test/java/com/learning/springboot/boottesting/part01_testing/GreetingControllerSpringBootLabTest.java`
+- `src/test/java/com/learning/springboot/boottesting/part01_testing/BootTestingMockBeanLabTest.java`
 
 ## Labs / Exercises 索引（按知识点 / 难度）
 
@@ -53,10 +59,10 @@ mvn -pl springboot-testing test
 
 | 类型 | 入口 | 知识点 | 难度 | 下一步 |
 | --- | --- | --- | --- | --- |
-| Lab | `src/test/java/com/learning/springboot/boottesting/GreetingControllerWebMvcLabTest.java` | `@WebMvcTest` + `@MockBean`（更快、更聚焦） | ⭐ | 对照 controller 入口与 mock 的依赖 |
-| Lab | `src/test/java/com/learning/springboot/boottesting/GreetingControllerSpringBootLabTest.java` | `@SpringBootTest(RANDOM_PORT)` 端到端验证 | ⭐ | 体会“真实链路”与启动开销 |
-| Lab | `src/test/java/com/learning/springboot/boottesting/BootTestingMockBeanLabTest.java` | full context 里 `@MockBean` 覆盖真实 Bean | ⭐⭐ | 分清“替换 Bean”与“只 mock 一层” |
-| Exercise | `src/test/java/com/learning/springboot/boottesting/BootTestingExerciseTest.java` | 按提示补充更多 slice/JSON/MockBean 练习 | ⭐–⭐⭐ | 从“增加一个 slice 测试”开始 |
+| Lab | `src/test/java/com/learning/springboot/boottesting/part01_testing/GreetingControllerWebMvcLabTest.java` | `@WebMvcTest` + `@MockBean`（更快、更聚焦） | ⭐ | 对照 controller 入口与 mock 的依赖 |
+| Lab | `src/test/java/com/learning/springboot/boottesting/part01_testing/GreetingControllerSpringBootLabTest.java` | `@SpringBootTest(RANDOM_PORT)` 端到端验证 | ⭐ | 体会“真实链路”与启动开销 |
+| Lab | `src/test/java/com/learning/springboot/boottesting/part01_testing/BootTestingMockBeanLabTest.java` | full context 里 `@MockBean` 覆盖真实 Bean | ⭐⭐ | 分清“替换 Bean”与“只 mock 一层” |
+| Exercise | `src/test/java/com/learning/springboot/boottesting/part00_guide/BootTestingExerciseTest.java` | 按提示补充更多 slice/JSON/MockBean 练习 | ⭐–⭐⭐ | 从“增加一个 slice 测试”开始 |
 
 ## 常见 Debug 路径
 

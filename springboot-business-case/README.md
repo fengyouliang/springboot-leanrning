@@ -42,10 +42,16 @@ mvn -pl springboot-business-case test
 
 ## 推荐 docs 阅读顺序
 
-> 本模块暂无 `docs/`，建议按“先跑通链路 → 再拆机制”的顺序：
+（docs 目录页：[`docs/README.md`](docs/README.md)）
 
-1. 先跑接口 + 跑 `BootBusinessCaseLabTest`：把“现象”固定下来
-2. 出现疑问时按链路拆解：
+建议按“先跑通链路 → 再拆机制”的顺序：
+
+1. 导读：`docs/part-00-guide/00-deep-dive-guide.md`
+2. 案例架构与主线：`docs/part-01-business-case/01-architecture-and-flow.md`
+3. 常见坑清单：`docs/appendix/90-common-pitfalls.md`
+4. 自测题：`docs/appendix/99-self-check.md`
+5. 先跑接口 + 跑 `BootBusinessCaseLabTest`：把“现象”固定下来
+6. 出现疑问时按链路拆解：
    - 代理/AOP：`spring-core-aop/docs/part-01-proxy-fundamentals/01-aop-proxy-mental-model.md`、`spring-core-aop/docs/part-01-proxy-fundamentals/03-self-invocation.md`
    - 事务：`spring-core-tx/docs/part-01-transaction-basics/01-transaction-boundary.md`、`spring-core-tx/docs/part-01-transaction-basics/02-transactional-proxy.md`
    - 事件与事务时机：`spring-core-events/docs/part-02-async-and-transactional/07-transactional-event-listener.md`
@@ -56,8 +62,8 @@ mvn -pl springboot-business-case test
 
 | 类型 | 入口 | 知识点 | 难度 | 下一步 |
 | --- | --- | --- | --- | --- |
-| Lab | `src/test/java/com/learning/springboot/bootbusinesscase/BootBusinessCaseLabTest.java` | 从 HTTP 入口串起 Validation/JPA/Tx/Events/AOP | ⭐⭐⭐ | 跟断点：Controller → Service → Repo → Listener → Aspect |
-| Exercise | `src/test/java/com/learning/springboot/bootbusinesscase/BootBusinessCaseExerciseTest.java` | 新增接口/传播行为/自调用陷阱等综合练习 | ⭐⭐⭐ | 从“新增查询接口 + 测试”开始 |
+| Lab | `src/test/java/com/learning/springboot/bootbusinesscase/part01_business_case/BootBusinessCaseLabTest.java` | 从 HTTP 入口串起 Validation/JPA/Tx/Events/AOP | ⭐⭐⭐ | 跟断点：Controller → Service → Repo → Listener → Aspect |
+| Exercise | `src/test/java/com/learning/springboot/bootbusinesscase/part00_guide/BootBusinessCaseExerciseTest.java` | 新增接口/传播行为/自调用陷阱等综合练习 | ⭐⭐⭐ | 从“新增查询接口 + 测试”开始 |
 
 ## 常见 Debug 路径
 

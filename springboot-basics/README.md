@@ -47,23 +47,25 @@ mvn -pl springboot-basics test
 
 建议按 “现象 → 覆盖规则 → 绑定机制 → 常见坑” 的顺序学习：
 
-1. [配置来源与 Profile 覆盖](docs/01-property-sources-and-profiles.md)
-2. [`@ConfigurationProperties` 绑定与类型转换](docs/02-configuration-properties-binding.md)
-3. [常见坑清单](docs/90-common-pitfalls.md)
+（docs 目录页：[`docs/README.md`](docs/README.md)）
+
+1. [配置来源与 Profile 覆盖](docs/part-01-boot-basics/01-property-sources-and-profiles.md)
+2. [`@ConfigurationProperties` 绑定与类型转换](docs/part-01-boot-basics/02-configuration-properties-binding.md)
+3. [常见坑清单](docs/appendix/90-common-pitfalls.md)
 
 对应的可运行实验（先跑后读）：
-- `src/test/java/com/learning/springboot/bootbasics/BootBasicsDefaultLabTest.java`
-- `src/test/java/com/learning/springboot/bootbasics/BootBasicsDevLabTest.java`
-- `src/test/java/com/learning/springboot/bootbasics/BootBasicsOverrideLabTest.java`
+- `src/test/java/com/learning/springboot/bootbasics/part01_boot_basics/BootBasicsDefaultLabTest.java`
+- `src/test/java/com/learning/springboot/bootbasics/part01_boot_basics/BootBasicsDevLabTest.java`
+- `src/test/java/com/learning/springboot/bootbasics/part01_boot_basics/BootBasicsOverrideLabTest.java`
 
 ## 概念 → 在本模块哪里能“看见”
 
 | 你要理解的概念 | 去读哪一章 | 去看哪个测试/代码 | 你应该能解释清楚 |
 | --- | --- | --- | --- |
-| 默认配置加载 | [docs/01](docs/01-property-sources-and-profiles.md) | `BootBasicsDefaultLabTest` + `application.properties` | 默认 profile 与配置值来自哪里 |
-| Profile 覆盖 | [docs/01](docs/01-property-sources-and-profiles.md) | `BootBasicsDevLabTest` + `application-dev.properties` | 为什么 dev 能覆盖默认配置 |
-| 测试级覆盖优先级 | [docs/01](docs/01-property-sources-and-profiles.md) | `BootBasicsOverrideLabTest` | 为什么测试 properties 能覆盖文件配置 |
-| 绑定与类型转换 | [docs/02](docs/02-configuration-properties-binding.md) | `AppProperties` + `BootBasicsDefaultLabTest` | string 配置如何变成 boolean/其他类型 |
+| 默认配置加载 | [docs/part-01/01](docs/part-01-boot-basics/01-property-sources-and-profiles.md) | `BootBasicsDefaultLabTest` + `application.properties` | 默认 profile 与配置值来自哪里 |
+| Profile 覆盖 | [docs/part-01/01](docs/part-01-boot-basics/01-property-sources-and-profiles.md) | `BootBasicsDevLabTest` + `application-dev.properties` | 为什么 dev 能覆盖默认配置 |
+| 测试级覆盖优先级 | [docs/part-01/01](docs/part-01-boot-basics/01-property-sources-and-profiles.md) | `BootBasicsOverrideLabTest` | 为什么测试 properties 能覆盖文件配置 |
+| 绑定与类型转换 | [docs/part-01/02](docs/part-01-boot-basics/02-configuration-properties-binding.md) | `AppProperties` + `BootBasicsDefaultLabTest` | string 配置如何变成 boolean/其他类型 |
 
 ## Labs / Exercises 索引（按知识点 / 难度）
 
@@ -71,10 +73,10 @@ mvn -pl springboot-basics test
 
 | 类型 | 入口 | 知识点 | 难度 | 下一步 |
 | --- | --- | --- | --- | --- |
-| Lab | `src/test/java/com/learning/springboot/bootbasics/BootBasicsDefaultLabTest.java` | 默认 profile 下的配置绑定与 Bean 选择 | ⭐ | 回到本 README 的“运行/观察” + 看 `application.properties` |
-| Lab | `src/test/java/com/learning/springboot/bootbasics/BootBasicsDevLabTest.java` | `dev` profile 的配置覆盖与 Bean 切换 | ⭐ | 对照 `application-dev.properties` 与 `@Profile` |
-| Lab | `src/test/java/com/learning/springboot/bootbasics/BootBasicsOverrideLabTest.java` | 测试级 property override 的优先级 | ⭐⭐ | 回看 `Environment` 的 property precedence |
-| Exercise | `src/test/java/com/learning/springboot/bootbasics/BootBasicsExerciseTest.java` | 按提示完成“新增配置/优先级/条件装配/更快测试”等练习 | ⭐–⭐⭐ | 先从第 1 个 `@Disabled` 练习开始 |
+| Lab | `src/test/java/com/learning/springboot/bootbasics/part01_boot_basics/BootBasicsDefaultLabTest.java` | 默认 profile 下的配置绑定与 Bean 选择 | ⭐ | 回到本 README 的“运行/观察” + 看 `application.properties` |
+| Lab | `src/test/java/com/learning/springboot/bootbasics/part01_boot_basics/BootBasicsDevLabTest.java` | `dev` profile 的配置覆盖与 Bean 切换 | ⭐ | 对照 `application-dev.properties` 与 `@Profile` |
+| Lab | `src/test/java/com/learning/springboot/bootbasics/part01_boot_basics/BootBasicsOverrideLabTest.java` | 测试级 property override 的优先级 | ⭐⭐ | 回看 `Environment` 的 property precedence |
+| Exercise | `src/test/java/com/learning/springboot/bootbasics/part00_guide/BootBasicsExerciseTest.java` | 按提示完成“新增配置/优先级/条件装配/更快测试”等练习 | ⭐–⭐⭐ | 先从第 1 个 `@Disabled` 练习开始 |
 
 ## 常见 Debug 路径
 

@@ -39,12 +39,14 @@ mvn -pl springboot-actuator test
 
 ## 推荐 docs 阅读顺序
 
-> 本模块暂无 `docs/`，建议按“端点现象 → 配置开关 → 自定义指标 → 测试验证”的顺序学习：
+（docs 目录页：[`docs/README.md`](docs/README.md)）
 
-1. 先跑起来，访问 `/actuator/health`
-2. 查找 `application.properties` 里与 exposure / health details 相关的配置
-3. 阅读自定义 `HealthIndicator` 的实现（它如何拼出 health 结果）
-4. 对照 Labs：看测试如何验证“端点暴露/覆盖配置”的效果
+建议按“端点现象 → 配置开关 → 自定义指标 → 测试验证”的顺序学习：
+
+1. 导读：`docs/part-00-guide/00-deep-dive-guide.md`
+2. Actuator 基础：`docs/part-01-actuator/01-actuator-basics.md`
+3. 常见坑清单：`docs/appendix/90-common-pitfalls.md`
+4. 自测题：`docs/appendix/99-self-check.md`
 
 ## Labs / Exercises 索引（按知识点 / 难度）
 
@@ -52,9 +54,9 @@ mvn -pl springboot-actuator test
 
 | 类型 | 入口 | 知识点 | 难度 | 下一步 |
 | --- | --- | --- | --- | --- |
-| Lab | `src/test/java/com/learning/springboot/bootactuator/BootActuatorLabTest.java` | health/info 默认行为 + 自定义健康检查 | ⭐ | 先用 curl 看 `/actuator/health` 输出 |
-| Lab | `src/test/java/com/learning/springboot/bootactuator/BootActuatorExposureOverrideLabTest.java` | 通过 properties 改变 endpoint exposure 并验证效果 | ⭐⭐ | 回看 exposure 配置与测试断言 |
-| Exercise | `src/test/java/com/learning/springboot/bootactuator/BootActuatorExerciseTest.java` | 按提示做“只在 dev 下显示 details/增加开关”等练习 | ⭐–⭐⭐ | 从“show-details 的 profile 差异”开始 |
+| Lab | `src/test/java/com/learning/springboot/bootactuator/part01_actuator/BootActuatorLabTest.java` | health/info 默认行为 + 自定义健康检查 | ⭐ | 先用 curl 看 `/actuator/health` 输出 |
+| Lab | `src/test/java/com/learning/springboot/bootactuator/part01_actuator/BootActuatorExposureOverrideLabTest.java` | 通过 properties 改变 endpoint exposure 并验证效果 | ⭐⭐ | 回看 exposure 配置与测试断言 |
+| Exercise | `src/test/java/com/learning/springboot/bootactuator/part00_guide/BootActuatorExerciseTest.java` | 按提示做“只在 dev 下显示 details/增加开关”等练习 | ⭐–⭐⭐ | 从“show-details 的 profile 差异”开始 |
 
 ## 常见 Debug 路径
 

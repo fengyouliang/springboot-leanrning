@@ -15,12 +15,14 @@ mvn -pl springboot-async-scheduling test
 
 ## 推荐 docs 阅读顺序
 
-1. [`@Async` 心智模型：代理与线程切换](docs/01-async-proxy-mental-model.md)
-2. [Executor 与线程命名/并发边界](docs/02-executor-and-threading.md)
-3. [异常传播：Future vs void](docs/03-exceptions.md)
-4. [self-invocation：为什么异步有时不生效](docs/04-self-invocation.md)
-5. [`@Scheduled` 基础与可测试性](docs/05-scheduling-basics.md)
-6. [常见坑清单](docs/90-common-pitfalls.md)
+（docs 目录页：[`docs/README.md`](docs/README.md)）
+
+1. [`@Async` 心智模型：代理与线程切换](docs/part-01-async-scheduling/01-async-proxy-mental-model.md)
+2. [Executor 与线程命名/并发边界](docs/part-01-async-scheduling/02-executor-and-threading.md)
+3. [异常传播：Future vs void](docs/part-01-async-scheduling/03-exceptions.md)
+4. [self-invocation：为什么异步有时不生效](docs/part-01-async-scheduling/04-self-invocation.md)
+5. [`@Scheduled` 基础与可测试性](docs/part-01-async-scheduling/05-scheduling-basics.md)
+6. [常见坑清单](docs/appendix/90-common-pitfalls.md)
 
 ## Labs / Exercises 索引
 
@@ -28,6 +30,5 @@ mvn -pl springboot-async-scheduling test
 
 | 类型 | 入口 | 知识点 | 难度 | 下一步 |
 | --- | --- | --- | --- | --- |
-| Lab | `src/test/java/com/learning/springboot/bootasyncscheduling/BootAsyncSchedulingLabTest.java` | `@Async` 代理/线程/异常、自调用陷阱；`@Scheduled` 可测实验 | ⭐⭐ | 逐个跑测试并用断点跟线程 |
-| Exercise | `src/test/java/com/learning/springboot/bootasyncscheduling/BootAsyncSchedulingExerciseTest.java` | 扩展更多 async/scheduling 场景与断言 | ⭐⭐–⭐⭐⭐ | 从“自定义 executor”开始 |
-
+| Lab | `src/test/java/com/learning/springboot/bootasyncscheduling/part01_async_scheduling/BootAsyncSchedulingLabTest.java` | `@Async` 代理/线程/异常、自调用陷阱；`@Scheduled` 可测实验 | ⭐⭐ | 逐个跑测试并用断点跟线程 |
+| Exercise | `src/test/java/com/learning/springboot/bootasyncscheduling/part00_guide/BootAsyncSchedulingExerciseTest.java` | 扩展更多 async/scheduling 场景与断言 | ⭐⭐–⭐⭐⭐ | 从“自定义 executor”开始 |

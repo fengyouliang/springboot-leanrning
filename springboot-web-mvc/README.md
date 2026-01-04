@@ -59,25 +59,27 @@ mvn -pl springboot-web-mvc test
 
 建议按 “入口 → 校验与错误形状 → 异常处理 → 绑定扩展 → 入口增强（拦截器/过滤器）” 的顺序学习：
 
-1. [校验与错误响应形状](docs/01-validation-and-error-shaping.md)
-2. [统一异常处理与坏输入](docs/02-exception-handling.md)
-3. [请求绑定与 Converter/Formatter](docs/03-binding-and-converters.md)
-4. [Interceptor vs Filter：入口与顺序](docs/04-interceptor-and-filter-ordering.md)
-5. [常见坑清单](docs/90-common-pitfalls.md)
+（docs 目录页：[`docs/README.md`](docs/README.md)）
+
+1. [校验与错误响应形状](docs/part-01-web-mvc/01-validation-and-error-shaping.md)
+2. [统一异常处理与坏输入](docs/part-01-web-mvc/02-exception-handling.md)
+3. [请求绑定与 Converter/Formatter](docs/part-01-web-mvc/03-binding-and-converters.md)
+4. [Interceptor vs Filter：入口与顺序](docs/part-01-web-mvc/04-interceptor-and-filter-ordering.md)
+5. [常见坑清单](docs/appendix/90-common-pitfalls.md)
 
 对应的可运行实验（先跑后读）：
-- `src/test/java/com/learning/springboot/bootwebmvc/BootWebMvcLabTest.java`（`@WebMvcTest` 切片）
-- `src/test/java/com/learning/springboot/bootwebmvc/BootWebMvcSpringBootLabTest.java`（`@SpringBootTest` 全量）
+- `src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcLabTest.java`（`@WebMvcTest` 切片）
+- `src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcSpringBootLabTest.java`（`@SpringBootTest` 全量）
     
 ## 概念 → 在本模块哪里能“看见”
 
 | 你要理解的概念 | 去读哪一章 | 去看哪个测试/代码 | 你应该能解释清楚 |
 | --- | --- | --- | --- |
-| 校验在边界触发 | [docs/01](docs/01-validation-and-error-shaping.md) | `BootWebMvcLabTest#returnsValidationErrorWhenRequestIsInvalid` + `CreateUserRequest` | 为什么需要 `@Valid`，失败时异常从哪来 |
-| 统一错误响应形状 | [docs/01](docs/01-validation-and-error-shaping.md) | `GlobalExceptionHandler` + `ApiError` | 为什么要自定义错误结构，结构由谁决定 |
-| malformed JSON vs 校验失败 | [docs/02](docs/02-exception-handling.md) | `BootWebMvcLabTest#returnsBadRequestWhenJsonIsMalformed` + `BootWebMvcExerciseTest#exercise_handleMalformedJson` | 两类 400 的根因差异 |
-| Converter/Formatter 扩展绑定 | [docs/03](docs/03-binding-and-converters.md) | `BootWebMvcExerciseTest#exercise_converterFormatter` | String 如何变成自定义类型 |
-| Interceptor 生效范围与顺序 | [docs/04](docs/04-interceptor-and-filter-ordering.md) | `BootWebMvcExerciseTest#exercise_interceptor` | 为什么它只对 `/api/**` 生效 |
+| 校验在边界触发 | [docs/part-01/01](docs/part-01-web-mvc/01-validation-and-error-shaping.md) | `BootWebMvcLabTest#returnsValidationErrorWhenRequestIsInvalid` + `CreateUserRequest` | 为什么需要 `@Valid`，失败时异常从哪来 |
+| 统一错误响应形状 | [docs/part-01/01](docs/part-01-web-mvc/01-validation-and-error-shaping.md) | `GlobalExceptionHandler` + `ApiError` | 为什么要自定义错误结构，结构由谁决定 |
+| malformed JSON vs 校验失败 | [docs/part-01/02](docs/part-01-web-mvc/02-exception-handling.md) | `BootWebMvcLabTest#returnsBadRequestWhenJsonIsMalformed` + `BootWebMvcExerciseTest#exercise_handleMalformedJson` | 两类 400 的根因差异 |
+| Converter/Formatter 扩展绑定 | [docs/part-01/03](docs/part-01-web-mvc/03-binding-and-converters.md) | `BootWebMvcExerciseTest#exercise_converterFormatter` | String 如何变成自定义类型 |
+| Interceptor 生效范围与顺序 | [docs/part-01/04](docs/part-01-web-mvc/04-interceptor-and-filter-ordering.md) | `BootWebMvcExerciseTest#exercise_interceptor` | 为什么它只对 `/api/**` 生效 |
 
 > 想从机制层理解“校验为什么有时不生效”，可进一步阅读 `spring-core-validation/docs/part-01-validation-core/03-method-validation-proxy.md`（方法参数校验与代理）。
 
@@ -87,9 +89,9 @@ mvn -pl springboot-web-mvc test
 
 | 类型 | 入口 | 知识点 | 难度 | 下一步 |
 | --- | --- | --- | --- | --- |
-| Lab | `src/test/java/com/learning/springboot/bootwebmvc/BootWebMvcLabTest.java` | `@WebMvcTest` 切片：Controller/校验/错误结构 | ⭐ | 看 `GlobalExceptionHandler` 的错误结构与字段 |
-| Lab | `src/test/java/com/learning/springboot/bootwebmvc/BootWebMvcSpringBootLabTest.java` | `@SpringBootTest`：RANDOM_PORT 下的端到端行为 | ⭐ | 对比切片与全量上下文加载范围 |
-| Exercise | `src/test/java/com/learning/springboot/bootwebmvc/BootWebMvcExerciseTest.java` | 按提示扩展字段/错误响应/测试断言 | ⭐–⭐⭐ | 从“新增字段 + 校验”开始 |
+| Lab | `src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcLabTest.java` | `@WebMvcTest` 切片：Controller/校验/错误结构 | ⭐ | 看 `GlobalExceptionHandler` 的错误结构与字段 |
+| Lab | `src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcSpringBootLabTest.java` | `@SpringBootTest`：RANDOM_PORT 下的端到端行为 | ⭐ | 对比切片与全量上下文加载范围 |
+| Exercise | `src/test/java/com/learning/springboot/bootwebmvc/part00_guide/BootWebMvcExerciseTest.java` | 按提示扩展字段/错误响应/测试断言 | ⭐–⭐⭐ | 从“新增字段 + 校验”开始 |
 
 ## 常见 Debug 路径
 

@@ -70,12 +70,14 @@ mvn -pl springboot-security test
 
 ## 推荐 docs 阅读顺序（从现象到机制）
 
-1. [401 vs 403：Basic Auth 与授权规则](docs/01-basic-auth-and-authorization.md)
-2. [CSRF：为什么 POST 会被拦？](docs/02-csrf.md)
-3. [Method Security 与代理：self-invocation 陷阱](docs/03-method-security-and-proxy.md)
-4. [FilterChain：多链路 + 顺序 + 自定义 Filter](docs/04-filter-chain-and-order.md)
-5. [JWT/Stateless：Bearer token + scope](docs/05-jwt-stateless.md)
-6. [常见坑清单](docs/90-common-pitfalls.md)
+（docs 目录页：[`docs/README.md`](docs/README.md)）
+
+1. [401 vs 403：Basic Auth 与授权规则](docs/part-01-security/01-basic-auth-and-authorization.md)
+2. [CSRF：为什么 POST 会被拦？](docs/part-01-security/02-csrf.md)
+3. [Method Security 与代理：self-invocation 陷阱](docs/part-01-security/03-method-security-and-proxy.md)
+4. [FilterChain：多链路 + 顺序 + 自定义 Filter](docs/part-01-security/04-filter-chain-and-order.md)
+5. [JWT/Stateless：Bearer token + scope](docs/part-01-security/05-jwt-stateless.md)
+6. [常见坑清单](docs/appendix/90-common-pitfalls.md)
 
 ## Labs / Exercises 索引（按知识点 / 难度）
 
@@ -83,8 +85,8 @@ mvn -pl springboot-security test
 
 | 类型 | 入口 | 知识点 | 难度 | 下一步 |
 | --- | --- | --- | --- | --- |
-| Lab | `src/test/java/com/learning/springboot/bootsecurity/BootSecurityLabTest.java` | 401/403、Basic Auth、CSRF、JWT、FilterChain、Method Security | ⭐⭐ | 按测试方法逐个跑/断点跟进 |
-| Exercise | `src/test/java/com/learning/springboot/bootsecurity/BootSecurityExerciseTest.java` | 自己补充 endpoint/配置/断言，强化机制理解 | ⭐⭐–⭐⭐⭐ | 从第 1 个练习开始 |
+| Lab | `src/test/java/com/learning/springboot/bootsecurity/part01_security/BootSecurityLabTest.java` | 401/403、Basic Auth、CSRF、JWT、FilterChain、Method Security | ⭐⭐ | 按测试方法逐个跑/断点跟进 |
+| Exercise | `src/test/java/com/learning/springboot/bootsecurity/part00_guide/BootSecurityExerciseTest.java` | 自己补充 endpoint/配置/断言，强化机制理解 | ⭐⭐–⭐⭐⭐ | 从第 1 个练习开始 |
 
 ## 常见 Debug 路径
 
@@ -97,4 +99,3 @@ mvn -pl springboot-security test
 
 - Spring Security Reference
 - Spring Security Test（`spring-security-test`）
-
