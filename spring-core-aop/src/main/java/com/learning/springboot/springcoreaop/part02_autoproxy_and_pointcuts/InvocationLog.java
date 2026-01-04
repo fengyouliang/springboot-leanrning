@@ -1,4 +1,4 @@
-package com.learning.springboot.springcoreaop;
+package com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;

@@ -1,4 +1,8 @@
-package com.learning.springboot.springcoreaop;
+package com.learning.springboot.springcoreaop.part03_proxy_stacking;
+
+import com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.InvocationLog;
+import com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.Traced;
+import com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.TracingAspect;
 
 // 这个 Lab 用“真实的 Tx/Cache/Method Security 基础设施”验证：AOP 叠加不是概念，而是可观察的 advisors + 可验证的调用语义。
 

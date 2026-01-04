@@ -1,4 +1,8 @@
-package com.learning.springboot.springcoreaop;
+package com.learning.springboot.springcoreaop.part01_proxy_fundamentals;
+
+import com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.InvocationLog;
+import com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.Traced;
+import com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.TracingAspect;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -189,7 +193,7 @@ class SpringCoreAopProxyMechanicsLabTest {
             this.callOrderLog = callOrderLog;
         }
 
-        @org.aspectj.lang.annotation.Around("@annotation(com.learning.springboot.springcoreaop.Traced)")
+        @org.aspectj.lang.annotation.Around("@annotation(com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.Traced)")
         public Object around(org.aspectj.lang.ProceedingJoinPoint joinPoint) throws Throwable {
             callOrderLog.add("first");
             return joinPoint.proceed();
@@ -206,7 +210,7 @@ class SpringCoreAopProxyMechanicsLabTest {
             this.callOrderLog = callOrderLog;
         }
 
-        @org.aspectj.lang.annotation.Around("@annotation(com.learning.springboot.springcoreaop.Traced)")
+        @org.aspectj.lang.annotation.Around("@annotation(com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.Traced)")
         public Object around(org.aspectj.lang.ProceedingJoinPoint joinPoint) throws Throwable {
             callOrderLog.add("second");
             return joinPoint.proceed();

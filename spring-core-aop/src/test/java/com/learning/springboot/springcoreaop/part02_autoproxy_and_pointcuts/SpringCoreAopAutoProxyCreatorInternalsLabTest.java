@@ -1,4 +1,4 @@
-package com.learning.springboot.springcoreaop;
+package com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts;
 
 // 这个 Lab 把 Spring AOP 放回到容器视角：AutoProxyCreator 作为 BPP 如何筛选 Advisor 并创建 proxy。
 

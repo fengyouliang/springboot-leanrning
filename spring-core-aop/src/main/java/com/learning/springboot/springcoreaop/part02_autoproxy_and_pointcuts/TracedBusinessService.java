@@ -1,4 +1,4 @@
-package com.learning.springboot.springcoreaop;
+package com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts;
 
 import org.springframework.stereotype.Service;
 

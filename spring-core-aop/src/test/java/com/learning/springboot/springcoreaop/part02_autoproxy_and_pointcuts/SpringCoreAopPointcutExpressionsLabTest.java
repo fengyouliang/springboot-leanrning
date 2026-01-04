@@ -1,4 +1,4 @@
-package com.learning.springboot.springcoreaop;
+package com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts;
 
 // 这个 Lab 用可断言结论证明：this/target 的命中结果会随 JDK/CGLIB 代理类型发生变化。
 
@@ -55,7 +55,7 @@ class SpringCoreAopPointcutExpressionsLabTest {
             this.log = log;
         }
 
-        @org.aspectj.lang.annotation.Around("this(com.learning.springboot.springcoreaop.ThisTargetServiceImpl)")
+        @org.aspectj.lang.annotation.Around("this(com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.ThisTargetServiceImpl)")
         public Object around(org.aspectj.lang.ProceedingJoinPoint joinPoint) throws Throwable {
             log.add("this");
             return joinPoint.proceed();
@@ -71,7 +71,7 @@ class SpringCoreAopPointcutExpressionsLabTest {
             this.log = log;
         }
 
-        @org.aspectj.lang.annotation.Around("target(com.learning.springboot.springcoreaop.ThisTargetServiceImpl)")
+        @org.aspectj.lang.annotation.Around("target(com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.ThisTargetServiceImpl)")
         public Object around(org.aspectj.lang.ProceedingJoinPoint joinPoint) throws Throwable {
             log.add("target");
             return joinPoint.proceed();

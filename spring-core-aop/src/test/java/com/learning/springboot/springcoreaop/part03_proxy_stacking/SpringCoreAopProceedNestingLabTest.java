@@ -1,4 +1,8 @@
-package com.learning.springboot.springcoreaop;
+package com.learning.springboot.springcoreaop.part03_proxy_stacking;
+
+import com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.InvocationLog;
+import com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.Traced;
+import com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.TracingAspect;
 
 // 这个 Lab 用可断言的顺序日志，把 `MethodInvocation#proceed` 的嵌套执行关系做成可验证结论。
 
@@ -75,7 +79,7 @@ class SpringCoreAopProceedNestingLabTest {
             this.log = log;
         }
 
-        @org.aspectj.lang.annotation.Around("@annotation(com.learning.springboot.springcoreaop.Traced)")
+        @org.aspectj.lang.annotation.Around("@annotation(com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.Traced)")
         public Object around(org.aspectj.lang.ProceedingJoinPoint joinPoint) throws Throwable {
             log.add("outer-before");
             try {
@@ -95,7 +99,7 @@ class SpringCoreAopProceedNestingLabTest {
             this.log = log;
         }
 
-        @org.aspectj.lang.annotation.Around("@annotation(com.learning.springboot.springcoreaop.Traced)")
+        @org.aspectj.lang.annotation.Around("@annotation(com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.Traced)")
         public Object around(org.aspectj.lang.ProceedingJoinPoint joinPoint) throws Throwable {
             log.add("inner-before");
             try {

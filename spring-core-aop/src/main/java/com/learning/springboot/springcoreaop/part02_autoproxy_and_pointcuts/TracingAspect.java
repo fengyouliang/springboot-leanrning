@@ -1,4 +1,4 @@
-package com.learning.springboot.springcoreaop;
+package com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -15,7 +15,7 @@ public class TracingAspect {
         this.invocationLog = invocationLog;
     }
 
-    @Around("@annotation(com.learning.springboot.springcoreaop.Traced)")
+    @Around("@annotation(com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.Traced)")
     public Object trace(ProceedingJoinPoint joinPoint) throws Throwable {
         String method = joinPoint.getSignature().toShortString();
         long startNs = System.nanoTime();

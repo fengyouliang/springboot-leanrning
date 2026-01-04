@@ -1,4 +1,8 @@
-package com.learning.springboot.springcoreaop;
+package com.learning.springboot.springcoreaop.part03_proxy_stacking;
+
+import com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.InvocationLog;
+import com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.Traced;
+import com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.TracingAspect;
 
 // 这个 Lab 用“模拟 Tx/Cache/Security 的 Advisors”展示：单 proxy 多 advisor 是主流形态；套娃 proxy 也能被识别与拆解。
 

@@ -1,4 +1,7 @@
-package com.learning.springboot.springcoreaop;
+package com.learning.springboot.springcoreaop.part00_guide;
+
+import com.learning.springboot.springcoreaop.part01_proxy_fundamentals.SelfInvocationExampleService;
+import com.learning.springboot.springcoreaop.part02_autoproxy_and_pointcuts.InvocationLog;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,8 +35,8 @@ class SpringCoreAopExerciseTest {
 
                         下一步：
                         1) 先读“自调用陷阱”与 exposeProxy：
-                           - `spring-core-aop/docs/03-self-invocation.md`
-                           - `spring-core-aop/docs/05-expose-proxy.md`
+                           - `spring-core-aop/docs/part-01-proxy-fundamentals/03-self-invocation.md`
+                           - `spring-core-aop/docs/part-01-proxy-fundamentals/05-expose-proxy.md`
                         2) 启用 exposeProxy（例如通过 `@EnableAspectJAutoProxy(exposeProxy = true)`）。
                         3) 修改 `SelfInvocationExampleService#outer`：用 `AopContext.currentProxy()` 调用 `inner`。
 
@@ -55,7 +58,7 @@ class SpringCoreAopExerciseTest {
                         2) 用 `@Order(0)` 设置优先级，并写测试证明顺序。
 
                         建议阅读：
-                        - `spring-core-aop/docs/06-debugging.md`
+                        - `spring-core-aop/docs/part-01-proxy-fundamentals/06-debugging.md`
                         """)
                 .isFalse();
     }
@@ -73,7 +76,7 @@ class SpringCoreAopExerciseTest {
                         3) 在测试里用 `AopUtils.isJdkDynamicProxy(...)` / `isCglibProxy(...)` 固化结论。
 
                         建议阅读：
-                        - `spring-core-aop/docs/02-jdk-vs-cglib.md`
+                        - `spring-core-aop/docs/part-01-proxy-fundamentals/02-jdk-vs-cglib.md`
                         """)
                 .isFalse();
     }
@@ -109,7 +112,7 @@ class SpringCoreAopExerciseTest {
                         3) 写下原因：JDK 代理只能代理接口；CGLIB 基于继承，无法覆盖 final。
 
                         建议阅读：
-                        - `spring-core-aop/docs/04-final-and-proxy-limits.md`
+                        - `spring-core-aop/docs/part-01-proxy-fundamentals/04-final-and-proxy-limits.md`
                         """)
                 .isFalse();
     }
