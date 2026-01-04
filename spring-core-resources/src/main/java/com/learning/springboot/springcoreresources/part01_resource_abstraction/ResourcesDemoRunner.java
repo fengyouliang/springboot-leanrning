@@ -1,4 +1,4 @@
-package com.learning.springboot.springcoreresources;
+package com.learning.springboot.springcoreresources.part01_resource_abstraction;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;

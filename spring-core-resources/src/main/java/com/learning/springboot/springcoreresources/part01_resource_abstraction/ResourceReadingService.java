@@ -1,4 +1,4 @@
-package com.learning.springboot.springcoreresources;
+package com.learning.springboot.springcoreresources.part01_resource_abstraction;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
