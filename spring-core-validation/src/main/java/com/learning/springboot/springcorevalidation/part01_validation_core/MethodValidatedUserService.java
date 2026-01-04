@@ -1,4 +1,4 @@
-package com.learning.springboot.springcorevalidation;
+package com.learning.springboot.springcorevalidation.part01_validation_core;
 
 import jakarta.validation.Valid;
 

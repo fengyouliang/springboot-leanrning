@@ -1,4 +1,4 @@
-package com.learning.springboot.springcorevalidation;
+package com.learning.springboot.springcorevalidation.part01_validation_core;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;

@@ -1,4 +1,7 @@
-package com.learning.springboot.springcorevalidation;
+package com.learning.springboot.springcorevalidation.part00_guide;
+
+import com.learning.springboot.springcorevalidation.part01_validation_core.CreateUserCommand;
+import com.learning.springboot.springcorevalidation.part01_validation_core.ProgrammaticValidationService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,8 +36,8 @@ class SpringCoreValidationExerciseTest {
                         3) 把断言从“数量”升级为“包含特定 violation”（例如 propertyPath=xxx）。
 
                         建议阅读：
-                        - `spring-core-validation/docs/01-constraint-mental-model.md`
-                        - `spring-core-validation/docs/02-programmatic-validator.md`
+                        - `spring-core-validation/docs/part-01-validation-core/01-constraint-mental-model.md`
+                        - `spring-core-validation/docs/part-01-validation-core/02-programmatic-validator.md`
 
                         提示：
                         - `ConstraintViolation#getPropertyPath()` 与 `#getMessage()` 是最有用的 debug 信息
@@ -55,7 +58,7 @@ class SpringCoreValidationExerciseTest {
                         3) 用 programmatic validation 分别传入不同 group，断言 violation 集合不同。
 
                         建议阅读：
-                        - `spring-core-validation/docs/04-groups.md`
+                        - `spring-core-validation/docs/part-01-validation-core/04-groups.md`
                         """)
                 .isFalse();
     }
@@ -73,7 +76,7 @@ class SpringCoreValidationExerciseTest {
                         3) 写测试：构造非法输入，断言新增 violation 出现。
 
                         建议阅读：
-                        - `spring-core-validation/docs/05-custom-constraint.md`
+                        - `spring-core-validation/docs/part-01-validation-core/05-custom-constraint.md`
                         """)
                 .isFalse();
     }
@@ -90,8 +93,8 @@ class SpringCoreValidationExerciseTest {
                         2) 再从 Spring 容器里取同一个 service bean，调用相同方法，观察会抛校验异常。
 
                         建议阅读：
-                        - `spring-core-validation/docs/03-method-validation-proxy.md`
-                        - `spring-core-aop/docs/01-aop-proxy-mental-model.md`
+                        - `spring-core-validation/docs/part-01-validation-core/03-method-validation-proxy.md`
+                        - `spring-core-aop/docs/part-01-proxy-fundamentals/01-aop-proxy-mental-model.md`
                         """)
                 .isFalse();
     }
@@ -109,8 +112,8 @@ class SpringCoreValidationExerciseTest {
                         3) 断言异常/violation 的差异。
 
                         建议阅读：
-                        - `spring-core-validation/docs/04-groups.md`
-                        - `spring-core-validation/docs/03-method-validation-proxy.md`
+                        - `spring-core-validation/docs/part-01-validation-core/04-groups.md`
+                        - `spring-core-validation/docs/part-01-validation-core/03-method-validation-proxy.md`
                         """)
                 .isFalse();
     }
