@@ -1,0 +1,81 @@
+# 27. SmartLifecycle：start/stop 时机与 phase 顺序
+
+`SmartLifecycle` 是容器提供的“启动/停止阶段”扩展点。
+
+它非常适合表达：
+
+- 我希望在容器 refresh 完成后自动 start
+- 我希望在容器 close 时 stop
+- 并且我希望多个组件之间按 phase 排序
+
+对应实验：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansSmartLifecycleLabTest.java`
+
+## 1. 现象：start 按 phase 升序，stop 反向
+
+对应测试：
+
+- `SpringCoreBeansSmartLifecycleLabTest.smartLifecycleStartsInPhaseOrder_andStopsInReverseOrder()`
+
+实验里我们注册了两个 lifecycle：
+
+- A：phase=0
+- B：phase=1
+
+你会观察到：
+
+- refresh 时：`start:A` → `start:B`
+- close 时：`stop:B` → `stop:A`
+
+## 2. 机制：LifecycleProcessor 统一管理
+
+容器内部通过 `LifecycleProcessor`（默认 `DefaultLifecycleProcessor`）来：
+
+- 在 refresh 阶段触发 `onRefresh()` → start
+- 在 close 阶段触发 `onClose()` → stop
+
+所以它不是“你手动调用 start/stop”，而是容器生命周期的一部分。
+
+## 3. 常见坑
+
+- **坑 1：把 SmartLifecycle 当成业务逻辑入口**
+  - 它更像基础设施启动/停止钩子。
+
+- **坑 2：stop(Runnable) 不调用 callback**
+  - 容器会等待 callback，用于支持异步 stop；如果你不调用 callback，关闭可能卡住。
+
+## 源码锚点（建议从这里下断点）
+
+- `AbstractApplicationContext#finishRefresh`：refresh 收尾阶段（触发 `LifecycleProcessor#onRefresh`）
+- `LifecycleProcessor#onRefresh`：生命周期统一入口（默认实现是 `DefaultLifecycleProcessor`）
+- `DefaultLifecycleProcessor#startBeans`：start 的排序与触发点（phase 升序）
+- `LifecycleProcessor#onClose`：close 阶段入口（触发 stop）
+- `DefaultLifecycleProcessor#stopBeans`：stop 的排序与触发点（phase 反序）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansSmartLifecycleLabTest.java`
+  - `smartLifecycleStartsInPhaseOrder_andStopsInReverseOrder()`
+
+建议断点：
+
+1) `DefaultLifecycleProcessor#startBeans`：观察 start 为什么按 phase 升序
+2) `SmartLifecycle#start`（你在 Lab 里的实现）：观察实际 start 调用顺序（A → B）
+3) `DefaultLifecycleProcessor#stopBeans`：观察 stop 为什么按 phase 反序
+4) `SmartLifecycle#stop` / `stop(Runnable)`：观察容器为什么需要 callback（否则可能卡关闭）
+
+## 排障分流：这是定义层问题还是实例层问题？
+
+- “SmartLifecycle 没自动 start” → **实例层（生命周期触发条件）**：`isAutoStartup()` 是否为 true？context 是否 refresh 完成？（看 `finishRefresh`）
+- “start/stop 顺序不符合预期” → **实例层（phase 语义）**：检查 `getPhase()` 值与依赖关系（本章第 1 节）
+- “close 卡住/stop 不返回” → **实例层（异步 stop）**：`stop(Runnable)` 必须调用 callback（本章第 3 节）
+- “把它当业务逻辑入口导致复杂副作用” → **设计风险**：它更适合作为基础设施 start/stop 钩子（本章第 3 节）
+
+## 4. 一句话自检
+
+- 你能解释清楚：为什么 stop 顺序是反向的吗？（提示：避免先停掉依赖者）
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansSmartLifecycleLabTest.java`
+推荐断点：`DefaultLifecycleProcessor#startBeans`、`DefaultLifecycleProcessor#stopBeans`、`SmartLifecycle#start`

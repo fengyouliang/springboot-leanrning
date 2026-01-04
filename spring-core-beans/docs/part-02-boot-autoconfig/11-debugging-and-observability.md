@@ -1,0 +1,347 @@
+# 11. 调试与自检：如何“看见”容器正在做什么
+
+理解 Spring 容器的最快方式，是让“不可见的机制”变得可观察。
+
+这一章给你一个实用的调试工具箱，目标是：当你遇到“为什么注入的是它？”“为什么它没注册？”“为什么它是代理？”时，知道从哪里下手。
+
+## 0. 观测对象总览：你其实只是在看 5 类东西
+
+当你说“调 Spring 容器”，本质上是在回答 5 类问题。把它们固定下来，你就不会再靠日志/猜测“碰运气”。
+
+| 你在看什么 | 它回答的问题 | 最小入口断点（建议条件断点） | 固定观察点（watch list） | 关联章节 / 可跑实验 |
+| --- | --- | --- | --- | --- |
+| `BeanDefinition`（原始定义） | “到底有没有注册？”“定义元数据是什么？” | `DefaultListableBeanFactory#getBeanDefinition` | `beanFactory.containsBeanDefinition(beanName)`、`beanFactory.getBeanDefinition(beanName)`（scope/lazy/dependsOn） | [01](01-bean-mental-model.md)、[02](02-bean-registration.md)、`SpringCoreBeansContainerLabTest.beanDefinitionIsNotTheBeanInstance()` |
+| merged `RootBeanDefinition`（最终配方） | “创建时为什么看到的是 Root？”“最终生效配方是什么？” | `AbstractBeanFactory#getMergedLocalBeanDefinition` | `mbd`（`RootBeanDefinition`）、merged 缓存（`mergedBeanDefinitions` 等）、`mbd.getPropertyValues()` | [35](35-merged-bean-definition.md)、`SpringCoreBeansMergedBeanDefinitionLabTest` |
+| 实例 vs 代理（最终暴露对象） | “为什么注入的是 proxy？”“谁把对象换掉了？” | `AbstractAutowireCapableBeanFactory#initializeBean`、`AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization` | `beanName`、`bean` vs `result`、`beanFactory.getBeanPostProcessors()` | [06](06-post-processors.md)、[31](31-proxying-phase-bpp-wraps-bean.md)、`SpringCoreBeansBeanCreationTraceLabTest` |
+| 依赖图（两张表） | “为什么注入的是它？”“为什么启动/关闭顺序这样？” | `DefaultListableBeanFactory#doResolveDependency`、`DefaultSingletonBeanRegistry#registerDependentBean`、`DefaultSingletonBeanRegistry#destroySingletons` | `getDependenciesForBean` / `getDependentBeans`、`dependentBeanMap` / `dependenciesForBeanMap` | [03](03-dependency-injection-resolution.md)、[19](19-depends-on.md)、`SpringCoreBeansBeanGraphDebugLabTest`、`SpringCoreBeansDependsOnLabTest` |
+| 单例缓存（循环依赖/提前暴露） | “循环依赖为什么有时能救？”“early reference 发生在哪？” | `DefaultSingletonBeanRegistry#getSingleton`、`AbstractAutowireCapableBeanFactory#getEarlyBeanReference` | `singletonObjects` / `earlySingletonObjects` / `singletonFactories` 的变化 | [16](16-early-reference-and-circular.md)、`SpringCoreBeansEarlyReferenceLabTest` |
+
+> 经验法则：先选“你在看哪一类对象”，再决定断点与 watch list；否则你很容易在巨大调用栈里迷路。
+
+## 1. 最简单也最有效：查容器里到底有哪些 Bean
+
+本模块的 lab 已经用过：
+
+- `applicationContext.getBeansOfType(TextFormatter.class)`
+
+对应测试：
+
+- `SpringCoreBeansLabTest.containerCanProvideAllFormatterBeansByType()`
+
+你可以把它升级为自己的调试习惯：
+
+- 先确认“容器里有没有你以为的 bean”
+- 再确认“候选有几个”
+- 再回到注入点看 `@Qualifier/@Primary` 等规则
+
+## 2. 进一步：看 BeanDefinition（定义层）
+
+当你怀疑“注册阶段出了问题”（扫描范围不对、`@Import` 没生效、条件没满足）时，光看实例不够。
+
+你需要去看：
+
+- beanName 是否存在对应的 `BeanDefinition`
+- scope、lazy、dependsOn 等元数据是什么
+
+在本模块的容器实验里你已经看过：
+
+- `context.getBeanFactory().getBeanDefinition("exampleBean")`
+
+对应测试：
+
+- `SpringCoreBeansContainerLabTest.beanDefinitionIsNotTheBeanInstance()`
+
+## 3. 把场景做小：用“最小容器”复现（比跑完整应用更快）
+
+很多人调 Spring 容器最大的痛点不是“不会打断点”，而是：**断点命中太多、调用栈太深、噪音太大**。
+
+解决办法往往很朴素：把问题缩成一个最小可复现的容器。
+
+本仓库里你已经反复用过两类“最小容器”：
+
+1) **纯 Spring 场景（更贴近容器机制本身）**：`AnnotationConfigApplicationContext`
+   - 典型例子：`SpringCoreBeansDependsOnLabTest`、`SpringCoreBeansBeanGraphDebugLabTest`
+   - 优点：你看到的就是 `DefaultListableBeanFactory` 的真实行为，几乎没有 Boot 噪音。
+
+2) **Spring Boot 自动装配场景（更贴近真实工程）**：`ApplicationContextRunner`
+   - 典型例子：`SpringCoreBeansAutoConfigurationLabTest`
+   - 优点：可以非常小地验证“某个自动配置为什么生效/为什么没生效”。
+
+> 经验法则：当你准备去翻一堆日志/追一个巨深的栈时，先问自己一句：能不能把它变成一个 `*LabTest` 的最小复现？
+
+## 4. 固定观察点：候选集合 vs 最终注入（以及容器记录的依赖边）
+
+当你要解释“为什么注入的是它”，建议把问题拆成两步观察：
+
+1) **候选集合（candidates）从哪来？**
+   - 最直接的 API：`beanFactory.getBeanNamesForType(requiredType)`
+   - 这一步只回答“有哪些候选”，不回答“最终选了谁”。
+
+2) **最终注入（final injection）到底选了谁？容器把依赖边记录到哪？**
+   - 最直接的 API：`beanFactory.getDependenciesForBean(beanName)`
+   - 你会看到：容器只会把“最终被注入/被引用”的那个 bean 记为依赖（而不是把所有候选都算进去）。
+
+对应实验：
+
+- `SpringCoreBeansBeanGraphDebugLabTest.dumpBeanGraph_candidatesAndRecordedDependencies_helpTroubleshootWhyItsInjected()`
+- 辅助工具：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/testsupport/BeanGraphDumper.java`
+
+> 补充：依赖关系表也会影响关闭时的销毁顺序；如果你想看更底层的 `dependentBeanMap` / `dependenciesForBeanMap`，建议结合 [19](19-depends-on.md) 一起看。
+
+## 5. Spring Boot 的“条件报告”：把自动装配的生效/失效原因打印出来
+
+当你怀疑“自动配置没生效”或“多了我不认识的 bean”时，建议开启条件评估报告：
+
+- 在运行参数里加 `--debug`
+- 或在配置里开启 `debug=true`
+
+它会告诉你：
+
+- 哪些自动配置生效
+- 哪些没生效
+- 没生效的原因（哪个条件失败）
+
+学习阶段你不需要记住每条报告格式，但要知道它存在，并且能回答“为什么”。
+
+如果你想把条件报告当成“可查询的数据结构”（更适合进阶学习、也更容易做成最小复现），见本章第 11 节与 `SpringCoreBeansConditionEvaluationReportLabTest`。
+
+> 进阶提醒：当你遇到 `@ConditionalOnBean` 这类“依赖另一个自动配置里注册的 bean”的场景时，除了看报告本身，还要考虑**条件评估时机**与**自动配置顺序**（after/before 元数据）。对应最小复现见 `SpringCoreBeansAutoConfigurationOrderingLabTest`，并对照 [10](10-spring-boot-auto-configuration.md) 的顺序依赖小节。
+
+## 6. 日志：把容器行为“吵”出来
+
+当你需要更细粒度地看依赖注入/bean 创建细节时，可以临时提高日志级别（建议只在学习/调试时使用）：
+
+- `org.springframework.beans`
+- `org.springframework.context`
+- `org.springframework.boot.autoconfigure`
+
+你会看到：
+
+- bean 创建顺序
+- 自动装配导入/条件判断的部分信息
+
+## 7. 一个实用的自检流程（遇到 DI 问题就按这个来）
+
+把问题先分流到“层/对象”，再下断点会快很多：
+
+- **Bean 根本不存在 / `NoSuchBeanDefinitionException`** → 先走 **定义层**
+  - 先看：`containsBeanDefinition(beanName)`、`getBeanDefinition(beanName)`（scope/lazy/dependsOn）
+  - 再看：扫描范围 / `@Import` / 条件装配（见第 5 节）
+  - 最小复现：`SpringCoreBeansLabTest.missingBeanLookupsFailFast()`
+
+- **候选太多 / `NoUniqueBeanDefinitionException`** → 走 **依赖解析（候选收敛）**
+  - 入口：`DefaultListableBeanFactory#doResolveDependency`
+  - 固定观察点：候选集合（by type）→ `@Qualifier/@Primary/@Priority` 收敛点
+  - 最小复现：`SpringCoreBeansAutowireCandidateSelectionLabTest`
+
+- **注入能发生，但“为什么注入的是它”** → 走 **候选集合 vs 最终依赖边（依赖图）**
+  - 先看候选：`getBeanNamesForType`
+  - 再看最终依赖边：`getDependenciesForBean(beanName)`（容器只记录最终注入的那条边）
+  - 最小复现：`SpringCoreBeansBeanGraphDebugLabTest`
+
+- **对象形态不对（拿到 proxy/wrapper）** → 走 **实例替换（BPP）**
+  - 入口：`initializeBean → applyBeanPostProcessorsAfterInitialization`
+  - 最小复现：`SpringCoreBeansBeanCreationTraceLabTest.beanCreationTrace_recordsPhases_andExposesProxyReplacement()`
+
+- **启动/关闭顺序很怪** → 走 **依赖图 + dependsOn**
+  - 入口：`DefaultSingletonBeanRegistry#registerDependentBean`、`#destroySingletons`
+  - 最小复现：`SpringCoreBeansDependsOnLabTest`（见第 9 节的 dependsOn 环异常也在这里）
+
+> 你可以把它记成一句话：先判断“这是定义层、解析层、还是实例层”，再去打断点。
+
+## 8. 与本模块运行输出对齐
+
+运行本模块：
+
+```bash
+mvn -pl spring-core-beans spring-boot:run
+```
+
+你会在输出中看到这些线索：
+
+- `BEANS:textFormatters=...` / `BEANS:formattingService.injectedFormatter=...`
+- `BEANS:prototype.direct.sameId=...`
+- `BEANS:prototype.provider.differentId=...`
+- `BEANS:lifecycle.postConstructCalled=...`
+- `BEANS:beanDefinitionCount=...`
+
+如果这些输出与你的理解不一致，优先回到：
+
+- [03. 依赖注入解析](03-dependency-injection-resolution.md)
+- [04. Scope 与 prototype 注入陷阱](04-scope-and-prototype.md)
+- [05. 生命周期](05-lifecycle-and-callbacks.md)
+
+## 9. 异常 → 断点入口（从报错秒跳到正确抓手）
+
+你不需要背所有异常，但建议把“异常类型 → 最有效入口断点”形成肌肉记忆。
+
+| 你看到的异常 | 常见含义（先分流） | 最有效入口断点（优先打条件断点） | 关联章节 / 可跑实验 |
+| --- | --- | --- | --- |
+| `NoSuchBeanDefinitionException` | 容器里根本没有候选（定义没注册/条件没满足/按 name 找不到） | `DefaultListableBeanFactory#doResolveDependency`、`DefaultListableBeanFactory#getBeanNamesForType` | [03](03-dependency-injection-resolution.md)、`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`（`missingBeanLookupsFailFast()`） |
+| `NoUniqueBeanDefinitionException` | 候选太多且无法唯一化（典型：单依赖注入时同类型有多个候选） | `DefaultListableBeanFactory#doResolveDependency`、`DefaultListableBeanFactory#determineAutowireCandidate`、`DefaultListableBeanFactory#determinePrimaryCandidate` | [03](03-dependency-injection-resolution.md)、[33](33-autowire-candidate-selection-primary-priority-order.md)、`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java`（`orderAnnotation_doesNotResolveSingleInjectionAmbiguity()`） |
+| `UnsatisfiedDependencyException` | “注入失败”的总包装：可能是没有候选、候选太多、类型不匹配、创建链路失败（它经常包着真正 root cause） | `DefaultListableBeanFactory#doResolveDependency`、`AutowiredAnnotationBeanPostProcessor#postProcessProperties`、`AbstractAutowireCapableBeanFactory#populateBean` | [03](03-dependency-injection-resolution.md)、[30](30-injection-phase-field-vs-constructor.md)、`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansExceptionNavigationLabTest.java`（`unsatisfiedDependency_failsFast()`） |
+| `BeanCurrentlyInCreationException` | 循环依赖/提前暴露相关：某个 bean 正在创建中又被请求（构造器循环依赖最常见） | `DefaultSingletonBeanRegistry#getSingleton`、`DefaultSingletonBeanRegistry#beforeSingletonCreation`、`AbstractBeanFactory#doGetBean` | [09](09-circular-dependencies.md)、[16](16-early-reference-and-circular.md)、`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`（`circularDependencyWithConstructorsFailsFast()`） |
+| `Circular depends-on relationship`（message） | **定义层拓扑环**：人为写了 `dependsOn A -> B -> A`；不要误判成“循环依赖/三级缓存” | `AbstractBeanFactory#doGetBean`、`DefaultSingletonBeanRegistry#registerDependentBean`、`DefaultSingletonBeanRegistry#isDependent` | [19](19-depends-on.md)、`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansDependsOnLabTest.java`（`dependsOn_cycle_failsFast()`） |
+| `BeanCreationException` | bean 创建链路失败（构造器异常 / init 回调异常 / BPP 包装失败 / 循环依赖失败等都会落到这里） | `AbstractAutowireCapableBeanFactory#doCreateBean`、`AbstractAutowireCapableBeanFactory#createBeanInstance`、`AbstractAutowireCapableBeanFactory#initializeBean` | [00](00-deep-dive-guide.md)、[12](12-container-bootstrap-and-infrastructure.md)、`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPreInstantiationLabTest.java`（`withoutBeforeInstantiationShortCircuit_refreshFailsAndConstructorWasCalled()`） |
+| `BeanDefinitionStoreException` | definition 解析/注册阶段失败（XML/注解解析/占位符等；通常发生在 refresh 前半段） | `XmlBeanDefinitionReader#loadBeanDefinitions`、`DefaultListableBeanFactory#registerBeanDefinition`、`AbstractApplicationContext#refresh` | [02](02-bean-registration.md)、[12](12-container-bootstrap-and-infrastructure.md)、`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansExceptionNavigationLabTest.java`（`beanDefinitionStoreException_invalidXml()`） |
+| （无异常）`@Autowired/@Resource/@PostConstruct` 不生效（字段为 null / 回调没跑） | 容器没装“注解能力基础设施”（annotation processors 未注册/未生效）；常见于 `GenericApplicationContext` 手工启动 | `AnnotationConfigUtils#registerAnnotationConfigProcessors`、`PostProcessorRegistrationDelegate#registerBeanPostProcessors`、`AutowiredAnnotationBeanPostProcessor#postProcessProperties`、`CommonAnnotationBeanPostProcessor#postProcessProperties` | [12](12-container-bootstrap-and-infrastructure.md)、`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansBootstrapInternalsLabTest.java`（`withoutAnnotationConfigProcessors_autowiredAndPostConstructAreNotApplied()`）、`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResourceInjectionLabTest.java`（`withoutAnnotationConfigProcessors_resourceIsIgnored()`） |
+
+> 小技巧：如果断点命中次数太多，先加条件（例如 `beanName.equals("xxx")`），再去看调用栈；深挖路线见 [00](00-deep-dive-guide.md)。
+
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansBeanGraphDebugLabTest.java`
+推荐断点：`DefaultListableBeanFactory#doResolveDependency`、`DefaultSingletonBeanRegistry#getSingleton`、`DefaultListableBeanFactory#preInstantiateSingletons`
+
+## 10. 代理定位闭环：为什么它是 proxy？
+
+对 B 路线读者而言，“为什么是 proxy”最有效的做法不是背概念，而是用一套固定闭环把它查出来：
+
+### 10.1 先判定：这是 JDK proxy 还是 CGLIB（别凭肉眼猜）
+
+- JDK proxy：`java.lang.reflect.Proxy.isProxyClass(bean.getClass()) == true`
+- CGLIB：`org.springframework.util.ClassUtils.isCglibProxyClass(bean.getClass()) == true`（或类名包含 `$$`）
+
+> 你不需要先知道“为什么会代理”，先把“代理类型”判定出来，后面的断点路径会短很多。
+
+### 10.2 再定位：代理替换最常见发生在哪？
+
+最常见的“换壳点”在初始化链路末尾：
+
+- `AbstractAutowireCapableBeanFactory#initializeBean`
+  - `applyBeanPostProcessorsAfterInitialization`（这里的 `result` 一旦不等于 `bean`，就发生了替换）
+
+推荐固定观察点（watch/evaluate）：
+
+- `beanName`（加条件断点只看你的目标 bean）
+- `bean`（原对象） vs `result`（BPP 链路返回的最终对象）
+- `beanFactory.getBeanPostProcessors()`（执行链，顺序就是“谁先包/谁后包”的原因）
+
+### 10.3 最后锁定：到底是哪一个 `BeanPostProcessor` 把它换掉的？
+
+在 `applyBeanPostProcessorsAfterInitialization` 的循环里：
+
+- 看循环变量（当前 BPP）是谁
+- 观察 `result` 何时从“原对象”变成“新对象”
+
+最小可跑入口（本仓库专门为这套闭环提供的实验）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansBeanCreationTraceLabTest.java`
+  - `beanCreationTrace_recordsPhases_andExposesProxyReplacement()`
+
+## 11. Boot 条件报告：把它当成“可查询的数据结构”（而不仅是日志）
+
+`--debug` 的条件报告很好用，但对进阶学习者更高收益的心智模型是：
+
+> 条件报告不是日志技巧，它是 `ConditionEvaluationReport` 这份“可查询的数据结构”。
+
+在 `ApplicationContextRunner` 场景里（最小、可控、无全量 Boot 噪音），你可以直接拿到它：
+
+```java
+ConditionEvaluationReport report = ConditionEvaluationReport.get(context.getBeanFactory());
+var outcomes = report.getConditionAndOutcomesBySource().get(AutoConfig.class.getName());
+```
+
+最小可跑入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansConditionEvaluationReportLabTest.java`
+
+## 12. 高收益条件断点模板（降噪）
+
+断点命中太多时，先套这些“模板条件”，能把噪音降一个数量级：
+
+- 创建链路（只看一个 bean）：`beanName.equals("yourBeanName")`
+- DI 链路（只看某个注入类型）：`descriptor.getDependencyType() == YourType.class`
+- 反向过滤（只看业务 bean）：`!beanName.startsWith("org.springframework.")`
+
+> 小技巧：如果你不确定 `beanName` 是什么，先用 `getBeanDefinitionNames()` 或 `getBeansOfType()` 把名字找出来，再回到断点加条件。
+
+## 13. IoC/DI 与生命周期 Debug Playbook（最小断点闭环）
+
+> 目标：给你一套“遇到现象就能立刻落到断点入口”的固定套路。每条 playbook 都绑定本仓库的最小复现入口（建议先跑通再下断点）。
+
+### 13.1 现象：`@Autowired/@PostConstruct/@Bean` 不生效（注解为什么能工作？）
+
+复现入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansBootstrapInternalsLabTest.java`
+  - `withoutAnnotationConfigProcessors_autowiredAndPostConstructAreNotApplied()`
+  - `registerAnnotationConfigProcessors_enablesAutowiredAndPostConstruct()`
+
+推荐断点（按顺序）：
+
+1) `AnnotationConfigUtils#registerAnnotationConfigProcessors`（基础设施处理器注册入口）
+2) `PostProcessorRegistrationDelegate#registerBeanPostProcessors`（BPP 何时进入主线）
+3) `AutowiredAnnotationBeanPostProcessor#postProcessProperties`（`@Autowired` 的解析与注入发生点）
+4) `CommonAnnotationBeanPostProcessor#postProcessBeforeInitialization`（`@PostConstruct` 的触发点）
+
+你应该能解释清楚：
+
+- 注解能力不是“语法自带”，而是容器在 refresh 主线里注册了 BFPP/BPP 才成立
+
+### 13.2 现象：单依赖注入歧义（候选太多）/ 为什么最终注入的是它？
+
+复现入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansInjectionAmbiguityLabTest.java`
+  - `singleInjectionFailsFast_whenMultipleCandidatesExist_andNoPrimaryOrQualifierIsPresent()`
+  - `primary_canResolveSingleInjectionAmbiguity_byChoosingTheDefaultWinner()`
+  - `qualifier_canResolveSingleInjectionAmbiguity_byExplicitlySelectingTheTargetBean()`
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
+  - `orderAnnotation_doesNotResolveSingleInjectionAmbiguity()`
+
+推荐断点（闭环版）：
+
+1) `DefaultListableBeanFactory#doResolveDependency`（依赖解析主入口）
+2) `DefaultListableBeanFactory#findAutowireCandidates`（候选收集：Map<beanName, candidate>）
+3) `DefaultListableBeanFactory#determineAutowireCandidate`（候选收敛：@Qualifier/@Primary/@Priority/name）
+4) `QualifierAnnotationAutowireCandidateResolver#isAutowireCandidate`（Qualifier 过滤与匹配）
+
+你应该能解释清楚：
+
+- `@Order` 管的是“集合注入排序”，不是“单依赖候选收敛”
+- 依赖解析的硬核主线就是：候选收集 → 候选收敛 → 最终注入
+
+### 13.3 现象：生命周期回调顺序说不清（Aware/BPP/@PostConstruct/afterPropertiesSet 谁先谁后？）
+
+复现入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
+  - `singletonLifecycleCallbacks_happenInAStableOrderAroundInitialization()`
+
+推荐断点（闭环版）：
+
+1) `AbstractAutowireCapableBeanFactory#doCreateBean`（创建主线）
+2) `AbstractAutowireCapableBeanFactory#populateBean`（注入发生点）
+3) `AbstractAutowireCapableBeanFactory#initializeBean`（Aware + init callbacks 串联点）
+4) `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInitialization/AfterInitialization`（BPP 两个切面）
+
+你应该能解释清楚：
+
+- Aware 发生在 initialize 阶段，且会早于 init callbacks（因此能在 `@PostConstruct` 之前拿到容器信息）
+- prototype 的销毁默认不由容器托管（对照同一个类里的 prototype 测试）
+
+### 13.4 现象：这个 bean 为什么变成 proxy？是谁把它换掉了？
+
+复现入口：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansBeanCreationTraceLabTest.java`
+  - `beanCreationTrace_recordsPhases_andExposesProxyReplacement()`
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProxyingPhaseLabTest.java`
+  - `beanPostProcessorCanReturnAProxyAsTheFinalExposedBean_andSelfInvocationStillBypassesTheProxy()`
+
+推荐断点（闭环版）：
+
+1) `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`
+2) 你自己的 `BeanPostProcessor#postProcessAfterInitialization`（或 AOP/Tx 的 AutoProxyCreator）
+
+你应该能解释清楚：
+
+- proxy/替换不只是 AOP/事务的“魔法”，而是容器在实例阶段允许 BPP 返回“另一个对象”作为最终暴露对象
+
+## 面试常问（排障方法论：先分层再下断点）
+
+- 常问：遇到“注解不生效/bean 不存在/注入错了/对象变成 proxy”你怎么排查？
+  - 答题要点：先分层：定义层（注册/条件/顺序）vs 实例层（注入/生命周期/代理）；再用最小上下文/最小复现把现象固化为断言。
+- 常见追问：如何定位“是谁把对象换成了 proxy”？
+  - 答题要点：从 `initializeBean` → `applyBeanPostProcessorsAfterInitialization` 追到具体 BPP；再回到 BPP 的注册顺序与匹配条件（Advisor/类型/注解）。
+- 常见追问：条件装配导致 bean 有/没有怎么定位？
+  - 答题要点：看 ConditionEvaluationReport（或 `--debug`）；先回答“为什么 match/why skip”，再看是否被用户 bean 覆盖或被排除。
