@@ -194,15 +194,15 @@ mvn -pl springboot-basics spring-boot:run
 下面这些“连接线”往往比单个知识点更重要：它们能解释为什么你在不同模块里会遇到同一类现象。
 
 - **代理（Proxy）是共同底座**：AOP、事务（`@Transactional`）、方法参数校验（method validation）都依赖代理机制  
-  - 从机制角度建议先读：[AOP 心智模型](spring-core-aop/docs/01-aop-proxy-mental-model.md)、[`@Transactional` 也是代理](spring-core-tx/docs/02-transactional-proxy.md)、[方法参数校验也需要代理](spring-core-validation/docs/03-method-validation-proxy.md)
+  - 从机制角度建议先读：[AOP 心智模型](spring-core-aop/docs/part-01-proxy-fundamentals/01-aop-proxy-mental-model.md)、[`@Transactional` 也是代理](spring-core-tx/docs/part-01-transaction-basics/02-transactional-proxy.md)、[方法参数校验也需要代理](spring-core-validation/docs/part-01-validation-core/03-method-validation-proxy.md)
 - **自调用（self-invocation）是代理世界第一大坑**：同一个类里用 `this.xxx()` 调用会绕过代理，因此 AOP/Tx 都可能“不生效”  
-  - 对照：[AOP 自调用陷阱](spring-core-aop/docs/03-self-invocation.md)、[Tx 常见坑清单](spring-core-tx/docs/90-common-pitfalls.md)
+  - 对照：[AOP 自调用陷阱](spring-core-aop/docs/part-01-proxy-fundamentals/03-self-invocation.md)、[Tx 常见坑清单](spring-core-tx/docs/appendix/90-common-pitfalls.md)
 - **事务边界决定持久化行为**：JPA 的 flush / dirty checking 不是“魔法”，它强依赖事务与 persistence context  
-  - 对照：[JPA Persistence Context](springboot-data-jpa/docs/02-persistence-context.md)、[事务边界](spring-core-tx/docs/01-transaction-boundary.md)
+  - 对照：[JPA Persistence Context](springboot-data-jpa/docs/02-persistence-context.md)、[事务边界](spring-core-tx/docs/part-01-transaction-basics/01-transaction-boundary.md)
 - **事件（Events）与事务（Tx）的时机关系**：同步事件 vs after-commit 事件（`@TransactionalEventListener`）能解释“回滚了但监听器为什么执行了/没执行”  
-  - 从现象入手：[spring-core-events](spring-core-events/README.md)、[`@TransactionalEventListener`（after-commit）](spring-core-events/docs/07-transactional-event-listener.md)、[springboot-business-case](springboot-business-case/README.md)
+  - 从现象入手：[spring-core-events](spring-core-events/README.md)、[`@TransactionalEventListener`（after-commit）](spring-core-events/docs/part-02-async-and-transactional/07-transactional-event-listener.md)、[springboot-business-case](springboot-business-case/README.md)
 - **资源（Resources）是很多能力的地基**：配置文件、classpath 扫描、jar/本地差异，最终都会回到 `Resource` 抽象  
-  - 对照：[Resource 抽象](spring-core-resources/docs/01-resource-abstraction.md)、[jar vs filesystem](spring-core-resources/docs/06-jar-vs-filesystem.md)
+  - 对照：[Resource 抽象](spring-core-resources/docs/part-01-resource-abstraction/01-resource-abstraction.md)、[jar vs filesystem](spring-core-resources/docs/part-01-resource-abstraction/06-jar-vs-filesystem.md)
 - **测试切片 vs 全量上下文**：`@DataJpaTest` / `@WebMvcTest` 用来快速验证机制，`@SpringBootTest` 更接近集成链路  
   - 对照：[springboot-testing](springboot-testing/README.md)、[`@DataJpaTest` 切片](springboot-data-jpa/docs/06-datajpatest-slice.md)
 

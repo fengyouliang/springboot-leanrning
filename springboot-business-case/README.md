@@ -46,9 +46,9 @@ mvn -pl springboot-business-case test
 
 1. 先跑接口 + 跑 `BootBusinessCaseLabTest`：把“现象”固定下来
 2. 出现疑问时按链路拆解：
-   - 代理/AOP：`spring-core-aop/docs/01-aop-proxy-mental-model.md`、`spring-core-aop/docs/03-self-invocation.md`
-   - 事务：`spring-core-tx/docs/01-transaction-boundary.md`、`spring-core-tx/docs/02-transactional-proxy.md`
-   - 事件与事务时机：`spring-core-events/docs/07-transactional-event-listener.md`
+   - 代理/AOP：`spring-core-aop/docs/part-01-proxy-fundamentals/01-aop-proxy-mental-model.md`、`spring-core-aop/docs/part-01-proxy-fundamentals/03-self-invocation.md`
+   - 事务：`spring-core-tx/docs/part-01-transaction-basics/01-transaction-boundary.md`、`spring-core-tx/docs/part-01-transaction-basics/02-transactional-proxy.md`
+   - 事件与事务时机：`spring-core-events/docs/part-02-async-and-transactional/07-transactional-event-listener.md`
 
 ## Labs / Exercises 索引（按知识点 / 难度）
 

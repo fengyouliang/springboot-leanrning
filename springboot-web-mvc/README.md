@@ -79,7 +79,7 @@ mvn -pl springboot-web-mvc test
 | Converter/Formatter 扩展绑定 | [docs/03](docs/03-binding-and-converters.md) | `BootWebMvcExerciseTest#exercise_converterFormatter` | String 如何变成自定义类型 |
 | Interceptor 生效范围与顺序 | [docs/04](docs/04-interceptor-and-filter-ordering.md) | `BootWebMvcExerciseTest#exercise_interceptor` | 为什么它只对 `/api/**` 生效 |
 
-> 想从机制层理解“校验为什么有时不生效”，可进一步阅读 `spring-core-validation/docs/03-method-validation-proxy.md`（方法参数校验与代理）。
+> 想从机制层理解“校验为什么有时不生效”，可进一步阅读 `spring-core-validation/docs/part-01-validation-core/03-method-validation-proxy.md`（方法参数校验与代理）。
 
 ## Labs / Exercises 索引（按知识点 / 难度）
 
