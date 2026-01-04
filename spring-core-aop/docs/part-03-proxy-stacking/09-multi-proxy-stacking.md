@@ -107,7 +107,7 @@
 - 你只看到一个 proxy，但它能同时实现事务、缓存、安全、AOP 切面
 - “顺序问题”很多时候不是“代理层级”，而是“advisor 顺序”
 
-AutoProxyCreator 主线详见：`docs/07-autoproxy-creator-mainline.md`。
+AutoProxyCreator 主线详见：[07 - AutoProxyCreator 主线](../part-02-autoproxy-and-pointcuts/07-autoproxy-creator-mainline.md)。
 
 ---
 

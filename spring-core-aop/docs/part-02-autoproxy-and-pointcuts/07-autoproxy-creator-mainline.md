@@ -175,4 +175,4 @@ mvn -pl spring-core-aop -Dtest=SpringCoreAopAutoProxyCreatorInternalsLabTest tes
 - **BPP 顺序**：影响“是否出现多层代理、谁先包谁后包”（容器阶段）
 - **Advisor 顺序**：影响“拦截器链谁在外层、谁先执行”（调用阶段）
 
-多代理叠加与顺序的完整解释见：`docs/09-multi-proxy-stacking.md`。
+多代理叠加与顺序的完整解释见：[09 - 多代理叠加与顺序](../part-03-proxy-stacking/09-multi-proxy-stacking.md)。
