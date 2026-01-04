@@ -1,4 +1,4 @@
-package com.learning.springboot.springcoreevents;
+package com.learning.springboot.springcoreevents.part01_event_basics;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
