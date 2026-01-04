@@ -1,4 +1,4 @@
-package com.learning.springboot.springcoreprofiles;
+package com.learning.springboot.springcoreprofiles.part01_profiles;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;

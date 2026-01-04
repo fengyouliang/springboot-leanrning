@@ -55,11 +55,11 @@ mvn -pl spring-core-profiles test
 
 ## 推荐 docs 阅读顺序
 
-> 本模块暂无 `docs/`，建议按“先写条件 → 再用 runner 证明”的顺序：
+> 本模块已补齐 `docs/`，建议按“先理解激活与选择 → 再用 runner 证明”的顺序：
 
-1. 先跑 `SpringCoreProfilesLabTest`：理解每个场景期望注入哪个 `GreetingProvider`
-2. 再回看 `@Profile` / `@ConditionalOnProperty` 的条件写法（以及为什么要避免注入歧义）
-3. 最后回到应用运行：用不同参数组合复现测试中的场景
+1. [深挖指南](docs/part-00-guide/00-deep-dive-guide.md)
+2. [Profile 激活与 Bean 选择](docs/part-01-profiles/01-profile-activation-and-bean-selection.md)
+3. [常见坑清单](docs/appendix/90-common-pitfalls.md) + [自测题](docs/appendix/99-self-check.md)
 
 ## Labs / Exercises 索引（按知识点 / 难度）
 
@@ -67,8 +67,8 @@ mvn -pl spring-core-profiles test
 
 | 类型 | 入口 | 知识点 | 难度 | 下一步 |
 | --- | --- | --- | --- | --- |
-| Lab | `src/test/java/com/learning/springboot/springcoreprofiles/SpringCoreProfilesLabTest.java` | `@Profile`/`@ConditionalOnProperty` + `ApplicationContextRunner` | ⭐⭐ | 把每个场景的“最终注入 Bean”说清楚 |
-| Exercise | `src/test/java/com/learning/springboot/springcoreprofiles/SpringCoreProfilesExerciseTest.java` | 按提示新增 profile/开关/兜底 Bean 并写断言 | ⭐–⭐⭐ | 从“增加 prod provider”开始 |
+| Lab | `src/test/java/com/learning/springboot/springcoreprofiles/part01_profiles/SpringCoreProfilesLabTest.java` | `@Profile`/`@ConditionalOnProperty` + `ApplicationContextRunner` | ⭐⭐ | 把每个场景的“最终注入 Bean”说清楚 |
+| Exercise | `src/test/java/com/learning/springboot/springcoreprofiles/part00_guide/SpringCoreProfilesExerciseTest.java` | 按提示新增 profile/开关/兜底 Bean 并写断言 | ⭐–⭐⭐ | 从“增加 prod provider”开始 |
 
 ## 常见 Debug 路径
 

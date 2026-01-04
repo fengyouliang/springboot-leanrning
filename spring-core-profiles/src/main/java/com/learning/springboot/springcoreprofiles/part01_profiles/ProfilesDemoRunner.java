@@ -1,4 +1,4 @@
-package com.learning.springboot.springcoreprofiles;
+package com.learning.springboot.springcoreprofiles.part01_profiles;
 
 import java.util.Arrays;
 

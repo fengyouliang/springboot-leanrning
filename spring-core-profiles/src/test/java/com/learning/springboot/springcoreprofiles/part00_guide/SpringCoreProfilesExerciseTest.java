@@ -1,4 +1,8 @@
-package com.learning.springboot.springcoreprofiles;
+package com.learning.springboot.springcoreprofiles.part00_guide;
+
+import com.learning.springboot.springcoreprofiles.part01_profiles.DevGreetingConfiguration;
+import com.learning.springboot.springcoreprofiles.part01_profiles.GreetingProvider;
+import com.learning.springboot.springcoreprofiles.part01_profiles.NonDevGreetingConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,4 +1,4 @@
-package com.learning.springboot.springcoreprofiles;
+package com.learning.springboot.springcoreprofiles.part01_profiles;
 
 public class DevGreetingProvider implements GreetingProvider {
 
