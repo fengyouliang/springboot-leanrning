@@ -26,5 +26,5 @@
 
 - `final` 方法拦截不到（CGLIB 情况）
 - private 方法通常也不会被拦截
-- 对照：AOP 模块的 [spring-core-aop/docs/04](../../spring-core-aop/docs/04-final-and-proxy-limits.md)
+- 对照：AOP 模块的 [spring-core-aop/docs/04](../../spring-core-aop/docs/part-01-proxy-fundamentals/04-final-and-proxy-limits.md)
 

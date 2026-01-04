@@ -1,4 +1,4 @@
-package com.learning.springboot.springcoretx;
+package com.learning.springboot.springcoretx.part01_transaction_basics;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;

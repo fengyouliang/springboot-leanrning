@@ -1,4 +1,4 @@
-package com.learning.springboot.springcoretx;
+package com.learning.springboot.springcoretx.part02_template_and_debugging;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,4 +1,4 @@
-package com.learning.springboot.springcoretx;
+package com.learning.springboot.springcoretx.part01_transaction_basics;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

@@ -1,4 +1,4 @@
-package com.learning.springboot.springcoretx;
+package com.learning.springboot.springcoretx.part01_transaction_basics;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

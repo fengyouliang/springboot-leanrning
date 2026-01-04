@@ -1,4 +1,7 @@
-package com.learning.springboot.springcoretx;
+package com.learning.springboot.springcoretx.part02_template_and_debugging;
+
+import com.learning.springboot.springcoretx.part01_transaction_basics.AccountRepository;
+import com.learning.springboot.springcoretx.part01_transaction_basics.AccountService;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;

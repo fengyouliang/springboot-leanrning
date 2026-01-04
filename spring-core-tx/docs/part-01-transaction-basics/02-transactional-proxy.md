@@ -18,7 +18,7 @@
 2. 调用入口必须“走代理”  
    - 同类内部自调用会绕过代理（AOP/Tx 的同一类坑）
 3. 目标方法必须能被代理拦截  
-   - `final` 方法、`private` 方法等可能导致拦截失效（见 AOP 模块的 [spring-core-aop/docs/04](../../spring-core-aop/docs/04-final-and-proxy-limits.md)）
+   - `final` 方法、`private` 方法等可能导致拦截失效（见 AOP 模块的 [spring-core-aop/docs/04](../../spring-core-aop/docs/part-01-proxy-fundamentals/04-final-and-proxy-limits.md)）
 
 ## 一句话总结
 

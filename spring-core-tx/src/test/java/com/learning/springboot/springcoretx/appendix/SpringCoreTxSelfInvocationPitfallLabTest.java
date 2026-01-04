@@ -1,4 +1,6 @@
-package com.learning.springboot.springcoretx;
+package com.learning.springboot.springcoretx.appendix;
+
+import com.learning.springboot.springcoretx.part01_transaction_basics.AccountRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
