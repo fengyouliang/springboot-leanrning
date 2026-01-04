@@ -7,8 +7,24 @@
 ## Module Overview
 
 - **Responsibility:** 提供 Bean 机制的系统文档与可运行 Labs/Exercises，用于建立源码级心智模型与排障能力。
+- **Docs Reading:** 推荐从 `spring-core-beans/docs/README.md` 开始（书本目录 + Part 划分）；主线可按 Part 顺读，每章顶部提供“上一章｜目录｜下一章”导航，降低章节切换成本。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-03
+- **Last Updated:** 2026-01-04
+
+## Source Layout（与 docs Part 对齐）
+
+为保证“像书本一样”的可发现性与可复现性，`spring-core-beans` 的源码与测试代码按 docs 的 Part 结构分组：
+
+- `spring-core-beans/docs/part-01-ioc-container/**` ⇔ `src/main/java/.../part01_ioc_container/**` + `src/test/java/.../part01_ioc_container/**`
+- `spring-core-beans/docs/part-02-boot-autoconfig/**` ⇔ `src/test/java/.../part02_boot_autoconfig/**`
+- `spring-core-beans/docs/part-03-container-internals/**` ⇔ `src/test/java/.../part03_container_internals/**`
+- `spring-core-beans/docs/part-04-wiring-and-boundaries/**` ⇔ `src/test/java/.../part04_wiring_and_boundaries/**`
+- `spring-core-beans/docs/appendix/**` ⇔ `src/test/java/.../appendix/**`
+- 跨 Part 的测试支撑：`src/test/java/.../testsupport/**`
+
+约束（必须遵守）：
+
+- 必须保留 `com.learning.springboot.springcorebeans.SpringCoreBeansApplication` 的包名不变（便于 Spring Boot 测试向上包查找 `@SpringBootConfiguration`）。
 
 ## Specifications
 
@@ -40,10 +56,10 @@
 - 能用 `PostProcessorRegistrationDelegate` 的两段算法解释：为什么 BFPP/BDRPP 更早、为什么 BPP 注册发生在 refresh 中前段、以及顺序如何由“三段分组 + comparator”决定
 - 能解释 `addBeanPostProcessor` 的 list 语义：为什么它绕过容器排序、为什么执行顺序 = 注册顺序、以及“BPP 不会 retroactive”的时机陷阱
 - 对应可复现闭环入口：
-  - `spring-core-beans/docs/14-post-processor-ordering.md`
-  - `spring-core-beans/docs/25-programmatic-bpp-registration.md`
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansPostProcessorOrderingLabTest.java`
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansProgrammaticBeanPostProcessorLabTest.java`
+  - `spring-core-beans/docs/part-03-container-internals/14-post-processor-ordering.md`
+  - `spring-core-beans/docs/part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md`
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPostProcessorOrderingLabTest.java`
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProgrammaticBeanPostProcessorLabTest.java`
 
 ## Dependencies
 
@@ -64,3 +80,7 @@
 - [202601030652_spring-core-beans-source-deep-dive](../../history/2026-01/202601030652_spring-core-beans-source-deep-dive/) - ✅ 已执行：在 docs/01、02、03、05、09 补齐 Spring 源码解析（refresh 主线/注册入口/依赖解析/生命周期/循环依赖），并用仓库 src 最小片段辅助理解
 - [202601030731_spring-core-beans-post-processors-bootstrap-source-deepening](../../history/2026-01/202601030731_spring-core-beans-post-processors-bootstrap-source-deepening/) - ✅ 已执行：深化 docs/06 与 docs/12 的源码解析（PostProcessorRegistrationDelegate 算法/annotation processors bootstrap），并新增 “static @Bean BFPP” 最小可运行 Lab
 - [202601030752_spring-core-beans-ordering-programmatic-bpp-deepening](../../history/2026-01/202601030752_spring-core-beans-ordering-programmatic-bpp-deepening/) - ✅ 已执行：把 docs/14 与 docs/25 补成“算法级 + 可复现”版本（排序器规则/分段执行/手工 addBeanPostProcessor 的 list 语义与时机陷阱），并增强 ordering Lab 覆盖 order 数值与 @Order 反例
+- [202601031508_spring-core-beans-docs-coherence](../../history/2026-01/202601031508_spring-core-beans-docs-coherence/) - ✅ 已执行：优化 docs/01-03 连贯性（本章定位/主线 vs 深挖/下一章预告），让 01→02→03 主线阅读更顺畅且不丢知识点
+- [202601032012_spring-core-beans-bookify-docs](../../history/2026-01/202601032012_spring-core-beans-bookify-docs/) - ✅ 已执行：docs 书本化（目录页 + Part 结构 + 全章 A–G 契约 + 上下章导航），并全局修复 docs 内链与模块 README 入口
+- [202601032124_spring-core-beans-src-part-grouping](../../history/2026-01/202601032124_spring-core-beans-src-part-grouping/) - ✅ 已执行：src/main 与 src/test 按 docs Part 分组（分包 + testsupport），并同步修复 docs/README/知识库中的源码路径引用
+- [202601041013_spring-core-beans-src-part-naming](../../history/2026-01/202601041013_spring-core-beans-src-part-naming/) - ✅ 已执行：将 src 分组目录命名语义化（partXX → partXX_<topic>），进一步对齐 docs Part 的具名章节域

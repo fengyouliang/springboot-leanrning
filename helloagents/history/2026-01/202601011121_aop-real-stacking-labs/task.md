@@ -12,8 +12,8 @@ Directory: `helloagents/history/2026-01/202601011121_aop-real-stacking-labs/`
 - [√] 2.2 增强可观察性：提供 advisor/chain 观察工具或断言入口（复用到集成 Lab）：`spring-core-aop/src/test/java/...`
 
 ## 3. spring-core-aop（文档：学习路线 + 断点清单 + 真实叠加排障）
-- [√] 3.1 新增“真实叠加 Debug Playbook”章节（路线 + 断点清单 + checklist）：`spring-core-aop/docs/10-real-world-stacking-playbook.md`
-- [√] 3.2 更新现有章节引用与导航（README/深挖指南/多代理章节）：`spring-core-aop/README.md`、`spring-core-aop/docs/00-deep-dive-guide.md`、`spring-core-aop/docs/09-multi-proxy-stacking.md`
+- [√] 3.1 新增“真实叠加 Debug Playbook”章节（路线 + 断点清单 + checklist）：`spring-core-aop/docs/part-03-proxy-stacking/10-real-world-stacking-playbook.md`
+- [√] 3.2 更新现有章节引用与导航（README/深挖指南/多代理章节）：`spring-core-aop/README.md`、`spring-core-aop/docs/part-00-guide/00-deep-dive-guide.md`、`spring-core-aop/docs/part-03-proxy-stacking/09-multi-proxy-stacking.md`
 
 ## 4. Security Check
 - [√] 4.1 安全自检（G9）：不引入明文密钥/外部服务；依赖变更最小化；不引入高风险命令

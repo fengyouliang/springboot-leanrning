@@ -24,6 +24,11 @@
 | 202601030731 | spring-core-beans-post-processors-bootstrap-source-deepening | Enhancement | ✅Completed | [202601030731_spring-core-beans-post-processors-bootstrap-source-deepening](2026-01/202601030731_spring-core-beans-post-processors-bootstrap-source-deepening/) |
 | 202601030752 | spring-core-beans-ordering-programmatic-bpp-deepening | Enhancement | ✅Completed | [202601030752_spring-core-beans-ordering-programmatic-bpp-deepening](2026-01/202601030752_spring-core-beans-ordering-programmatic-bpp-deepening/) |
 | 202601031327 | first-pass-content-merge-into-existing-docs | Enhancement | ✅Completed | [202601031327_first-pass-content-merge-into-existing-docs](2026-01/202601031327_first-pass-content-merge-into-existing-docs/) |
+| 202601031508 | spring-core-beans-docs-coherence | Enhancement | ✅Completed | [202601031508_spring-core-beans-docs-coherence](2026-01/202601031508_spring-core-beans-docs-coherence/) |
+| 202601032012 | spring-core-beans-bookify-docs | Enhancement | ✅Completed | [202601032012_spring-core-beans-bookify-docs](2026-01/202601032012_spring-core-beans-bookify-docs/) |
+| 202601032124 | spring-core-beans-src-part-grouping | Refactor | ✅Completed | [202601032124_spring-core-beans-src-part-grouping](2026-01/202601032124_spring-core-beans-src-part-grouping/) |
+| 202601041013 | spring-core-beans-src-part-naming | Refactor | ✅Completed | [202601041013_spring-core-beans-src-part-naming](2026-01/202601041013_spring-core-beans-src-part-naming/) |
+| 202601041046 | spring-core-part-structure-sync | Refactor | ✅Completed | [202601041046_spring-core-part-structure-sync](2026-01/202601041046_spring-core-part-structure-sync/) |
 
 ---
 
@@ -47,3 +52,8 @@
 - [202601030731_spring-core-beans-post-processors-bootstrap-source-deepening](2026-01/202601030731_spring-core-beans-post-processors-bootstrap-source-deepening/) - spring-core-beans：继续深化 docs/06/12（PostProcessors 算法与注解基础设施 bootstrap），新增 static @Bean BFPP 最小复现 Lab
 - [202601030752_spring-core-beans-ordering-programmatic-bpp-deepening](2026-01/202601030752_spring-core-beans-ordering-programmatic-bpp-deepening/) - spring-core-beans：补齐 docs/14/25（Ordering + programmatic BPP 注册）源码算法级解析，并增强 ordering Lab 覆盖 order 数值与 @Order 反例
 - [202601031327_first-pass-content-merge-into-existing-docs](2026-01/202601031327_first-pass-content-merge-into-existing-docs/) - spring-core-beans：将 First Pass 的最小实验入口融入 docs/00 与 docs/99（不新增独立文件）
+- [202601031508_spring-core-beans-docs-coherence](2026-01/202601031508_spring-core-beans-docs-coherence/) - spring-core-beans：优化 docs/01-03 连贯性（章节契约/桥接段/下一章预告），让 01→02→03 主线阅读更顺畅
+- [202601032012_spring-core-beans-bookify-docs](2026-01/202601032012_spring-core-beans-bookify-docs/) - spring-core-beans：docs 书本化（目录页 + Part 结构 + 全章 A–G 契约 + 上下章导航），并全局修复内链与 README 入口
+- [202601032124_spring-core-beans-src-part-grouping](2026-01/202601032124_spring-core-beans-src-part-grouping/) - spring-core-beans：src/main 与 src/test 按 docs Part 分组（分包 + testsupport），并同步修复文档源码路径引用
+- [202601041013_spring-core-beans-src-part-naming](2026-01/202601041013_spring-core-beans-src-part-naming/) - spring-core-beans：将分组目录命名语义化（partXX → partXX_<topic>），进一步对齐 docs Part
+- [202601041046_spring-core-part-structure-sync](2026-01/202601041046_spring-core-part-structure-sync/) - 将 spring-core-beans 的 Part 结构（docs + src/main + src/test）同步到其他 spring-core-* 模块，并修复跨模块引用与路径一致性问题
