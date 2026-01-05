@@ -1,5 +1,12 @@
 # 07. `@Configuration` 增强与 `@Bean` 语义（proxyBeanMethods）
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansContainerLabTest test`
+
 这一章解释一个经常让人“以为 Spring 坏了”的现象：
 
 > 为什么在 `@Configuration` 里调用另一个 `@Bean` 方法，有时会得到同一个实例，有时会 new 出一个新实例？
@@ -103,3 +110,5 @@ ConfigB configB(ConfigA a) {
   - 答题要点：`true` 时配置类被增强，`@Bean` 方法互调会被拦截并走容器缓存，保持单例语义；`false` 时互调是普通 Java 调用，可能 new 出额外对象。
 - 常见追问：在工程里如何避免误用？
   - 答题要点：避免在 `@Bean` 方法体内直接调用另一个 `@Bean` 方法；优先使用方法参数注入或构造注入，让依赖解析回到容器。
+
+上一章：[06. 容器扩展点：BFPP vs BPP（以及它们能/不能做什么）](06-post-processors.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[08. `FactoryBean`：产品 vs 工厂（以及 `&` 前缀）](08-factorybean.md)

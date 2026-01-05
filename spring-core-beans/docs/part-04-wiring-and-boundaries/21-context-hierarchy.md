@@ -1,5 +1,12 @@
 # 21. 父子 ApplicationContext：可见性与覆盖边界
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansContextHierarchyLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansContextHierarchyLabTest test`
+
 当你进入真实工程或复杂测试环境，很容易遇到“多个 ApplicationContext”。
 
 这一章用一个最小实验展示：
@@ -72,7 +79,7 @@
 
 - “child 拿不到 parent 的 bean” → **优先定义层/上下文关系问题**：child 是否真的设置了 parent？parent 是否 refresh 并注册了该定义？
 - “我在 child 里覆盖了 bean，但 parent 的行为没变” → **这是预期（name-based、只在 child 生效）**：override 发生在查找链路上，不会反向影响 parent（本章第 2 节）
-- “按类型注入出现歧义（parent/child 都有同类型）” → **实例层（候选解析）**：需要 `@Qualifier/@Primary` 等规则收敛（见 [03](03-dependency-injection-resolution.md)/[33](33-autowire-candidate-selection-primary-priority-order.md)）
+- “按类型注入出现歧义（parent/child 都有同类型）” → **实例层（候选解析）**：需要 `@Qualifier/@Primary` 等规则收敛（见 [03](../part-01-ioc-container/03-dependency-injection-resolution.md)/[33](33-autowire-candidate-selection-primary-priority-order.md)）
 - “以为这是 Boot 专属现象” → **容器机制**：parent/child 是 `ApplicationContext` 层面的通用能力（本章 Lab 用小容器也能复现）
 
 ## 4. 一句话自检
@@ -80,3 +87,5 @@
 - 你能解释清楚：为什么 child 可以拿到 parent 的 bean，但 parent 拿不到 child 的 bean 吗？
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansContextHierarchyLabTest.java`
 推荐断点：`BeanFactoryUtils#beanNamesForTypeIncludingAncestors`、`AbstractBeanFactory#doGetBean`、`AbstractApplicationContext#setParent`
+
+上一章：[20. registerResolvableDependency：能注入，但它不是 Bean](20-resolvable-dependency.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[22. Bean 名称与 alias：同一个实例，多一个名字](22-bean-names-and-aliases.md)

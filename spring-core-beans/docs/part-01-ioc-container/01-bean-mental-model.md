@@ -120,7 +120,7 @@
 
 不要求你背源码，但建议你知道“该去哪里看”。更系统的断点与路线见：
 
-- [00. 深挖指南：把“Bean 三层模型”落到源码与断点](00-deep-dive-guide.md)
+- [00. 深挖指南：把“Bean 三层模型”落到源码与断点](../part-00-guide/00-deep-dive-guide.md)
 
 ### 7.2 用实验建立“阶段感”（强烈推荐）
 
@@ -130,10 +130,10 @@
 
 如果你愿意再深入一步（开始进入“为什么注解能工作 / 为什么会被代理 / 为什么会短路”），建议按这个顺序继续读：
 
-1) [12. 容器启动与基础设施处理器](12-container-bootstrap-and-infrastructure.md)（注解能力来自哪些处理器）
-2) [14. PostProcessor 顺序](14-post-processor-ordering.md)（很多坑的根源是顺序）
-3) [15. 实例化前短路](15-pre-instantiation-short-circuit.md)（为什么有时“还没 new”就拿到对象了）
-4) [16. early reference 与循环依赖](16-early-reference-and-circular.md)（循环依赖到底怎么救）
+1) [12. 容器启动与基础设施处理器](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)（注解能力来自哪些处理器）
+2) [14. PostProcessor 顺序](../part-03-container-internals/14-post-processor-ordering.md)（很多坑的根源是顺序）
+3) [15. 实例化前短路](../part-03-container-internals/15-pre-instantiation-short-circuit.md)（为什么有时“还没 new”就拿到对象了）
+4) [16. early reference 与循环依赖](../part-03-container-internals/16-early-reference-and-circular.md)（循环依赖到底怎么救）
 
 到这里为止，你就不再是“懂概念”，而是能把问题定位到：定义层（注册/顺序/条件）还是实例层（注入/代理/回调）。
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
@@ -219,3 +219,5 @@ try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicatio
 
 - 它会在 after-initialization 阶段返回一个 JDK proxy（只实现接口）
 - 因此 `context.getBean(WorkService.class)` 成功，但按具体类取可能失败（典型“最终暴露对象 != 原始实例”）
+
+上一章：[00. 深挖指南：把“Bean 三层模型”落到源码与断点](../part-00-guide/00-deep-dive-guide.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[02. Bean 注册入口：扫描、@Bean、@Import、registrar](02-bean-registration.md)

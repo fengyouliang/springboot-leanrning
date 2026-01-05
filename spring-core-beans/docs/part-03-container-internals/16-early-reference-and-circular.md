@@ -10,6 +10,10 @@
 
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansEarlyReferenceLabTest.java`
 
+补充实验（raw injection despite wrapping 的风险与开关语义）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansRawInjectionDespiteWrappingLabTest.java`
+
 ## 1. 现象：setter 循环依赖有时能成功
 
 在 `SpringCoreBeansContainerLabTest` 里你已经见过：
@@ -142,10 +146,10 @@
 
 ## 排障分流：这是定义层问题还是实例层问题？
 
-- “构造器循环依赖失败” → **实例层（创建时机）**：构造器依赖发生在实例化之前，容器没机会提前暴露引用（回看 [09](09-circular-dependencies.md)）
+- “构造器循环依赖失败” → **实例层（创建时机）**：构造器依赖发生在实例化之前，容器没机会提前暴露引用（回看 [09](../part-01-ioc-container/09-circular-dependencies.md)）
 - “setter 循环依赖也失败/报 raw vs wrapped 不一致” → **实例层（early vs final 形态不一致）**：检查 early 与 afterInit 是否返回同一个 proxy（本章第 4 节）
-- “循环依赖解决了但拿到的类型变了（proxy）” → **实例层（代理语义）**：这是为了保证“最终暴露形态一致”，与 AOP/事务心智模型一致（见 [31](31-proxying-phase-bpp-wraps-bean.md)）
-- “以为这只和循环依赖有关” → **实例层通用机制**：early reference 是为了解决“创建中暴露引用”，但核心仍是 BPP 能改变 bean 形态（见 [00](00-deep-dive-guide.md)）
+- “循环依赖解决了但拿到的类型变了（proxy）” → **实例层（代理语义）**：这是为了保证“最终暴露形态一致”，与 AOP/事务心智模型一致（见 [31](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)）
+- “以为这只和循环依赖有关” → **实例层通用机制**：early reference 是为了解决“创建中暴露引用”，但核心仍是 BPP 能改变 bean 形态（见 [00](../part-00-guide/00-deep-dive-guide.md)）
 
 ## 源码最短路径（call chain）
 
@@ -205,14 +209,68 @@
 
 正确做法（本章实验的成功路径）：
 
-- 优先按接口注入（让 proxy 仍然满足类型约束），并把“调用链必须走代理”的心智模型打牢（见 [31](31-proxying-phase-bpp-wraps-bean.md)）
+- 优先按接口注入（让 proxy 仍然满足类型约束），并把“调用链必须走代理”的心智模型打牢（见 [31](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)）
 - 如果你确实必须按实现类注入：你需要 class-based proxy（或避免用会改变暴露类型的代理策略）
 - 如果你在循环依赖场景还希望 early 与 final 形态一致：实现 `SmartInstantiationAwareBeanPostProcessor#getEarlyBeanReference(...)` 并保证 after-init 返回同一个 proxy  
   ⇒ 参见 `getEarlyBeanReference_canProvideEarlyProxyDuringCircularDependencyResolution()`
 
-## 5. 一句话自检
+## 5. 补充：raw injection despite wrapping 与 allowRawInjectionDespiteWrapping
+
+如果你在真实项目里看到过类似错误信息（关键词往往很明显）：
+
+- `BeanCurrentlyInCreationException`
+- “raw version / wrapped” / “has been injected into other beans” 之类的提示
+
+它想保护的核心就一句话：
+
+> **同一个 bean 在系统里不应该同时存在 raw 与 wrapped/proxy 两份引用。**
+
+循环依赖场景下，容器为了“救活 setter 循环”，会提前暴露 early reference。  
+但如果你的增强/代理发生在 `postProcessAfterInitialization`（final 阶段），那么：
+
+- 依赖方（dependent bean）可能早早拿到了 raw
+- 容器最终对外暴露的是 proxy
+- 系统出现 “raw vs proxy” 两种形态并存，行为可能不一致（最典型：调用路径绕过代理，导致事务/安全/缓存等失效）
+
+Spring 为了避免这种不一致，提供了一个 fail-fast 的保护开关：
+
+- `DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping(boolean)`
+  - `false`（默认，更安全）：检测到 “raw 注入 + 最终被 wrapping” 时直接失败
+  - `true`：允许启动，但你必须清楚这会留下“依赖绕过代理”的隐患
+
+### 5.1 最小复现入口（可断言 + 可断点）
+
+- 入口测试：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansRawInjectionDespiteWrappingLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansRawInjectionDespiteWrappingLabTest test`
+
+你应该观察到两个稳定结论：
+
+1) `allowRawInjectionDespiteWrapping=false`：**创建该 bean 时 fail-fast**，拒绝让系统进入 raw/proxy 不一致状态（如果是 eager singleton 场景，表现为 refresh 失败）
+2) `allowRawInjectionDespiteWrapping=true`：容器允许继续运行，但 dependent bean 持有 raw，容器对外暴露 proxy，调用链会出现“绕过代理”
+
+### 5.2 你应该把它和哪几个点一起记（避免混淆）
+
+- `getEarlyBeanReference`：解决“循环依赖时拿到的引用是否已是最终形态（proxy）”
+- `allowRawInjectionDespiteWrapping`：解决“如果 early 阶段拿到 raw、final 阶段又变 proxy，是否允许系统带着不一致继续运行”
+
+一个常用的心智模型：
+
+- **能做到 early 与 final 一致**（例如 early 就返回 proxy）→ 最优
+- **做不到一致**（early raw + final proxy）→ 默认 fail-fast；除非你明确接受风险才打开开关
+
+### 5.3 推荐断点（把异常放回 refresh 主线）
+
+- `DefaultSingletonBeanRegistry#getSingleton`：命中 early reference 分支的入口
+- `AbstractAutowireCapableBeanFactory#doCreateBean`：尾部 “raw vs wrapped” 一致性检查点（异常往往就在这里抛）
+- `AbstractAutowireCapableBeanFactory#getEarlyBeanReference`：如果你实现了 early proxy，会走到这里
+
+## 6. 一句话自检
 
 - 你能解释清楚：为什么循环依赖场景下，容器需要一个“提前暴露的引用”？
 - 你能解释清楚：`getEarlyBeanReference` 为什么必须跟“代理/包装”一起讲？
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansEarlyReferenceLabTest.java`
 推荐断点：`DefaultSingletonBeanRegistry#getSingleton`、`AbstractAutowireCapableBeanFactory#getEarlyBeanReference`、`SmartInstantiationAwareBeanPostProcessor#getEarlyBeanReference`
+
+上一章：[15. 实例化前短路：postProcessBeforeInstantiation 能让构造器根本不执行](15-pre-instantiation-short-circuit.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[17. 生命周期回调顺序：Aware / BPP / init / destroy（以及 prototype 为什么不销毁）](17-lifecycle-callback-order.md)

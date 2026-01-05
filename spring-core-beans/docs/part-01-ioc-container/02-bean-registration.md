@@ -1,5 +1,13 @@
 # 02. Bean 注册入口：扫描、@Bean、@Import、registrar
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansComponentScanLabTest.java`
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansComponentScanLabTest test`
+
 这一章解决的问题是：**一个 Bean 是怎么“进入容器”的？**  
 你会看到：Spring 的“注册入口”不止 `@Component`。理解这些入口，是理解 Spring Boot 自动装配、以及各种框架“魔法”的前提。
 
@@ -31,6 +39,24 @@
 
 1) **扫描范围**（base package）决定了“你以为存在的 bean”是否真的存在  
 2) 扫描产生的 beanName 有默认规则（通常是类名首字母小写），你也可以显式指定
+
+### 2.1 include/exclude filters：把“扫描”从黑盒变成可控工具
+
+很多项目遇到“为什么这个类被扫进来了/为什么没扫进来”，本质都在这三件事上：
+
+- basePackages 是否覆盖到目标类
+- 默认过滤器（stereotype 注解）是否启用
+- include/exclude filters 是否额外收窄/扩展了候选
+
+最小可复现实验（推荐先跑再下断点）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansComponentScanLabTest.java`
+
+你在这个 Lab 里应该能断言并复述：
+
+- stereotype（`@Component/@Service`）如何变成候选
+- `@Component("explicitName")` 如何影响 beanName
+- `excludeFilters` 能如何让“明明标了 @Component 的类”不进入容器
 
 ## 3. 另一条大路：`@Configuration` + `@Bean`
 
@@ -117,7 +143,7 @@ class AppConfig {}
 
 更详细内容见：
 
-- [10. Spring Boot 自动装配如何影响 Bean](10-spring-boot-auto-configuration.md)
+- [10. Spring Boot 自动装配如何影响 Bean](../part-02-boot-autoconfig/10-spring-boot-auto-configuration.md)
 
 ## 7. 在本模块里如何“跑起来验证”
 
@@ -248,3 +274,5 @@ static class RegisteredMessageRegistrar implements ImportBeanDefinitionRegistrar
 本模块已有可复用的小工具（测试辅助类）可以 dump 这些信息：
 
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/testsupport/BeanDefinitionOriginDumper.java`
+
+上一章：[01. Bean 心智模型：BeanDefinition vs Bean 实例](01-bean-mental-model.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[03. 依赖注入解析：类型/名称/@Qualifier/@Primary](03-dependency-injection-resolution.md)

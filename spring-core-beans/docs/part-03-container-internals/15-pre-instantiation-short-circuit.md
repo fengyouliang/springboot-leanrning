@@ -1,5 +1,12 @@
 # 15. 实例化前短路：postProcessBeforeInstantiation 能让构造器根本不执行
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPreInstantiationLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansPreInstantiationLabTest test`
+
 这一章讲一个“非常像魔法”的容器机制：
 
 - `InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation`
@@ -83,10 +90,10 @@
 
 ## 排障分流：这是定义层问题还是实例层问题？
 
-- “我写了 before-instantiation 的 BPP，但构造器还是执行了” → **实例层（时机/注册方式）**：BPP 是否在 refresh 前注册？是否真的被当作 BPP 注册进 BeanFactory？（对照 [25](25-programmatic-bpp-registration.md)）
+- “我写了 before-instantiation 的 BPP，但构造器还是执行了” → **实例层（时机/注册方式）**：BPP 是否在 refresh 前注册？是否真的被当作 BPP 注册进 BeanFactory？（对照 [25](../part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md)）
 - “短路后出现 `BeanNotOfRequiredTypeException`” → **实例层（暴露类型）**：返回对象的类型是否与容器期望类型兼容？（JDK proxy 只实现接口）
-- “短路后生命周期回调/注入行为变得反直觉” → **实例层（绕过默认流程）**：你返回对象意味着你可能绕过 `doCreateBean` 的部分阶段（可对照 [17](17-lifecycle-callback-order.md)、[30](30-injection-phase-field-vs-constructor.md)）
-- “我以为这是 AOP/事务专属机制” → **实例层通用机制**：代理/替身的出现不止发生在 AOP（见 [31](31-proxying-phase-bpp-wraps-bean.md)）
+- “短路后生命周期回调/注入行为变得反直觉” → **实例层（绕过默认流程）**：你返回对象意味着你可能绕过 `doCreateBean` 的部分阶段（可对照 [17](17-lifecycle-callback-order.md)、[30](../part-04-wiring-and-boundaries/30-injection-phase-field-vs-constructor.md)）
+- “我以为这是 AOP/事务专属机制” → **实例层通用机制**：代理/替身的出现不止发生在 AOP（见 [31](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)）
 
 ## 5. 一句话自检
 
@@ -100,3 +107,5 @@
   - 答题要点：可以在实例化前直接返回替身/proxy，短路后续创建流程；风险是打破注入/初始化回调的直觉，引入“看似没执行构造但对象可用”的误判。
 - 常见追问：怎么证明某个 bean 命中了短路？断点怎么下？
   - 答题要点：以 `resolveBeforeInstantiation` 为入口，沿着 `applyBeanPostProcessorsBeforeInstantiation` 找到具体哪个 `InstantiationAwareBeanPostProcessor` 返回了替身。
+
+上一章：[14. 顺序（Ordering）：PriorityOrdered / Ordered / 无序](14-post-processor-ordering.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[16. early reference 与循环依赖：getEarlyBeanReference 到底解决什么？](16-early-reference-and-circular.md)

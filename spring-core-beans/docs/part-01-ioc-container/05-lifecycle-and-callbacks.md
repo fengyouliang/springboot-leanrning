@@ -228,6 +228,33 @@ public class LifecycleLogger {
 
 这也是为什么 prototype 更像“容器帮你 new，一次性交付”，而不是“完整托管生命周期”。
 
+### 4.1 prototype 销毁语义补齐：destroy callbacks 为什么不会自动发生？怎么手动触发？
+
+一句话结论：
+
+- **prototype 的销毁不是容器的职责**，而是“创建者（调用方）”的职责
+
+原因并不玄学，本质是“容器没法帮你回收它不持有引用的对象”：
+
+- singleton：容器会缓存实例，并在 close 时统一遍历并销毁（`destroySingletons` 主线）
+- prototype：容器每次 `getBean` 都 new 一个给你，但通常不会把这些实例登记到“待销毁列表”里  
+  → 因此 close 时它也不知道要销毁哪些实例
+
+如果你确实需要触发 prototype 的销毁回调（例如释放连接/文件句柄等），需要显式调用销毁 API：
+
+- `ConfigurableBeanFactory#destroyBean(beanName, instance)`：显式触发 `@PreDestroy` / `DisposableBean#destroy` / destroyMethod 等回调
+
+最小可复现入口（必现，且可断言）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPrototypeDestroySemanticsLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansPrototypeDestroySemanticsLabTest test`
+
+你应该观察到：
+
+1) `context.close()` 不会触发 prototype 的 `@PreDestroy`
+2) 显式 `destroyBean(...)` 才会触发 destroy callbacks（资源释放责任在调用方）
+
 ## 源码锚点（建议从这里下断点）
 
 想把生命周期“看见”，你至少需要这几个断点入口：
@@ -243,6 +270,7 @@ public class LifecycleLogger {
 
 - `SpringCoreBeansLifecycleCallbackOrderLabTest#singletonLifecycleCallbacks_happenInAStableOrderAroundInitialization`
 - `SpringCoreBeansLifecycleCallbackOrderLabTest#prototypeBeans_areNotDestroyedByContainerByDefault`
+- `SpringCoreBeansPrototypeDestroySemanticsLabTest#prototypeBean_canBeDestroyedManually_viaDestroyBean`
 
 你应该能在断点里明确验证：
 
@@ -258,3 +286,5 @@ public class LifecycleLogger {
 下一章我们专门讲扩展点：BFPP/BPP，它们就是影响“定义层/实例层”的关键入口。
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
 推荐断点：`AbstractAutowireCapableBeanFactory#initializeBean`、`CommonAnnotationBeanPostProcessor#postProcessBeforeInitialization`、`DisposableBeanAdapter#destroy`
+
+上一章：[04. Scope 与 prototype 注入陷阱（ObjectProvider / @Lookup / scoped proxy）](04-scope-and-prototype.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[06. 容器扩展点：BFPP vs BPP（以及它们能/不能做什么）](06-post-processors.md)

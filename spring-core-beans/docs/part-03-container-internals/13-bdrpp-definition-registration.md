@@ -81,7 +81,7 @@ BDRPP 的价值在于：它可以在 **第 1 步和第 2 步之间** 动态注�
 - “我没显式注册，但某个 bean 却出现了/多了很多 bean” → **优先定义层**：是否有 BDRPP/registrar 在动态注册定义？（本章 Lab）
 - “我动态注册的 bean 找不到/没进容器” → **优先定义层**：`postProcessBeanDefinitionRegistry` 是否被调用？是否真的 `registerBeanDefinition` 成功？
 - “bean 在，但属性/构造参数不符合预期” → **优先定义层（修改定义）**：BFPP 是否在 BDRPP 之后运行、是否覆盖了定义元数据？（对照本章第 3 节）
-- “在 post-processor 阶段 `getBean()` 引发奇怪顺序/代理缺失” → **优先实例层的时机问题**：你可能触发了过早实例化，导致后续 BPP 来不及介入（对照 [14](14-post-processor-ordering.md)、[25](25-programmatic-bpp-registration.md)）
+- “在 post-processor 阶段 `getBean()` 引发奇怪顺序/代理缺失” → **优先实例层的时机问题**：你可能触发了过早实例化，导致后续 BPP 来不及介入（对照 [14](14-post-processor-ordering.md)、[25](../part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md)）
 
 ## 源码最短路径（call chain）
 
@@ -110,9 +110,9 @@ BDRPP 的价值在于：它可以在 **第 1 步和第 2 步之间** 动态注�
 
 - `invokeBeanFactoryPostProcessors` → `postProcessBeanDefinitionRegistry`  
   那你处理的是“定义从哪里来的”问题（本章）
-- 如果你要追“最初的定义入口”（扫描/`@Bean`/`@Import`/registrar），先回到 [02](02-bean-registration.md)
+- 如果你要追“最初的定义入口”（扫描/`@Bean`/`@Import`/registrar），先回到 [02](../part-01-ioc-container/02-bean-registration.md)
 - `registerBeanPostProcessors` / `preInstantiateSingletons` / `doCreateBean`  
-  那你处理的是“实例如何被创建/被包装”问题（见 [14](14-post-processor-ordering.md)、[25](25-programmatic-bpp-registration.md)、[31](31-proxying-phase-bpp-wraps-bean.md)）
+  那你处理的是“实例如何被创建/被包装”问题（见 [14](14-post-processor-ordering.md)、[25](../part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md)、[31](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)）
 
 ## 固定观察点（watch list）
 
@@ -181,3 +181,5 @@ BDRPP 的价值在于：它可以在 **第 1 步和第 2 步之间** 动态注�
 - 你能解释清楚：为什么 BFPP 能修改 BDRPP 注册的定义？（提示：因为 BDRPP 更早）
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansRegistryPostProcessorLabTest.java`
 推荐断点：`PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`、`BeanDefinitionRegistryPostProcessor#postProcessBeanDefinitionRegistry`、`DefaultListableBeanFactory#registerBeanDefinition`
+
+上一章：[12. 容器启动与基础设施处理器：为什么注解能工作？](12-container-bootstrap-and-infrastructure.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[14. 顺序（Ordering）：PriorityOrdered / Ordered / 无序](14-post-processor-ordering.md)

@@ -1,5 +1,12 @@
 # 27. SmartLifecycle：start/stop 时机与 phase 顺序
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansSmartLifecycleLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansSmartLifecycleLabTest test`
+
 `SmartLifecycle` 是容器提供的“启动/停止阶段”扩展点。
 
 它非常适合表达：
@@ -79,3 +86,5 @@
 - 你能解释清楚：为什么 stop 顺序是反向的吗？（提示：避免先停掉依赖者）
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansSmartLifecycleLabTest.java`
 推荐断点：`DefaultLifecycleProcessor#startBeans`、`DefaultLifecycleProcessor#stopBeans`、`SmartLifecycle#start`
+
+上一章：[26. SmartInitializingSingleton：所有单例都创建完之后再做事](26-smart-initializing-singleton.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[28. 自定义 Scope + scoped proxy：thread scope 的真实语义](28-custom-scope-and-scoped-proxy.md)

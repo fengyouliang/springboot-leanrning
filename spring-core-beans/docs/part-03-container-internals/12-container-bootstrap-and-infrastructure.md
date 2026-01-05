@@ -141,9 +141,9 @@ AnnotatedBeanDefinitionReader(registry):
 ## 排障分流：这是定义层问题还是实例层问题？
 
 - “`@Autowired/@Resource/@PostConstruct` 全都不生效/字段一直是 null” → **优先定义层/基础设施问题**：你是否注册了 annotation processors？（回到本章 Lab）
-- “`@Bean` 方法写了但容器里没有这个 bean” → **优先定义层问题**：配置类是否被 `ConfigurationClassPostProcessor` 解析？（可对照 [02](02-bean-registration.md) 与本章断点）
-- “注入生效了但选错候选/候选太多” → **优先实例层（依赖解析）问题**：看 `DefaultListableBeanFactory#doResolveDependency`（见 [03](03-dependency-injection-resolution.md) / [33](33-autowire-candidate-selection-primary-priority-order.md)）
-- “拿到的对象形态不对（proxy/替身）” → **优先实例层（BPP/代理）问题**：看 [31](31-proxying-phase-bpp-wraps-bean.md) 与 [00](00-deep-dive-guide.md)
+- “`@Bean` 方法写了但容器里没有这个 bean” → **优先定义层问题**：配置类是否被 `ConfigurationClassPostProcessor` 解析？（可对照 [02](../part-01-ioc-container/02-bean-registration.md) 与本章断点）
+- “注入生效了但选错候选/候选太多” → **优先实例层（依赖解析）问题**：看 `DefaultListableBeanFactory#doResolveDependency`（见 [03](../part-01-ioc-container/03-dependency-injection-resolution.md) / [33](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)）
+- “拿到的对象形态不对（proxy/替身）” → **优先实例层（BPP/代理）问题**：看 [31](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md) 与 [00](../part-00-guide/00-deep-dive-guide.md)
 
 ## 源码最短路径（call chain）
 
@@ -164,9 +164,9 @@ AnnotatedBeanDefinitionReader(registry):
       - `AbstractBeanFactory#doGetBean`
         - `AbstractAutowireCapableBeanFactory#doCreateBean`
           - `applyMergedBeanDefinitionPostProcessors`  
-            - 一些基础设施 BPP 会在这里“基于 merged BD 缓存元数据”（见 [35](35-merged-bean-definition.md)）
+            - 一些基础设施 BPP 会在这里“基于 merged BD 缓存元数据”（见 [35](../part-04-wiring-and-boundaries/35-merged-bean-definition.md)）
           - `populateBean`
-            - `AutowiredAnnotationBeanPostProcessor#postProcessProperties`（`@Autowired/@Value` 注入点解析与赋值，见 [30](30-injection-phase-field-vs-constructor.md)）
+            - `AutowiredAnnotationBeanPostProcessor#postProcessProperties`（`@Autowired/@Value` 注入点解析与赋值，见 [30](../part-04-wiring-and-boundaries/30-injection-phase-field-vs-constructor.md)）
             - `CommonAnnotationBeanPostProcessor#postProcessProperties`（`@Resource` 注入）
           - `initializeBean`
             - `InitDestroyAnnotationBeanPostProcessor#postProcessBeforeInitialization`（`@PostConstruct` 触发）
@@ -251,3 +251,5 @@ AnnotatedBeanDefinitionReader(registry):
 
 3) 面试官让你“给一个断点闭环”，你会怎么打断点证明上面两点？
 - 答题要点：从 `AbstractApplicationContext#refresh` 入手，串 `PostProcessorRegistrationDelegate` 的 BFPP/BPP 两段，再落到 `AutowiredAnnotationBeanPostProcessor#postProcessProperties` 与 init 回调处理器。
+
+上一章：[11. 调试与自检：如何“看见”容器正在做什么](../part-02-boot-autoconfig/11-debugging-and-observability.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[13. BeanDefinitionRegistryPostProcessor：在“注册阶段”动态加定义](13-bdrpp-definition-registration.md)

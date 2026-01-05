@@ -1,5 +1,12 @@
 # 17. 生命周期回调顺序：Aware / BPP / init / destroy（以及 prototype 为什么不销毁）
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansLifecycleCallbackOrderLabTest test`
+
 很多“容器行为”只有把生命周期顺序看清楚才能解释。
 
 对应实验：
@@ -111,7 +118,7 @@ prototype 的语义是：
 
 - “`@PostConstruct` 没触发/注入为 null” → **优先定义层/基础设施问题**：容器是否具备注解处理器？（见 [12](12-container-bootstrap-and-infrastructure.md)）
 - “`@PreDestroy` 没触发” → **优先实例层/生命周期语义问题**：是不是 prototype？context 是否真的 close？（本章第 2 节）
-- “BPP 里依赖复杂 bean 导致顺序怪异” → **实例层 + 顺序问题**：BPP 本身会很早创建/注册，必要时拆分依赖（对照 [14](14-post-processor-ordering.md)、[25](25-programmatic-bpp-registration.md)）
+- “BPP 里依赖复杂 bean 导致顺序怪异” → **实例层 + 顺序问题**：BPP 本身会很早创建/注册，必要时拆分依赖（对照 [14](14-post-processor-ordering.md)、[25](../part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md)）
 - “我以为 destroy 回调一定会执行” → **实例层 + scope 语义问题**：prototype 的销毁不由容器托管（本章第 2 节）
 
 ## 4. 一句话自检
@@ -127,3 +134,5 @@ prototype 的语义是：
   - 答题要点：constructor → aware → populate（注入）→ BPP before-init → `@PostConstruct` → `afterPropertiesSet` → initMethod → BPP after-init。
 - 常见追问：为什么 prototype 默认不会走销毁回调（`@PreDestroy`）？
   - 答题要点：prototype 的生命周期末端默认不由容器托管；容器负责创建，但不负责统一回收（除非自定义 scope/显式销毁）。
+
+上一章：[16. early reference 与循环依赖：getEarlyBeanReference 到底解决什么？](16-early-reference-and-circular.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[18. Lazy：lazy-init bean vs `@Lazy` 注入点（懒代理）](../part-04-wiring-and-boundaries/18-lazy-semantics.md)

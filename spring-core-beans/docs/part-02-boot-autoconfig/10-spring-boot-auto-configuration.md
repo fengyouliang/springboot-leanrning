@@ -27,7 +27,7 @@
 
 - “请帮我导入一堆自动配置类”
 
-而“导入一堆类”的技术手段，与 [02 章](02-bean-registration.md) 的 `@Import` 思想一致。
+而“导入一堆类”的技术手段，与 [02 章](../part-01-ioc-container/02-bean-registration.md) 的 `@Import` 思想一致。
 
 ## 3. 自动配置类从哪里来？（类清单的来源）
 
@@ -290,3 +290,5 @@ mvn -pl spring-core-beans test
   - 追问：你有哪些修复方式？怎么选？
   - 答题要点：重复候选不一定立刻炸；只要出现单注入点就会触发候选收敛并 fail-fast。修复分两类：`@Primary/@Qualifier` 确定化选择（候选仍可能多个） vs 让 auto-config back-off 生效（更干净）。
   - 复现入口：`SpringCoreBeansAutoConfigurationOverrideMatrixLabTest`
+
+上一章：[09. 循环依赖：现象、原因与规避（constructor vs setter）](../part-01-ioc-container/09-circular-dependencies.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[11. 调试与自检：如何“看见”容器正在做什么](11-debugging-and-observability.md)

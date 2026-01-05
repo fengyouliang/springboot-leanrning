@@ -1,5 +1,12 @@
 # 06. 容器扩展点：BFPP vs BPP（以及它们能/不能做什么）
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPostProcessorOrderingLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansPostProcessorOrderingLabTest test`
+
 这一章是理解 Spring “高级玩法”的关键。很多你觉得像“魔法”的特性，本质都是某个 post-processor 在某个阶段做了事。
 
 先记住一句话：
@@ -288,3 +295,5 @@ BFPP 本该在“定义层”工作，如果你在里面直接拿 bean（实例�
   - 答题要点：BDRPP 能在“注册阶段”新增定义；BFPP 能在实例化前修改定义；BPP 介入实例创建链路，能改实例，甚至替换成 proxy。
 - 常见追问：为什么很多 BFPP 建议写成 `static @Bean`？
   - 答题要点：避免过早实例化配置类/减少循环依赖与顺序陷阱；更贴近“定义层扩展点”的职责。
+
+上一章：[05. 生命周期：初始化、销毁与回调（@PostConstruct/@PreDestroy 等）](05-lifecycle-and-callbacks.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[07. `@Configuration` 增强与 `@Bean` 语义（proxyBeanMethods）](07-configuration-enhancement.md)

@@ -1,5 +1,12 @@
 # 04. Scope 与 prototype 注入陷阱（ObjectProvider / @Lookup / scoped proxy）
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansLabTest test`
+
 这一章的主题是：**scope 不是“对象的特性”，而是“容器如何管理对象的策略”。**
 
 尤其要吃透一句话：
@@ -88,7 +95,44 @@
 
 学习阶段建议把它当作“了解存在即可”的方案。
 
-## 7. 一句话自检
+## 7. prototype 的销毁语义（容器默认不托管）
+
+这一点在真实工程里非常关键，因为它决定了“资源释放责任在谁”：
+
+- prototype 更像是：**容器帮你 new，一次性交付**
+- 而不是：**容器全程托管（创建 + 使用 + 销毁）**
+
+因此默认行为是：
+
+- 你向容器要一个 prototype → 容器负责创建（注入/初始化也照常发生）
+- 但当容器关闭时 → **不会自动触发 prototype 的 destroy callbacks**
+
+这也是为什么很多人会困惑：
+
+- “我写了 `@PreDestroy` / `DisposableBean#destroy`，为什么 prototype 看起来不执行？”
+  - 因为容器没有保存这些 prototype 实例的引用，无法在 close 时逐个回收
+
+### 7.1 最小复现入口（可断言）
+
+- 入口测试：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPrototypeDestroySemanticsLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansPrototypeDestroySemanticsLabTest test`
+
+你应该观察到：
+
+- `context.close()` 不会触发 prototype 的 `@PreDestroy`
+- 只有当你显式调用 `BeanFactory#destroyBean(...)`，才会触发 destroy callbacks（资源释放需要调用方负责）
+
+### 7.2 排障提示：什么时候应该怀疑是 prototype 销毁语义问题？
+
+- 症状：连接/文件句柄/线程池等资源泄漏，但你确认 `@PreDestroy` 逻辑存在
+- 排查：这个 bean 是否是 prototype？它的创建者（调用方）是否负责 close/destroy？
+
+下一章我们把 scope 与生命周期合起来讲：什么时候创建、什么时候初始化、什么时候销毁（以及回调顺序）。
+如果你已经开始关心“销毁回调顺序/触发者”，可以直接跳到下一章 [05](05-lifecycle-and-callbacks.md)。
+
+## 8. 一句话自检
 
 读完这一章你应该能回答：
 
@@ -96,7 +140,6 @@
 2) “为什么直接注入 prototype 到 singleton 会得到同一个实例？”
 3) “`ObjectProvider` 和 `@Lookup` 的差别是什么？”
 
-下一章我们把 scope 与生命周期合起来讲：什么时候创建、什么时候初始化、什么时候销毁。
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`
 推荐断点：`AbstractBeanFactory#doGetBean`、`DefaultSingletonBeanRegistry#getSingleton`、`DefaultListableBeanFactory#doResolveDependency`
 
@@ -106,3 +149,5 @@
   - 答题要点：prototype 的语义是“每次向容器要都是新的”；但注入发生在 singleton 创建时，只解析一次导致实例被“冻结”。
 - 常见追问：怎么修复？`ObjectProvider` / `@Lookup` / scoped proxy 什么时候用？
   - 答题要点：需要“每次用都新”→ provider/lookup；需要“按上下文动态解析”→ scoped proxy；关键是让解析发生在“使用时”，不是“创建 singleton 时”。
+
+上一章：[03. 依赖注入解析：类型/名称/@Qualifier/@Primary](03-dependency-injection-resolution.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[05. 生命周期：初始化、销毁与回调（@PostConstruct/@PreDestroy 等）](05-lifecycle-and-callbacks.md)

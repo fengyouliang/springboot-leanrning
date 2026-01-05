@@ -1,0 +1,92 @@
+# 91. 术语表（Glossary）
+
+## 0. 复现入口（可运行）
+
+- 本章为索引/术语类内容，不直接提供单一 Lab 入口。
+- 建议做法：从本页跳转到对应章节后，按章节中的“复现入口（可运行）”运行对应 Test。
+
+这份术语表的目标不是“背概念”，而是解决两个学习痛点：
+
+1) 读文档/看断点时遇到名词能快速定位“它到底是什么、在哪个阶段出现、影响什么”
+2) 把同一类名词放在一起对比，避免“记得名字但不知道边界”
+
+> 使用建议：遇到不熟的名词先来这里查 10 秒，再回到对应章节跑 Lab。
+
+---
+
+## 容器与定义
+
+- **Bean**：被 Spring 容器管理的对象（最终 `getBean()` 拿到的“对外暴露对象”，可能是原始对象也可能是代理）。  
+  章节：[`01`](../part-01-ioc-container/01-bean-mental-model.md)
+- **BeanDefinition**：定义层元数据，描述“如何创建一个 bean”（class/factory method/scope/lazy/dependsOn/回调等）。  
+  章节：[`01`](../part-01-ioc-container/01-bean-mental-model.md)、[`35`](../part-04-wiring-and-boundaries/35-merged-bean-definition.md)
+- **RootBeanDefinition / MergedBeanDefinition**：创建时实际参与计算的“合并后的最终配方”。  
+  章节：[`35`](../part-04-wiring-and-boundaries/35-merged-bean-definition.md)
+- **BeanFactory**：最核心的 IoC 容器能力（创建/注入/scope/生命周期骨架）。  
+  章节：[`01`](../part-01-ioc-container/01-bean-mental-model.md)
+- **ApplicationContext**：在 BeanFactory 上叠加事件、资源、环境等“应用级能力”，并提供 `refresh()` 主线。  
+  章节：[`01`](../part-01-ioc-container/01-bean-mental-model.md)、[`12`](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
+- **refresh**：容器启动的主线流程（定义注册→执行 BFPP/BDRPP→注册 BPP→创建单例→收尾事件）。  
+  章节：[`00`](../part-00-guide/00-deep-dive-guide.md)、[`12`](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
+
+---
+
+## 注入与候选
+
+- **DependencyDescriptor**：注入点的“描述符”（需要什么类型/是否 required/是否带泛型/有哪些注解/名称等）。  
+  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)
+- **候选（candidates）**：按类型匹配得到的候选集合；单依赖需要进一步收敛为唯一胜者，否则失败。  
+  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)、[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
+- **`@Qualifier`**：缩小候选集合（精确选择）。  
+  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)
+- **`@Primary`**：默认胜者（没有更强限定条件时）。  
+  章节：[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
+- **`@Order` / Ordered**：主要影响集合注入/链路执行顺序，不等价于“单依赖选谁”。  
+  章节：[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)、[`14`](../part-03-container-internals/14-post-processor-ordering.md)
+- **ResolvableDependency**：可注入但不是 bean 的特殊依赖（例如 `ApplicationContext`、`Environment`）。  
+  章节：[`20`](../part-04-wiring-and-boundaries/20-resolvable-dependency.md)
+- **ResolvableType**：Spring 用来描述/匹配泛型的类型系统。  
+  章节：[`37`](../part-04-wiring-and-boundaries/37-generic-type-matching-pitfalls.md)
+
+---
+
+## 生命周期与扩展点
+
+- **生命周期（lifecycle callbacks）**：实例化→属性填充→初始化回调（Aware/@PostConstruct 等）→对外暴露→销毁回调。  
+  章节：[`05`](../part-01-ioc-container/05-lifecycle-and-callbacks.md)、[`17`](../part-03-container-internals/17-lifecycle-callback-order.md)
+- **Aware**：让 bean “感知容器能力”的回调族（BeanName/BeanFactory/ApplicationContext 等）。  
+  章节：[`12`](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
+- **BFPP（BeanFactoryPostProcessor）**：作用于定义层（BeanDefinition），发生在实例化之前。  
+  章节：[`06`](../part-01-ioc-container/06-post-processors.md)、[`14`](../part-03-container-internals/14-post-processor-ordering.md)
+- **BDRPP（BeanDefinitionRegistryPostProcessor）**：BFPP 的增强版，可以再注册更多 BeanDefinition。  
+  章节：[`13`](../part-03-container-internals/13-bdrpp-definition-registration.md)
+- **BPP（BeanPostProcessor）**：作用于实例层（创建过程中/初始化前后），可以包装/替换最终暴露对象（proxy）。  
+  章节：[`06`](../part-01-ioc-container/06-post-processors.md)、[`31`](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)
+- **PriorityOrdered / Ordered**：处理器排序的两层契约（分段执行 + 组内排序）。  
+  章节：[`14`](../part-03-container-internals/14-post-processor-ordering.md)
+
+---
+
+## 代理、FactoryBean、循环依赖
+
+- **Proxy（代理）**：容器最终暴露对象可能是代理而非原始实例，常见由 BPP 在 after-init 返回。  
+  章节：[`31`](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)
+- **FactoryBean**：注册在容器里的是工厂，`getBean("name")` 默认拿到 product，`getBean("&name")` 才拿到工厂本身。  
+  章节：[`08`](../part-01-ioc-container/08-factorybean.md)、[`23`](../part-04-wiring-and-boundaries/23-factorybean-deep-dive.md)、[`29`](../part-04-wiring-and-boundaries/29-factorybean-edge-cases.md)
+- **early reference（提前暴露引用）**：为缓解部分单例循环依赖，在“还没初始化完”时暴露早期引用（可能与代理交互）。  
+  章节：[`09`](../part-01-ioc-container/09-circular-dependencies.md)、[`16`](../part-03-container-internals/16-early-reference-and-circular.md)
+
+---
+
+## 值解析与类型转换
+
+- **embedded value resolver**：`@Value` 字符串解析的核心机制（non-strict vs strict）。  
+  章节：[`34`](../part-04-wiring-and-boundaries/34-value-placeholder-resolution-strict-vs-non-strict.md)
+- **BeanWrapper**：属性读写与类型转换触发器（写入属性时触发 convertIfNecessary）。  
+  章节：[`36`](../part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md)
+- **ConversionService**：现代转换体系（建议优先理解与使用）。  
+  章节：[`36`](../part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md)
+
+---
+
+上一章：[90. 常见坑清单（建议反复对照）](90-common-pitfalls.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[92. 知识点地图（Concept → Chapter → Lab）](92-knowledge-map.md)

@@ -1,5 +1,12 @@
 # 28. 自定义 Scope + scoped proxy：thread scope 的真实语义
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansCustomScopeLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansCustomScopeLabTest test`
+
 Spring 的 scope 机制是可扩展的：你可以注册自定义 scope。
 
 本章用 `SimpleThreadScope`（Spring 提供但默认不注册）演示：
@@ -101,3 +108,5 @@ Spring 的 scope 机制是可扩展的：你可以注册自定义 scope。
 - 你能解释清楚：ObjectProvider 与 scoped proxy 的差别吗？
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansCustomScopeLabTest.java`
 推荐断点：`AbstractBeanFactory#doGetBean`、`SimpleThreadScope#get`、`ScopedProxyFactoryBean#getObject`
+
+上一章：[27. SmartLifecycle：start/stop 时机与 phase 顺序](27-smart-lifecycle-phase.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[29. FactoryBean 边界：getObjectType 返回 null 会让“按类型发现”失效](29-factorybean-edge-cases.md)

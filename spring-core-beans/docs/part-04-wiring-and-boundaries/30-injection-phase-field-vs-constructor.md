@@ -1,5 +1,12 @@
 # 30. 注入阶段：field injection vs constructor injection（以及 `postProcessProperties`）
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansInjectionPhaseLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansInjectionPhaseLabTest test`
+
 这一章解决两个“非常折磨人但非常核心”的问题：
 
 1. 为什么我在构造器里访问 `@Autowired` 字段时，它永远是 `null`？
@@ -73,7 +80,7 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansInjectionPhaseLabTest test
 
 如果你想把“注解能力从哪来”也串起来，请回看：
 
-- [12. 容器启动与基础设施处理器：为什么注解能工作？](12-container-bootstrap-and-infrastructure.md)
+- [12. 容器启动与基础设施处理器：为什么注解能工作？](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
 
 ## 5. 常见坑与实践建议
 
@@ -115,7 +122,9 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansInjectionPhaseLabTest test
 
 - “构造器里访问 field injection 字段为 null” → **这是实例层阶段差异（预期）**：field injection 在实例化之后才发生（本章第 1 节）
 - “constructor injection 没走到带参构造器/选错构造器” → **实例层（构造器解析）**：看 `determineCandidateConstructors` 与 `autowireConstructor`（本章源码锚点）
-- “`@Autowired/@Value` 完全不生效” → **优先定义层/基础设施问题**：注解处理器是否注册？（见 [12](12-container-bootstrap-and-infrastructure.md)）
-- “注入发生了但候选选择不符合预期” → **实例层（依赖解析）**：转到 [03](03-dependency-injection-resolution.md)/[33](33-autowire-candidate-selection-primary-priority-order.md)
+- “`@Autowired/@Value` 完全不生效” → **优先定义层/基础设施问题**：注解处理器是否注册？（见 [12](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)）
+- “注入发生了但候选选择不符合预期” → **实例层（依赖解析）**：转到 [03](../part-01-ioc-container/03-dependency-injection-resolution.md)/[33](33-autowire-candidate-selection-primary-priority-order.md)
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansInjectionPhaseLabTest.java`
 推荐断点：`AutowiredAnnotationBeanPostProcessor#postProcessProperties`、`AbstractAutowireCapableBeanFactory#populateBean`、`DefaultListableBeanFactory#doResolveDependency`
+
+上一章：[29. FactoryBean 边界：getObjectType 返回 null 会让“按类型发现”失效](29-factorybean-edge-cases.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[31. 代理/替换阶段：`BeanPostProcessor` 如何把 Bean “换成 Proxy”](31-proxying-phase-bpp-wraps-bean.md)

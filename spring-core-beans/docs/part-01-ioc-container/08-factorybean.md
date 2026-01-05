@@ -1,5 +1,12 @@
 # 08. `FactoryBean`：产品 vs 工厂（以及 `&` 前缀）
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansFactoryBeanDeepDiveLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansFactoryBeanDeepDiveLabTest test`
+
 `FactoryBean` 是 Spring 里一个非常“老牌但重要”的扩展点，常见于各种框架集成（ORM、RPC、代理生成等）。
 
 这一章解决的问题是：
@@ -116,4 +123,6 @@
 - 常见追问：`isSingleton()` 决定缓存的是什么？
   - 答题要点：决定 product 的缓存语义（缓存的是 product 不是 factory）；这会影响你观测到的“是不是同一个对象”。
 - 常见追问：`getObjectType()` 返回 `null` 有什么坑？为什么 `allowEagerInit=false` 会放大它？
-  - 答题要点：会影响 type-based 查找与条件装配（例如 `@ConditionalOnMissingBean`）；需要时对照 [23](23-factorybean-deep-dive.md) 与 [29](29-factorybean-edge-cases.md) 深挖。
+  - 答题要点：会影响 type-based 查找与条件装配（例如 `@ConditionalOnMissingBean`）；需要时对照 [23](../part-04-wiring-and-boundaries/23-factorybean-deep-dive.md) 与 [29](../part-04-wiring-and-boundaries/29-factorybean-edge-cases.md) 深挖。
+
+上一章：[07. `@Configuration` 增强与 `@Bean` 语义（proxyBeanMethods）](07-configuration-enhancement.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[09. 循环依赖：现象、原因与规避（constructor vs setter）](09-circular-dependencies.md)

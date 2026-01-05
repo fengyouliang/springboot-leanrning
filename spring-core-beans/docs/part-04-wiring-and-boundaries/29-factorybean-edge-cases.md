@@ -1,5 +1,12 @@
 # 29. FactoryBean 边界：getObjectType 返回 null 会让“按类型发现”失效
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansFactoryBeanEdgeCasesLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansFactoryBeanEdgeCasesLabTest test`
+
 `FactoryBean` 的核心机制你已经在 [23 章](23-factorybean-deep-dive.md) 学过了。
 
 这一章补一个非常实用的边界：
@@ -104,7 +111,7 @@
 
 - “按类型发现不到某个 FactoryBean 的 product（尤其在 allowEagerInit=false）” → **定义层（类型元数据不足）**：检查 `getObjectType()` 是否返回 null（本章结论）
 - “按名字能拿到，但按类型扫描/条件判断不稳定” → **定义层（类型匹配路径）**：type matching 与 name-based retrieval 是两条路径（本章第 2 节）
-- “在 Boot 条件装配里出现诡异匹配结果” → **定义层 + 条件机制**：FactoryBean 的类型声明不可靠会影响条件判断，建议优先修正 `getObjectType()`（并回看 [10](10-spring-boot-auto-configuration.md)）
+- “在 Boot 条件装配里出现诡异匹配结果” → **定义层 + 条件机制**：FactoryBean 的类型声明不可靠会影响条件判断，建议优先修正 `getObjectType()`（并回看 [10](../part-02-boot-autoconfig/10-spring-boot-auto-configuration.md)）
 - “把它当成缓存/创建 bug 去排查” → **先确认类型信息**：这类问题往往不是实例缓存，而是类型推断与 allowEagerInit 的限制
 
 ## 4. 一句话自检
@@ -112,3 +119,5 @@
 - 你能解释清楚：为什么 allowEagerInit=false 时容器不能“猜”出 unknownValue 的类型吗？
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansFactoryBeanEdgeCasesLabTest.java`
 推荐断点：`AbstractBeanFactory#getType`、`DefaultListableBeanFactory#getBeanNamesForType`、`FactoryBeanRegistrySupport#getTypeForFactoryBean`
+
+上一章：[28. 自定义 Scope + scoped proxy：thread scope 的真实语义](28-custom-scope-and-scoped-proxy.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[30. 注入阶段：field injection vs constructor injection（以及 `postProcessProperties`）](30-injection-phase-field-vs-constructor.md)

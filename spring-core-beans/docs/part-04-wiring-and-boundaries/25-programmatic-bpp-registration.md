@@ -10,6 +10,10 @@
 
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProgrammaticBeanPostProcessorLabTest.java`
 
+补充对照实验（编程式注册 Bean 的三种入口差异）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProgrammaticRegistrationLabTest.java`
+
 ## 1. 现象：手工添加的 BPP 会比容器自动发现的 BPP 更早执行
 
 对应测试：
@@ -135,7 +139,7 @@ addBeanPostProcessor(bpp):
 ## 排障分流：这是定义层问题还是实例层问题？
 
 - “我实现了 `Ordered/@Order`，但某个 BPP 顺序不生效” → **实例层 + 注册方式问题**：它是不是被手工 `addBeanPostProcessor` 进去的？（本章第 2 节）
-- “某个 BPP 完全没生效” → **实例层 + 时机问题**：目标 bean 是否在 BPP 注册之前就被提前实例化了？（结合 [14](14-post-processor-ordering.md) 与本章断点）
+- “某个 BPP 完全没生效” → **实例层 + 时机问题**：目标 bean 是否在 BPP 注册之前就被提前实例化了？（结合 [14](../part-03-container-internals/14-post-processor-ordering.md) 与本章断点）
 - “系统里出现很难追踪的代理/增强行为” → **实例层可观测性问题**：优先从 BPP 列表与注册方式入手（也可对照 [31](31-proxying-phase-bpp-wraps-bean.md)）
 - “把这类手工注册当成常规手段到处用” → **设计风险**：它会绕开容器默认排序与可观测性，建议仅用于框架/基础设施层
 
@@ -223,10 +227,63 @@ addBeanPostProcessor(bpp):
 
 如果你碰到的是“某个 bean 完全没被 BPP 处理”，也常见于另一个更隐蔽的坑：
 
-- **在 BDRPP/BFPP 阶段 `getBean()` 触发过早实例化**，导致该 bean 在“没有 BPP 的世界”里先被创建出来（见 [13](13-bdrpp-definition-registration.md) 的反例）
+- **在 BDRPP/BFPP 阶段 `getBean()` 触发过早实例化**，导致该 bean 在“没有 BPP 的世界”里先被创建出来（见 [13](../part-03-container-internals/13-bdrpp-definition-registration.md) 的反例）
 
-## 6. 一句话自检
+## 6. 补充：三种编程式注册方式对照（定义层 vs 实例层）
+
+这一节解决另一个在工程里更常见、也更容易“误诊成 BPP 顺序问题”的现象：
+
+- “我把对象塞进容器了，但没注入 / 没 init / 没被 BPP 处理”
+- “我明明注册了 `@Autowired` 字段，但还是 `null`”
+
+很多时候根因不是 BPP 顺序，而是你走了“实例层注册”路径（`registerSingleton`），本质上绕开了创建管线。
+
+### 6.1 三种入口：你到底注册了什么？
+
+- `registerBeanDefinition` / `registerBean`：注册的是 **定义（BeanDefinition 语义）**
+  - 结果：对象会在之后的创建过程中被容器创建，并完整参与 “注入 → 初始化 → BPP” 管线
+- `registerSingleton`：注册的是 **既有实例（instance 语义）**
+  - 结果：容器只是把你提供的对象放进 singleton cache，以后 `getBean` 直接返回它
+  - 注意：不会 retroactive 触发注入/初始化/BPP；也不会替你“补上代理/包装”
+
+一句话记住：
+
+- 定义层注册 = 把“怎么造对象”交给容器
+- 实例层注册 = 你已经把对象造好了，容器只是“帮你挂个名字”
+
+### 6.2 最小复现入口（可断言 + 可断点）
+
+- 入口测试：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProgrammaticRegistrationLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansProgrammaticRegistrationLabTest test`
+
+你应该观察到：
+
+- `registerBeanDefinition` 与 `registerBean`：完成依赖注入，并被 `BeanPostProcessor` 处理
+- `registerSingleton`：不会自动注入，也不会被 `BeanPostProcessor` retroactive 处理
+
+### 6.3 如果你“就是想把既有对象交给 Spring 管”，该怎么补齐？
+
+原则：把“创建管线”的关键步骤手动调用一遍（否则你得到的只是“有名字的对象”，不是“容器创建的 bean”）。
+
+常见做法（概念级，帮助你建立心智模型）：
+
+- `AutowireCapableBeanFactory#autowireBean(existing)`：补齐依赖注入
+- `AutowireCapableBeanFactory#initializeBean(existing, beanName)`：补齐初始化与 BPP 链路
+- 销毁阶段：用 `destroyBean` 显式触发销毁回调（与 prototype 销毁语义一起理解，见 docs/05）
+
+### 6.4 源码锚点（看清楚“绕开了哪条管线”）
+
+- 定义层注册入口：`DefaultListableBeanFactory#registerBeanDefinition`、`GenericApplicationContext#registerBean`
+- 实例层注册入口：`DefaultSingletonBeanRegistry#registerSingleton`
+- 定义层创建主线：`AbstractAutowireCapableBeanFactory#doCreateBean`
+- 初始化主线（BPP/init callbacks）：`AbstractAutowireCapableBeanFactory#initializeBean`
+
+## 7. 一句话自检
 
 - 你能解释清楚：为什么手工注册的 BPP 不受 Ordered 影响吗？（提示：容器不会再对它排序，只按注册顺序调用）
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProgrammaticBeanPostProcessorLabTest.java`
 推荐断点：`AbstractBeanFactory#addBeanPostProcessor`、`PostProcessorRegistrationDelegate#registerBeanPostProcessors`、`AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`
+
+上一章：[24. BeanDefinition 覆盖（overriding）：同名 bean 是“最后一个赢”还是“直接失败”？](24-bean-definition-overriding.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[26. SmartInitializingSingleton：所有单例都创建完之后再做事](26-smart-initializing-singleton.md)

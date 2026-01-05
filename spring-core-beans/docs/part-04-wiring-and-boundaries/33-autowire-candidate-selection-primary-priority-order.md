@@ -90,8 +90,8 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
 
 ## 5. 延伸阅读（把规则放回更完整的 DI 体系）
 
-- DI 解析总览：`@Qualifier/@Primary` 的基本语义：[03. 依赖注入解析](03-dependency-injection-resolution.md)
-- 如果你在看容器扩展点顺序（BPP/BFPP）：顺序体系更复杂（另一个层面）：[14. 顺序：PriorityOrdered / Ordered / 无序](14-post-processor-ordering.md)
+- DI 解析总览：`@Qualifier/@Primary` 的基本语义：[03. 依赖注入解析](../part-01-ioc-container/03-dependency-injection-resolution.md)
+- 如果你在看容器扩展点顺序（BPP/BFPP）：顺序体系更复杂（另一个层面）：[14. 顺序：PriorityOrdered / Ordered / 无序](../part-03-container-internals/14-post-processor-ordering.md)
 
 ## 源码锚点（建议从这里下断点）
 
@@ -122,3 +122,5 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
 - “候选选择行为跟想象不一致” → **先确认注入点类型**：单依赖 vs 集合是两套规则（本章第 1 节）
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
 推荐断点：`DefaultListableBeanFactory#determineAutowireCandidate`、`DefaultListableBeanFactory#doResolveDependency`、`AnnotationAwareOrderComparator#sort`
+
+上一章：[32. `@Resource` 注入：为什么它更像“按名称找 Bean”？](32-resource-injection-name-first.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[34. `@Value("${...}")` 占位符解析：默认 non-strict vs strict fail-fast](34-value-placeholder-resolution-strict-vs-non-strict.md)

@@ -1,5 +1,12 @@
 # 00. 深挖指南：把“Bean 三层模型”落到源码与断点
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansLabTest test`
+
 如果你觉得 `docs/01` 这类“概念章”看完仍然不过瘾，通常不是因为它讲错了，而是因为你已经进入下一阶段：
 
 > 你需要把概念映射到**时间线（refresh 流程）**、**数据结构（BeanDefinition/缓存）**、以及**关键参与者（哪些类/哪些扩展点在起作用）**。
@@ -69,7 +76,7 @@ mvn -pl spring-core-beans -Dtest=<TestClass>#<testMethod> test
    - 你要画：注册定义 → BFPP/BDRPP → 注册 BPP → 创建单例 → 收尾事件（抓住阶段边界即可）
 
 3) BeanDefinition 从哪里来（列 3 条入口 + 各 1 句定位方法）  
-   - 入口：阅读 [02](02-bean-registration.md) + 跑 `SpringCoreBeansBootstrapInternalsLabTest`  
+   - 入口：阅读 [02](../part-01-ioc-container/02-bean-registration.md) + 跑 `SpringCoreBeansBootstrapInternalsLabTest`  
    - 你要写：扫描 / `@Bean` / `@Import`（selector/registrar）各自如何落到 registry
 
 4) 注入歧义：用 `@Primary` 与 `@Qualifier` 各修一次并解释差异  
@@ -127,10 +134,10 @@ mvn -pl spring-core-beans -Dtest=<TestClass>#<testMethod> test
 
 对应章节：
 
-- [02. 注册入口](02-bean-registration.md)
-- [06. PostProcessor 概览](06-post-processors.md)
-- [12. 注解为什么能工作（基础设施处理器）](12-container-bootstrap-and-infrastructure.md)
-- [13. BDRPP](13-bdrpp-definition-registration.md)
+- [02. 注册入口](../part-01-ioc-container/02-bean-registration.md)
+- [06. PostProcessor 概览](../part-01-ioc-container/06-post-processors.md)
+- [12. 注解为什么能工作（基础设施处理器）](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
+- [13. BDRPP](../part-03-container-internals/13-bdrpp-definition-registration.md)
 
 ### 2.2 实例层：createBean → 注入 → 初始化 → 可能被代理
 
@@ -148,9 +155,9 @@ mvn -pl spring-core-beans -Dtest=<TestClass>#<testMethod> test
 
 对应章节：
 
-- [30. 注入发生在什么时候（field vs constructor）](30-injection-phase-field-vs-constructor.md)
-- [15. 实例化前短路](15-pre-instantiation-short-circuit.md)
-- [31. BPP 如何把 Bean 换成 Proxy](31-proxying-phase-bpp-wraps-bean.md)
+- [30. 注入发生在什么时候（field vs constructor）](../part-04-wiring-and-boundaries/30-injection-phase-field-vs-constructor.md)
+- [15. 实例化前短路](../part-03-container-internals/15-pre-instantiation-short-circuit.md)
+- [31. BPP 如何把 Bean 换成 Proxy](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)
 
 ### 2.3 缓存与“循环依赖能不能救”：单例的三层缓存
 
@@ -161,8 +168,8 @@ mvn -pl spring-core-beans -Dtest=<TestClass>#<testMethod> test
 
 对应章节：
 
-- [09. 循环依赖概览](09-circular-dependencies.md)
-- [16. early reference 与循环依赖：getEarlyBeanReference](16-early-reference-and-circular.md)
+- [09. 循环依赖概览](../part-01-ioc-container/09-circular-dependencies.md)
+- [16. early reference 与循环依赖：getEarlyBeanReference](../part-03-container-internals/16-early-reference-and-circular.md)
 
 ### 2.4 深挖时最容易忽略的三件事（但它们决定了你看到的“真相”）
 
@@ -179,10 +186,10 @@ mvn -pl spring-core-beans -Dtest=<TestClass>#<testMethod> test
 
 对应章节：
 
-- [35. BeanDefinition 的合并（MergedBeanDefinition）](35-merged-bean-definition.md)
-- [20. registerResolvableDependency：能注入但它不是 Bean](20-resolvable-dependency.md)
-- [19. dependsOn：强制初始化顺序（依赖关系记录）](19-depends-on.md)
-- [11. 调试与自检：异常 → 断点入口 + bean graph](11-debugging-and-observability.md)
+- [35. BeanDefinition 的合并（MergedBeanDefinition）](../part-04-wiring-and-boundaries/35-merged-bean-definition.md)
+- [20. registerResolvableDependency：能注入但它不是 Bean](../part-04-wiring-and-boundaries/20-resolvable-dependency.md)
+- [19. dependsOn：强制初始化顺序（依赖关系记录）](../part-04-wiring-and-boundaries/19-depends-on.md)
+- [11. 调试与自检：异常 → 断点入口 + bean graph](../part-02-boot-autoconfig/11-debugging-and-observability.md)
 
 ---
 
@@ -250,8 +257,8 @@ mvn -pl spring-core-beans -Dtest=<TestClass>#<testMethod> test
 
 对应章节：
 
-- [03. 依赖注入解析](03-dependency-injection-resolution.md)
-- [33. 候选选择与顺序](33-autowire-candidate-selection-primary-priority-order.md)
+- [03. 依赖注入解析](../part-01-ioc-container/03-dependency-injection-resolution.md)
+- [33. 候选选择与顺序](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
 
 ### 3.4 看清“最终生效的定义长什么样”：从 merged BeanDefinition 切入
 
@@ -273,7 +280,7 @@ mvn -pl spring-core-beans -Dtest=<TestClass>#<testMethod> test
 
 对应章节与可跑实验：
 
-- [35. BeanDefinition 的合并（MergedBeanDefinition）](35-merged-bean-definition.md)
+- [35. BeanDefinition 的合并（MergedBeanDefinition）](../part-04-wiring-and-boundaries/35-merged-bean-definition.md)
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansMergedBeanDefinitionLabTest.java`
 
 ### 3.5 看清“能注入但不是 Bean”：从 ResolvableDependency 切入
@@ -293,7 +300,7 @@ mvn -pl spring-core-beans -Dtest=<TestClass>#<testMethod> test
 
 对应章节与可跑实验：
 
-- [20. registerResolvableDependency：能注入但它不是 Bean](20-resolvable-dependency.md)
+- [20. registerResolvableDependency：能注入但它不是 Bean](../part-04-wiring-and-boundaries/20-resolvable-dependency.md)
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResolvableDependencyLabTest.java`
 
 ### 3.6 看清“依赖图怎么记录/为什么销毁顺序是那样”：从 dependentBeanMap 切入
@@ -314,9 +321,9 @@ mvn -pl spring-core-beans -Dtest=<TestClass>#<testMethod> test
 
 对应章节与可跑实验：
 
-- [11. 调试与自检：异常 → 断点入口 + bean graph](11-debugging-and-observability.md)
+- [11. 调试与自检：异常 → 断点入口 + bean graph](../part-02-boot-autoconfig/11-debugging-and-observability.md)
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansBeanGraphDebugLabTest.java`
-- [19. dependsOn：强制初始化顺序](19-depends-on.md)
+- [19. dependsOn：强制初始化顺序](../part-04-wiring-and-boundaries/19-depends-on.md)
 
 ---
 
@@ -349,13 +356,13 @@ mvn -pl spring-core-beans -Dtest=<TestClass>#<testMethod> test
 
 ### 练习 B：让注入阶段“可见”（最适合理清阶段感）
 
-直接按 [30 章](30-injection-phase-field-vs-constructor.md) 给的断点走一遍。
+直接按 [30 章](../part-04-wiring-and-boundaries/30-injection-phase-field-vs-constructor.md) 给的断点走一遍。
 
 目标：建立“构造器阶段 vs 属性填充阶段”的手感，不再把 `@Autowired` 当成“构造时就有”。
 
 ### 练习 C：看一次 early reference（最适合理清循环依赖到底怎么救）
 
-按 [16 章](16-early-reference-and-circular.md) 的思路，在 `DefaultSingletonBeanRegistry#getSingleton(...)` 观察 early reference 的生成与使用。
+按 [16 章](../part-03-container-internals/16-early-reference-and-circular.md) 的思路，在 `DefaultSingletonBeanRegistry#getSingleton(...)` 观察 early reference 的生成与使用。
 
 目标：能解释“为什么 setter 循环有时能成、构造器循环必死”背后的缓存与时机。
 
@@ -414,3 +421,5 @@ mvn -pl spring-core-beans -Dtest=<TestClass>#<testMethod> test
 回到概念章继续读也不会“太简单”了：因为你已经知道每个概念在源码里对应哪里、能怎么证明。
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
 推荐断点：`AbstractApplicationContext#refresh`、`AbstractAutowireCapableBeanFactory#doCreateBean`、`DefaultListableBeanFactory#doResolveDependency`
+
+上一章：[Docs TOC](../README.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[01. Bean 心智模型：BeanDefinition vs Bean 实例](../part-01-ioc-container/01-bean-mental-model.md)

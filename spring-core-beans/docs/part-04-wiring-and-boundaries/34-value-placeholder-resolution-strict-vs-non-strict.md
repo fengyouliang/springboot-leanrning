@@ -1,5 +1,12 @@
 # 34. `@Value("${...}")` 占位符解析：默认 non-strict vs strict fail-fast
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansValuePlaceholderResolutionLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansValuePlaceholderResolutionLabTest test`
+
 这一章回答一个很折磨人的问题：
 
 > 为什么我写了 `@Value("${demo.missing}")`，应用居然没启动失败？  
@@ -28,7 +35,7 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansValuePlaceholderResolutionLab
 也就是说：`@Value` 是否“严格”，取决于 **BeanFactory 里安装的 embedded value resolver**。
 
 对照阅读（为什么注解能生效）：  
-- [12. 容器启动与基础设施处理器：为什么注解能工作？](12-container-bootstrap-and-infrastructure.md)
+- [12. 容器启动与基础设施处理器：为什么注解能工作？](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
 
 ## 2. 默认行为：Environment resolver（non-strict）可能让缺失占位符“悄悄通过”
 
@@ -64,7 +71,7 @@ Lab 里我们显式设置：
 - refresh 直接失败（root cause 通常是 `IllegalArgumentException: Could not resolve placeholder ...`）
 
 对照阅读（BFPP vs BPP，谁更早）：  
-- [06. 容器扩展点：BFPP vs BPP](06-post-processors.md)
+- [06. 容器扩展点：BFPP vs BPP](../part-01-ioc-container/06-post-processors.md)
 
 ## 4. Debug / 观察建议
 
@@ -82,7 +89,7 @@ Lab 里我们显式设置：
 
 延伸阅读：
 
-- 调试与自检：如何“看见”容器正在做什么：[11. Debugging and Observability](11-debugging-and-observability.md)
+- 调试与自检：如何“看见”容器正在做什么：[11. Debugging and Observability](../part-02-boot-autoconfig/11-debugging-and-observability.md)
 
 ## 源码锚点（建议从这里下断点）
 
@@ -109,7 +116,9 @@ Lab 里我们显式设置：
 
 - “`@Value("${missing}")` 没失败，值变成原样字符串” → **优先定义层（resolver 语义）**：当前容器可能只装了 non-strict resolver（本章第 2 节）
 - “启用 strict 后启动直接失败” → **定义层（BFPP 提前失败）**：`PropertySourcesPlaceholderConfigurer` 会在实例化前就 fail-fast（本章第 3 节）
-- “`@Value` 完全不生效/字段没被注入” → **优先定义层/基础设施问题**：是否具备注解处理能力？（回看 [12](12-container-bootstrap-and-infrastructure.md)）
+- “`@Value` 完全不生效/字段没被注入” → **优先定义层/基础设施问题**：是否具备注解处理能力？（回看 [12](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)）
 - “值不对但不报错” → **先拆分路径**：确认 property source 是否包含 key，再确认 strict/non-strict（本章第 4 节 + `resolveEmbeddedValue`）
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansValuePlaceholderResolutionLabTest.java`
 推荐断点：`PropertySourcesPlaceholderConfigurer#postProcessBeanFactory`、`AbstractBeanFactory#resolveEmbeddedValue`、`AutowiredAnnotationBeanPostProcessor#postProcessProperties`
+
+上一章：[33. 候选选择 vs 顺序：`@Primary` / `@Priority` / `@Order` 到底各管什么？](33-autowire-candidate-selection-primary-priority-order.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[35. BeanDefinition 的合并（MergedBeanDefinition）：RootBeanDefinition 从哪里来？](35-merged-bean-definition.md)

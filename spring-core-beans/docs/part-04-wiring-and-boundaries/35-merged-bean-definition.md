@@ -49,7 +49,7 @@
 2) `DefaultListableBeanFactory#getMergedBeanDefinition`  
    - 这是你在业务/测试代码里更容易直接调用到的 public API（底层会走到上面那个方法）
 
-你可以把它和 [00 章](00-deep-dive-guide.md) 的时间线对上：
+你可以把它和 [00 章](../part-00-guide/00-deep-dive-guide.md) 的时间线对上：
 
 - 当容器准备创建某个 bean 时，它首先会确保拿到 merged definition
 - 拿到 merged 之后，才进入 `createBean → doCreateBean → populateBean → initializeBean` 这条链路
@@ -84,9 +84,9 @@
 
 进一步阅读建议：
 
-- 注解为什么能工作（基础设施处理器）：[12](12-container-bootstrap-and-infrastructure.md)
+- 注解为什么能工作（基础设施处理器）：[12](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
 - 注入发生在哪个阶段：`postProcessProperties`： [30](30-injection-phase-field-vs-constructor.md)
-- 生命周期回调顺序： [17](17-lifecycle-callback-order.md)
+- 生命周期回调顺序： [17](../part-03-container-internals/17-lifecycle-callback-order.md)
 
 ---
 
@@ -169,3 +169,5 @@
 
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansMergedBeanDefinitionLabTest.java`
 推荐断点：`AbstractBeanFactory#getMergedLocalBeanDefinition`、`AbstractAutowireCapableBeanFactory#applyMergedBeanDefinitionPostProcessors`、`MergedBeanDefinitionPostProcessor#postProcessMergedBeanDefinition`
+
+上一章：[34. `@Value("${...}")` 占位符解析：默认 non-strict vs strict fail-fast](34-value-placeholder-resolution-strict-vs-non-strict.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[36. 类型转换：BeanWrapper / ConversionService / PropertyEditor 的边界](36-type-conversion-and-beanwrapper.md)

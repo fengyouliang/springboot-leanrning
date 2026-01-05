@@ -1,5 +1,12 @@
 # 32. `@Resource` 注入：为什么它更像“按名称找 Bean”？
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResourceInjectionLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test`
+
 这一章补齐一个非常高频、也非常容易踩坑的点：`@Resource`（Jakarta / JSR-250）注入到底是怎么解析候选的？
 
 很多人会把它当成 “另一个 `@Autowired`”，但它更像：
@@ -31,7 +38,7 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
 
 对照阅读：
 
-- [12. 容器启动与基础设施处理器：为什么注解能工作？](12-container-bootstrap-and-infrastructure.md)
+- [12. 容器启动与基础设施处理器：为什么注解能工作？](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
 
 ## 2. 现象：注册 processors 后，`@Resource` 默认按字段名注入（name-first）
 
@@ -86,9 +93,9 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
 
 ## 6. 延伸阅读（把注入模型连起来）
 
-- DI 候选选择（类型/名称/Qualifier/Primary）：[03. 依赖注入解析](03-dependency-injection-resolution.md)
+- DI 候选选择（类型/名称/Qualifier/Primary）：[03. 依赖注入解析](../part-01-ioc-container/03-dependency-injection-resolution.md)
 - 注入发生在容器的哪个阶段：[`postProcessProperties` 与 field vs constructor](30-injection-phase-field-vs-constructor.md)
-- 注解能力从哪来：[`registerAnnotationConfigProcessors`](12-container-bootstrap-and-infrastructure.md)
+- 注解能力从哪来：[`registerAnnotationConfigProcessors`](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
 
 ## 源码锚点（建议从这里下断点）
 
@@ -116,7 +123,7 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
 - “`@Resource` 字段一直为 null” → **优先定义层/基础设施问题**：容器是否注册了 `CommonAnnotationBeanPostProcessor`？（看 `registerAnnotationConfigProcessors`）
 - “注入到了错误的 bean / name 对不上” → **实例层（name-first 解析）**：字段名/显式 name 是否真的对应 beanName？（本章第 2 节）
 - “name 找不到后兜底 type 还是报多候选” → **实例层（候选解析）**：转到 [33](33-autowire-candidate-selection-primary-priority-order.md) 的选择规则
-- “以为它等价于 `@Autowired`” → **概念差异**：`@Resource` 默认 name-first，`@Autowired` 默认 type-first（对照 [03](03-dependency-injection-resolution.md)）
+- “以为它等价于 `@Autowired`” → **概念差异**：`@Resource` 默认 name-first，`@Autowired` 默认 type-first（对照 [03](../part-01-ioc-container/03-dependency-injection-resolution.md)）
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResourceInjectionLabTest.java`
 推荐断点：`CommonAnnotationBeanPostProcessor#postProcessProperties`、`CommonAnnotationBeanPostProcessor#autowireResource`、`DefaultListableBeanFactory#doResolveDependency`
 
@@ -126,3 +133,5 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
   - 答题要点：`@Resource` 更偏 name-first（字段名/指定 name），`@Autowired` 更偏 type-first；两者由不同的 BPP 处理，语义与排障路径不同。
 - 常见追问：为什么很多团队更推荐“构造注入 + `@Autowired`（可省略）”？
   - 答题要点：依赖显式、可测试性更好；避免 name-first 在重构字段/beanName 时引入隐性回归。
+
+上一章：[31. 代理/替换阶段：`BeanPostProcessor` 如何把 Bean “换成 Proxy”](31-proxying-phase-bpp-wraps-bean.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[33. 候选选择 vs 顺序：`@Primary` / `@Priority` / `@Order` 到底各管什么？](33-autowire-candidate-selection-primary-priority-order.md)

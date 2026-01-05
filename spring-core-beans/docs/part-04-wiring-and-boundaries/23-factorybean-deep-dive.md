@@ -1,5 +1,12 @@
 # 23. FactoryBean 深潜：product vs factory、类型匹配、以及 isSingleton 缓存语义
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansFactoryBeanDeepDiveLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansFactoryBeanDeepDiveLabTest test`
+
 `FactoryBean` 是 Spring 里非常“容器味”的机制：
 
 - 这个 bean 本身是工厂
@@ -128,3 +135,5 @@
 - 你能解释清楚：`isSingleton()` 控制的是“product 是否缓存”而不是“factory 是否单例”吗？
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansFactoryBeanDeepDiveLabTest.java`
 推荐断点：`AbstractBeanFactory#getType`、`AbstractBeanFactory#getObjectForBeanInstance`、`FactoryBeanRegistrySupport#getObjectFromFactoryBean`
+
+上一章：[22. Bean 名称与 alias：同一个实例，多一个名字](22-bean-names-and-aliases.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[24. BeanDefinition 覆盖（overriding）：同名 bean 是“最后一个赢”还是“直接失败”？](24-bean-definition-overriding.md)

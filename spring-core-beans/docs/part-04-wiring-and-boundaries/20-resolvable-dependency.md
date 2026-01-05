@@ -142,7 +142,7 @@
    - 容器把自己“回调”给 bean（例如调用 `setApplicationContext(...)`）
 
 如果你在 debug 时把两者混在一起看，很容易误判“为什么这个注入能生效/为什么另一个不生效”。  
-建议和 [12](12-container-bootstrap-and-infrastructure.md) 一起对照理解。
+建议和 [12](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md) 一起对照理解。
 
 ## 3. 常见坑
 
@@ -184,9 +184,9 @@
 ## 排障分流：这是定义层问题还是实例层问题？
 
 - “某个类型能注入，但 `getBean(type)` 拿不到” → **优先实例层（解析路径差异）**：它可能是 ResolvableDependency，而不是普通 bean（本章 Lab）
-- “我想让它也出现在 beans 列表/支持 scope/lifecycle” → **定义层需求**：你需要注册 BeanDefinition（而不是 ResolvableDependency）（回看 [02](02-bean-registration.md)）
+- “我想让它也出现在 beans 列表/支持 scope/lifecycle” → **定义层需求**：你需要注册 BeanDefinition（而不是 ResolvableDependency）（回看 [02](../part-01-ioc-container/02-bean-registration.md)）
 - “把业务对象塞进 ResolvableDependency 里导致难 debug” → **设计/使用问题**：ResolvableDependency 更适合容器级依赖（framework internal），业务对象更适合普通 bean（对照本章第 2 节）
-- “依赖解析选错候选/歧义” → **实例层（候选解析）**：ResolvableDependency 只是其中一种来源，回到 [03](03-dependency-injection-resolution.md)/[33](33-autowire-candidate-selection-primary-priority-order.md)
+- “依赖解析选错候选/歧义” → **实例层（候选解析）**：ResolvableDependency 只是其中一种来源，回到 [03](../part-01-ioc-container/03-dependency-injection-resolution.md)/[33](33-autowire-candidate-selection-primary-priority-order.md)
 
 ## 源码最短路径（call chain）
 
@@ -213,7 +213,7 @@
 
 - `descriptor.getDependencyType()`：决定是否能命中 `resolvableDependencies`
 - `this.resolvableDependencies`：是否包含该类型 key（命中则不会再走候选集合收敛）
-- `matchingBeans` / `findAutowireCandidates(...)`（如果没命中 ResolvableDependency）：说明你已经切换到“按 bean 候选集”路线（转 [03](03-dependency-injection-resolution.md)）
+- `matchingBeans` / `findAutowireCandidates(...)`（如果没命中 ResolvableDependency）：说明你已经切换到“按 bean 候选集”路线（转 [03](../part-01-ioc-container/03-dependency-injection-resolution.md)）
 
 在 `doGetBean(...)` 里建议 watch/evaluate：
 
@@ -246,3 +246,5 @@
   - 答题要点：它注册在依赖解析表里，不会变成 `BeanDefinition`/bean；因此可 autowire，但 `getBean(type)` 不一定存在。
 - 常见追问：什么时候应该用它，而不是 `@Bean`？
   - 答题要点：适合“容器基础对象/上下文对象”的注入（更像基础设施）；业务对象仍应通过 `BeanDefinition` 管理，避免隐藏生命周期与可观测性问题。
+
+上一章：[19. dependsOn：强制初始化顺序（即使没有显式依赖）](19-depends-on.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[21. 父子 ApplicationContext：可见性与覆盖边界](21-context-hierarchy.md)

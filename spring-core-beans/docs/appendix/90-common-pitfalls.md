@@ -1,5 +1,12 @@
 # 90. 常见坑清单（建议反复对照）
 
+## 0. 复现入口（可运行）
+
+- 入口测试：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansLabTest test`
+
 这份清单不是为了“背”，而是为了让你在遇到问题时能快速定位：到底是概念没建立，还是机制没搞清。
 
 ## 1) 以为“prototype 每次方法调用都是新对象”
@@ -19,7 +26,7 @@
 - `@Lookup`
 - scoped proxy（谨慎）
 
-见：[04. Scope 与 prototype 注入陷阱](04-scope-and-prototype.md)
+见：[04. Scope 与 prototype 注入陷阱](../part-01-ioc-container/04-scope-and-prototype.md)
 
 ## 2) 以为 `@Order` 能解决“单个依赖注入的歧义”
 
@@ -28,7 +35,7 @@
 - `@Order` 更常用于集合注入的排序
 - 单依赖选择优先看 `@Primary`、`@Qualifier` 等
 
-见：[03. 依赖注入解析](03-dependency-injection-resolution.md)
+见：[03. 依赖注入解析](../part-01-ioc-container/03-dependency-injection-resolution.md)
 
 ## 3) 在 `@Configuration(proxyBeanMethods=false)` 里互相调用 `@Bean` 方法
 
@@ -40,7 +47,7 @@
 
 - 用 `@Bean` 方法参数声明依赖
 
-见：[07. @Configuration 增强](07-configuration-enhancement.md)
+见：[07. @Configuration 增强](../part-01-ioc-container/07-configuration-enhancement.md)
 
 ## 4) 把 `FactoryBean` 当作“普通 bean”
 
@@ -54,7 +61,7 @@
 - `"name"` → product
 - `"&name"` → factory
 
-见：[08. FactoryBean](08-factorybean.md)
+见：[08. FactoryBean](../part-01-ioc-container/08-factorybean.md)
 
 ## 5) 认为“循环依赖能跑起来就没问题”
 
@@ -64,7 +71,7 @@
 - 半初始化对象、代理、生命周期都会让问题变复杂
 - Boot 环境里可能默认更严格，直接不让你启动
 
-见：[09. 循环依赖](09-circular-dependencies.md)
+见：[09. 循环依赖](../part-01-ioc-container/09-circular-dependencies.md)
 
 ## 6) 认为“自动装配就是自动注入”
 
@@ -77,7 +84,7 @@
 
 - 学会看条件报告（`--debug` / `debug=true`）
 
-见：[10. Boot 自动装配](10-spring-boot-auto-configuration.md) 与 [11. 调试](11-debugging-and-observability.md)
+见：[10. Boot 自动装配](../part-02-boot-autoconfig/10-spring-boot-auto-configuration.md) 与 [11. 调试](../part-02-boot-autoconfig/11-debugging-and-observability.md)
 
 ## 7) 把 `applicationContext.getBean()` 当成日常依赖注入方式
 
@@ -113,7 +120,7 @@
 
 - 对应 Lab/Test：`SpringCoreBeansAutowireCandidateSelectionLabTest#primaryOverridesPriority_forSingleInjection`
 
-见：[03. 依赖注入解析](03-dependency-injection-resolution.md)
+见：[03. 依赖注入解析](../part-01-ioc-container/03-dependency-injection-resolution.md)
 
 ## 9) 以为 `@Primary` 能“覆盖一切”
 
@@ -126,7 +133,7 @@
 
 - 对应 Lab/Test：`SpringCoreBeansAutowireCandidateSelectionLabTest`（优先级/primary 的对比）
 
-见：[03. 依赖注入解析](03-dependency-injection-resolution.md) 与 [`@Resource` 注入](32-resource-injection-name-first.md)
+见：[03. 依赖注入解析](../part-01-ioc-container/03-dependency-injection-resolution.md) 与 [`@Resource` 注入](../part-04-wiring-and-boundaries/32-resource-injection-name-first.md)
 
 ## 10) 以为集合注入的顺序“默认就稳定”
 
@@ -143,7 +150,7 @@
 
 - 对应 Lab/Test：`SpringCoreBeansAutowireCandidateSelectionLabTest#orderAnnotation_affectsCollectionInjectionOrder`
 
-见：[03. 依赖注入解析](03-dependency-injection-resolution.md)
+见：[03. 依赖注入解析](../part-01-ioc-container/03-dependency-injection-resolution.md)
 
 ## 11) 以为 `@PostConstruct` 发生在“构造器之前”
 
@@ -156,7 +163,7 @@
 
 - 对应 Lab/Test：`SpringCoreBeansLifecycleCallbackOrderLabTest#singletonLifecycleCallbacks_happenInAStableOrderAroundInitialization`
 
-见：[05. 生命周期：初始化、销毁与回调](05-lifecycle-and-callbacks.md) 与 [12. 容器启动与基础设施处理器](12-container-bootstrap-and-infrastructure.md)
+见：[05. 生命周期：初始化、销毁与回调](../part-01-ioc-container/05-lifecycle-and-callbacks.md) 与 [12. 容器启动与基础设施处理器](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
 
 ## 12) 以为 BPP “只是改属性”，不会把 bean 换成另一个对象
 
@@ -169,7 +176,7 @@
 
 - 对应 Lab/Test：`SpringCoreBeansProxyingPhaseLabTest#beanPostProcessorCanReturnAProxyAsTheFinalExposedBean_andSelfInvocationStillBypassesTheProxy`
 
-见：[31. 代理/替换阶段：BPP 如何把 Bean 换成 Proxy](31-proxying-phase-bpp-wraps-bean.md)
+见：[31. 代理/替换阶段：BPP 如何把 Bean 换成 Proxy](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)
 
 ## 13) 以为循环依赖“只要能启动就等于没问题”
 
@@ -182,7 +189,7 @@
 
 - 对应 Lab/Test：`SpringCoreBeansEarlyReferenceLabTest#getEarlyBeanReference_canProvideEarlyProxyDuringCircularDependencyResolution`
 
-见：[09. 循环依赖](09-circular-dependencies.md) 与 [16. early reference 与循环依赖](16-early-reference-and-circular.md)
+见：[09. 循环依赖](../part-01-ioc-container/09-circular-dependencies.md) 与 [16. early reference 与循环依赖](../part-03-container-internals/16-early-reference-and-circular.md)
 
 ## 14) 以为 `FactoryBean` 只影响 `getBean("name")` 的返回值
 
@@ -195,7 +202,7 @@
 
 - 对应 Lab/Test：`SpringCoreBeansFactoryBeanEdgeCasesLabTest#factoryBeanWithNullObjectType_isNotDiscoverableByTypeWithoutEagerInit_butCanStillBeRetrievedByName`
 
-见：[08. FactoryBean](08-factorybean.md)、[23. FactoryBean 深潜](23-factorybean-deep-dive.md)、[29. FactoryBean 边界](29-factorybean-edge-cases.md)
+见：[08. FactoryBean](../part-01-ioc-container/08-factorybean.md)、[23. FactoryBean 深潜](../part-04-wiring-and-boundaries/23-factorybean-deep-dive.md)、[29. FactoryBean 边界](../part-04-wiring-and-boundaries/29-factorybean-edge-cases.md)
 
 ## 15) 以为 `proxyBeanMethods=false` 只是“性能优化”，不会影响语义
 
@@ -210,4 +217,42 @@
   - `SpringCoreBeansContainerLabTest#configurationProxyBeanMethodsTruePreservesSingletonSemanticsForBeanMethodCalls`
   - `SpringCoreBeansContainerLabTest#configurationProxyBeanMethodsFalseAllowsDirectMethodCallToCreateExtraInstance`
 
-见：[07. @Configuration 增强](07-configuration-enhancement.md)
+见：[07. @Configuration 增强](../part-01-ioc-container/07-configuration-enhancement.md)
+
+## 16) 以为“按泛型找 bean（Handler<String>）一定可靠”
+
+典型症状：
+
+- 按原始类型 `Handler` 能找到候选，但按 `Handler<String>`（带泛型）找不到
+- 你明明觉得“这个实现就是 String 版本”，但容器无法证明
+
+事实：
+
+- Spring 的泛型匹配依赖 `ResolvableType`
+- 一旦候选 bean 在运行时丢失了泛型信息（常见原因：JDK 动态代理、手工注册 singleton 实例等），按泛型匹配就可能失配
+
+如何验证：
+
+- 对应 Lab/Test：`SpringCoreBeansGenericTypeMatchingPitfallsLabTest#genericTypeMatching_canFailWhenCandidateLosesGenericInformation_likeJdkProxySingleton`
+
+见：[37. 泛型匹配与注入坑](../part-04-wiring-and-boundaries/37-generic-type-matching-pitfalls.md)
+
+## 17) 以为“类型转换只发生在 @Value”，与 BeanDefinition/属性填充无关
+
+典型症状：
+
+- 你在 BFPP 里把 property value 写成字符串（例如 `"8080"`），却发现最终注入到 `int` 属性里变成了数字
+- 或者自定义值对象注入失败，不知道该在哪注册 Converter
+
+事实：
+
+- 属性填充阶段（populateBean）会通过 `BeanWrapper` 写入属性，并触发类型转换
+- `@Value` 的链路是“先解析字符串，再转换为目标类型”
+
+如何验证：
+
+- 对应 Lab/Test：`SpringCoreBeansTypeConversionLabTest`
+
+见：[36. 类型转换：BeanWrapper / ConversionService / PropertyEditor 的边界](../part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md)
+
+上一章：[37. 泛型匹配与注入坑：ResolvableType 与代理导致的类型信息丢失](../part-04-wiring-and-boundaries/37-generic-type-matching-pitfalls.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[91. 术语表（Glossary）](91-glossary.md)

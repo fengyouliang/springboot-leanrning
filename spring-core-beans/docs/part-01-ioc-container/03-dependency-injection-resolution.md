@@ -72,6 +72,51 @@ Exercises 里也专门有题让你把 `@Qualifier` 改成 `@Primary` 来体会�
 
 这对 prototype 注入 singleton 尤其重要，[04 章](04-scope-and-prototype.md)会详细解释。
 
+## 4.1 可选依赖：`@Autowired(required=false)` / `Optional<T>` / `@Nullable`
+
+当你希望“没有这个 bean 也能启动”，你需要明确告诉容器：**这个依赖不是强依赖**。
+
+常见的三种做法（按“表达力”从直观到灵活）：
+
+1) `@Autowired(required=false)`（更偏 field/setter 注入）
+   - 缺失时：不报错，注入 `null`
+   - 适合：兼容性开关、可插拔依赖（但要注意 null 处理）
+2) `Optional<T>`（更偏 constructor/方法参数注入）
+   - 缺失时：注入 `Optional.empty()`
+   - 适合：显式表达“可选”，比 `null` 更安全
+3) `@Nullable`（对参数/字段标注“可为 null”）
+   - 缺失时：允许注入 `null`
+   - 适合：你不想引入 Optional，但能接受空值语义
+
+> 经验规则：如果你在写“核心业务依赖”，不要用可选注入把问题藏起来；  
+> 可选注入更适合“可插拔能力”（metrics、tracing、某些 adapter）或“演进中的依赖”。
+
+对应实验（可运行 + 可断言）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansOptionalInjectionLabTest.java`
+
+建议断点：
+
+- `DefaultListableBeanFactory#doResolveDependency`（看 `descriptor.isRequired()`、看候选集合为空时的分支）
+- `DefaultListableBeanFactory#resolveMultipleBeans`（`Optional`/集合依赖不会走“选唯一候选”的逻辑）
+
+## 4.2 JSR-330：`@Inject` / `@Named` / `Provider<T>`（对照 Spring）
+
+Spring 也支持 JSR-330（`jakarta.inject`）注入体系，但你需要把它和 Spring 自己的注入语义对齐理解：
+
+- `@Inject` ≈ `@Autowired`（默认 required=true）
+  - JSR-330 的 `@Inject` **没有** `required=false` 这种属性，想表达“可选”通常靠 `Provider<T>` / `Optional<T>`
+- `@Named("beanName")` ≈ `@Qualifier("beanName")`
+  - 用于在多候选时做按名选择（本质仍是“候选收敛”）
+- `Provider<T>`（JSR-330）与 `ObjectProvider<T>`（Spring）都属于“延迟解析”
+  - 共同点：注入阶段不强制创建目标 bean；真正调用 `get()` / `getObject()` 时才解析
+  - 差异点：`ObjectProvider` 提供 `getIfAvailable()` / `getIfUnique()` 等更友好的可选语义
+
+复现入口（可断言 + 可断点）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansJsr330InjectionLabTest.java`
+- 推荐运行命令：`mvn -pl spring-core-beans -Dtest=SpringCoreBeansJsr330InjectionLabTest test`
+
 ## 5. 集合注入与排序（你以后一定会遇到）
 
 当你注入：
@@ -226,11 +271,11 @@ Exercises 里也专门有题让你把 `@Qualifier` 改成 `@Primary` 来体会�
 
 - `DefaultListableBeanFactory#resolveDependency`
   - `DefaultListableBeanFactory#doResolveDependency`
-    - **（特殊通道）** `resolvableDependencies` 命中：直接返回（见 [20](20-resolvable-dependency.md)）
+    - **（特殊通道）** `resolvableDependencies` 命中：直接返回（见 [20](../part-04-wiring-and-boundaries/20-resolvable-dependency.md)）
     - **（集合通道）** `resolveMultipleBeans(...)`：`List/Map/ObjectProvider` 等不会走“选唯一候选”的逻辑
     - **（普通通道）** `findAutowireCandidates(...)`：先按类型收集候选集合
       - `determineAutowireCandidate(...)`：再按规则收敛到唯一候选（`@Qualifier/@Primary/@Priority/beanName` 等）
-    - `getBean(candidateName)`：拿到最终注入的实例，并记录依赖边（`dependentBeanMap` / `dependenciesForBeanMap`，见 [19](19-depends-on.md)）
+    - `getBean(candidateName)`：拿到最终注入的实例，并记录依赖边（`dependentBeanMap` / `dependenciesForBeanMap`，见 [19](../part-04-wiring-and-boundaries/19-depends-on.md)）
 
 如果你只想把“候选如何收敛”看清楚，优先在这两个点停住即可：
 
@@ -277,9 +322,9 @@ Exercises 里也专门有题让你把 `@Qualifier` 改成 `@Primary` 来体会�
 
 把这个反例看懂，你就能把三件事分清：
 
-- 单依赖注入：`@Qualifier/@Primary/@Priority`（见 [33](33-autowire-candidate-selection-primary-priority-order.md)）
+- 单依赖注入：`@Qualifier/@Primary/@Priority`（见 [33](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)）
 - 集合注入排序：`@Order/@Priority/Ordered`
-- “能注入但不是 bean”：`resolvableDependencies`（见 [20](20-resolvable-dependency.md)）
+- “能注入但不是 bean”：`resolvableDependencies`（见 [20](../part-04-wiring-and-boundaries/20-resolvable-dependency.md)）
 
 ## 源码解析补充：`doResolveDependency` 的关键分支（伪代码）
 
@@ -359,3 +404,5 @@ static class SingleWorkerConsumer {
 下一章我们会把 “候选是怎么创建出来的” 和 “什么时候创建” 结合起来讲：Scope。
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansBeanGraphDebugLabTest.java`
 推荐断点：`DefaultListableBeanFactory#doResolveDependency`、`DefaultListableBeanFactory#determineAutowireCandidate`、`AutowiredAnnotationBeanPostProcessor#postProcessProperties`
+
+上一章：[02. Bean 注册入口：扫描、@Bean、@Import、registrar](02-bean-registration.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[04. Scope 与 prototype 注入陷阱（ObjectProvider / @Lookup / scoped proxy）](04-scope-and-prototype.md)

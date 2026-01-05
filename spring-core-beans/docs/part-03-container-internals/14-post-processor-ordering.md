@@ -233,9 +233,9 @@ registerBeanPostProcessors(beanFactory):
 ## 排障分流：这是定义层问题还是实例层问题？
 
 - “某个 BFPP 改定义没生效/被覆盖了” → **定义层 + 顺序问题**：先确认它是否实现了 `PriorityOrdered/Ordered`，再看它是否比其他 BFPP 更早执行（本章 Lab）
-- “某个 BPP 的代理/增强消失了或包裹顺序不对” → **实例层 + 顺序问题**：看 `registerBeanPostProcessors` 的排序与注册时机（对照 [31](31-proxying-phase-bpp-wraps-bean.md)）
-- “我手工 `addBeanPostProcessor` 后，`Ordered` 反而不生效” → **实例层 + 注册方式问题**：手工注册的 BPP 不会走容器的排序流程（见 [25](25-programmatic-bpp-registration.md)）
-- “我以为 `@Order` 能解决单依赖注入歧义” → **不是顺序问题，是候选选择问题**：转到 [33](33-autowire-candidate-selection-primary-priority-order.md)
+- “某个 BPP 的代理/增强消失了或包裹顺序不对” → **实例层 + 顺序问题**：看 `registerBeanPostProcessors` 的排序与注册时机（对照 [31](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)）
+- “我手工 `addBeanPostProcessor` 后，`Ordered` 反而不生效” → **实例层 + 注册方式问题**：手工注册的 BPP 不会走容器的排序流程（见 [25](../part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md)）
+- “我以为 `@Order` 能解决单依赖注入歧义” → **不是顺序问题，是候选选择问题**：转到 [33](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
 
 ## 源码最短路径（call chain）
 
@@ -316,10 +316,12 @@ registerBeanPostProcessors(beanFactory):
 把这个反例看懂，你就能把两个顺序体系彻底分开：
 
 - “容器自动发现 + 排序”体系：见本章（`registerBeanPostProcessors`）
-- “手工注册绕过排序”体系：见 [25](25-programmatic-bpp-registration.md)
+- “手工注册绕过排序”体系：见 [25](../part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md)
 
 ## 5. 一句话自检
 
 - 你能解释清楚：为什么我们只断言“相对顺序”，而不去断言“容器内所有处理器的全序列”？
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPostProcessorOrderingLabTest.java`
 推荐断点：`PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`、`PostProcessorRegistrationDelegate#registerBeanPostProcessors`、`AnnotationAwareOrderComparator#sort`
+
+上一章：[13. BeanDefinitionRegistryPostProcessor：在“注册阶段”动态加定义](13-bdrpp-definition-registration.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[15. 实例化前短路：postProcessBeforeInstantiation 能让构造器根本不执行](15-pre-instantiation-short-circuit.md)

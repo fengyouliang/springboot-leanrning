@@ -86,7 +86,7 @@
 > - `beanFactory.getDependenciesForBean(beanName)`：我依赖谁（更像 `dependenciesForBeanMap` 的视角）
 > - `beanFactory.getDependentBeans(beanName)`：谁依赖我（更像 `dependentBeanMap` 的视角）
 >
-> 如果你想把“依赖边”做成可观测闭环（候选集合 vs 最终依赖边），推荐先看 [11](11-debugging-and-observability.md) 的固定观察点。
+> 如果你想把“依赖边”做成可观测闭环（候选集合 vs 最终依赖边），推荐先看 [11](../part-02-boot-autoconfig/11-debugging-and-observability.md) 的固定观察点。
 
 ## 6. 销毁顺序：为什么关闭时顺序“反过来”？
 
@@ -148,7 +148,7 @@
 
 相关章节：
 
-- DI 收敛规则：[03](03-dependency-injection-resolution.md)、[33](33-autowire-candidate-selection-primary-priority-order.md)
+- DI 收敛规则：[03](../part-01-ioc-container/03-dependency-injection-resolution.md)、[33](33-autowire-candidate-selection-primary-priority-order.md)
 
 ## 6.3 写入时机对照：`dependsOn` 这段元数据是何时写进 `BeanDefinition` 的？
 
@@ -191,7 +191,7 @@
 
 - “我设置了 dependsOn，但顺序没变” → **优先定义层**：`dependsOn` 是否真的写进 `BeanDefinition`？beanName 是否写对？（看 `getDependsOn`）
 - “我用 dependsOn 想让 `first` 自动注入到 `second`” → **不是注入问题，是概念误用**：dependsOn 只管顺序，不管 DI（回看本章开头）
-- “启动/关闭顺序很怪，像是有隐式依赖” → **定义层 + 依赖关系问题**：排查 `dependsOn`/工厂内部注册的依赖（结合 [11](11-debugging-and-observability.md) 观察 bean 图）
+- “启动/关闭顺序很怪，像是有隐式依赖” → **定义层 + 依赖关系问题**：排查 `dependsOn`/工厂内部注册的依赖（结合 [11](../part-02-boot-autoconfig/11-debugging-and-observability.md) 观察 bean 图）
 - “出现依赖环（dependsOn A → B → A）” → **定义层问题**：这属于人为引入的拓扑环，建议回避而不是依赖容器“救场”
 
 ## 源码最短路径（call chain）
@@ -256,3 +256,5 @@
   - 答题要点：`dependsOn` 只控制初始化顺序（谁先创建），不改变 DI 候选选择规则；注入歧义要用 `@Qualifier/@Primary` 或条件装配解决。
 - 常见追问：什么时候必须用 `dependsOn`？
   - 答题要点：外部资源/生命周期强依赖（例如必须先初始化某个基础设施再创建业务 bean）时，用它强制顺序更直观。
+
+上一章：[18. Lazy：lazy-init bean vs `@Lazy` 注入点（懒代理）](18-lazy-semantics.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[20. registerResolvableDependency：能注入，但它不是 Bean](20-resolvable-dependency.md)

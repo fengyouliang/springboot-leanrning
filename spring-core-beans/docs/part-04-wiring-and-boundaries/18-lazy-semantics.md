@@ -1,5 +1,12 @@
 # 18. Lazy：lazy-init bean vs `@Lazy` 注入点（懒代理）
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansLazyLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansLazyLabTest test`
+
 懒加载经常被误用：很多人以为“加了 `@Lazy` 就不会启动慢了”，但实际效果取决于你把 lazy 放在哪里。
 
 对应实验：
@@ -103,3 +110,5 @@
   - 答题要点：`lazy-init` 是定义层的“延迟创建策略”；注入点 `@Lazy` 更像“注入一个延迟解析的代理/提供者”，把真正解析推迟到首次使用。
 - 常见追问：为什么标了 lazy-init 仍可能在 refresh 时被创建？
   - 答题要点：被 eager 依赖/被提前触发（例如非 lazy 单例依赖它）时仍会创建；排障要找“谁触发了依赖解析”。
+
+上一章：[17. 生命周期回调顺序：Aware / BPP / init / destroy（以及 prototype 为什么不销毁）](../part-03-container-internals/17-lifecycle-callback-order.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[19. dependsOn：强制初始化顺序（即使没有显式依赖）](19-depends-on.md)

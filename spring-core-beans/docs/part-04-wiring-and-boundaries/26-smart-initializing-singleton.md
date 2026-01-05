@@ -1,5 +1,12 @@
 # 26. SmartInitializingSingleton：所有单例都创建完之后再做事
 
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansSmartInitializingSingletonLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansSmartInitializingSingletonLabTest test`
+
 有时候你需要一个“容器已经把主要单例都创建完”的时机点，比如：
 
 - 想扫描容器里所有某类 bean，并建立索引
@@ -80,3 +87,5 @@ Spring 提供了一个非常明确的回调：
 - 你能解释清楚：为什么 `afterSingletonsInstantiated` 触发时 lazy bean 可能还没创建吗？
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansSmartInitializingSingletonLabTest.java`
 推荐断点：`DefaultListableBeanFactory#preInstantiateSingletons`、`SmartInitializingSingleton#afterSingletonsInstantiated`、`AbstractAutowireCapableBeanFactory#doCreateBean`
+
+上一章：[25. 手工添加 BeanPostProcessor：顺序与 Ordered 的陷阱](25-programmatic-bpp-registration.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[27. SmartLifecycle：start/stop 时机与 phase 顺序](27-smart-lifecycle-phase.md)

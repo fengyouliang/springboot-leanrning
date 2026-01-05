@@ -1,5 +1,12 @@
 # 99. 自测题：你是否真的理解了？
 
+## 0. 复现入口（可运行）
+
+- 入口测试：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansExerciseTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansExerciseTest test`
+
 建议学习方式：
 
 - 先不看代码，尝试回答问题
@@ -62,6 +69,24 @@
 14) 为什么 `getBean("sequence")` 拿到的是 Long 而不是 `SequenceFactoryBean`？
 15) 构造器循环依赖为什么必然失败？setter 循环为什么有时能成功？
 
+## H. 值解析与类型转换（对应 34/36）
+
+- 你能不能说清 `@Value` 的链路：先做 `${...}`/SpEL 解析，再做类型转换？核心断点打在哪里？
+- 你能不能解释“为什么在 BFPP 里把 property value 写成字符串，最后能注入到 `int` 属性里”？这属于 bean 创建的哪个阶段？
+- 你要让字符串能注入为自定义值对象（例如 `UserId`），你会把 Converter 注册在哪里？它怎么被安装进 BeanFactory？
+
+16) `@Value("${demo.port}") int port` 这行代码背后至少经历了哪两步（解析与转换）？
+17) `BeanDefinition#getPropertyValues()` 里的 `"8080"` 最终写入 `int port` 的关键入口方法是什么？
+
+## I. 泛型匹配与注入坑（对应 37/29）
+
+- 你能不能用一句话解释：为什么按 `Handler` 能找到，但按 `Handler<String>` 找不到？
+- `ResolvableType` 在这个问题里扮演什么角色？
+- 为什么“候选是运行时 proxy 实例”时，泛型信息更容易丢失？
+
+18) 为什么 `DefaultListableBeanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(Handler.class, String.class))` 可能返回空？
+19) 你会用什么工程策略避免“靠泛型匹配做关键依赖注入”带来的不确定性？
+
 ## F. 动手题（建议直接做 Exercises）
 
 这些题都已经在本模块的 Exercises 里给出（默认 `@Disabled`）：
@@ -82,7 +107,7 @@
 
 1) 定义层 vs 实例层：`SpringCoreBeansContainerLabTest#beanDefinitionIsNotTheBeanInstance`
 2) refresh 阶段感：从 `AbstractApplicationContext#refresh` 走一遍 BFPP/BPP 的关键阶段（同上测试即可）
-3) 注册入口：`SpringCoreBeansBootstrapInternalsLabTest`（配合 [02](02-bean-registration.md)）
+3) 注册入口：`SpringCoreBeansBootstrapInternalsLabTest`（配合 [02](../part-01-ioc-container/02-bean-registration.md)）
 4) 注入歧义：`SpringCoreBeansInjectionAmbiguityLabTest`
 5) 候选选择边界：`SpringCoreBeansAutowireCandidateSelectionLabTest`
 6) prototype 注入陷阱：`SpringCoreBeansLabTest`（prototype 相关用例）
@@ -90,3 +115,5 @@
 8) post-processor 职责边界：`SpringCoreBeansRegistryPostProcessorLabTest` + `SpringCoreBeansPostProcessorOrderingLabTest`
 9) early reference：`SpringCoreBeansEarlyReferenceLabTest`
 10) 排障断点入口：`SpringCoreBeansExceptionNavigationLabTest` / `SpringCoreBeansBeanGraphDebugLabTest`
+
+上一章：[92. 知识点地图（Concept → Chapter → Lab）](92-knowledge-map.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[Docs TOC](../README.md)

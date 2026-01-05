@@ -190,7 +190,7 @@ JDK 代理的本质是：
 - “AOP/事务/拦截器不生效” → **优先实例层（调用链是否走代理）**：入口调用是否发生在 proxy 上？self-invocation 必然绕过（本章第 2 节）
 - “按实现类注入/按实现类 getBean 失败” → **实例层（代理暴露类型）**：JDK proxy 只实现接口（本章第 3 节 + `doResolveDependency`）
 - “我以为容器里的 bean 一定是原始对象” → **实例层机制**：BPP 可以替换最终暴露对象（本章第 1 节 + `applyBeanPostProcessorsAfterInitialization`）
-- “不知道从哪里下断点” → **回到容器时间线**：从 [00](00-deep-dive-guide.md) 的 `initializeBean/doCreateBean` 入口开始定位
+- “不知道从哪里下断点” → **回到容器时间线**：从 [00](../part-00-guide/00-deep-dive-guide.md) 的 `initializeBean/doCreateBean` 入口开始定位
 
 ## 源码最短路径（call chain）
 
@@ -249,3 +249,5 @@ JDK 代理的本质是：
 
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProxyingPhaseLabTest.java`
 推荐断点：`AbstractAutowireCapableBeanFactory#initializeBean`、`AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`、`DefaultListableBeanFactory#doResolveDependency`
+
+上一章：[30. 注入阶段：field injection vs constructor injection（以及 `postProcessProperties`）](30-injection-phase-field-vs-constructor.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[32. `@Resource` 注入：为什么它更像“按名称找 Bean”？](32-resource-injection-name-first.md)
