@@ -146,8 +146,18 @@ Exercises 默认禁用：打开 `*ExerciseTest`，移除/注释 `@Disabled`，�
 33. [候选选择 vs 顺序：`@Primary` / `@Priority` / `@Order` 到底各管什么？](docs/part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
 34. [`@Value("${...}")` 占位符解析：默认 non-strict vs strict fail-fast](docs/part-04-wiring-and-boundaries/34-value-placeholder-resolution-strict-vs-non-strict.md)
 35. [BeanDefinition 的合并（MergedBeanDefinition）：RootBeanDefinition 从哪里来？](docs/part-04-wiring-and-boundaries/35-merged-bean-definition.md)
-36. [常见坑清单（建议反复对照）](docs/appendix/90-common-pitfalls.md)
-37. [自测题：你是否真的理解了？](docs/appendix/99-self-check.md)
+36. [AOT / Native 总览：为什么“JVM 能跑”不等于“Native 能跑”】【Part 05】](docs/part-05-aot-and-real-world/40-aot-and-native-overview.md)
+37. [RuntimeHints 入门：把构建期契约跑通【Part 05】](docs/part-05-aot-and-real-world/41-runtimehints-basics.md)
+38. [XML → BeanDefinitionReader：定义层解析与错误分型【Part 05】](docs/part-05-aot-and-real-world/42-xml-bean-definition-reader.md)
+39. [容器外对象注入：AutowireCapableBeanFactory【Part 05】](docs/part-05-aot-and-real-world/43-autowirecapablebeanfactory-external-objects.md)
+40. [SpEL 与 `@Value("#{...}")`：表达式解析链路【Part 05】](docs/part-05-aot-and-real-world/44-spel-and-value-expression.md)
+41. [自定义 Qualifier：meta-annotation 与候选收敛【Part 05】](docs/part-05-aot-and-real-world/45-custom-qualifier-meta-annotation.md)
+42. [常见坑清单（建议反复对照）](docs/appendix/90-common-pitfalls.md)
+43. [术语表（Glossary）](docs/appendix/91-glossary.md)
+44. [知识点地图（Concept → Chapter → Lab）](docs/appendix/92-knowledge-map.md)
+45. [面试复述模板（决策树 → Lab → 断点入口）](docs/appendix/93-interview-playbook.md)
+46. [生产排障清单（异常分型 → 入口 → 观察点 → 修复策略）](docs/appendix/94-production-troubleshooting-checklist.md)
+47. [自测题：你是否真的理解了？](docs/appendix/99-self-check.md)
 
 ## 容器主线（refresh call chain）一页纸
 
@@ -177,6 +187,14 @@ Exercises 默认禁用：打开 `*ExerciseTest`，移除/注释 `@Disabled`，�
 - BeanDefinition 合并（merged `RootBeanDefinition`）→ [docs/35](docs/part-04-wiring-and-boundaries/35-merged-bean-definition.md) → `SpringCoreBeansMergedBeanDefinitionLabTest`
 - 排障：异常 → 断点入口（候选集合/最终注入/依赖关系）→ [docs/11](docs/part-02-boot-autoconfig/11-debugging-and-observability.md) → `SpringCoreBeansBeanGraphDebugLabTest`
 - 代理定位闭环：最终暴露对象是哪里被换成 proxy 的？→ [docs/11](docs/part-02-boot-autoconfig/11-debugging-and-observability.md) / [docs/31](docs/part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md) → `SpringCoreBeansBeanCreationTraceLabTest` / `SpringCoreBeansProxyingPhaseLabTest`
+
+## 概念地图（真实世界补齐：AOT/XML/外部对象/SpEL/自定义 Qualifier）
+
+- AOT/Native 心智模型 → [docs/40](docs/part-05-aot-and-real-world/40-aot-and-native-overview.md) / [docs/41](docs/part-05-aot-and-real-world/41-runtimehints-basics.md) → `SpringCoreBeansAotRuntimeHintsLabTest`
+- XML → BeanDefinitionReader（定义层错误分型）→ [docs/42](docs/part-05-aot-and-real-world/42-xml-bean-definition-reader.md) → `SpringCoreBeansXmlBeanDefinitionReaderLabTest`
+- 容器外对象注入与回调 → [docs/43](docs/part-05-aot-and-real-world/43-autowirecapablebeanfactory-external-objects.md) → `SpringCoreBeansAutowireCapableBeanFactoryLabTest`
+- SpEL 与 `@Value("#{...}")` → [docs/44](docs/part-05-aot-and-real-world/44-spel-and-value-expression.md) → `SpringCoreBeansSpelValueLabTest`
+- 自定义 Qualifier（meta-annotation）→ [docs/45](docs/part-05-aot-and-real-world/45-custom-qualifier-meta-annotation.md) → `SpringCoreBeansCustomQualifierLabTest`
 
 ## Labs / Exercises 索引（按知识点 / 难度）
 

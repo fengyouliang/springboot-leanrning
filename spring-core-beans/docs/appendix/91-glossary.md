@@ -89,4 +89,23 @@
 
 ---
 
+## AOT 与真实世界补齐
+
+- **AOT（Ahead-of-Time）**：把原本运行期才能完成的工作（分析/生成/裁剪元信息）前移到构建期执行，以换取更快启动与更强可预知性。  
+  章节：[`40`](../part-05-aot-and-real-world/40-aot-and-native-overview.md)
+- **RuntimeHints**：AOT/Native 下的“构建期契约”数据结构，用于声明反射/代理/资源等运行期需求。  
+  章节：[`41`](../part-05-aot-and-real-world/41-runtimehints-basics.md)
+- **RuntimeHintsRegistrar**：hints 的注册入口（面向模块/能力的契约声明点）。  
+  章节：[`41`](../part-05-aot-and-real-world/41-runtimehints-basics.md)
+- **XmlBeanDefinitionReader**：把 XML 配置读成 BeanDefinition 并注册到 BeanFactory 的 reader；定义层错误分型的关键入口。  
+  章节：[`42`](../part-05-aot-and-real-world/42-xml-bean-definition-reader.md)
+- **AutowireCapableBeanFactory**：对容器外对象提供“注入/初始化/销毁”的能力入口，用于把部分容器管道应用到非托管对象上。  
+  章节：[`43`](../part-05-aot-and-real-world/43-autowirecapablebeanfactory-external-objects.md)
+- **SpEL（Spring Expression Language）**：Spring 的表达式语言，用于 `@Value("#{...}")` 等场景进行计算/引用 bean/调用方法。  
+  章节：[`44`](../part-05-aot-and-real-world/44-spel-and-value-expression.md)
+- **自定义 Qualifier（meta-annotation）**：通过注解做 `@Qualifier` 的元注解，把“候选收敛规则”提升为有业务语义的限定符（避免散落字符串）。  
+  章节：[`45`](../part-05-aot-and-real-world/45-custom-qualifier-meta-annotation.md)
+
+---
+
 上一章：[90. 常见坑清单（建议反复对照）](90-common-pitfalls.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[92. 知识点地图（Concept → Chapter → Lab）](92-knowledge-map.md)

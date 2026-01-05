@@ -23,7 +23,8 @@
 3. Part 02：Spring Boot 自动装配与可观察性（把“为什么有这个 bean/为什么没生效”讲清楚）
 4. Part 03：容器内部机制与扩展点（bootstrap/排序/短路/early reference）
 5. Part 04：装配语义与边界（lazy/dependsOn/resolvable/层级/命名/FactoryBean/覆盖/手工注册/回调钩子/注入阶段/代理/值解析/merged definition）
-6. Appendix：常见坑与自测题（用于复盘与巩固）
+6. Part 05：AOT/真实世界补齐（RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）
+7. Appendix：常见坑与自测题（用于复盘与巩固）
 
 ---
 
@@ -45,6 +46,10 @@
   - Lab：`SpringCoreBeansTypeConversionLabTest`
 - 泛型匹配按 `Handler<String>` 找不到（代理丢失类型信息）→ [37](part-04-wiring-and-boundaries/37-generic-type-matching-pitfalls.md)
   - Lab：`SpringCoreBeansGenericTypeMatchingPitfallsLabTest`
+- `BeanDefinitionStoreException`（例如 invalid XML）→ [42](part-05-aot-and-real-world/42-xml-bean-definition-reader.md) / [11](part-02-boot-autoconfig/11-debugging-and-observability.md)
+  - Lab：`SpringCoreBeansXmlBeanDefinitionReaderLabTest` / `SpringCoreBeansExceptionNavigationLabTest`
+- `@Value("#{...}")`（SpEL）注入不符合预期 → [44](part-05-aot-and-real-world/44-spel-and-value-expression.md) / [36](part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md)
+  - Lab：`SpringCoreBeansSpelValueLabTest`
 
 更完整的跳读地图见： [92. 知识点地图](appendix/92-knowledge-map.md)
 
@@ -65,6 +70,8 @@
 | [34](part-04-wiring-and-boundaries/34-value-placeholder-resolution-strict-vs-non-strict.md) | non-strict vs strict 占位符解析 | `SpringCoreBeansValuePlaceholderResolutionLabTest` |
 | [36](part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md) | BeanWrapper/ConversionService 类型转换 | `SpringCoreBeansTypeConversionLabTest` |
 | [37](part-04-wiring-and-boundaries/37-generic-type-matching-pitfalls.md) | ResolvableType 泛型匹配边界 | `SpringCoreBeansGenericTypeMatchingPitfallsLabTest` |
+| [41](part-05-aot-and-real-world/41-runtimehints-basics.md) | AOT/Native 的“构建期契约”如何表达与验证 | `SpringCoreBeansAotRuntimeHintsLabTest` |
+| [42](part-05-aot-and-real-world/42-xml-bean-definition-reader.md) | XML → BeanDefinitionReader：定义层解析与错误分型 | `SpringCoreBeansXmlBeanDefinitionReaderLabTest` |
 
 ---
 
@@ -123,11 +130,22 @@
 - [36. 类型转换：BeanWrapper / ConversionService / PropertyEditor 的边界](part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md)
 - [37. 泛型匹配与注入坑：ResolvableType 与代理导致的类型信息丢失](part-04-wiring-and-boundaries/37-generic-type-matching-pitfalls.md)
 
+### Part 05：AOT / 真实世界补齐（把“项目里真会遇到的坑”补成可复现实验）
+
+- [40. AOT / Native 总览：为什么“JVM 能跑”不等于“Native 能跑”](part-05-aot-and-real-world/40-aot-and-native-overview.md)
+- [41. RuntimeHints 入门：把构建期契约跑通](part-05-aot-and-real-world/41-runtimehints-basics.md)
+- [42. XML → BeanDefinitionReader：定义层解析与错误分型](part-05-aot-and-real-world/42-xml-bean-definition-reader.md)
+- [43. 容器外对象注入：AutowireCapableBeanFactory](part-05-aot-and-real-world/43-autowirecapablebeanfactory-external-objects.md)
+- [44. SpEL 与 `@Value("#{...}")`：表达式解析链路](part-05-aot-and-real-world/44-spel-and-value-expression.md)
+- [45. 自定义 Qualifier：meta-annotation 与候选收敛](part-05-aot-and-real-world/45-custom-qualifier-meta-annotation.md)
+
 ### Appendix：复盘与自测
 
 - [90. 常见坑清单（建议反复对照）](appendix/90-common-pitfalls.md)
 - [91. 术语表（Glossary）](appendix/91-glossary.md)
 - [92. 知识点地图（Concept → Chapter → Lab）](appendix/92-knowledge-map.md)
+- [93. 面试复述模板（决策树 → Lab → 断点入口）](appendix/93-interview-playbook.md)
+- [94. 生产排障清单（异常分型 → 入口 → 观察点 → 修复策略）](appendix/94-production-troubleshooting-checklist.md)
 - [99. 自测题（Self Check）](appendix/99-self-check.md)
 
 ---

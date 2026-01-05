@@ -1,0 +1,90 @@
+# 43. 容器外对象注入：AutowireCapableBeanFactory
+
+真实项目里你一定会遇到这种场景：
+
+> “这个对象不是 Spring 创建的，但我希望它能用到 Spring 的依赖注入/回调能力。”
+
+典型例子：
+
+- 某些第三方框架创建对象（非 Spring 托管）
+- 你手工 new 了对象（工具类/策略对象/回调对象）
+- 测试里构造了对象，但想复用容器的注入能力
+
+这类问题的核心是：**区分“容器管理的 bean”与“容器外对象”**。
+
+---
+
+## 1. 结论先行：注入 ≠ 生命周期托管 ≠ 代理替换
+
+对容器外对象，你能做到的事情通常分成三层：
+
+1) **注入（populate）**：把 `@Autowired/@Value` 等依赖填进去
+2) **初始化（initialize）**：执行 Aware、`@PostConstruct`、`afterPropertiesSet`、以及 BeanPostProcessor
+3) **销毁（destroy）**：触发 `@PreDestroy` 等销毁回调
+
+在 Spring 里，这三层能力对外的入口就是：
+
+- `AutowireCapableBeanFactory#autowireBean`（偏“只做注入”）
+- `AutowireCapableBeanFactory#initializeBean`（触发初始化链路）
+- `AutowireCapableBeanFactory#destroyBean`（触发销毁链路）
+
+---
+
+## 2. 复现入口（可运行）
+
+本模块提供一个最小对照实验，帮助你建立直觉：
+
+- 只做 `autowireBean`：依赖可能已注入，但 `@PostConstruct` 还没跑
+- 再做 `initializeBean`：`@PostConstruct` 才会被触发（因为它依赖 BPP）
+- 最后 `destroyBean`：触发销毁回调（用于你理解“prototype 默认不销毁”的反面）
+
+入口测试：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAutowireCapableBeanFactoryLabTest.java`
+
+推荐运行命令：
+
+```bash
+mvn -pl spring-core-beans -Dtest=SpringCoreBeansAutowireCapableBeanFactoryLabTest test
+```
+
+---
+
+## 3. Debug / 断点建议
+
+你只需要记住两个入口就能覆盖大多数排障：
+
+- `AbstractAutowireCapableBeanFactory#populateBean`（注入发生点）
+- `AbstractAutowireCapableBeanFactory#initializeBean`（Aware/BPP/init callbacks 串联点）
+
+当你想对照“容器外对象”与“容器管理 bean”的差异时，再回到：
+
+- [25. 手工添加 BeanPostProcessor：顺序与 Ordered 的陷阱](../part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md)
+- [05. 初始化、销毁与回调](../part-01-ioc-container/05-lifecycle-and-callbacks.md)
+
+---
+
+## 4. 常见误区
+
+1) **误区：autowireBean 之后就等同于容器管理**
+   - 实际：它只是“尽力帮你补上部分管道”，你仍要对生命周期与代理替换保持警惕。
+2) **误区：容器外对象一定不能用 @PostConstruct**
+   - 可以，但你要显式调用 initialize 链路（否则 BPP 不会触发）。
+
+---
+
+## 5. 小结与下一章预告
+
+这一章你应该能回答：
+
+- autowireBean / initializeBean / destroyBean 分别解决什么问题？
+- 为什么 `@PostConstruct` 不会在 autowireBean 之后自动发生？
+
+下一章我们补齐另一个真实项目高频点：
+
+- SpEL 与 `@Value("#{...}")` 的表达式解析链路
+
+---
+
+上一章：[42. XML → BeanDefinitionReader：定义层解析与错误分型](42-xml-bean-definition-reader.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[44. SpEL 与 @Value(\"#{...}\")：表达式解析链路](44-spel-and-value-expression.md)
+

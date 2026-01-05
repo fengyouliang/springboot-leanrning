@@ -21,7 +21,8 @@
 3. `10–11`：Boot 自动装配与排障（为什么有/为什么没有）
 4. `12–17`：容器内部机制（顺序/短路/early reference/回调顺序）
 5. `18–37`：边界与高级语义（lazy/dependsOn/resolvable/alias/FactoryBean/代理/value/merged/转换/泛型）
-6. `90/99`：坑点复盘与自测
+6. `40–45`：AOT/真实世界补齐（RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）
+7. `90/99`：坑点复盘与自测
 
 ---
 
@@ -82,6 +83,36 @@
 - 章节：`36` 类型转换（BeanWrapper/ConversionService）
 - Lab：`SpringCoreBeansTypeConversionLabTest`
 
+### 2.9 AOT/Native：RuntimeHints（构建期契约）
+
+- 章节：`40` AOT/Native 总览 + `41` RuntimeHints 入门
+- Labs：
+  - `SpringCoreBeansAotRuntimeHintsLabTest`
+
+### 2.10 定义层失败：BeanDefinitionStoreException（XML/资源/解析）
+
+- 章节：
+  - `42` XML → BeanDefinitionReader（定义层解析与错误分型）
+  - `11` 调试与可观察性（异常分型与断点入口）
+- Labs：
+  - `SpringCoreBeansXmlBeanDefinitionReaderLabTest`
+  - `SpringCoreBeansExceptionNavigationLabTest`（invalid XML 示例）
+
+### 2.11 容器外对象注入与生命周期托管（AutowireCapableBeanFactory）
+
+- 章节：`43` 容器外对象注入：AutowireCapableBeanFactory
+- Lab：`SpringCoreBeansAutowireCapableBeanFactoryLabTest`
+
+### 2.12 SpEL：`@Value("#{...}")` 的表达式解析链路
+
+- 章节：`44` SpEL 与 `@Value("#{...}")`
+- Lab：`SpringCoreBeansSpelValueLabTest`
+
+### 2.13 自定义 Qualifier（meta-annotation）与候选收敛
+
+- 章节：`45` 自定义 Qualifier：meta-annotation 与候选收敛
+- Lab：`SpringCoreBeansCustomQualifierLabTest`
+
 ---
 
 ## 3) 一页纸：核心概念到章节的映射
@@ -96,7 +127,12 @@
 - FactoryBean（product vs factory/边界）→ `08`、`23`、`29`
 - 值解析与类型转换（@Value/ConversionService）→ `34`、`36`
 - 泛型匹配（ResolvableType/代理丢失信息）→ `37`
+- AOT/Native（构建期契约：RuntimeHints）→ `40`、`41`
+- 定义层输入（XML → BeanDefinitionReader）→ `42`
+- 容器外对象（AutowireCapableBeanFactory）→ `43`
+- SpEL（`@Value("#{...}")`）→ `44`
+- 自定义限定符（meta-annotation Qualifier）→ `45`
 
 ---
 
-上一章：[91. 术语表（Glossary）](91-glossary.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[99. 自测题：你是否真的理解了？](99-self-check.md)
+上一章：[91. 术语表（Glossary）](91-glossary.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[93. 面试复述模板（决策树 → Lab → 断点入口）](93-interview-playbook.md)
