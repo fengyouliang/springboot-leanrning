@@ -8,7 +8,7 @@
 
 - **Responsibility:** 提供 Bean 机制的系统文档与可运行 Labs/Exercises，用于建立源码级心智模型与排障能力。
 - **Docs Reading:** 推荐从 `spring-core-beans/docs/README.md` 开始（书本目录 + Part 划分）；主线可按 Part 顺读，每章顶部提供“上一章｜目录｜下一章”导航，降低章节切换成本。
-- **Highlights:** 在补齐类型转换/泛型匹配章节与 Labs 闭环的基础上，进一步统一 docs 的“上一章｜目录｜下一章”导航与“复现入口（可运行）”块；新增 JSR-330 `@Inject`/`Provider<T>` 对照 Lab，并增强 testsupport dumper 让排障输出更结构化；补齐 3 类易翻车边界机制 Labs（编程式注册差异 / allowRawInjectionDespiteWrapping / prototype 销毁语义），并将入口落位到 docs/04、docs/05、docs/16、docs/25。
+- **Highlights:** 在补齐类型转换/泛型匹配章节与 Labs 闭环的基础上，进一步统一 docs 的“上一章｜目录｜下一章”导航与“复现入口（可运行）”块；新增 JSR-330 `@Inject`/`Provider<T>` 对照 Lab，并增强 testsupport dumper 让排障输出更结构化；补齐 3 类易翻车边界机制 Labs（编程式注册差异 / allowRawInjectionDespiteWrapping / prototype 销毁语义），并将入口落位到 docs/04、docs/05、docs/16、docs/25；新增 Part 05（AOT/RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）与对应 Labs，并新增面试复述模板与生产排障清单用于体系化复盘。
 - **Status:** 🚧In Development
 - **Last Updated:** 2026-01-05
 
@@ -20,6 +20,7 @@
 - `spring-core-beans/docs/part-02-boot-autoconfig/**` ⇔ `src/test/java/.../part02_boot_autoconfig/**`
 - `spring-core-beans/docs/part-03-container-internals/**` ⇔ `src/test/java/.../part03_container_internals/**`
 - `spring-core-beans/docs/part-04-wiring-and-boundaries/**` ⇔ `src/test/java/.../part04_wiring_and_boundaries/**`
+- `spring-core-beans/docs/part-05-aot-and-real-world/**` ⇔ `src/test/java/.../part05_aot_and_real_world/**`
 - `spring-core-beans/docs/appendix/**` ⇔ `src/test/java/.../appendix/**`
 - 跨 Part 的测试支撑：`src/test/java/.../testsupport/**`
 
@@ -62,6 +63,26 @@
   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPostProcessorOrderingLabTest.java`
   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProgrammaticBeanPostProcessorLabTest.java`
 
+#### Scenario: 能解释 AOT/Native 约束，并把 RuntimeHints 变成可断言结论
+- 能说清：AOT/Native 的关键是“构建期契约”，RuntimeHints 用于声明反射/代理/资源需求
+- 能用 JVM 单测验证 hints 的存在性（不必构建 native image）
+- 对应可复现闭环入口：
+  - `spring-core-beans/docs/part-05-aot-and-real-world/40-aot-and-native-overview.md`
+  - `spring-core-beans/docs/part-05-aot-and-real-world/41-runtimehints-basics.md`
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAotRuntimeHintsLabTest.java`
+
+#### Scenario: 能补齐“真实世界高频但易忽略”的机制（XML/容器外对象/SpEL/自定义 Qualifier）
+- 能把 XML 输入归一为 BeanDefinition（定义层分型），并给出断点入口
+- 能解释容器外对象的注入/初始化/销毁三段能力与边界（AutowireCapableBeanFactory）
+- 能解释 `@Value("#{...}")` 的 SpEL 链路（与 `${...}` 占位符的职责边界）
+- 能用自定义 Qualifier（meta-annotation）把候选收敛规则提升为业务语义
+- 对应可复现闭环入口：
+  - `spring-core-beans/docs/part-05-aot-and-real-world/42-xml-bean-definition-reader.md`
+  - `spring-core-beans/docs/part-05-aot-and-real-world/43-autowirecapablebeanfactory-external-objects.md`
+  - `spring-core-beans/docs/part-05-aot-and-real-world/44-spel-and-value-expression.md`
+  - `spring-core-beans/docs/part-05-aot-and-real-world/45-custom-qualifier-meta-annotation.md`
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/*LabTest.java`
+
 ## Dependencies
 
 - 无跨模块硬依赖（该模块是 Spring Core 学习底座）
@@ -88,3 +109,4 @@
 - [202601051050_spring_core_beans_deepen](../../history/2026-01/202601051050_spring_core_beans_deepen/) - ✅ 已执行：补齐 docs 目录页索引与跳读地图，新增类型转换/泛型匹配章节，并新增 component-scan/profile/optional injection/type conversion Labs 形成可复现实验闭环
 - [202601051252_spring_core_beans_finish_all_tasks](../../history/2026-01/202601051252_spring_core_beans_finish_all_tasks/) - ✅ 已执行：统一 docs 全章导航与复现入口块，补齐 JSR-330 注入对照 Lab，并增强 testsupport dump 工具提升可观察性
 - [202601051339_spring_core_beans_edge_case_labs](../../history/2026-01/202601051339_spring_core_beans_edge_case_labs/) - ✅ 已执行：补齐编程式注册差异 / raw injection despite wrapping / prototype 销毁语义三类边界机制，并同步 docs 入口与断点锚点
+- [202601051507_spring_core_beans_aot_playbook](../../history/2026-01/202601051507_spring_core_beans_aot_playbook/) - ✅ 已执行：新增 Part 05（AOT/RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）与对应 Labs，并新增面试复述模板/生产排障清单用于体系化复盘

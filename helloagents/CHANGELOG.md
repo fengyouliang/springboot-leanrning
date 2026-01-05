@@ -23,6 +23,7 @@
 - `spring-core-beans`：新增 docs/36（类型转换链路：BeanWrapper/ConversionService）与 docs/37（泛型匹配注入坑：ResolvableType/代理/实例注册），新增 appendix/91（术语表）与 appendix/92（知识点跳读地图），并新增 component-scan/profile/optional injection/type conversion Labs 形成文档→实验闭环；同时修复 docs/README.md 排版并补齐快速定位与章节↔Lab 对照表。
 - `spring-core-beans`：统一 docs 全章“上一章｜目录｜下一章”导航与“复现入口（可运行）”块，新增 JSR-330 `@Inject`/`Provider<T>` 对照 Lab（补齐 `jakarta.inject-api` 测试依赖），并增强 testsupport dumper 输出（候选集合/依赖边/来源定位）以提升排障可观察性。
 - `spring-core-beans`：补齐 3 类易翻车边界机制：编程式注册差异（定义层 vs 实例层）、raw injection despite wrapping（`allowRawInjectionDespiteWrapping` 一致性保护）、prototype 销毁语义（默认不销毁 + `destroyBean` 手动销毁）；并在 docs/04、docs/05、docs/16、docs/25 增补复现入口与断点锚点。
+- `spring-core-beans`：新增 Part 05（AOT/RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）与对应 Labs，并新增 Appendix（面试复述模板 / 生产排障清单），同步更新 docs/README、模块 README、知识点地图与术语表索引。
 - `scripts`：新增 Markdown 相对链接存在性检查脚本（用于文档 0 断链自检）。
 - 深化 `spring-core-aop` 核心章节：新增 docs/00（深挖指南）与 docs/99（自测题），扩写 docs/01-06、docs/90（常见坑），补齐源码断点入口/观察点与排障闭环。
 - 二次深化 `spring-core-aop`：新增 docs/07-09（AutoProxyCreator 主线 / pointcut 表达式系统 / 多代理叠加与顺序），并新增 4 组 Labs 覆盖 BPP 主线、proceed 嵌套、this vs target、以及多 advisor vs 套娃 proxy 的可断言闭环；同时在 `spring-core-beans` 的 BPP/代理/顺序章节补齐 AutoProxyCreator 承接与跨模块链接。

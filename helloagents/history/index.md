@@ -33,6 +33,7 @@
 | 202601051050 | spring_core_beans_deepen | Enhancement | ✅Completed | [202601051050_spring_core_beans_deepen](2026-01/202601051050_spring_core_beans_deepen/) |
 | 202601051252 | spring_core_beans_finish_all_tasks | Enhancement | ✅Completed | [202601051252_spring_core_beans_finish_all_tasks](2026-01/202601051252_spring_core_beans_finish_all_tasks/) |
 | 202601051339 | spring_core_beans_edge_case_labs | Enhancement | ✅Completed | [202601051339_spring_core_beans_edge_case_labs](2026-01/202601051339_spring_core_beans_edge_case_labs/) |
+| 202601051507 | spring_core_beans_aot_playbook | Enhancement | ✅Completed | [202601051507_spring_core_beans_aot_playbook](2026-01/202601051507_spring_core_beans_aot_playbook/) |
 
 ---
 
@@ -65,3 +66,4 @@
 - [202601051050_spring_core_beans_deepen](2026-01/202601051050_spring_core_beans_deepen/) - spring-core-beans：补齐 docs 目录页索引与跳读地图，新增类型转换/泛型匹配章节，并新增 component-scan/profile/optional injection/type conversion Labs 形成可复现实验闭环
 - [202601051252_spring_core_beans_finish_all_tasks](2026-01/202601051252_spring_core_beans_finish_all_tasks/) - spring-core-beans：统一 docs 全章导航与复现入口块，补齐 JSR-330 注入对照 Lab，并增强 testsupport dump 工具提升可观察性
 - [202601051339_spring_core_beans_edge_case_labs](2026-01/202601051339_spring_core_beans_edge_case_labs/) - spring-core-beans：补齐边界机制 Labs（编程式注册差异 / raw injection despite wrapping / prototype 销毁语义）并同步 docs 入口
+- [202601051507_spring_core_beans_aot_playbook](2026-01/202601051507_spring_core_beans_aot_playbook/) - spring-core-beans：新增 Part 05（AOT/RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）+ 面试复述模板/生产排障清单 + 对应 Labs
