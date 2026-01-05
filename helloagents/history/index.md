@@ -30,6 +30,9 @@
 | 202601041013 | spring-core-beans-src-part-naming | Refactor | ✅Completed | [202601041013_spring-core-beans-src-part-naming](2026-01/202601041013_spring-core-beans-src-part-naming/) |
 | 202601041046 | spring-core-part-structure-sync | Refactor | ✅Completed | [202601041046_spring-core-part-structure-sync](2026-01/202601041046_spring-core-part-structure-sync/) |
 | 202601041358 | springboot-part-structure-sync | Refactor | ✅Completed | [202601041358_springboot-part-structure-sync](2026-01/202601041358_springboot-part-structure-sync/) |
+| 202601051050 | spring_core_beans_deepen | Enhancement | ✅Completed | [202601051050_spring_core_beans_deepen](2026-01/202601051050_spring_core_beans_deepen/) |
+| 202601051252 | spring_core_beans_finish_all_tasks | Enhancement | ✅Completed | [202601051252_spring_core_beans_finish_all_tasks](2026-01/202601051252_spring_core_beans_finish_all_tasks/) |
+| 202601051339 | spring_core_beans_edge_case_labs | Enhancement | ✅Completed | [202601051339_spring_core_beans_edge_case_labs](2026-01/202601051339_spring_core_beans_edge_case_labs/) |
 
 ---
 
@@ -59,3 +62,6 @@
 - [202601041013_spring-core-beans-src-part-naming](2026-01/202601041013_spring-core-beans-src-part-naming/) - spring-core-beans：将分组目录命名语义化（partXX → partXX_<topic>），进一步对齐 docs Part
 - [202601041046_spring-core-part-structure-sync](2026-01/202601041046_spring-core-part-structure-sync/) - 将 spring-core-beans 的 Part 结构（docs + src/main + src/test）同步到其他 spring-core-* 模块，并修复跨模块引用与路径一致性问题
 - [202601041358_springboot-part-structure-sync](2026-01/202601041358_springboot-part-structure-sync/) - 将 Part 结构（docs + src/test + src/main 最小分组）推广到全部 springboot-* 模块，并同步修复 README/docs 引用与路径一致性问题
+- [202601051050_spring_core_beans_deepen](2026-01/202601051050_spring_core_beans_deepen/) - spring-core-beans：补齐 docs 目录页索引与跳读地图，新增类型转换/泛型匹配章节，并新增 component-scan/profile/optional injection/type conversion Labs 形成可复现实验闭环
+- [202601051252_spring_core_beans_finish_all_tasks](2026-01/202601051252_spring_core_beans_finish_all_tasks/) - spring-core-beans：统一 docs 全章导航与复现入口块，补齐 JSR-330 注入对照 Lab，并增强 testsupport dump 工具提升可观察性
+- [202601051339_spring_core_beans_edge_case_labs](2026-01/202601051339_spring_core_beans_edge_case_labs/) - spring-core-beans：补齐边界机制 Labs（编程式注册差异 / raw injection despite wrapping / prototype 销毁语义）并同步 docs 入口
