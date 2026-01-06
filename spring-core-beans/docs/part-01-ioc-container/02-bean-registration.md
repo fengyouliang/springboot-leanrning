@@ -93,14 +93,73 @@ class AppConfig {}
 
 ### 4.2 import `ImportSelector`（用代码决定“导入哪些配置”）
 
-`ImportSelector` 的任务是：返回一组要导入的“配置类全限定名”。
+`ImportSelector` 的任务是：**在配置类解析阶段**返回一组要导入的“配置类全限定名”，让 Spring 把这些配置类也纳入同一条解析/注册主线。
 
-典型用途：
+#### 4.2.1 为什么很多初学者看完还是“不知道怎么用/也不知道它在干什么”
 
-- 做 feature toggle（根据条件导入不同实现）
-- 做“按需装配”的基础设施（框架、starter 常见）
+站在初学者视角，`ImportSelector` 容易“读懂一句话，但仍不会用”，通常是因为下面这些认知断层：
 
-> 你不需要记接口方法签名，只要记住：它发生在配置解析阶段，用来“决定导入列表”。
+1) **你以为它“注册 Bean”，但它真正返回的是“配置类名”**  
+   它不直接往容器里塞一个 bean；它返回“下一步要解析的配置来源”。  
+   后面真正产出 `BeanDefinition` 的，仍然是配置类解析器（把返回的配置类继续解析）。
+
+2) **你以为它是运行时机制，但它发生在“定义层（解析阶段）”**  
+   `ImportSelector` 的执行时机很早，早到还没有进入“实例化 Bean”的主线。  
+   所以你用它的时候，心智模型应该是：**它改变的是“未来将有哪些 BeanDefinition”，不是“现有 Bean 的行为”**。
+
+3) **真实项目里它常常被 `@EnableXxx`/starter 包起来，你根本看不到它**  
+   你写的是 `@EnableSomething`，但真正决定导入列表的是它背后的 selector（Boot 自动装配就是一个大号版本：DeferredImportSelector）。
+
+4) **缺少一个“最小闭环”会让人完全抓不住**  
+   对初学者来说，重要的不是“接口名”，而是：放在哪、怎么触发、返回什么、跑完看到什么现象、怎么下断点证明。
+
+#### 4.2.2 最小可运行写法（你可以把它当成“可控版自动装配”）
+
+最小闭环通常由 4 个部件组成：
+
+- 一个 `@EnableXxx` 注解（用 `@Import(YourSelector.class)` 把 selector 挂上去）
+- 一个 `ImportSelector`（读取注解属性/环境属性，返回配置类名数组）
+- 两个（或多个）候选配置类（分别提供不同 Bean）
+- 一个可运行入口（Lab/Test）
+
+本仓库已经把这 4 件套做成了可运行的 Lab：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportLabTest.java`
+  - `importSelectorChoosesConfigurationBasedOnEnvironmentProperty()`
+
+你可以先把它当成“读得懂的答案”，再回过头写 Exercise（见本章第 8 节）。
+
+#### 4.2.3 原理：把现象放回容器主线（它发生在哪个阶段？产物是什么？）
+
+把它放回 refresh 主线，你会更容易把“魔法入口”还原成确定步骤：
+
+1) `ConfigurationClassPostProcessor`（本质是一个 BDRPP）在 refresh 早期运行  
+2) 它驱动 `ConfigurationClassParser` 解析配置类  
+3) 解析到 `@Import` 时，会进入 import 处理分支  
+4) 如果 import 的是 `ImportSelector`：  
+   - Spring 实例化 selector（并回填 `Environment`/`ResourceLoader` 等 *Aware* 依赖）  
+   - 调用 `selectImports(...)` 得到“要导入的配置类名列表”  
+5) 返回的配置类会被继续解析，最终把它们的 `@Bean`/`@Import` 等注册为 `BeanDefinition`
+
+你会发现：`ImportSelector` 的“产物”不是 bean，而是**“更多配置输入”**。它改变的是“定义层的输入集合”，而不是“实例层的行为”。
+
+#### 4.2.4 怎么实现的：源码主线 + 断点入口 + 观察点（建议从这里下手）
+
+建议断点（从入口到闭环）：
+
+- `ConfigurationClassPostProcessor#processConfigBeanDefinitions`（配置解析总入口）
+- `ConfigurationClassParser#processImports`（处理 `@Import` 的主分支）
+- 你的 `ImportSelector#selectImports`（观察返回的 class names）
+- `ConfigurationClassBeanDefinitionReader#loadBeanDefinitionsForConfigurationClass`（把解析模型落到 BeanDefinitionRegistry）
+- `DefaultListableBeanFactory#registerBeanDefinition`（最终入库）
+
+建议观察点（你下断点时应该盯住这些变量）：
+
+- `importingClassMetadata.getClassName()`：是谁触发了 import（哪个 `@EnableXxx`）
+- `importingClassMetadata.getAnnotationAttributes(...)`：注解属性是否读取正确
+- `environment.getProperty(...)`：条件输入是否符合预期（missing/false/true 的三态尤其重要）
+- `selectImports(...)` 的返回数组：导入列表是否命中你预期的分支
+- 最终容器里是否出现目标 bean：`context.containsBean("...")` / `getBean(...)`
 
 ### 4.3 import `ImportBeanDefinitionRegistrar`（最强，也最容易滥用）
 
@@ -154,6 +213,11 @@ class AppConfig {}
   - `importSelectorChoosesConfigurationBasedOnEnvironmentProperty()`：用环境属性驱动 `ImportSelector` 选择不同配置
   - `importBeanDefinitionRegistrarCanRegisterBeanDefinitionProgrammatically()`：用 registrar 直接注册 `BeanDefinition` 并断言构造参数
 
+本章对应的 Exercise / Solution（可对照练习与答案）：
+
+- Exercise（默认 `@Disabled`）：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportExerciseTest.java`
+- Solution（默认参与回归）：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportExerciseSolutionTest.java`
+
 运行方式：
 
 ```bash
@@ -168,6 +232,10 @@ mvn -pl spring-core-beans test
 
 1) 用 `@Import(SomeConfig.class)` 引入一个额外 `@Bean`
 2) 写一个最小 `ImportSelector`，根据某个系统属性决定导入 `UpperCaseTextFormatter` 还是 `LowerCaseTextFormatter`
+
+如果你不确定“练习题该怎么写才算闭环”，可以先对照本仓库的 Solution：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportExerciseSolutionTest.java`
 
 你会直观感受到：“注册入口决定了最终有哪些 BeanDefinition”，而不是“运行时魔法注入”。
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportLabTest.java`

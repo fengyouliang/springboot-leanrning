@@ -143,6 +143,17 @@
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`
 推荐断点：`AbstractBeanFactory#doGetBean`、`DefaultSingletonBeanRegistry#getSingleton`、`DefaultListableBeanFactory#doResolveDependency`
 
+## 练习与参考答案（Exercise ↔ Solution）
+
+如果你想把“现象 → 原理 → 断点 → 代码改造”做成闭环，可以对照下面两份测试：
+
+- Exercise（默认 `@Disabled`，自己动手改造）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansExerciseTest.java`
+    - `exercise_makeDirectPrototypeConsumerUseFreshPrototypeEachCall()`（让 direct consumer 每次调用都拿到新 prototype）
+    - `exercise_changePrototypeScopeAndUpdateExpectations()`（把 prototype 改为 singleton，观察 provider 行为变化）
+- Solution（默认参与回归，可直接对照答案）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansExerciseSolutionTest.java`
+
 ## 面试常问（prototype 注入陷阱）
 
 - 常问：`prototype` 的真实语义是什么？为什么“prototype 注入 singleton”会像单例？
