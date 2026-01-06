@@ -23,7 +23,7 @@
 3. Part 02：Spring Boot 自动装配与可观察性（把“为什么有这个 bean/为什么没生效”讲清楚）
 4. Part 03：容器内部机制与扩展点（bootstrap/排序/短路/early reference）
 5. Part 04：装配语义与边界（lazy/dependsOn/resolvable/层级/命名/FactoryBean/覆盖/手工注册/回调钩子/注入阶段/代理/值解析/merged definition）
-6. Part 05：AOT/真实世界补齐（RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）
+6. Part 05：AOT/真实世界补齐（RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier/XML namespace 扩展/其它 Reader/方法注入/内置 FactoryBean/值解析）
 7. Appendix：常见坑与自测题（用于复盘与巩固）
 
 ---
@@ -48,8 +48,14 @@
   - Lab：`SpringCoreBeansGenericTypeMatchingPitfallsLabTest`
 - `BeanDefinitionStoreException`（例如 invalid XML）→ [42](part-05-aot-and-real-world/42-xml-bean-definition-reader.md) / [11](part-02-boot-autoconfig/11-debugging-and-observability.md)
   - Lab：`SpringCoreBeansXmlBeanDefinitionReaderLabTest` / `SpringCoreBeansExceptionNavigationLabTest`
+- 自定义 XML namespace / `<tx:...>` 这类“自定义元素”怎么注册 BeanDefinition → [46](part-05-aot-and-real-world/46-xml-namespace-extension.md) / [42](part-05-aot-and-real-world/42-xml-bean-definition-reader.md)
+  - Lab：`SpringCoreBeansXmlNamespaceExtensionLabTest`
 - `@Value("#{...}")`（SpEL）注入不符合预期 → [44](part-05-aot-and-real-world/44-spel-and-value-expression.md) / [36](part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md)
   - Lab：`SpringCoreBeansSpelValueLabTest`
+- product vs factory（为什么 `getBean("x")` 不是你以为的那个对象？）→ [49](part-05-aot-and-real-world/49-built-in-factorybeans-gallery.md) / [08](part-01-ioc-container/08-factorybean.md)
+  - Lab：`SpringCoreBeansBuiltInFactoryBeansLabTest`
+- String/引用/集合到底在哪一步“变成对象”（值解析与类型转换想下断点）→ [50](part-05-aot-and-real-world/50-property-editor-and-value-resolution.md) / [36](part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md)
+  - Lab：`SpringCoreBeansPropertyEditorLabTest` / `SpringCoreBeansBeanDefinitionValueResolutionLabTest`
 
 更完整的跳读地图见： [92. 知识点地图](appendix/92-knowledge-map.md)
 
@@ -72,6 +78,28 @@
 | [37](part-04-wiring-and-boundaries/37-generic-type-matching-pitfalls.md) | ResolvableType 泛型匹配边界 | `SpringCoreBeansGenericTypeMatchingPitfallsLabTest` |
 | [41](part-05-aot-and-real-world/41-runtimehints-basics.md) | AOT/Native 的“构建期契约”如何表达与验证 | `SpringCoreBeansAotRuntimeHintsLabTest` |
 | [42](part-05-aot-and-real-world/42-xml-bean-definition-reader.md) | XML → BeanDefinitionReader：定义层解析与错误分型 | `SpringCoreBeansXmlBeanDefinitionReaderLabTest` |
+| [46](part-05-aot-and-real-world/46-xml-namespace-extension.md) | XML 自定义元素如何注册 BeanDefinition（namespace 扩展） | `SpringCoreBeansXmlNamespaceExtensionLabTest` |
+| [47](part-05-aot-and-real-world/47-beandefinitionreader-other-inputs-properties-groovy.md) | BeanDefinitionReader 的其它输入源（Properties/Groovy） | `SpringCoreBeansPropertiesBeanDefinitionReaderLabTest` / `SpringCoreBeansGroovyBeanDefinitionReaderLabTest` |
+| [48](part-05-aot-and-real-world/48-method-injection-replaced-method.md) | 方法注入：replaced-method 的实例化策略分支 | `SpringCoreBeansReplacedMethodLabTest` |
+| [49](part-05-aot-and-real-world/49-built-in-factorybeans-gallery.md) | 内置 FactoryBean：product/factory 与 & 前缀 | `SpringCoreBeansBuiltInFactoryBeansLabTest` |
+| [50](part-05-aot-and-real-world/50-property-editor-and-value-resolution.md) | PropertyEditor 与值解析主线（BeanDefinitionValueResolver） | `SpringCoreBeansPropertyEditorLabTest` / `SpringCoreBeansBeanDefinitionValueResolutionLabTest` |
+
+### Exercise ↔ Solution（练习与答案）对照表
+
+> 设计原则（保证教学闭环 + 不破坏回归）：
+> - Exercise：默认 `@Disabled`（不参与回归），读者自行移除 `@Disabled` 完成练习
+> - Solution：默认参与回归（持续可验证），提供参考实现与断言闭环
+
+| Part | Exercise（默认跳过） | Solution（默认运行） | 关联章节（建议从 docs 读起） |
+| --- | --- | --- | --- |
+| Part 00 | `src/test/java/.../part00_guide/SpringCoreBeansExerciseTest.java` | `src/test/java/.../part00_guide/SpringCoreBeansExerciseSolutionTest.java` | [00](part-00-guide/00-deep-dive-guide.md) / [03](part-01-ioc-container/03-dependency-injection-resolution.md) / [04](part-01-ioc-container/04-scope-and-prototype.md) |
+| Part 01 | `src/test/java/.../part01_ioc_container/SpringCoreBeansImportExerciseTest.java` | `src/test/java/.../part01_ioc_container/SpringCoreBeansImportExerciseSolutionTest.java` | [02](part-01-ioc-container/02-bean-registration.md) |
+| Part 02 | `src/test/java/.../part02_boot_autoconfig/SpringCoreBeansAutoConfigurationExerciseTest.java` | `src/test/java/.../part02_boot_autoconfig/SpringCoreBeansAutoConfigurationExerciseSolutionTest.java` | [10](part-02-boot-autoconfig/10-spring-boot-auto-configuration.md) / [11](part-02-boot-autoconfig/11-debugging-and-observability.md) |
+| Part 03 | `src/test/java/.../part03_container_internals/SpringCoreBeansContainerInternalsExerciseTest.java` | `src/test/java/.../part03_container_internals/SpringCoreBeansContainerInternalsExerciseSolutionTest.java` | [14](part-03-container-internals/14-post-processor-ordering.md) / [16](part-03-container-internals/16-early-reference-and-circular.md) / Part 04 的边界章节（27–31） |
+
+运行建议：
+- 先跑回归（包含 Solution）：`mvn -pl spring-core-beans test`
+- 再做练习：打开对应 `*ExerciseTest.java`，移除某个方法上的 `@Disabled` 单题运行
 
 ---
 
@@ -138,6 +166,11 @@
 - [43. 容器外对象注入：AutowireCapableBeanFactory](part-05-aot-and-real-world/43-autowirecapablebeanfactory-external-objects.md)
 - [44. SpEL 与 `@Value("#{...}")`：表达式解析链路](part-05-aot-and-real-world/44-spel-and-value-expression.md)
 - [45. 自定义 Qualifier：meta-annotation 与候选收敛](part-05-aot-and-real-world/45-custom-qualifier-meta-annotation.md)
+- [46. XML namespace 扩展：NamespaceHandler / Parser / spring.handlers](part-05-aot-and-real-world/46-xml-namespace-extension.md)
+- [47. BeanDefinitionReader：除了注解与 XML，还有 Properties / Groovy](part-05-aot-and-real-world/47-beandefinitionreader-other-inputs-properties-groovy.md)
+- [48. 方法注入：replaced-method / MethodReplacer（实例化策略分支）](part-05-aot-and-real-world/48-method-injection-replaced-method.md)
+- [49. 内置 FactoryBean 图鉴：MethodInvoking / ServiceLocator / & 前缀](part-05-aot-and-real-world/49-built-in-factorybeans-gallery.md)
+- [50. PropertyEditor 与 BeanDefinition 值解析：值从定义层落到对象](part-05-aot-and-real-world/50-property-editor-and-value-resolution.md)
 
 ### Appendix：复盘与自测
 

@@ -34,6 +34,8 @@
 | 202601051252 | spring_core_beans_finish_all_tasks | Enhancement | ✅Completed | [202601051252_spring_core_beans_finish_all_tasks](2026-01/202601051252_spring_core_beans_finish_all_tasks/) |
 | 202601051339 | spring_core_beans_edge_case_labs | Enhancement | ✅Completed | [202601051339_spring_core_beans_edge_case_labs](2026-01/202601051339_spring_core_beans_edge_case_labs/) |
 | 202601051507 | spring_core_beans_aot_playbook | Enhancement | ✅Completed | [202601051507_spring_core_beans_aot_playbook](2026-01/202601051507_spring_core_beans_aot_playbook/) |
+| 202601052057 | spring_core_beans_teaching_upgrade | Enhancement | ✅Completed | [202601052057_spring_core_beans_teaching_upgrade](2026-01/202601052057_spring_core_beans_teaching_upgrade/) |
+| 202601052200 | spring_core_beans_beans_package_full_coverage | Enhancement | ✅Completed | [202601052200_spring_core_beans_beans_package_full_coverage](2026-01/202601052200_spring_core_beans_beans_package_full_coverage/) |
 
 ---
 
@@ -67,3 +69,5 @@
 - [202601051252_spring_core_beans_finish_all_tasks](2026-01/202601051252_spring_core_beans_finish_all_tasks/) - spring-core-beans：统一 docs 全章导航与复现入口块，补齐 JSR-330 注入对照 Lab，并增强 testsupport dump 工具提升可观察性
 - [202601051339_spring_core_beans_edge_case_labs](2026-01/202601051339_spring_core_beans_edge_case_labs/) - spring-core-beans：补齐边界机制 Labs（编程式注册差异 / raw injection despite wrapping / prototype 销毁语义）并同步 docs 入口
 - [202601051507_spring_core_beans_aot_playbook](2026-01/202601051507_spring_core_beans_aot_playbook/) - spring-core-beans：新增 Part 05（AOT/RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）+ 面试复述模板/生产排障清单 + 对应 Labs
+- [202601052057_spring_core_beans_teaching_upgrade](2026-01/202601052057_spring_core_beans_teaching_upgrade/) - spring-core-beans：为 Exercises 补齐对应 Solution（默认参与回归）+ docs/README 收敛章节↔Lab↔Exercise↔Solution 对照表 + 关键章节补强（ImportSelector/Part05 断点观察点）
+- [202601052200_spring_core_beans_beans_package_full_coverage](2026-01/202601052200_spring_core_beans_beans_package_full_coverage/) - spring-core-beans：补齐 Spring Framework `spring-beans` 包 5 组机制闭环（docs 46–50 + Labs）

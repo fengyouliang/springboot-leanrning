@@ -45,17 +45,26 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansXmlBeanDefinitionReaderLabTest t
 
 ---
 
-## 3. Debug / 断点建议
+## 3. 源码 / 断点建议（把“看 XML”变成“走链路”）
 
-把 XML 问题迅速收敛到 2 个入口：
+把 XML 问题迅速收敛到 3 个层次（入口 → 解析 → 入库）：
 
-- `XmlBeanDefinitionReader#loadBeanDefinitions`（读/解析/注册主入口）
-- `DefaultListableBeanFactory#registerBeanDefinition`（定义注册入口：冲突/覆盖/合法性检查）
+1) 入口：`XmlBeanDefinitionReader#loadBeanDefinitions`（读资源 + 进入 XML 解析）
+2) 解析：`DefaultBeanDefinitionDocumentReader#registerBeanDefinitions`（把 Document 变成一组 BeanDefinition）
+   - 进一步深挖：`BeanDefinitionParserDelegate#parseBeanDefinitionElement`
+3) 入库：`DefaultListableBeanFactory#registerBeanDefinition`（定义注册入口：冲突/覆盖/合法性检查）
 
 当你需要把错误放回 refresh 主线理解时：
 
 - `AbstractApplicationContext#refresh`
 - `PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`
+
+建议观察点（下断点时优先盯这些变量）：
+
+- `Resource` / `resourceDescription`：到底读的是哪一个 XML（路径/类路径资源/文件资源）
+- `beanName` / `beanClassName`：解析到的定义是否符合预期
+- `BeanDefinition` 的关键信息：scope、propertyValues、constructorArgumentValues
+- 异常分型：是“XML 语法/命名空间解析失败”，还是“注册阶段合法性检查失败”
 
 ---
 
@@ -82,4 +91,3 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansXmlBeanDefinitionReaderLabTest t
 ---
 
 上一章：[41. RuntimeHints 入门：把构建期契约跑通](41-runtimehints-basics.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[43. 容器外对象注入：AutowireCapableBeanFactory](43-autowirecapablebeanfactory-external-objects.md)
-

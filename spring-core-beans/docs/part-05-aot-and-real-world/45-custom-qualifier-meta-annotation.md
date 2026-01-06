@@ -50,7 +50,7 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansCustomQualifierLabTest test
 
 ---
 
-## 3. Debug / 断点建议
+## 3. 源码 / 断点建议（把“为什么注入的是它”讲成可复述算法）
 
 只需要 2 个断点，你就能在真实项目里解释“为什么注入的是它”：
 
@@ -60,6 +60,12 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansCustomQualifierLabTest test
 如果你要解释最终选中规则：
 
 - `DefaultListableBeanFactory#determineAutowireCandidate`
+
+建议观察点（你下断点时应该盯住这些变量）：
+
+- `DependencyDescriptor`：注入点的类型信息与注解（`@Qualifier/@Cn/...`）
+- `candidates`：当前候选集合里有哪些 beanName（以及它们的定义来源）
+- Qualifier 匹配细节：是 “meta-annotation 命中” 还是 “value/name 命中”
 
 ---
 
@@ -79,11 +85,10 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansCustomQualifierLabTest test
 - 自定义 Qualifier 是如何参与候选收敛的？
 - 你会在哪两个方法下断点证明“候选集合如何被过滤”？
 
-Part 05 到这里结束。下一步进入复盘与自测：
+下一章开始进入“真实世界里经常遇到，但很多人没系统学过”的内容：
 
-- [90. 常见坑清单（建议反复对照）](../appendix/90-common-pitfalls.md)
+- XML 生态的扩展机制：自定义 namespace / `spring.handlers` / `spring.schemas`
 
 ---
 
-上一章：[44. SpEL 与 @Value(\"#{...}\")：表达式解析链路](44-spel-and-value-expression.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[90. 常见坑清单（建议反复对照）](../appendix/90-common-pitfalls.md)
-
+上一章：[44. SpEL 与 @Value(\"#{...}\")：表达式解析链路](44-spel-and-value-expression.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[46. XML namespace 扩展：NamespaceHandler / Parser / spring.handlers](46-xml-namespace-extension.md)

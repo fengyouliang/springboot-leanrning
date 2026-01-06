@@ -21,7 +21,7 @@
 3. `10–11`：Boot 自动装配与排障（为什么有/为什么没有）
 4. `12–17`：容器内部机制（顺序/短路/early reference/回调顺序）
 5. `18–37`：边界与高级语义（lazy/dependsOn/resolvable/alias/FactoryBean/代理/value/merged/转换/泛型）
-6. `40–45`：AOT/真实世界补齐（RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）
+6. `40–50`：AOT/真实世界补齐（RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier/XML namespace 扩展/其它 Reader/方法注入/内置 FactoryBean/值解析）
 7. `90/99`：坑点复盘与自测
 
 ---
@@ -113,6 +113,28 @@
 - 章节：`45` 自定义 Qualifier：meta-annotation 与候选收敛
 - Lab：`SpringCoreBeansCustomQualifierLabTest`
 
+### 2.14 XML 自定义 namespace：`<tx:...>` 这类元素怎么注册 BeanDefinition？
+
+- 章节：`46` XML namespace 扩展：NamespaceHandler / Parser / spring.handlers
+- Labs：
+  - `SpringCoreBeansXmlNamespaceExtensionLabTest`
+
+### 2.15 product vs factory：为什么 `getBean("x")` 不是你以为的那个对象？
+
+- 章节：
+  - `49` 内置 FactoryBean 图鉴（`&beanName` 与典型内置 FactoryBean）
+  - `08` FactoryBean：product vs factory（基础语义）
+- Lab：`SpringCoreBeansBuiltInFactoryBeansLabTest`
+
+### 2.16 值解析与类型转换：引用/集合/字符串到底在哪一步“变成对象”？
+
+- 章节：
+  - `50` PropertyEditor 与 BeanDefinition 值解析
+  - `36` 类型转换（BeanWrapper/ConversionService/PropertyEditor 的边界）
+- Labs：
+  - `SpringCoreBeansPropertyEditorLabTest`
+  - `SpringCoreBeansBeanDefinitionValueResolutionLabTest`
+
 ---
 
 ## 3) 一页纸：核心概念到章节的映射
@@ -132,6 +154,11 @@
 - 容器外对象（AutowireCapableBeanFactory）→ `43`
 - SpEL（`@Value("#{...}")`）→ `44`
 - 自定义限定符（meta-annotation Qualifier）→ `45`
+- XML namespace 扩展（spring.handlers/schemas）→ `46`
+- BeanDefinitionReader 其它输入源（Properties/Groovy）→ `47`
+- 方法注入（replaced-method / MethodOverrides）→ `48`
+- 内置 FactoryBean（MethodInvoking/ServiceLocator/& 前缀）→ `49`
+- 值解析主线（BeanDefinitionValueResolver/PropertyEditor）→ `50`
 
 ---
 

@@ -28,6 +28,9 @@
 - `AutowireCapableBeanFactory#initializeBean`（触发初始化链路）
 - `AutowireCapableBeanFactory#destroyBean`（触发销毁链路）
 
+一个非常容易踩的点是：`initializeBean(...)` **可能返回一个“被 BPP 包装/替换后的对象”**（例如代理）。  
+因此在“容器外对象”场景里，如果你想要 AOP/代理语义，必须使用 `initializeBean` 的返回值，而不是继续拿原始对象用。
+
 ---
 
 ## 2. 复现入口（可运行）
@@ -50,12 +53,18 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansAutowireCapableBeanFactoryLabTes
 
 ---
 
-## 3. Debug / 断点建议
+## 3. 源码 / 断点建议（把“容器外对象”放回统一生命周期主线）
 
-你只需要记住两个入口就能覆盖大多数排障：
+你只需要记住两个入口就能覆盖大多数排障（注入 vs 初始化）：
 
 - `AbstractAutowireCapableBeanFactory#populateBean`（注入发生点）
 - `AbstractAutowireCapableBeanFactory#initializeBean`（Aware/BPP/init callbacks 串联点）
+
+当你要进一步解释“到底是谁在做注入/谁在触发 @PostConstruct”时，常用加深断点：
+
+- `AutowiredAnnotationBeanPostProcessor#postProcessProperties`（`@Autowired/@Value` 等注入入口）
+- `InitDestroyAnnotationBeanPostProcessor#postProcessBeforeInitialization`（`@PostConstruct` 入口之一）
+- `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`（BPP 可能在这里返回 proxy）
 
 当你想对照“容器外对象”与“容器管理 bean”的差异时，再回到：
 
@@ -87,4 +96,3 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansAutowireCapableBeanFactoryLabTes
 ---
 
 上一章：[42. XML → BeanDefinitionReader：定义层解析与错误分型](42-xml-bean-definition-reader.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[44. SpEL 与 @Value(\"#{...}\")：表达式解析链路](44-spel-and-value-expression.md)
-

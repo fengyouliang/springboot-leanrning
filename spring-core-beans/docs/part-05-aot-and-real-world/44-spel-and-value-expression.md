@@ -44,7 +44,7 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansSpelValueLabTest test
 
 ---
 
-## 3. Debug / 断点建议（从“值注入失败”到“根因”）
+## 3. 源码 / 断点建议（从“值注入失败”到“根因”）
 
 把链路分成三段打断点，排障会非常快：
 
@@ -54,7 +54,16 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansSpelValueLabTest test
    - `BeanWrapperImpl#setPropertyValue`（属性填充）
    - 或 `TypeConverter#convertIfNecessary`（注入点转换）
 
-当你需要进一步看 SpEL 的执行细节时，再扩展到表达式解析器（通常是 StandardBeanExpressionResolver）内部。
+当你需要进一步看 SpEL 的执行细节时，再扩展到表达式解析器内部：
+
+- `StandardBeanExpressionResolver#evaluate`（把 `#{...}` 交给 SpEL 计算）
+- `SpelExpression#getValue` / `ExpressionParser#parseExpression`（表达式解析与求值）
+
+建议观察点（断点时优先盯这些变量）：
+
+- 原始字符串：到底是 `"${...}"` 还是 `"#\{...\}"`（两条链路的入口信号不同）
+- `BeanExpressionContext`：SpEL 能不能访问到你期望的 bean（例如 `@beanName`）
+- 最终值类型：SpEL 计算结果是 `String` 还是 `Integer`/对象（决定后续转换是否必需）
 
 ---
 
@@ -81,4 +90,3 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansSpelValueLabTest test
 ---
 
 上一章：[43. 容器外对象注入：AutowireCapableBeanFactory](43-autowirecapablebeanfactory-external-objects.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[45. 自定义 Qualifier：meta-annotation 与候选收敛](45-custom-qualifier-meta-annotation.md)
-
