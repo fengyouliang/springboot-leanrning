@@ -4,6 +4,8 @@
 
 - 本章为索引/术语类内容，不直接提供单一 Lab 入口。
 - 建议做法：从本页跳转到对应章节后，按章节中的“复现入口（可运行）”运行对应 Test。
+- 如果你是“按 API 名称反查章节/Lab”：先看 `95`（Public API 索引），再用 `96`（Gap 清单）决定下一步补齐方向。
+- 如果你要做“更深的断点观察（不影响默认回归）”：看 `97`（Explore/Debug 用例）并用显式开关运行。
 
 这份“知识点地图”用于两类阅读方式：
 
@@ -88,6 +90,7 @@
 - 章节：`40` AOT/Native 总览 + `41` RuntimeHints 入门
 - Labs：
   - `SpringCoreBeansAotRuntimeHintsLabTest`
+  - `SpringCoreBeansAotFactoriesLabTest`（`aot.factories` / `AotServices` / AOT processors 发现入口）
 
 ### 2.10 定义层失败：BeanDefinitionStoreException（XML/资源/解析）
 
@@ -125,6 +128,7 @@
   - `49` 内置 FactoryBean 图鉴（`&beanName` 与典型内置 FactoryBean）
   - `08` FactoryBean：product vs factory（基础语义）
 - Lab：`SpringCoreBeansBuiltInFactoryBeansLabTest`
+- Lab：`SpringCoreBeansServiceLoaderFactoryBeansLabTest`（ServiceLoader* 系列内置 FactoryBean）
 
 ### 2.16 值解析与类型转换：引用/集合/字符串到底在哪一步“变成对象”？
 
@@ -134,6 +138,22 @@
 - Labs：
   - `SpringCoreBeansPropertyEditorLabTest`
   - `SpringCoreBeansBeanDefinitionValueResolutionLabTest`
+
+### 2.17 配置值“不生效/被覆盖”：Environment/PropertySource 的优先级怎么断点证明？
+
+- 章节：`38` Environment Abstraction：PropertySource / @PropertySource / 优先级与排障主线
+- Labs：
+  - `SpringCoreBeansEnvironmentPropertySourceLabTest`
+  - `SpringCoreBeansValuePlaceholderResolutionLabTest`（占位符 strict vs non-strict）
+
+### 2.18 “注解为什么不生效”：BeanFactory API 的边界与手动 bootstrap
+
+- 章节：
+  - `39` BeanFactory API 深挖：接口族谱与手动 bootstrap 的边界
+  - `12` 容器启动与基础设施处理器：为什么注解能工作
+- Labs：
+  - `SpringCoreBeansBeanFactoryApiLabTest`
+  - `SpringCoreBeansBootstrapInternalsLabTest`
 
 ---
 
@@ -159,6 +179,8 @@
 - 方法注入（replaced-method / MethodOverrides）→ `48`
 - 内置 FactoryBean（MethodInvoking/ServiceLocator/& 前缀）→ `49`
 - 值解析主线（BeanDefinitionValueResolver/PropertyEditor）→ `50`
+- Environment/PropertySource（优先级/@PropertySource/placeholder）→ `38`、`34`
+- BeanFactory API（plain vs context / 手动 bootstrap 边界）→ `39`、`12`
 
 ---
 

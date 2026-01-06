@@ -9,10 +9,11 @@
 - `FactoryBean` 不是“帮你 new 对象的工具类”，它是一个**容器级机制**：  
   容器把它当作“能生产 product 的 bean”，并且在 `getBean` 时做特殊分派。
 
-本章用 2 个最常见的内置 FactoryBean 做闭环：
+本章用 3 类常见的内置 FactoryBean 做闭环：
 
 - `MethodInvokingFactoryBean`：把“调用一个方法”变成一个 bean（product）
 - `ServiceLocatorFactoryBean`：把 `BeanFactory#getBean(...)` 包装成一个“服务定位器代理”
+- `ServiceLoader*FactoryBean`：把 Java SPI（`ServiceLoader`）的 provider 列表/loader 变成一个 bean（product）
 
 ---
 
@@ -21,11 +22,12 @@
 入口测试：
 
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansBuiltInFactoryBeansLabTest.java`
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansServiceLoaderFactoryBeansLabTest.java`
 
 推荐运行命令：
 
 ```bash
-mvn -pl spring-core-beans -Dtest=SpringCoreBeansBuiltInFactoryBeansLabTest test
+mvn -pl spring-core-beans -Dtest=SpringCoreBeansBuiltInFactoryBeansLabTest,SpringCoreBeansServiceLoaderFactoryBeansLabTest test
 ```
 
 你要观察的现象（Lab 里都有断言）：
@@ -81,6 +83,19 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansBuiltInFactoryBeansLabTest test
 - 需要“每次调用都重新拿一个 prototype”（典型：状态型对象、短生命周期对象）
 
 但是注意：这是一种 **service locator 模式**，会把依赖关系从“注入点”挪到“调用点”，可读性更差，能不用就不用。
+
+### 2.3 `ServiceLoader*FactoryBean`（把 Java SPI provider 变成 bean）
+
+这组内置 FactoryBean 面向的是 Java 标准的 SPI 机制（`ServiceLoader`）：
+
+- `ServiceLoaderFactoryBean`：product 是 `ServiceLoader<T>`（你自己决定如何迭代/选择）
+- `ServiceListFactoryBean`：product 是 `List<T>`（直接给你 provider 列表）
+- `ServiceFactoryBean`：product 是单个 `T`（通常用于“只希望有一个 provider”的场景）
+
+它的价值不在于“更好用”，而在于“你在真实项目/源码里可能会碰到它”：
+
+- 你想把“SPI provider 列表”交给 Spring 管理（生命周期/注入）
+- 或者你在排障时看到 `ServiceListFactoryBean`，需要能判断“这是 FactoryBean 还是 product”
 
 ---
 
@@ -168,4 +183,3 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansBuiltInFactoryBeansLabTest test
 ---
 
 上一章：[48. 方法注入：replaced-method / MethodReplacer（实例化策略分支）](48-method-injection-replaced-method.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[50. PropertyEditor 与 BeanDefinition 值解析：值从定义层落到对象](50-property-editor-and-value-resolution.md)
-

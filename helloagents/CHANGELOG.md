@@ -26,6 +26,8 @@
 - `spring-core-beans`：新增 Part 05（AOT/RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）与对应 Labs，并新增 Appendix（面试复述模板 / 生产排障清单），同步更新 docs/README、模块 README、知识点地图与术语表索引。
 - `spring-core-beans`：为 Exercises 补齐对应 Solution（默认参与回归），并在 docs/README 增加“章节↔Lab↔Exercise↔Solution”对照表与运行建议；同时补强 docs/02（ImportSelector 新手闭环/源码主线/断点观察点）、docs/04（练习↔答案指引）与 Part05 的 42–45（补齐“源码/断点建议”与观察点）。
 - `spring-core-beans`：补齐 Spring Framework `spring-beans` 包 5 组机制闭环：XML namespace 扩展（`spring.handlers/schemas` + `NamespaceHandler/Parser`）、Properties/Groovy `BeanDefinitionReader`、`replaced-method` 方法注入、内置 FactoryBean（`MethodInvokingFactoryBean`/`ServiceLocatorFactoryBean`/`&beanName`）、以及 PropertyEditor 与 `BeanDefinitionValueResolver` 值解析主线；新增 docs 46–50 与对应 Labs（默认参与回归），并引入 test scope `org.apache.groovy:groovy:4.0.21` 以开箱运行 Groovy Reader Lab。
+- `spring-core-beans`：补齐 Spring Framework `BeanFactory API` 与 `Environment Abstraction` 的系统化深挖闭环：新增 docs 38–39（主线/边界/误区 + 断点入口/观察点）与对应 Labs（默认参与回归），并同步更新 docs/README 与知识点地图索引入口。
+- `spring-core-beans`：面向 Spring Framework `spring-beans` 模块的 Public API 全覆盖：新增 Appendix（`95` Public API 索引 + `96` Gap 清单）用于“按类型检索/可审计”，并补齐 `META-INF/spring/aot.factories`/`AotServices` 与 `ServiceLoader*FactoryBean` 机制的 docs+Labs；新增 `97` Explore/Debug 用例与显式开关（不影响默认回归）。
 - `scripts`：新增 Markdown 相对链接存在性检查脚本（用于文档 0 断链自检）。
 - 深化 `spring-core-aop` 核心章节：新增 docs/00（深挖指南）与 docs/99（自测题），扩写 docs/01-06、docs/90（常见坑），补齐源码断点入口/观察点与排障闭环。
 - 二次深化 `spring-core-aop`：新增 docs/07-09（AutoProxyCreator 主线 / pointcut 表达式系统 / 多代理叠加与顺序），并新增 4 组 Labs 覆盖 BPP 主线、proceed 嵌套、this vs target、以及多 advisor vs 套娃 proxy 的可断言闭环；同时在 `spring-core-beans` 的 BPP/代理/顺序章节补齐 AutoProxyCreator 承接与跨模块链接。

@@ -8,9 +8,9 @@
 
 - **Responsibility:** 提供 Bean 机制的系统文档与可运行 Labs/Exercises，用于建立源码级心智模型与排障能力。
 - **Docs Reading:** 推荐从 `spring-core-beans/docs/README.md` 开始（书本目录 + Part 划分）；主线可按 Part 顺读，每章顶部提供“上一章｜目录｜下一章”导航，降低章节切换成本。
-- **Highlights:** 在补齐类型转换/泛型匹配章节与 Labs 闭环的基础上，进一步统一 docs 的“上一章｜目录｜下一章”导航与“复现入口（可运行）”块；新增 JSR-330 `@Inject`/`Provider<T>` 对照 Lab，并增强 testsupport dumper 让排障输出更结构化；补齐 3 类易翻车边界机制 Labs（编程式注册差异 / allowRawInjectionDespiteWrapping / prototype 销毁语义），并将入口落位到 docs/04、docs/05、docs/16、docs/25；新增 Part 05（AOT/RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）与对应 Labs，并新增面试复述模板与生产排障清单用于体系化复盘；同时为 Exercises 补齐对应 Solution（默认参与回归），并在 docs/README 收敛“章节↔Lab↔Exercise↔Solution”对照表与运行建议，补强 ImportSelector 等新手高频卡点的“源码主线/断点/观察点”；进一步补齐 Spring Framework `spring-beans` 体系的 5 组“真实世界常见但容易缺失”的机制闭环（docs 46–50：XML namespace 扩展 / Properties+Groovy Reader / replaced-method 方法注入 / 内置 FactoryBean / PropertyEditor+值解析），并新增对应 Labs（默认参与回归）。
+- **Highlights:** 在补齐类型转换/泛型匹配章节与 Labs 闭环的基础上，进一步统一 docs 的“上一章｜目录｜下一章”导航与“复现入口（可运行）”块；新增 JSR-330 `@Inject`/`Provider<T>` 对照 Lab，并增强 testsupport dumper 让排障输出更结构化；补齐 3 类易翻车边界机制 Labs（编程式注册差异 / allowRawInjectionDespiteWrapping / prototype 销毁语义），并将入口落位到 docs/04、docs/05、docs/16、docs/25；新增 Part 05（AOT/RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）与对应 Labs，并新增面试复述模板与生产排障清单用于体系化复盘；同时为 Exercises 补齐对应 Solution（默认参与回归），并在 docs/README 收敛“章节↔Lab↔Exercise↔Solution”对照表与运行建议，补强 ImportSelector 等新手高频卡点的“源码主线/断点/观察点”；进一步补齐 Spring Framework `spring-beans` 体系的 5 组“真实世界常见但容易缺失”的机制闭环（docs 46–50：XML namespace 扩展 / Properties+Groovy Reader / replaced-method 方法注入 / 内置 FactoryBean / PropertyEditor+值解析），并新增对应 Labs（默认参与回归）；补齐 Spring Framework `BeanFactory API` 与 `Environment Abstraction` 两类常用但容易“只会用不会解释”的主题：新增 docs/38–39 与对应可断言 Labs（默认参与回归）；新增 spring-beans Public API 索引（docs Appendix 95/96）用于“按类型检索/可审计”，并补齐 aot.factories/AotServices 与 ServiceLoader*FactoryBean 的闭环，新增 Explore/Debug 用例（docs Appendix 97，显式开关启用，不影响默认回归）。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-05
+- **Last Updated:** 2026-01-06
 
 ## Source Layout（与 docs Part 对齐）
 
@@ -41,6 +41,20 @@
 #### Scenario: 能从注入报错反推候选选择过程
 - 文档明确候选收集与缩小过程（@Primary/@Qualifier/名称匹配/集合注入排序）
 - 提供 Lab 覆盖：多实现歧义、@Primary、@Qualifier、集合注入排序与可选依赖
+
+#### Scenario: 能把 Environment/PropertySource 放回容器主线解释（含覆盖优先级与时机）
+- 能解释 PropertySources 的优先级与“占位符解析”如何接入 BeanFactory 的值解析链路
+- 能解释：refresh 前/后修改 Environment 对 Bean 的影响边界（不会 retroactive 影响已创建 bean）
+- 对应可复现闭环入口：
+  - `spring-core-beans/docs/part-04-wiring-and-boundaries/38-environment-and-propertysource.md`
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansEnvironmentPropertySourceLabTest.java`
+
+#### Scenario: 能把 BeanFactory API 当作“最小容器”理解（并解释与 ApplicationContext 的边界）
+- 能解释：为什么 plain BeanFactory 不会自动启用注解注入/生命周期（需要显式 BPP），以及 BPP 安装顺序/时机的影响
+- 能给出最小可运行路径：`DefaultListableBeanFactory` + 手动注册 annotation processors + `addBeanPostProcessor` 的可断言对照
+- 对应可复现闭环入口：
+  - `spring-core-beans/docs/part-04-wiring-and-boundaries/39-beanfactory-api-deep-dive.md`
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanFactoryApiLabTest.java`
 
 #### Scenario: 能讲清循环依赖“能救/不能救”的边界（含代理介入）
 - 文档解释三层缓存与 early reference 的真实语义
@@ -112,3 +126,5 @@
 - [202601051507_spring_core_beans_aot_playbook](../../history/2026-01/202601051507_spring_core_beans_aot_playbook/) - ✅ 已执行：新增 Part 05（AOT/RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）与对应 Labs，并新增面试复述模板/生产排障清单用于体系化复盘
 - [202601052057_spring_core_beans_teaching_upgrade](../../history/2026-01/202601052057_spring_core_beans_teaching_upgrade/) - ✅ 已执行：为 Exercises 补齐对应 Solution（默认参与回归）并在 docs/README 收敛“章节↔Lab↔Exercise↔Solution”对照表；补强 ImportSelector 新手闭环与 Part05（42–45）的“源码/断点建议”与观察点
 - [202601052200_spring_core_beans_beans_package_full_coverage](../../history/2026-01/202601052200_spring_core_beans_beans_package_full_coverage/) - ✅ 已执行：补齐 Spring Framework `spring-beans` 包 5 组机制闭环（XML namespace 扩展 / Properties+Groovy Reader / `replaced-method` 方法注入 / 内置 FactoryBean / PropertyEditor+值解析），新增 docs 46–50 与对应 Labs（默认参与回归）
+- [202601060957_spring_core_beans_environment_beanfactory_deepening](../../history/2026-01/202601060957_spring_core_beans_environment_beanfactory_deepening/) - ✅ 已执行：补齐 Spring Framework `BeanFactory API` 与 `Environment Abstraction` 深挖闭环（docs 38–39 + Labs）
+- [202601061038_spring_core_beans_spring_beans_api_full_coverage](../../history/2026-01/202601061038_spring_core_beans_spring_beans_api_full_coverage/) - ✅ 已执行：新增 spring-beans Public API 索引（95/96）+ AOT/ServiceLoader* 补齐 + Explore/Debug 用例（97）

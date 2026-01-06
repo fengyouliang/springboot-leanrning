@@ -36,6 +36,8 @@
 | 202601051507 | spring_core_beans_aot_playbook | Enhancement | ✅Completed | [202601051507_spring_core_beans_aot_playbook](2026-01/202601051507_spring_core_beans_aot_playbook/) |
 | 202601052057 | spring_core_beans_teaching_upgrade | Enhancement | ✅Completed | [202601052057_spring_core_beans_teaching_upgrade](2026-01/202601052057_spring_core_beans_teaching_upgrade/) |
 | 202601052200 | spring_core_beans_beans_package_full_coverage | Enhancement | ✅Completed | [202601052200_spring_core_beans_beans_package_full_coverage](2026-01/202601052200_spring_core_beans_beans_package_full_coverage/) |
+| 202601060957 | spring_core_beans_environment_beanfactory_deepening | Enhancement | ✅Completed | [202601060957_spring_core_beans_environment_beanfactory_deepening](2026-01/202601060957_spring_core_beans_environment_beanfactory_deepening/) |
+| 202601061038 | spring_core_beans_spring_beans_api_full_coverage | Enhancement | ✅Completed | [202601061038_spring_core_beans_spring_beans_api_full_coverage](2026-01/202601061038_spring_core_beans_spring_beans_api_full_coverage/) |
 
 ---
 
@@ -71,3 +73,5 @@
 - [202601051507_spring_core_beans_aot_playbook](2026-01/202601051507_spring_core_beans_aot_playbook/) - spring-core-beans：新增 Part 05（AOT/RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）+ 面试复述模板/生产排障清单 + 对应 Labs
 - [202601052057_spring_core_beans_teaching_upgrade](2026-01/202601052057_spring_core_beans_teaching_upgrade/) - spring-core-beans：为 Exercises 补齐对应 Solution（默认参与回归）+ docs/README 收敛章节↔Lab↔Exercise↔Solution 对照表 + 关键章节补强（ImportSelector/Part05 断点观察点）
 - [202601052200_spring_core_beans_beans_package_full_coverage](2026-01/202601052200_spring_core_beans_beans_package_full_coverage/) - spring-core-beans：补齐 Spring Framework `spring-beans` 包 5 组机制闭环（docs 46–50 + Labs）
+- [202601060957_spring_core_beans_environment_beanfactory_deepening](2026-01/202601060957_spring_core_beans_environment_beanfactory_deepening/) - spring-core-beans：补齐 Spring Framework `BeanFactory API` 与 `Environment Abstraction` 的系统化深挖闭环（docs 38–39 + Labs）
+- [202601061038_spring_core_beans_spring_beans_api_full_coverage](2026-01/202601061038_spring_core_beans_spring_beans_api_full_coverage/) - spring-core-beans：新增 spring-beans Public API 索引（95/96）+ AOT/ServiceLoader* 补齐 + Explore/Debug 用例（97）

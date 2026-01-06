@@ -38,6 +38,10 @@
   - Lab：`SpringCoreBeansLabTest`（prototype 用例）/ Exercises（改造题）
 - `@Value("${missing}")` 没失败，值变成 `"${...}"` → [34](part-04-wiring-and-boundaries/34-value-placeholder-resolution-strict-vs-non-strict.md)
   - Lab：`SpringCoreBeansValuePlaceholderResolutionLabTest`
+- 配置值“不生效/被覆盖/优先级不符合直觉”（Environment/PropertySource）→ [38](part-04-wiring-and-boundaries/38-environment-and-propertysource.md)
+  - Lab：`SpringCoreBeansEnvironmentPropertySourceLabTest`
+- 想按 API 名称直接定位到章节与 Lab（spring-beans Public API 索引）→ [95](appendix/95-spring-beans-public-api-index.md)
+  - Gap 清单：`96`（用于按包/机制域分批深化）
 - 代理导致行为“不符合直觉”（最终对象不是原始实例/self-invocation）→ [31](part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)
   - Lab：`SpringCoreBeansProxyingPhaseLabTest`
 - 循环依赖：constructor 无解、setter 有时能救 → [09](part-01-ioc-container/09-circular-dependencies.md) / [16](part-03-container-internals/16-early-reference-and-circular.md)
@@ -52,6 +56,8 @@
   - Lab：`SpringCoreBeansXmlNamespaceExtensionLabTest`
 - `@Value("#{...}")`（SpEL）注入不符合预期 → [44](part-05-aot-and-real-world/44-spel-and-value-expression.md) / [36](part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md)
   - Lab：`SpringCoreBeansSpelValueLabTest`
+- “注解为什么不生效/为什么 plain BeanFactory 看起来缺能力”（BeanFactory API 边界）→ [39](part-04-wiring-and-boundaries/39-beanfactory-api-deep-dive.md) / [12](part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
+  - Lab：`SpringCoreBeansBeanFactoryApiLabTest`
 - product vs factory（为什么 `getBean("x")` 不是你以为的那个对象？）→ [49](part-05-aot-and-real-world/49-built-in-factorybeans-gallery.md) / [08](part-01-ioc-container/08-factorybean.md)
   - Lab：`SpringCoreBeansBuiltInFactoryBeansLabTest`
 - String/引用/集合到底在哪一步“变成对象”（值解析与类型转换想下断点）→ [50](part-05-aot-and-real-world/50-property-editor-and-value-resolution.md) / [36](part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md)
@@ -76,6 +82,8 @@
 | [34](part-04-wiring-and-boundaries/34-value-placeholder-resolution-strict-vs-non-strict.md) | non-strict vs strict 占位符解析 | `SpringCoreBeansValuePlaceholderResolutionLabTest` |
 | [36](part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md) | BeanWrapper/ConversionService 类型转换 | `SpringCoreBeansTypeConversionLabTest` |
 | [37](part-04-wiring-and-boundaries/37-generic-type-matching-pitfalls.md) | ResolvableType 泛型匹配边界 | `SpringCoreBeansGenericTypeMatchingPitfallsLabTest` |
+| [38](part-04-wiring-and-boundaries/38-environment-and-propertysource.md) | Environment/PropertySource：优先级与 @PropertySource 进入链路 | `SpringCoreBeansEnvironmentPropertySourceLabTest` |
+| [39](part-04-wiring-and-boundaries/39-beanfactory-api-deep-dive.md) | BeanFactory API：接口族谱与手动 bootstrap 边界 | `SpringCoreBeansBeanFactoryApiLabTest` |
 | [41](part-05-aot-and-real-world/41-runtimehints-basics.md) | AOT/Native 的“构建期契约”如何表达与验证 | `SpringCoreBeansAotRuntimeHintsLabTest` |
 | [42](part-05-aot-and-real-world/42-xml-bean-definition-reader.md) | XML → BeanDefinitionReader：定义层解析与错误分型 | `SpringCoreBeansXmlBeanDefinitionReaderLabTest` |
 | [46](part-05-aot-and-real-world/46-xml-namespace-extension.md) | XML 自定义元素如何注册 BeanDefinition（namespace 扩展） | `SpringCoreBeansXmlNamespaceExtensionLabTest` |
@@ -157,6 +165,8 @@
 - [35. MergedBeanDefinition：合并后的 RootBeanDefinition](part-04-wiring-and-boundaries/35-merged-bean-definition.md)
 - [36. 类型转换：BeanWrapper / ConversionService / PropertyEditor 的边界](part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md)
 - [37. 泛型匹配与注入坑：ResolvableType 与代理导致的类型信息丢失](part-04-wiring-and-boundaries/37-generic-type-matching-pitfalls.md)
+- [38. Environment Abstraction：PropertySource / @PropertySource / 优先级与排障主线](part-04-wiring-and-boundaries/38-environment-and-propertysource.md)
+- [39. BeanFactory API 深挖：接口族谱与手动 bootstrap 的边界](part-04-wiring-and-boundaries/39-beanfactory-api-deep-dive.md)
 
 ### Part 05：AOT / 真实世界补齐（把“项目里真会遇到的坑”补成可复现实验）
 
@@ -179,4 +189,7 @@
 - [92. 知识点地图（Concept → Chapter → Lab）](appendix/92-knowledge-map.md)
 - [93. 面试复述模板（决策树 → Lab → 断点入口）](appendix/93-interview-playbook.md)
 - [94. 生产排障清单（异常分型 → 入口 → 观察点 → 修复策略）](appendix/94-production-troubleshooting-checklist.md)
+- [95. spring-beans Public API 索引（按类型检索）](appendix/95-spring-beans-public-api-index.md)
+- [96. spring-beans Public API Gap 清单（按包/机制域分批深化）](appendix/96-spring-beans-public-api-gap.md)
+- [97. Explore/Debug 用例（可选启用，不影响默认回归）](appendix/97-explore-debug-tests.md)
 - [99. 自测题（Self Check）](appendix/99-self-check.md)

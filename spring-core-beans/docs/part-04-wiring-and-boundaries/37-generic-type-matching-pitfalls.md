@@ -122,4 +122,4 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansGenericTypeMatchingPitfallsLa
 
 ---
 
-上一章：[36. 类型转换：BeanWrapper / ConversionService / PropertyEditor 的边界](36-type-conversion-and-beanwrapper.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[90. 常见坑清单（建议反复对照）](../appendix/90-common-pitfalls.md)
+上一章：[36. 类型转换：BeanWrapper / ConversionService / PropertyEditor 的边界](36-type-conversion-and-beanwrapper.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[38. Environment Abstraction：PropertySource / @PropertySource / 优先级与排障主线](38-environment-and-propertysource.md)

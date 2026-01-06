@@ -38,6 +38,20 @@
 
 下一章会把它落成“可断言”的最小实验：[41. RuntimeHints 入门](41-runtimehints-basics.md)。
 
+### 2.1 spring-beans 的 AOT 基础设施：`META-INF/spring/aot.factories` 与 `AotServices`
+
+很多初学者在学习 AOT 时会有一个错觉：
+
+> “AOT = 我自己写 RuntimeHintsRegistrar + 配点 hints 就完了”
+
+但在 Spring Framework 里，AOT 不是“一个点”，而是一套 **基础设施**：
+
+- **Spring 会在 classpath 里发布 AOT service 列表**：`META-INF/spring/aot.factories`
+- **Spring 会用 `AotServices` 去发现并加载这些服务**
+- `spring-beans` 自己就会提供一部分 AOT services（比如 BeanFactory 初始化阶段的 AOT processors）
+
+这一点对“为什么会有这些接口/类”“它们何时参与容器主线”非常关键（这也正是 `org.springframework.beans.factory.aot.*` 这个包存在的原因）。
+
 ---
 
 ## 3. 你在真实项目里会遇到的典型现象（症状表）
@@ -62,10 +76,11 @@
 
 - 入口测试：
   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAotRuntimeHintsLabTest.java`
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAotFactoriesLabTest.java`
 - 推荐运行命令：
 
 ```bash
-mvn -pl spring-core-beans -Dtest=SpringCoreBeansAotRuntimeHintsLabTest test
+mvn -pl spring-core-beans -Dtest=SpringCoreBeansAotRuntimeHintsLabTest,SpringCoreBeansAotFactoriesLabTest test
 ```
 
 ---
@@ -81,7 +96,11 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansAotRuntimeHintsLabTest test
 
 - `RuntimeHintsRegistrar#registerHints`（你定义的注册入口）
 
-更深挖：当你要把 AOT 放回完整链路（AOT 生成器、BeanFactory 初始化 AOT Processor）时，再进一步扩展断点地图。
+当你想把 AOT 放回 `spring-beans` 的真实基础设施时（而不是只停留在“我自己写 hints”）：
+
+- `AotServices#factories`（定位 `META-INF/spring/aot.factories` 的加载入口）
+- `AotServices.Loader#load`（观察：某个 service interface 最终加载到了哪些实现类）
+- `BeanFactoryInitializationAotProcessor`（BeanFactory 初始化阶段的 AOT processor 入口）
 
 ---
 
@@ -106,5 +125,4 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansAotRuntimeHintsLabTest test
 
 ---
 
-上一章：[37. 泛型匹配与注入坑：ResolvableType 与代理导致的类型信息丢失](../part-04-wiring-and-boundaries/37-generic-type-matching-pitfalls.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[41. RuntimeHints 入门：把构建期契约跑通](41-runtimehints-basics.md)
-
+上一章：[39. BeanFactory API 深挖：接口族谱与手动 bootstrap 的边界](../part-04-wiring-and-boundaries/39-beanfactory-api-deep-dive.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[41. RuntimeHints 入门：把构建期契约跑通](41-runtimehints-basics.md)
