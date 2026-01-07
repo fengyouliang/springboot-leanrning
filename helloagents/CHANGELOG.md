@@ -11,10 +11,10 @@
 - `springboot-web-mvc`：补齐传统 MVC（HTML）页面渲染主线（Thymeleaf/表单提交/校验回显/PRG/错误页/Accept 内容协商），新增对应 docs 与 MockMvc + 端到端 Labs，并补齐 API 侧 malformed JSON/type mismatch 的统一错误体。
 - `springboot-web-mvc`：安全基线补充：模板输出默认使用转义（`th:text`），错误页仅展示必要信息，不输出堆栈与敏感细节（为后续接入安全模块预留空间）。
 
-- `scripts`：新增章节契约自检脚本 `scripts/check-chapter-contract.py`（A–G 七段 + 对应 Lab/Test + 至少 1 个 LabTest），并接入 `scripts/check-docs.sh`。
+- `scripts`：新增章节契约自检脚本 `scripts/check-chapter-contract.py`（A–G 七段 + 对应 Lab/Test + 至少 1 个 LabTest）；后续不再作为硬性闸门，仅作为可选自检脚本。
 - `scripts`：新增 A–G 批处理重写脚本 `scripts/ag-contract-docs.py`：以 `docs/README.md` 为 SSOT，对章节执行结构化重写并注入模块默认 LabTest 兜底。
 ### Changed
-- 全模块 docs：将 `docs/README.md` 引用的全部章节升级为 A–G 章节契约（统一二级标题 A–G，并保留 BOOKIFY 尾部导航）；新增闸门确保每章至少 1 个 LabTest 引用可解析。
+- 全模块 docs：将 `docs/README.md` 引用的全部章节升级为 A–G 章节结构（统一二级标题 A–G，并保留 BOOKIFY 尾部导航）；后续不再强制要求所有章节持续遵守该结构。
 - 根 `README.md`：跨模块学习路线入口统一指向 `<module>/docs/README.md`（Docs TOC）。
 - `spring-core-*`：对齐教学化文档规范：清理 docs 正文中的 `docs/NN` 缩写引用，统一替换为可解析的 Markdown 相对链接；统一章节末尾 `### 对应 Lab/Test` 入口块；并通过断链检查与教学覆盖检查。
 - `scripts/check-md-relative-links.py`：支持传入 docs 目录或单个 .md 文件进行模块级自检；默认扫描所有 `spring-core-*/docs` 与 `springboot-*/docs`。
