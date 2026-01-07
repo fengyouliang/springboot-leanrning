@@ -215,8 +215,11 @@ def _mapping_rules() -> tuple[MappingRule, ...]:
             package_prefix="org.springframework.beans.support",
             domain="Beans 支撑（偏低层）",
             primary_chapter="part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md",
-            primary_labs=("src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansTypeConversionLabTest.java",),
-            coverage="partial",
+            primary_labs=(
+                "src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeansSupportUtilitiesLabTest.java",
+                "src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansTypeConversionLabTest.java",
+            ),
+            coverage="core",
         ),
         MappingRule(
             package_prefix="org.springframework.beans",

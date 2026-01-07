@@ -1,17 +1,20 @@
 # 17. 生命周期回调顺序：Aware / BPP / init / destroy（以及 prototype 为什么不销毁）
 
-## 0. 复现入口（可运行）
+<!-- AG-CONTRACT:START -->
 
-- 入口测试（推荐先跑通再下断点）：
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
-- 推荐运行命令：
-  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansLifecycleCallbackOrderLabTest test`
+## A. 本章定位
+
+- 本章主题：**17. 生命周期回调顺序：Aware / BPP / init / destroy（以及 prototype 为什么不销毁）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 很多“容器行为”只有把生命周期顺序看清楚才能解释。
-
-对应实验：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
 
 ## 1. 一个可断言的顺序（比看日志更可靠）
 
@@ -26,7 +29,7 @@
 5. `@PostConstruct`（由 `InitDestroyAnnotationBeanPostProcessor` 触发）
 6. `InitializingBean#afterPropertiesSet`
 7. 自定义 initMethod（`@Bean(initMethod=...)`）
-8. `BeanPostProcessor#postProcessAfterInitialization`（代理/包装经常在这里发生，见 docs/31）
+8. `BeanPostProcessor#postProcessAfterInitialization`（代理/包装经常在这里发生，见 [31. 代理/替换阶段：`BeanPostProcessor` 如何把 Bean “换成 Proxy”](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)）
 
 销毁阶段（容器关闭时，singleton 才会默认触发）：
 
@@ -35,13 +38,7 @@
 3. `DisposableBean#destroy`
 4. 自定义 destroyMethod（`@Bean(destroyMethod=...)`）
 
-> 注意：顺序表的意义是“能定位”，不是“每次都一模一样”。当 BPP 数量与排序变化时（见 docs/14、docs/25），你看到的实际调用栈会变化，但大方向依然稳定。
-
 对应测试：
-
-- `SpringCoreBeansLifecycleCallbackOrderLabTest.singletonLifecycleCallbacks_happenInAStableOrderAroundInitialization()`
-
-实验使用一个记录器把关键阶段串起来：
 
 - constructor
 - BeanNameAware / BeanFactoryAware
@@ -61,8 +58,6 @@
 
 对应测试：
 
-- `SpringCoreBeansLifecycleCallbackOrderLabTest.prototypeBeans_areNotDestroyedByContainerByDefault()`
-
 prototype 的语义是：
 
 - 容器帮你创建并注入
@@ -73,41 +68,7 @@ prototype 的语义是：
 - `@PreDestroy` / destroyMethod 可能不会被调用
 - 清理资源需要调用方自己管理（或引入额外机制）
 
-## 3. 常见坑
-
-- **坑 1：在 `@PostConstruct` 做重 IO**
-  - 会拉长启动时间；也更难测试。
-
-- **坑 2：误以为 prototype 会自动销毁**
-  - 你必须知道：谁负责 close/cleanup。
-
-- **坑 3：BeanPostProcessor 本身也是特殊 bean**
-  - BPP 会很早被实例化、很早被注册。
-  - 因此在 BPP 的构造器里依赖复杂 bean，可能导致“过早创建”与“错过后续处理器”。
-
-## 源码锚点（建议从这里下断点）
-
-- `AbstractAutowireCapableBeanFactory#doCreateBean`：单个 bean 创建主流程（实例化 → 注入 → 初始化）
-- `AbstractAutowireCapableBeanFactory#populateBean`：属性填充阶段（`@Autowired/@Resource` 等注入发生在这一段）
-- `AbstractAutowireCapableBeanFactory#initializeBean`：初始化阶段（aware → before-init → init callbacks → after-init）
-- `DisposableBeanAdapter#destroy`：销毁链路的统一入口（`@PreDestroy/DisposableBean/destroyMethod` 会在这里串起来）
-- `AbstractApplicationContext#doClose`：context close 阶段触发销毁回调（prototype 默认不在这里被销毁）
-
-## 断点闭环（用本仓库 Lab/Test 跑一遍）
-
 入口：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
-  - `singletonLifecycleCallbacks_happenInAStableOrderAroundInitialization()`
-  - `prototypeBeans_areNotDestroyedByContainerByDefault()`
-
-建议断点：
-
-1) 参与实验的目标 bean 构造器：观察“构造器先执行，但此时注入未发生”
-2) `AbstractAutowireCapableBeanFactory#initializeBean`：观察 init 回调链如何被串起来
-3) `BeanPostProcessor#postProcessBeforeInitialization`（例如 `CommonAnnotationBeanPostProcessor`）：观察 `@PostConstruct` 的触发时机
-4) `BeanPostProcessor#postProcessAfterInitialization`：观察它一定发生在 init callbacks 之后（本章自检题的答案）
-5) `DisposableBeanAdapter#destroy`：在测试里 close context 时命中，观察销毁回调顺序
 
 你应该看到：
 
@@ -123,11 +84,6 @@ prototype 的语义是：
 
 ## 4. 一句话自检
 
-- 你能解释清楚：为什么 `postProcessAfterInitialization` 一定发生在 init callbacks 之后吗？
-- 你能解释清楚：为什么 prototype 默认不会触发 `@PreDestroy` 吗？
-对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
-推荐断点：`AbstractAutowireCapableBeanFactory#initializeBean`、`BeanPostProcessor#postProcessBeforeInitialization`、`DisposableBeanAdapter#destroy`
-
 ## 面试常问（生命周期回调顺序）
 
 - 常问：初始化阶段的回调顺序是什么？BPP before/after-init 与 `@PostConstruct` 谁先谁后？
@@ -135,4 +91,90 @@ prototype 的语义是：
 - 常见追问：为什么 prototype 默认不会走销毁回调（`@PreDestroy`）？
   - 答题要点：prototype 的生命周期末端默认不由容器托管；容器负责创建，但不负责统一回收（除非自定义 scope/显式销毁）。
 
-上一章：[16. early reference 与循环依赖：getEarlyBeanReference 到底解决什么？](16-early-reference-and-circular.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[18. Lazy：lazy-init bean vs `@Lazy` 注入点（懒代理）](../part-04-wiring-and-boundaries/18-lazy-semantics.md)
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansLifecycleCallbackOrderLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansLifecycleCallbackOrderLabTest test`
+
+对应实验：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
+
+- `SpringCoreBeansLifecycleCallbackOrderLabTest.singletonLifecycleCallbacks_happenInAStableOrderAroundInitialization()`
+
+实验使用一个记录器把关键阶段串起来：
+
+- `SpringCoreBeansLifecycleCallbackOrderLabTest.prototypeBeans_areNotDestroyedByContainerByDefault()`
+
+## 源码锚点（建议从这里下断点）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
+  - `singletonLifecycleCallbacks_happenInAStableOrderAroundInitialization()`
+  - `prototypeBeans_areNotDestroyedByContainerByDefault()`
+
+建议断点：
+
+1) 参与实验的目标 bean 构造器：观察“构造器先执行，但此时注入未发生”
+2) `AbstractAutowireCapableBeanFactory#initializeBean`：观察 init 回调链如何被串起来
+3) `BeanPostProcessor#postProcessBeforeInitialization`（例如 `CommonAnnotationBeanPostProcessor`）：观察 `@PostConstruct` 的触发时机
+4) `BeanPostProcessor#postProcessAfterInitialization`：观察它一定发生在 init callbacks 之后（本章自检题的答案）
+5) `DisposableBeanAdapter#destroy`：在测试里 close context 时命中，观察销毁回调顺序
+
+- 你能解释清楚：为什么 `postProcessAfterInitialization` 一定发生在 init callbacks 之后吗？
+- 你能解释清楚：为什么 prototype 默认不会触发 `@PreDestroy` 吗？
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
+推荐断点：`AbstractAutowireCapableBeanFactory#initializeBean`、`BeanPostProcessor#postProcessBeforeInitialization`、`DisposableBeanAdapter#destroy`
+
+## F. 常见坑与边界
+
+> 注意：顺序表的意义是“能定位”，不是“每次都一模一样”。当 BPP 数量与排序变化时（见 [14. 顺序（Ordering）：PriorityOrdered / Ordered / 无序](14-post-processor-ordering.md)、[25. 手工添加 BeanPostProcessor：顺序与 Ordered 的陷阱](../part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md)），你看到的实际调用栈会变化，但大方向依然稳定。
+
+## 3. 常见坑
+
+- **坑 1：在 `@PostConstruct` 做重 IO**
+  - 会拉长启动时间；也更难测试。
+
+- **坑 2：误以为 prototype 会自动销毁**
+  - 你必须知道：谁负责 close/cleanup。
+
+- **坑 3：BeanPostProcessor 本身也是特殊 bean**
+  - BPP 会很早被实例化、很早被注册。
+  - 因此在 BPP 的构造器里依赖复杂 bean，可能导致“过早创建”与“错过后续处理器”。
+
+## G. 小结与下一章
+
+- `AbstractAutowireCapableBeanFactory#doCreateBean`：单个 bean 创建主流程（实例化 → 注入 → 初始化）
+- `AbstractAutowireCapableBeanFactory#populateBean`：属性填充阶段（`@Autowired/@Resource` 等注入发生在这一段）
+- `AbstractAutowireCapableBeanFactory#initializeBean`：初始化阶段（aware → before-init → init callbacks → after-init）
+- `DisposableBeanAdapter#destroy`：销毁链路的统一入口（`@PreDestroy/DisposableBean/destroyMethod` 会在这里串起来）
+- `AbstractApplicationContext#doClose`：context close 阶段触发销毁回调（prototype 默认不在这里被销毁）
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansLifecycleCallbackOrderLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
+
+上一章：[16. early reference 与循环依赖：getEarlyBeanReference](16-early-reference-and-circular.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[18. @Lazy 的真实语义：延迟的是谁、延迟到哪一步](../part-04-wiring-and-boundaries/18-lazy-semantics.md)
+
+<!-- BOOKIFY:END -->

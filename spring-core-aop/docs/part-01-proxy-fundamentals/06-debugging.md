@@ -1,5 +1,19 @@
 # 06. Debug / 观察：如何“看见”代理与切点
 
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**06. Debug / 观察：如何“看见”代理与切点**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
 学习 AOP 时，最怕的不是概念难，而是“感觉它在工作，但我看不见”。这一章给出一套可复用的观察方法。
 
 ## 1) 先判断 bean 是否为代理
@@ -10,11 +24,7 @@
 - `AopUtils.isJdkDynamicProxy(bean)`：是不是 JDK 代理
 - `AopUtils.isCglibProxy(bean)`：是不是 CGLIB 代理
 
-本模块的 `SpringCoreAopLabTest` 已经给了现成例子。
-
 ### 1.1 进一步：怎么看“真实目标类型”？
-
-当你在调试器里看到 `com.sun.proxy.$ProxyXX` 或 `$$SpringCGLIB$$`，不要直接用 `getClass()` 下结论。
 
 更稳定的做法是：
 
@@ -55,24 +65,57 @@
 1. 先看 `bean instanceof Advised`
 2. 再看 `((Advised) bean).getTargetSource().getTarget()` 返回的 target 是否还是 AOP proxy
 
-配套章节：见 [docs/09](09-multi-proxy-stacking.md)。
-
-## 3) 验证切点是否命中（从最小切点开始）
+配套章节：见 [09. multi-proxy-stacking](../part-03-proxy-stacking/09-multi-proxy-stacking.md)。
 
 建议学习路径：
 
 1. 先用最小切点（例如 `@annotation(Traced)`）确保你“能拦截”
 2. 再尝试把切点换成更通用表达式（例如 `execution(...)`），对照命中范围变化
 
+配套章节：见 [08. pointcut-expression-system](../part-02-autoproxy-and-pointcuts/08-pointcut-expression-system.md)。
+
+## 4) 遇到“不拦截”的排查顺序（经验）
+
+### 5.1 “proxy 是怎么来的”（容器阶段）
+
+- `PostProcessorRegistrationDelegate#registerBeanPostProcessors`（确认 AutoProxyCreator 作为 BPP 被注册）
+- `AbstractAutoProxyCreator#postProcessAfterInitialization`
+- `AbstractAutoProxyCreator#wrapIfNecessary`
+- `DefaultAopProxyFactory#createAopProxy`
+
+- `AbstractAdvisorAutoProxyCreator#findEligibleAdvisors`
+- `AopUtils#canApply`
+
+- `JdkDynamicAopProxy#invoke` / `CglibAopProxy.DynamicAdvisedInterceptor#intercept`
+- `DefaultAdvisorChainFactory#getInterceptorsAndDynamicInterceptionAdvice`
+- `ReflectiveMethodInvocation#proceed`
+
+对应章节：
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreAopLabTest` / `SpringCoreAopMultiProxyStackingLabTest` / `SpringCoreAopPointcutExpressionsLabTest`
+- 建议命令：`mvn -pl spring-core-aop test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+本模块的 `SpringCoreAopLabTest` 已经给了现成例子。
+
+当你在调试器里看到 `com.sun.proxy.$ProxyXX` 或 `$$SpringCGLIB$$`，不要直接用 `getClass()` 下结论。
+
+## 3) 验证切点是否命中（从最小切点开始）
+
 练习入口：`SpringCoreAopExerciseTest#exercise_changePointcutStyle`
 
 如果你经常误判（尤其是 this vs target），建议直接做这个 Lab：
 
 - `SpringCoreAopPointcutExpressionsLabTest`（JDK/CGLIB 下命中差异可断言）
-
-配套章节：见 [docs/08](08-pointcut-expression-system.md)。
-
-## 4) 遇到“不拦截”的排查顺序（经验）
 
 1. 调用入口是否走代理（是否自调用）
 2. 目标方法是否能被拦截（`final/private` 等限制）
@@ -85,29 +128,34 @@
 
 当你要把问题定位到源码层面，建议从两条主线各打一组断点：
 
-### 5.1 “proxy 是怎么来的”（容器阶段）
-
-- `PostProcessorRegistrationDelegate#registerBeanPostProcessors`（确认 AutoProxyCreator 作为 BPP 被注册）
-- `AbstractAutoProxyCreator#postProcessAfterInitialization`
-- `AbstractAutoProxyCreator#wrapIfNecessary`
-- `DefaultAopProxyFactory#createAopProxy`
-
 如果你要进一步看清“advisor 是怎么筛出来的”，加这两个断点（命中频繁，建议加条件）：
 
-- `AbstractAdvisorAutoProxyCreator#findEligibleAdvisors`
-- `AopUtils#canApply`
-
 ### 5.2 “advice 链是怎么跑的”（调用阶段）
-
-- `JdkDynamicAopProxy#invoke` / `CglibAopProxy.DynamicAdvisedInterceptor#intercept`
-- `DefaultAdvisorChainFactory#getInterceptorsAndDynamicInterceptionAdvice`
-- `ReflectiveMethodInvocation#proceed`
 
 > 读者 C/D 目标（看懂嵌套关系）：建议配合 `SpringCoreAopProceedNestingLabTest` 或 `SpringCoreAopMultiProxyStackingLabTest`，在 `proceed()` 里观察：
 >
 > - `interceptorsAndDynamicMethodMatchers`（链条顺序）
 > - `currentInterceptorIndex`（执行到哪一层）
 
-对应章节：
+- 如果你想系统跑一遍断点闭环：见 [00. 深挖指南](../part-00-guide/00-deep-dive-guide.md)
 
-- 如果你想系统跑一遍断点闭环：见 [00 深挖指南](00-deep-dive-guide.md)
+## F. 常见坑与边界
+
+- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreAopLabTest` / `SpringCoreAopMultiProxyStackingLabTest` / `SpringCoreAopPointcutExpressionsLabTest` / `SpringCoreAopProceedNestingLabTest`
+- Exercise：`SpringCoreAopExerciseTest`
+
+上一章：[05-expose-proxy](05-expose-proxy.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[07-autoproxy-creator-mainline](../part-02-autoproxy-and-pointcuts/07-autoproxy-creator-mainline.md)
+
+<!-- BOOKIFY:END -->

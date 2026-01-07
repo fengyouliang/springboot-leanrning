@@ -62,24 +62,25 @@ mvn -pl springboot-basics spring-boot:run
 
 | 顺序 | 模块 | 建议耗时 | 你应该做到（能解释/能改写/能调试） |
 | --- | --- | --- | --- |
-| 1 | `springboot-basics` | 0.5–1h | 配置绑定 + Profile；新增配置项并验证；能解释配置优先级 |
-| 2 | `springboot-web-mvc` | 1–2h | Controller/校验/错误处理；扩展请求字段；能定位 400 的字段错误 |
-| 3 | `springboot-testing` | 1–2h | slice vs full context；补一条测试；能解释为什么 `@WebMvcTest` 更快 |
-| 4 | `springboot-data-jpa` | 2–3h | persistence context/flush/脏检查；加查询；能解释“一级缓存假象” |
-| 5 | `springboot-actuator` | 0.5–1h | 暴露端点 + 自定义 health；加开关；能解释 exposure 与安全边界 |
-| 6 | `springboot-business-case` | 2–4h | 串联 Web/JPA/Tx/AOP/Events；改一条链路；能定位代理/事务边界问题 |
+| 1 | [`springboot-basics`](springboot-basics/docs/README.md) | 0.5–1h | 配置绑定 + Profile；新增配置项并验证；能解释配置优先级 |
+| 2 | [`springboot-web-mvc`](springboot-web-mvc/docs/README.md) | 1–2h | Controller/校验/错误处理；扩展请求字段；能定位 400 的字段错误 |
+| 3 | [`springboot-testing`](springboot-testing/docs/README.md) | 1–2h | slice vs full context；补一条测试；能解释为什么 `@WebMvcTest` 更快 |
+| 4 | [`springboot-data-jpa`](springboot-data-jpa/docs/README.md) | 2–3h | persistence context/flush/脏检查；加查询；能解释“一级缓存假象” |
+| 5 | [`springboot-actuator`](springboot-actuator/docs/README.md) | 0.5–1h | 暴露端点 + 自定义 health；加开关；能解释 exposure 与安全边界 |
+| 6 | [`springboot-business-case`](springboot-business-case/docs/README.md) | 2–4h | 串联 Web/JPA/Tx/AOP/Events；改一条链路；能定位代理/事务边界问题 |
 
 ### 机制线（把底层原理补齐）
 
 | 顺序 | 模块 | 建议耗时 | 你应该做到（能解释/能改写/能调试） |
 | --- | --- | --- | --- |
-| 1 | `spring-core-beans` | 4–6h | Bean 注册/注入/生命周期/扩展点；能解释 BFPP vs BPP；能用调试手段“看见容器” |
-| 2 | `spring-core-profiles` | 1–2h | `@Profile`/`@ConditionalOnProperty`；避免注入歧义；能定位条件为何不生效 |
-| 3 | `spring-core-validation` | 1–2h | 约束/violation/method validation；能解释“为何依赖代理”；能定位 `@Validated` 缺失 |
-| 4 | `spring-core-aop` | 2–3h | 代理/切点/自调用/final 限制；能判断 JDK vs CGLIB；能解释“入口没走代理” |
-| 5 | `spring-core-tx` | 2–3h | 事务边界/回滚规则/传播；能解释 checked exception；能定位“自调用导致事务不生效” |
-| 6 | `spring-core-events` | 1–2h | 同步/异常传播/@Async/after-commit；能解释回滚时机；能稳定断言异步 |
-| 7 | `spring-core-resources` | 1–2h | `Resource` 抽象/pattern/jar 差异；能区分 handle vs exists；能定位 classpath 路径问题 |
+| 1 | [`spring-core-beans`](spring-core-beans/docs/README.md) | 4–6h | Bean 注册/注入/生命周期/扩展点；能解释 BFPP vs BPP；能用调试手段“看见容器” |
+| 2 | [`spring-core-profiles`](spring-core-profiles/docs/README.md) | 1–2h | `@Profile`/`@ConditionalOnProperty`；避免注入歧义；能定位条件为何不生效 |
+| 3 | [`spring-core-validation`](spring-core-validation/docs/README.md) | 1–2h | 约束/violation/method validation；能解释“为何依赖代理”；能定位 `@Validated` 缺失 |
+| 4 | [`spring-core-aop`](spring-core-aop/docs/README.md) | 2–3h | 代理/切点/自调用/final 限制；能判断 JDK vs CGLIB；能解释“入口没走代理” |
+| 5 | [`spring-core-aop-weaving`](spring-core-aop-weaving/docs/README.md) | 2–4h | AspectJ weaving（LTW/CTW）；`call` vs `execution`；constructor/get/set；withincode/cflow；能排障“代理做不到/织入没生效” |
+| 6 | [`spring-core-tx`](spring-core-tx/docs/README.md) | 2–3h | 事务边界/回滚规则/传播；能解释 checked exception；能定位“自调用导致事务不生效” |
+| 7 | [`spring-core-events`](spring-core-events/docs/README.md) | 1–2h | 同步/异常传播/@Async/after-commit；能解释回滚时机；能稳定断言异步 |
+| 8 | [`spring-core-resources`](spring-core-resources/docs/README.md) | 1–2h | `Resource` 抽象/pattern/jar 差异；能区分 handle vs exists；能定位 classpath 路径问题 |
 
 ## Labs/Exercises 总索引（按知识点 / 难度）
 
@@ -164,23 +165,24 @@ mvn -pl springboot-basics spring-boot:run
 
 | 模块 | 主题 | 入口说明 |
 |---|---|---|
-| `springboot-basics` | 启动、配置属性、Profiles | [README](springboot-basics/README.md) |
-| `springboot-web-mvc` | REST Controller、Validation、错误处理 | [README](springboot-web-mvc/README.md) |
-| `springboot-data-jpa` | Spring Data JPA + H2、Entity、Repository、CRUD | [README](springboot-data-jpa/README.md) |
-| `springboot-actuator` | Actuator 端点 + 自定义健康检查 | [README](springboot-actuator/README.md) |
-| `springboot-testing` | 测试基础：`@SpringBootTest`、`@WebMvcTest` 等 | [README](springboot-testing/README.md) |
-| `springboot-business-case` | Capstone：MVC + Validation + JPA + Tx + Events + AOP | [README](springboot-business-case/README.md) |
-| `springboot-security` | Security：认证/授权/CSRF/method security/JWT | [README](springboot-security/README.md) |
-| `springboot-web-client` | Web Client：RestClient vs WebClient、超时/重试/错误处理 | [README](springboot-web-client/README.md) |
-| `springboot-async-scheduling` | 异步与调度：`@Async`、线程池、`@Scheduled` | [README](springboot-async-scheduling/README.md) |
-| `springboot-cache` | 缓存：Spring Cache + Caffeine（key/evict/过期） | [README](springboot-cache/README.md) |
-| `spring-core-beans` | Spring Core：Bean、DI、`@Qualifier`、Scope、生命周期 | [README](spring-core-beans/README.md) |
-| `spring-core-aop` | Spring AOP：代理、Advice、Pointcut、自调用陷阱 | [README](spring-core-aop/README.md) |
-| `spring-core-events` | Spring 事件：发布事件、`@EventListener`、默认同步 | [README](spring-core-events/README.md) |
-| `spring-core-validation` | 校验：Bean Validation + Spring 集成 | [README](spring-core-validation/README.md) |
-| `spring-core-resources` | 资源：`Resource` 抽象 + classpath pattern | [README](spring-core-resources/README.md) |
-| `spring-core-tx` | 事务：`@Transactional` 提交/回滚（JDBC + H2） | [README](spring-core-tx/README.md) |
-| `spring-core-profiles` | Profiles/条件装配：`@Profile` + `@ConditionalOnProperty` | [README](spring-core-profiles/README.md) |
+| `springboot-basics` | 启动、配置属性、Profiles | [Docs TOC](springboot-basics/docs/README.md) |
+| `springboot-web-mvc` | REST Controller、Validation、错误处理 | [Docs TOC](springboot-web-mvc/docs/README.md) |
+| `springboot-data-jpa` | Spring Data JPA + H2、Entity、Repository、CRUD | [Docs TOC](springboot-data-jpa/docs/README.md) |
+| `springboot-actuator` | Actuator 端点 + 自定义健康检查 | [Docs TOC](springboot-actuator/docs/README.md) |
+| `springboot-testing` | 测试基础：`@SpringBootTest`、`@WebMvcTest` 等 | [Docs TOC](springboot-testing/docs/README.md) |
+| `springboot-business-case` | Capstone：MVC + Validation + JPA + Tx + Events + AOP | [Docs TOC](springboot-business-case/docs/README.md) |
+| `springboot-security` | Security：认证/授权/CSRF/method security/JWT | [Docs TOC](springboot-security/docs/README.md) |
+| `springboot-web-client` | Web Client：RestClient vs WebClient、超时/重试/错误处理 | [Docs TOC](springboot-web-client/docs/README.md) |
+| `springboot-async-scheduling` | 异步与调度：`@Async`、线程池、`@Scheduled` | [Docs TOC](springboot-async-scheduling/docs/README.md) |
+| `springboot-cache` | 缓存：Spring Cache + Caffeine（key/evict/过期） | [Docs TOC](springboot-cache/docs/README.md) |
+| `spring-core-beans` | Spring Core：Bean、DI、`@Qualifier`、Scope、生命周期 | [Docs TOC](spring-core-beans/docs/README.md) |
+| `spring-core-aop` | Spring AOP：代理、Advice、Pointcut、自调用陷阱 | [Docs TOC](spring-core-aop/docs/README.md) |
+| `spring-core-aop-weaving` | AspectJ weaving：LTW/CTW、更多 join point（call/get/set/constructor） | [Docs TOC](spring-core-aop-weaving/docs/README.md) |
+| `spring-core-events` | Spring 事件：发布事件、`@EventListener`、默认同步 | [Docs TOC](spring-core-events/docs/README.md) |
+| `spring-core-validation` | 校验：Bean Validation + Spring 集成 | [Docs TOC](spring-core-validation/docs/README.md) |
+| `spring-core-resources` | 资源：`Resource` 抽象 + classpath pattern | [Docs TOC](spring-core-resources/docs/README.md) |
+| `spring-core-tx` | 事务：`@Transactional` 提交/回滚（JDBC + H2） | [Docs TOC](spring-core-tx/docs/README.md) |
+| `spring-core-profiles` | Profiles/条件装配：`@Profile` + `@ConditionalOnProperty` | [Docs TOC](spring-core-profiles/docs/README.md) |
 
 > 端口说明：`springboot-web-mvc` 默认 `8081`，`springboot-actuator` 默认 `8082`，`springboot-testing` 默认 `8083`，`springboot-business-case` 默认 `8084`，`springboot-security` 默认 `8085`。非 Web 模块不监听端口。
 
@@ -195,16 +197,18 @@ mvn -pl springboot-basics spring-boot:run
 
 - **代理（Proxy）是共同底座**：AOP、事务（`@Transactional`）、方法参数校验（method validation）都依赖代理机制  
   - 从机制角度建议先读：[AOP 心智模型](spring-core-aop/docs/part-01-proxy-fundamentals/01-aop-proxy-mental-model.md)、[`@Transactional` 也是代理](spring-core-tx/docs/part-01-transaction-basics/02-transactional-proxy.md)、[方法参数校验也需要代理](spring-core-validation/docs/part-01-validation-core/03-method-validation-proxy.md)
+- **织入（Weaving）是代理的能力上限之外**：当你需要 `call/constructor/get/set/withincode/cflow` 这类 join point 或希望“非 Spring Bean 也能拦截”时，去看 `spring-core-aop-weaving`  
+  - 对照：[`spring-core-aop-weaving` 深挖指南](spring-core-aop-weaving/docs/part-00-guide/00-deep-dive-guide.md)、[Proxy vs Weaving 心智模型](spring-core-aop-weaving/docs/part-01-mental-model/01-proxy-vs-weaving.md)
 - **自调用（self-invocation）是代理世界第一大坑**：同一个类里用 `this.xxx()` 调用会绕过代理，因此 AOP/Tx 都可能“不生效”  
   - 对照：[AOP 自调用陷阱](spring-core-aop/docs/part-01-proxy-fundamentals/03-self-invocation.md)、[Tx 常见坑清单](spring-core-tx/docs/appendix/90-common-pitfalls.md)
 - **事务边界决定持久化行为**：JPA 的 flush / dirty checking 不是“魔法”，它强依赖事务与 persistence context  
   - 对照：[JPA Persistence Context](springboot-data-jpa/docs/part-01-data-jpa/02-persistence-context.md)、[事务边界](spring-core-tx/docs/part-01-transaction-basics/01-transaction-boundary.md)
 - **事件（Events）与事务（Tx）的时机关系**：同步事件 vs after-commit 事件（`@TransactionalEventListener`）能解释“回滚了但监听器为什么执行了/没执行”  
-  - 从现象入手：[spring-core-events](spring-core-events/README.md)、[`@TransactionalEventListener`（after-commit）](spring-core-events/docs/part-02-async-and-transactional/07-transactional-event-listener.md)、[springboot-business-case](springboot-business-case/README.md)
+  - 从现象入手：[spring-core-events](spring-core-events/docs/README.md)、[`@TransactionalEventListener`（after-commit）](spring-core-events/docs/part-02-async-and-transactional/07-transactional-event-listener.md)、[springboot-business-case](springboot-business-case/docs/README.md)
 - **资源（Resources）是很多能力的地基**：配置文件、classpath 扫描、jar/本地差异，最终都会回到 `Resource` 抽象  
   - 对照：[Resource 抽象](spring-core-resources/docs/part-01-resource-abstraction/01-resource-abstraction.md)、[jar vs filesystem](spring-core-resources/docs/part-01-resource-abstraction/06-jar-vs-filesystem.md)
 - **测试切片 vs 全量上下文**：`@DataJpaTest` / `@WebMvcTest` 用来快速验证机制，`@SpringBootTest` 更接近集成链路  
-  - 对照：[springboot-testing](springboot-testing/README.md)、[`@DataJpaTest` 切片](springboot-data-jpa/docs/part-01-data-jpa/06-datajpatest-slice.md)
+  - 对照：[springboot-testing](springboot-testing/docs/README.md)、[`@DataJpaTest` 切片](springboot-data-jpa/docs/part-01-data-jpa/06-datajpatest-slice.md)
 
 ## 常见问题
 

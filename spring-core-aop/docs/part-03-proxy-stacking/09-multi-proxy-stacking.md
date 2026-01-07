@@ -1,5 +1,19 @@
 # 09. 多切面/多代理叠加与顺序：AOP/Tx/Cache/Security 代理链如何叠、如何看
 
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**09. 多切面/多代理叠加与顺序：AOP/Tx/Cache/Security 代理链如何叠、如何看**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
 真实项目里你几乎一定会遇到“叠加”：
 
 - AOP（自定义切面）
@@ -8,15 +22,6 @@
 - 安全（方法级鉴权）
 
 这一章的目标是让你能做到：
-
-- 能解释“叠加”到底是 **一个 proxy 上多个 advisor**，还是 **多个 proxy 套娃**
-- 能解释顺序：谁在外层、谁先执行、为什么
-- 能在 debug 时把链条“看见”：从 proxy 到 advisors，再到拦截器链
-
-> 推荐配套 Labs：`SpringCoreAopMultiProxyStackingLabTest`（同时覆盖“多 advisor”与“多层 proxy”）。
->
-> 如果你希望把“叠加”落到真实基础设施（`@Transactional/@Cacheable/@PreAuthorize`）并用断点验证语义，
-> 继续读 [docs/10](10-real-world-stacking-playbook.md) + 跑 `SpringCoreAopRealWorldStackingLabTest`。
 
 ---
 
@@ -50,8 +55,6 @@
 - `outerProxy` 是 AOP proxy
 - `outerProxy` 的 target **也是** AOP proxy（继续套娃）
 
-这种形态如果你没意识到，很容易导致调试误判（比如你在某一层看不到期望的 advisors）。
-
 ---
 
 ## 2. 顺序到底由谁决定？不要把两种顺序混在一起
@@ -65,13 +68,10 @@
 
 相关入口（容器时间线）：
 
-- `PostProcessorRegistrationDelegate#registerBeanPostProcessors`（决定 BPP 注册顺序）
-- `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`（按列表顺序依次应用 BPP）
-
 对应 beans 深挖：
 
-- `spring-core-beans/docs/14-post-processor-ordering.md`
-- `spring-core-beans/docs/31-proxying-phase-bpp-wraps-bean.md`
+- `spring-core-beans/docs/part-03-container-internals/14-post-processor-ordering.md`
+- `spring-core-beans/docs/part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md`
 
 ### 2.2 顺序 2：Advisor/Interceptor 顺序（调用阶段）
 
@@ -111,8 +111,6 @@ AutoProxyCreator 主线详见：[07 - AutoProxyCreator 主线](../part-02-autopr
 
 ---
 
-## 4. Debug 方法：怎么把链条“看见”
-
 ### 4.1 第一步：确认你拿到的是不是 proxy
 
 - `AopUtils.isAopProxy(bean)`
@@ -138,8 +136,6 @@ AutoProxyCreator 主线详见：[07 - AutoProxyCreator 主线](../part-02-autopr
 
 ### 4.4 第四步：看执行链条（proceed 嵌套）
 
-断点：
-
 - `DefaultAdvisorChainFactory#getInterceptorsAndDynamicInterceptionAdvice`（链条组装）
 - `ReflectiveMethodInvocation#proceed`（链条执行）
 
@@ -150,23 +146,10 @@ AutoProxyCreator 主线详见：[07 - AutoProxyCreator 主线](../part-02-autopr
 
 ---
 
-## 5. Labs：把“叠加”做成可断言结论
-
-本模块提供一个专门的 Lab：
-
-- `SpringCoreAopMultiProxyStackingLabTest`
-
-它会同时验证：
-
 1) **单 proxy 多 advisors**：同一个 proxy 上挂多个“模拟 Tx/Cache/Security” 的 advisors，顺序与 proceed 嵌套可断言  
 2) **多层 proxy**：显式再包一层 proxy，演示 nested proxy 的识别与拆解
 
 如果你要进一步把“模拟 advisors”升级为“真实基础设施”：
-
-- 真实叠加集成 Lab：`SpringCoreAopRealWorldStackingLabTest`
-- 配套 Debug Playbook：`docs/10-real-world-stacking-playbook.md`
-
-建议断点配合：
 
 - 容器阶段：`AbstractAutoProxyCreator#wrapIfNecessary/createProxy`
 - 调用阶段：`ReflectiveMethodInvocation#proceed`
@@ -184,3 +167,65 @@ AutoProxyCreator 主线详见：[07 - AutoProxyCreator 主线](../part-02-autopr
 5. **顺序问题归位**：是 BPP 顺序导致套娃/包裹顺序，还是 advisor 顺序导致 proceed 嵌套顺序？
 
 如果你能把这 5 步跑通，基本就能独立定位真实项目里 AOP/Tx/Cache/Security “不生效”与“顺序怪”的大多数原因。
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreAopMultiProxyStackingLabTest` / `SpringCoreAopRealWorldStackingLabTest`
+- 建议命令：`mvn -pl spring-core-aop test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+- 能解释“叠加”到底是 **一个 proxy 上多个 advisor**，还是 **多个 proxy 套娃**
+- 能解释顺序：谁在外层、谁先执行、为什么
+- 能在 debug 时把链条“看见”：从 proxy 到 advisors，再到拦截器链
+
+> 推荐配套 Labs：`SpringCoreAopMultiProxyStackingLabTest`（同时覆盖“多 advisor”与“多层 proxy”）。
+>
+> 如果你希望把“叠加”落到真实基础设施（`@Transactional/@Cacheable/@PreAuthorize`）并用断点验证语义，
+> 继续读 [10. real-world-stacking-playbook](10-real-world-stacking-playbook.md) + 跑 `SpringCoreAopRealWorldStackingLabTest`。
+
+这种形态如果你没意识到，很容易导致调试误判（比如你在某一层看不到期望的 advisors）。
+
+## 4. Debug 方法：怎么把链条“看见”
+
+断点：
+
+## 5. Labs：把“叠加”做成可断言结论
+
+本模块提供一个专门的 Lab：
+
+- `SpringCoreAopMultiProxyStackingLabTest`
+
+它会同时验证：
+
+- 真实叠加集成 Lab：`SpringCoreAopRealWorldStackingLabTest`
+- 配套 Debug Playbook：见 [10. real-world-stacking-playbook](10-real-world-stacking-playbook.md)
+
+建议断点配合：
+
+## F. 常见坑与边界
+
+- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+
+## G. 小结与下一章
+
+- `PostProcessorRegistrationDelegate#registerBeanPostProcessors`（决定 BPP 注册顺序）
+- `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`（按列表顺序依次应用 BPP）
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreAopMultiProxyStackingLabTest` / `SpringCoreAopRealWorldStackingLabTest`
+
+上一章：[08-pointcut-expression-system](../part-02-autoproxy-and-pointcuts/08-pointcut-expression-system.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[10-real-world-stacking-playbook](10-real-world-stacking-playbook.md)
+
+<!-- BOOKIFY:END -->

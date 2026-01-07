@@ -38,6 +38,13 @@
 | 202601052200 | spring_core_beans_beans_package_full_coverage | Enhancement | ✅Completed | [202601052200_spring_core_beans_beans_package_full_coverage](2026-01/202601052200_spring_core_beans_beans_package_full_coverage/) |
 | 202601060957 | spring_core_beans_environment_beanfactory_deepening | Enhancement | ✅Completed | [202601060957_spring_core_beans_environment_beanfactory_deepening](2026-01/202601060957_spring_core_beans_environment_beanfactory_deepening/) |
 | 202601061038 | spring_core_beans_spring_beans_api_full_coverage | Enhancement | ✅Completed | [202601061038_spring_core_beans_spring_beans_api_full_coverage](2026-01/202601061038_spring_core_beans_spring_beans_api_full_coverage/) |
+| 202601061309 | springboot-web-mvc-thymeleaf-view-rendering | Enhancement | ✅Completed | [202601061309_springboot-web-mvc-thymeleaf-view-rendering](2026-01/202601061309_springboot-web-mvc-thymeleaf-view-rendering/) |
+| 202601061341 | spring-core-aop-weaving | Enhancement | ✅Completed | [202601061341_spring-core-aop-weaving](2026-01/202601061341_spring-core-aop-weaving/) |
+| 202601061359 | spring_core_beans_beans_support_utils | Enhancement | ✅Completed | [202601061359_spring_core_beans_beans_support_utils](2026-01/202601061359_spring_core_beans_beans_support_utils/) |
+| 202601061556 | spring_core_modules_teaching_rollout | Enhancement | ✅Completed | [202601061556_spring_core_modules_teaching_rollout](2026-01/202601061556_spring_core_modules_teaching_rollout/) |
+| 202601062024 | springboot_modules_teaching_rollout | Enhancement | ✅Completed | [202601062024_springboot_modules_teaching_rollout](2026-01/202601062024_springboot_modules_teaching_rollout/) |
+| 202601062218 | all_modules_docs_bookify | Enhancement | ✅Completed | [202601062218_all_modules_docs_bookify](2026-01/202601062218_all_modules_docs_bookify/) |
+| 202601071034 | all_modules_docs_ag_contract | Enhancement | ✅Completed | [202601071034_all_modules_docs_ag_contract](2026-01/202601071034_all_modules_docs_ag_contract/) |
 
 ---
 
@@ -75,3 +82,10 @@
 - [202601052200_spring_core_beans_beans_package_full_coverage](2026-01/202601052200_spring_core_beans_beans_package_full_coverage/) - spring-core-beans：补齐 Spring Framework `spring-beans` 包 5 组机制闭环（docs 46–50 + Labs）
 - [202601060957_spring_core_beans_environment_beanfactory_deepening](2026-01/202601060957_spring_core_beans_environment_beanfactory_deepening/) - spring-core-beans：补齐 Spring Framework `BeanFactory API` 与 `Environment Abstraction` 的系统化深挖闭环（docs 38–39 + Labs）
 - [202601061038_spring_core_beans_spring_beans_api_full_coverage](2026-01/202601061038_spring_core_beans_spring_beans_api_full_coverage/) - spring-core-beans：新增 spring-beans Public API 索引（95/96）+ AOT/ServiceLoader* 补齐 + Explore/Debug 用例（97）
+- [202601061309_springboot-web-mvc-thymeleaf-view-rendering](2026-01/202601061309_springboot-web-mvc-thymeleaf-view-rendering/) - springboot-web-mvc：补齐传统 MVC（Thymeleaf/表单/错误页/Accept）+ docs 与 tests 闭环
+- [202601061341_spring-core-aop-weaving](2026-01/202601061341_spring-core-aop-weaving/) - spring-core-aop-weaving：新增 weaving 深挖模块（AspectJ LTW/CTW + join point/pointcut cookbook + Labs/Exercises 闭环）
+- [202601061359_spring_core_beans_beans_support_utils](2026-01/202601061359_spring_core_beans_beans_support_utils/) - spring-core-beans：补齐 `org.springframework.beans.support` support 工具类闭环（ArgumentConvertingMethodInvoker/ResourceEditorRegistrar/PropertyComparator/PagedListHolder/SortDefinition）并新增可运行 Lab，Appendix 96 Gap 归零
+- [202601061556_spring_core_modules_teaching_rollout](2026-01/202601061556_spring_core_modules_teaching_rollout/) - spring-core-*：推广教学化文档规范（目录页/Part 编号/章节入口块/清理 docs/NN 缩写引用）并新增自检闸门脚本，保证全量断链=0、min-labs=2
+- [202601062024_springboot_modules_teaching_rollout](2026-01/202601062024_springboot_modules_teaching_rollout/) - springboot-*：推广教学化文档规范（docs/README Markdown 链接目录页 SSOT + guide/appendix 可跑入口块），并扩展自检闸门覆盖 springboot，同时补齐 min-labs=2（新增 5 个 LabTest）
+- [202601062218_all_modules_docs_bookify](2026-01/202601062218_all_modules_docs_bookify/) - 全模块：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过闸门与抽样回归
+- [202601071034_all_modules_docs_ag_contract](2026-01/202601071034_all_modules_docs_ag_contract/) - 全模块：升级 A–G 章节契约（每章 A–G + 对应 Lab/Test + 至少 1 个 LabTest），新增契约闸门并更新根 README 入口

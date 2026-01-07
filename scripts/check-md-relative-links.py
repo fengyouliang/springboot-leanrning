@@ -4,9 +4,13 @@
 """
 检查 Markdown 文档中的相对链接是否存在（仅做“路径存在性检查”，不校验锚点）。
 
+默认行为（不带参数）：
+  - 自动扫描仓库根目录下所有 `spring-core-*/docs` 与 `springboot-*/docs`
+
 用法：
-  python scripts/check-md-relative-links.py spring-core-beans/docs
-  python scripts/check-md-relative-links.py spring-core-beans/docs spring-core-aop/docs
+  python3 scripts/check-md-relative-links.py
+  python3 scripts/check-md-relative-links.py spring-core-beans/docs spring-core-aop/docs
+  python3 scripts/check-md-relative-links.py spring-core-aop/docs/part-00-guide/00-deep-dive-guide.md
 
 规则：
   - 只检查相对路径与仓库根路径（/xxx）形式的链接目标是否存在
@@ -16,6 +20,7 @@
 
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 from pathlib import Path
@@ -108,9 +113,41 @@ def check_one_file(repo_root: Path, md_file: Path) -> list[tuple[int, str, Path]
     return missing
 
 
+def default_doc_roots(repo_root: Path) -> list[Path]:
+    roots: list[Path] = []
+    for p in sorted(repo_root.iterdir()):
+        if not p.is_dir():
+            continue
+        if not (p.name.startswith("spring-core-") or p.name.startswith("springboot-")):
+            continue
+        docs_dir = p / "docs"
+        if docs_dir.is_dir():
+            roots.append(docs_dir)
+    return roots
+
+
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="check-md-relative-links.py",
+        description="检查 Markdown 文档中的相对链接目标是否存在（不校验锚点）。",
+    )
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        help="要检查的 docs 目录或单个 .md 文件（默认：扫描所有 spring-core-*/docs 与 springboot-*/docs）。",
+    )
+    return parser.parse_args(argv)
+
+
 def main(argv: list[str]) -> int:
     repo_root = Path(__file__).resolve().parents[1]
-    paths = [Path(p) for p in (argv[1:] if len(argv) > 1 else ["spring-core-beans/docs"])]
+    args = parse_args(argv[1:])
+
+    input_paths = [Path(p) for p in args.paths]
+    paths = input_paths if input_paths else default_doc_roots(repo_root)
+    if not paths:
+        print("[ERROR] No docs directory found under spring-core-*/docs or springboot-*/docs.", file=sys.stderr)
+        return 2
 
     md_files: list[Path] = []
     for p in paths:

@@ -116,4 +116,14 @@
 9) early reference：`SpringCoreBeansEarlyReferenceLabTest`
 10) 排障断点入口：`SpringCoreBeansExceptionNavigationLabTest` / `SpringCoreBeansBeanGraphDebugLabTest`
 
-上一章：[92. 知识点地图（Concept → Chapter → Lab）](92-knowledge-map.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[Docs TOC](../README.md)
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansLabTest` / `SpringCoreBeansContainerLabTest` / `SpringCoreBeansBootstrapInternalsLabTest` / `SpringCoreBeansInjectionAmbiguityLabTest` / `SpringCoreBeansAutowireCandidateSelectionLabTest` / `SpringCoreBeansLifecycleCallbackOrderLabTest` / `SpringCoreBeansRegistryPostProcessorLabTest` / `SpringCoreBeansPostProcessorOrderingLabTest` / `SpringCoreBeansEarlyReferenceLabTest` / `SpringCoreBeansExceptionNavigationLabTest` / `SpringCoreBeansBeanGraphDebugLabTest`
+- Exercise：`SpringCoreBeansExerciseTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansExerciseTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`
+
+上一章：[97. Explore/Debug 用例（可选启用，不影响默认回归）](97-explore-debug-tests.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[Docs TOC](../README.md)
+
+<!-- BOOKIFY:END -->

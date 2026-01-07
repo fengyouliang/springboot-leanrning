@@ -1,10 +1,20 @@
----
-tagline: 把 AOP/Tx/Cache/Security 拉到同一条调用链里，用断点与可断言实验定位“不生效/顺序怪/被绕过”
----
+# 10 real world stacking playbook
 
-# 10. 真实项目叠加 Debug Playbook：AOP/Tx/Cache/Security 如何叠、如何断点验证
+<!-- AG-CONTRACT:START -->
 
-上一章（`docs/09`）我们用“模拟 Tx/Cache/Security 的 Advisors”把两种叠加形态讲清楚了：
+## A. 本章定位
+
+- 本章主题：**10 real world stacking playbook**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
+上一章（[09. multi-proxy-stacking](09-multi-proxy-stacking.md)）我们用“模拟 Tx/Cache/Security 的 Advisors”把两种叠加形态讲清楚了：
 
 - **主流形态：单 proxy + 多 advisors**（同一个代理上挂很多增强）
 - **少见但要能识别：多层 proxy（套娃）**
@@ -15,33 +25,9 @@ tagline: 把 AOP/Tx/Cache/Security 拉到同一条调用链里，用断点与可
 - 缓存：`@Cacheable`
 - 安全：`@PreAuthorize`（方法级鉴权）
 
-这一章的目标不是“再讲一遍概念”，而是把它做成 **可复现、可断言、可断点复述主线** 的实验闭环：
-
-- 你能把“叠加机制”落到断点，并复述调用主线（A）
-- 你能在真实项目里定位 AOP/Tx/Cache/Security 不生效的原因（B）
-- 你能解释并验证 JDK vs CGLIB 的类型/注入边界（C）
-- 你能解释并验证多切面顺序与多代理叠加（D）
-
-> 本章配套 Lab：`SpringCoreAopRealWorldStackingLabTest`  
-> 它用最小 `AnnotationConfigApplicationContext` 组装 Tx/Cache/Security 的基础设施，避免 Spring Boot 自动装配带来的噪音。
-
 ---
 
-## 0. 推荐的最小运行方式（精确到方法）
-
-```bash
-# 只跑这一组集成 Lab（最推荐）
-mvn -pl spring-core-aop -Dtest=SpringCoreAopRealWorldStackingLabTest test
-
-# 精确到某个方法（断点更舒服）
-mvn -pl spring-core-aop -Dtest=SpringCoreAopRealWorldStackingLabTest#cache_hit_short_circuits_target_but_security_still_applies test
-```
-
 如果你需要在启动后挂起等待 IDE attach：
-
-```bash
-mvn -pl spring-core-aop -Dmaven.surefire.debug -Dtest=SpringCoreAopRealWorldStackingLabTest test
-```
 
 ---
 
@@ -53,17 +39,9 @@ mvn -pl spring-core-aop -Dmaven.surefire.debug -Dtest=SpringCoreAopRealWorldStac
 
 因此你遇到的所有“增强不生效”问题，本质上都能被稳定分流成 3 类：
 
-1) **入口没走 proxy（call path 问题）**：自调用/`new` 出来的对象/绕过 Spring 管理  
-2) **这次调用没命中（pointcut/matcher 问题）**：表达式误判、方法不可代理、可见性限制  
-3) **顺序/短路改变了语义（ordering/short-circuit 问题）**：缓存命中直接返回、鉴权提前抛错、事务边界位置不同
-
 > 这个分流框架建议背下来。它能让你在真实项目里“少猜、快定位”。
 
 ---
-
-## 2. Lab 入口：你要验证的 4 个真实结论
-
-打开 `SpringCoreAopRealWorldStackingLabTest`，你会看到它刻意覆盖四类“真实语义”：
 
 1) **鉴权阻断（AccessDenied）**  
    - 未授权调用会在增强链上被阻断，目标方法不执行，缓存不写入。
@@ -83,10 +61,6 @@ mvn -pl spring-core-aop -Dmaven.surefire.debug -Dtest=SpringCoreAopRealWorldStac
 
 ---
 
-## 3. 断点 Playbook：从“能跑”到“能复述主线”
-
-下面给你一套按问题类型组织的断点清单。你不需要全打，一次只打你当前要验证的那一段。
-
 ### 3.1 第一步：确认你拿到的是不是 proxy（不要跳过）
 
 在你的业务入口（controller/service 的调用点）先做一个“事实确认”：
@@ -103,8 +77,6 @@ mvn -pl spring-core-aop -Dmaven.surefire.debug -Dtest=SpringCoreAopRealWorldStac
 
 ### 3.2 第二步：看清“链条组装”（你要看见这次调用挂了哪些拦截器）
 
-核心断点（调用阶段）：
-
 - `DefaultAdvisorChainFactory#getInterceptorsAndDynamicInterceptionAdvice`
 
 你要看的不是源码细节，而是两个观察点：
@@ -116,8 +88,6 @@ mvn -pl spring-core-aop -Dmaven.surefire.debug -Dtest=SpringCoreAopRealWorldStac
 
 ### 3.3 第三步：看清“链条执行”（proceed 嵌套关系）
 
-核心断点：
-
 - `ReflectiveMethodInvocation#proceed`
 
 观察点：
@@ -125,39 +95,17 @@ mvn -pl spring-core-aop -Dmaven.surefire.debug -Dtest=SpringCoreAopRealWorldStac
 - `currentInterceptorIndex`：现在执行到第几个 interceptor
 - “before 的顺序 / after 的逆序”：你应该能解释为什么 finally 会倒着出栈
 
-如果你已经读过 `docs/06` 与 `docs/Proceed` Lab，这一步会非常顺滑；如果不顺滑，建议回去先把：
-
-- `SpringCoreAopProceedNestingLabTest`
-
-跑通，再回到这个集成 Lab。
-
 ---
 
-## 4. 真实基础设施断点：Tx / Cache / Security 分别在哪“进场”
-
-这一节的目标是：你能在断点里“看到”它们分别在哪拦截、在哪短路、在哪抛错。
-
 ### 4.1 事务（@Transactional）
-
-常见断点（版本差异不大）：
 
 - `TransactionInterceptor#invoke`
 - `TransactionAspectSupport#invokeWithinTransaction`
 
-你要验证的事实：
-
-- 目标方法执行前，事务已开始（或已加入已有事务）
-- 目标方法内 `TransactionSynchronizationManager.isActualTransactionActive()` 为 true
-- 异常时 rollback 规则由 `TransactionAttribute` 决定（本 Lab 不做回滚细节，但建议你能在断点里看到 attribute）
-
 ### 4.2 缓存（@Cacheable）
-
-常见断点：
 
 - `CacheInterceptor#invoke`
 - `CacheAspectSupport#execute`
-
-你要验证两个分支：
 
 - **缓存未命中**：继续 `proceed()` → 执行目标方法 → 写入 cache
 - **缓存命中**：直接返回 cached value（短路），目标方法不会执行
@@ -172,36 +120,15 @@ mvn -pl spring-core-aop -Dmaven.surefire.debug -Dtest=SpringCoreAopRealWorldStac
 - 在未授权时会 **直接抛出 AccessDeniedException**
 - 它必须发生在“返回结果之前”（否则就已经泄露数据）
 
-建议断点策略：
-
-1) 先在 IDE 里全局搜索 `AccessDeniedException` 的 throw 点（或 Debug 时 “Break on Exception”）
-2) 再回到链条组装断点里确认：链条中确实包含来自 `org.springframework.security...` 的拦截器
-
-你要验证的事实：
-
-- **未授权调用**：异常抛出点发生在目标方法执行之前
-- **授权调用**：鉴权通过后才允许继续 proceed
-- **缓存命中场景**：未授权也必须抛错，不能返回缓存结果（本章 Lab 已用断言固化）
-
 ---
 
 ## 5. 真实项目排障 Checklist（你可以直接照着跑）
 
 当你遇到“AOP/Tx/Cache/Security 不生效/顺序怪”，按这个顺序做，基本不会走弯路：
 
-1) **call path**：入口是否走 Spring bean？是否 self-invocation？是否从 `new` 出来的对象调用？  
-2) **proxy 存在性**：`AopUtils.isAopProxy(bean)` 是否为 true？代理类型（JDK/CGLIB）是否符合预期？  
-3) **advisors 存在性**：`bean instanceof Advised` 后看 `getAdvisors()`，期望的增强是否存在？  
-4) **本次调用是否命中**：在链条组装断点里看，这次方法调用是否把期望的 interceptor 加入链条？  
-5) **短路与顺序**：缓存命中是否直接返回？鉴权是否在结果返回前发生？事务边界是否包住目标执行？
-
 如果你能把这 5 步跑通，基本就具备了在真实项目里独立定位 AOP/Tx/Cache/Security 问题的能力。
 
 ---
-
-## 6. 练习：把“机制”复述成一条可运行的主线（建议 30 分钟）
-
-建议你按顺序做三次 Debug，每次只完成一个“可复述结论”：
 
 1) 跑：`unauthorized_call_is_denied_and_does_not_invoke_target_or_cache`  
    - 你能指出：是谁抛出了 `AccessDeniedException`？目标方法有没有执行？
@@ -216,7 +143,126 @@ mvn -pl spring-core-aop -Dmaven.surefire.debug -Dtest=SpringCoreAopRealWorldStac
 
 ## 7. 下一步推荐
 
-- 想把“叠加形态”与“顺序归属（BPP vs Advisor）”彻底讲透：回看 `docs/09` + `SpringCoreAopMultiProxyStackingLabTest`
-- 想把“容器视角（AutoProxyCreator/BPP）”拉通：读 `docs/07` + 跑 `SpringCoreAopAutoProxyCreatorInternalsLabTest`
-- 想把“pointcut 误判”系统补齐：读 `docs/08` + 跑 `SpringCoreAopPointcutExpressionsLabTest`
+## D. 源码与断点
 
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreAopAutoProxyCreatorInternalsLabTest` / `SpringCoreAopMultiProxyStackingLabTest` / `SpringCoreAopPointcutExpressionsLabTest`
+- 建议命令：`mvn -pl spring-core-aop test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+---
+tagline: 把 AOP/Tx/Cache/Security 拉到同一条调用链里，用断点与可断言实验定位“不生效/顺序怪/被绕过”
+---
+
+# 10. 真实项目叠加 Debug Playbook：AOP/Tx/Cache/Security 如何叠、如何断点验证
+
+这一章的目标不是“再讲一遍概念”，而是把它做成 **可复现、可断言、可断点复述主线** 的实验闭环：
+
+- 你能把“叠加机制”落到断点，并复述调用主线（A）
+- 你能在真实项目里定位 AOP/Tx/Cache/Security 不生效的原因（B）
+- 你能解释并验证 JDK vs CGLIB 的类型/注入边界（C）
+- 你能解释并验证多切面顺序与多代理叠加（D）
+
+> 本章配套 Lab：`SpringCoreAopRealWorldStackingLabTest`  
+> 它用最小 `AnnotationConfigApplicationContext` 组装 Tx/Cache/Security 的基础设施，避免 Spring Boot 自动装配带来的噪音。
+
+## 0. 推荐的最小运行方式（精确到方法）
+
+```bash
+# 只跑这一组集成 Lab（最推荐）
+mvn -pl spring-core-aop -Dtest=SpringCoreAopRealWorldStackingLabTest test
+
+# 精确到某个方法（断点更舒服）
+mvn -pl spring-core-aop -Dtest=SpringCoreAopRealWorldStackingLabTest#cache_hit_short_circuits_target_but_security_still_applies test
+```
+
+```bash
+mvn -pl spring-core-aop -Dmaven.surefire.debug -Dtest=SpringCoreAopRealWorldStackingLabTest test
+```
+
+## 2. Lab 入口：你要验证的 4 个真实结论
+
+打开 `SpringCoreAopRealWorldStackingLabTest`，你会看到它刻意覆盖四类“真实语义”：
+
+## 3. 断点 Playbook：从“能跑”到“能复述主线”
+
+下面给你一套按问题类型组织的断点清单。你不需要全打，一次只打你当前要验证的那一段。
+
+核心断点（调用阶段）：
+
+核心断点：
+
+如果你已经读过 [06. debugging](../part-01-proxy-fundamentals/06-debugging.md) 与 `docs/Proceed` Lab，这一步会非常顺滑；如果不顺滑，建议回去先把：
+
+- `SpringCoreAopProceedNestingLabTest`
+
+跑通，再回到这个集成 Lab。
+
+## 4. 真实基础设施断点：Tx / Cache / Security 分别在哪“进场”
+
+这一节的目标是：你能在断点里“看到”它们分别在哪拦截、在哪短路、在哪抛错。
+
+常见断点（版本差异不大）：
+
+你要验证的事实：
+
+- 目标方法执行前，事务已开始（或已加入已有事务）
+- 目标方法内 `TransactionSynchronizationManager.isActualTransactionActive()` 为 true
+- 异常时 rollback 规则由 `TransactionAttribute` 决定（本 Lab 不做回滚细节，但建议你能在断点里看到 attribute）
+
+常见断点：
+
+你要验证两个分支：
+
+建议断点策略：
+
+1) 先在 IDE 里全局搜索 `AccessDeniedException` 的 throw 点（或 Debug 时 “Break on Exception”）
+2) 再回到链条组装断点里确认：链条中确实包含来自 `org.springframework.security...` 的拦截器
+
+你要验证的事实：
+
+- **未授权调用**：异常抛出点发生在目标方法执行之前
+- **授权调用**：鉴权通过后才允许继续 proceed
+- **缓存命中场景**：未授权也必须抛错，不能返回缓存结果（本章 Lab 已用断言固化）
+
+1) **call path**：入口是否走 Spring bean？是否 self-invocation？是否从 `new` 出来的对象调用？  
+2) **proxy 存在性**：`AopUtils.isAopProxy(bean)` 是否为 true？代理类型（JDK/CGLIB）是否符合预期？  
+3) **advisors 存在性**：`bean instanceof Advised` 后看 `getAdvisors()`，期望的增强是否存在？  
+4) **本次调用是否命中**：在链条组装断点里看，这次方法调用是否把期望的 interceptor 加入链条？  
+5) **短路与顺序**：缓存命中是否直接返回？鉴权是否在结果返回前发生？事务边界是否包住目标执行？
+
+## 6. 练习：把“机制”复述成一条可运行的主线（建议 30 分钟）
+
+建议你按顺序做三次 Debug，每次只完成一个“可复述结论”：
+
+- 想把“叠加形态”与“顺序归属（BPP vs Advisor）”彻底讲透：回看 [09. multi-proxy-stacking](09-multi-proxy-stacking.md) + `SpringCoreAopMultiProxyStackingLabTest`
+- 想把“容器视角（AutoProxyCreator/BPP）”拉通：读 [07. autoproxy-creator-mainline](../part-02-autoproxy-and-pointcuts/07-autoproxy-creator-mainline.md) + 跑 `SpringCoreAopAutoProxyCreatorInternalsLabTest`
+- 想把“pointcut 误判”系统补齐：读 [08. pointcut-expression-system](../part-02-autoproxy-and-pointcuts/08-pointcut-expression-system.md) + 跑 `SpringCoreAopPointcutExpressionsLabTest`
+
+## F. 常见坑与边界
+
+1) **入口没走 proxy（call path 问题）**：自调用/`new` 出来的对象/绕过 Spring 管理  
+2) **这次调用没命中（pointcut/matcher 问题）**：表达式误判、方法不可代理、可见性限制  
+3) **顺序/短路改变了语义（ordering/short-circuit 问题）**：缓存命中直接返回、鉴权提前抛错、事务边界位置不同
+
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreAopAutoProxyCreatorInternalsLabTest` / `SpringCoreAopMultiProxyStackingLabTest` / `SpringCoreAopPointcutExpressionsLabTest` / `SpringCoreAopRealWorldStackingLabTest` / `SpringCoreAopProceedNestingLabTest`
+
+上一章：[09-multi-proxy-stacking](09-multi-proxy-stacking.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[90-common-pitfalls](../appendix/90-common-pitfalls.md)
+
+<!-- BOOKIFY:END -->

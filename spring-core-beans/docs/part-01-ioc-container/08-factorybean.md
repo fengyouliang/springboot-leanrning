@@ -1,11 +1,18 @@
 # 08. `FactoryBean`：产品 vs 工厂（以及 `&` 前缀）
 
-## 0. 复现入口（可运行）
+<!-- AG-CONTRACT:START -->
 
-- 入口测试（推荐先跑通再下断点）：
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansFactoryBeanDeepDiveLabTest.java`
-- 推荐运行命令：
-  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansFactoryBeanDeepDiveLabTest test`
+## A. 本章定位
+
+- 本章主题：**08. `FactoryBean`：产品 vs 工厂（以及 `&` 前缀）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 `FactoryBean` 是 Spring 里一个非常“老牌但重要”的扩展点，常见于各种框架集成（ORM、RPC、代理生成等）。
 
@@ -33,8 +40,6 @@
 - `FactoryBean#isSingleton()` 返回 `true`：容器会缓存 product（下一次取同名 bean 直接返回缓存）
 - `FactoryBean#isSingleton()` 返回 `false`：容器不会缓存 product（每次可能重新生产）
 
-> 注意：这会让“同一个 beanName 每次拿到是否同一对象”变成一个需要你明确验证的点，而不是凭感觉判断。
-
 ### 1.3 类型匹配：按类型找的是 product 的类型
 
 当你做“按类型注入/按类型查找”时，Spring 需要知道 product 的类型：
@@ -52,21 +57,7 @@
 
 这就是很多人第一次碰到 `FactoryBean` 时的迷惑点。
 
-## 2. 本模块的实验：用 `&sequence` 拿到工厂
-
-建议从这些测试方法开始（它们把 FactoryBean 的关键语义做成了可断言实验）：
-
-- `SpringCoreBeansContainerLabTest#factoryBeanByNameReturnsProductAndAmpersandReturnsFactory`：`&name` 的硬规则
-- `SpringCoreBeansFactoryBeanDeepDiveLabTest#factoryBeanProductParticipatesInTypeMatching_andIsRetrievedByProductType`：product 参与 type matching
-- `SpringCoreBeansFactoryBeanDeepDiveLabTest#singletonFactoryBeanProduct_isCached_byTheContainer`：`isSingleton=true` 的缓存
-- `SpringCoreBeansFactoryBeanDeepDiveLabTest#nonSingletonFactoryBeanProduct_isNotCached_byTheContainer`：`isSingleton=false` 的非缓存
-- `SpringCoreBeansFactoryBeanEdgeCasesLabTest#factoryBeanWithNullObjectType_isNotDiscoverableByTypeWithoutEagerInit_butCanStillBeRetrievedByName`：`getObjectType=null` 的边界
-
 对应测试：
-
-- `SpringCoreBeansContainerLabTest.factoryBeanByNameReturnsProductAndAmpersandReturnsFactory()`
-
-实验里定义了一个 `SequenceFactoryBean implements FactoryBean<Long>`：
 
 - `getBean("sequence", Long.class)` 返回的是 Long（产品），并且每次调用递增
 - `getBean("&sequence")` 返回的是 `SequenceFactoryBean`（工厂本身）
@@ -82,28 +73,17 @@
 - 与外部系统集成时，把“连接/代理对象的创建”封装成 bean
 - 生成代理对象（你以为注入的是接口实现，其实是代理）
 
-## 源码锚点（建议从这里下断点）
-
 你想在源码里“看见” product/factory 与缓存发生在哪，建议从这几个点切入：
 
 - `AbstractBeanFactory#doGetBean`：`getBean()` 总入口
 - `FactoryBeanRegistrySupport#getObjectFromFactoryBean`：从 factory 拿 product，并处理缓存
 - `AbstractBeanFactory#isTypeMatch` / `DefaultListableBeanFactory#getBeanNamesForType`：type matching 的关键路径
 
-## 断点闭环（用本仓库 Lab/Test 跑一遍）
-
-把断点打在上面几个方法，然后跑：
-
-- `SpringCoreBeansFactoryBeanDeepDiveLabTest`
-- `SpringCoreBeansFactoryBeanEdgeCasesLabTest`
-
 你应该能在调用栈里明确看到：
 
 - `"name"` 与 `"&name"` 的分流
 - product 缓存命中/未命中的差异
 - `allowEagerInit=false` 时为什么不会主动实例化 factory 来推断类型
-
-## 4. 常见坑
 
 1) 你以为注册的是 `MyFactoryBean`，结果注入点按类型找不到  
    - 因为容器对外暴露的类型是它生产的 `T`
@@ -112,11 +92,60 @@
 3) 你以为 `FactoryBean` 的 `isSingleton()` 决定工厂是不是单例  
    - 它影响的是“产品是否单例”，不是“工厂本身是否单例”（工厂通常也是单例 bean）
 
+## 面试常问（FactoryBean）
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansContainerLabTest` / `SpringCoreBeansFactoryBeanDeepDiveLabTest` / `SpringCoreBeansFactoryBeanEdgeCasesLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansFactoryBeanDeepDiveLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansFactoryBeanDeepDiveLabTest test`
+
+> 注意：这会让“同一个 beanName 每次拿到是否同一对象”变成一个需要你明确验证的点，而不是凭感觉判断。
+
+## 2. 本模块的实验：用 `&sequence` 拿到工厂
+
+建议从这些测试方法开始（它们把 FactoryBean 的关键语义做成了可断言实验）：
+
+- `SpringCoreBeansContainerLabTest#factoryBeanByNameReturnsProductAndAmpersandReturnsFactory`：`&name` 的硬规则
+- `SpringCoreBeansFactoryBeanDeepDiveLabTest#factoryBeanProductParticipatesInTypeMatching_andIsRetrievedByProductType`：product 参与 type matching
+- `SpringCoreBeansFactoryBeanDeepDiveLabTest#singletonFactoryBeanProduct_isCached_byTheContainer`：`isSingleton=true` 的缓存
+- `SpringCoreBeansFactoryBeanDeepDiveLabTest#nonSingletonFactoryBeanProduct_isNotCached_byTheContainer`：`isSingleton=false` 的非缓存
+- `SpringCoreBeansFactoryBeanEdgeCasesLabTest#factoryBeanWithNullObjectType_isNotDiscoverableByTypeWithoutEagerInit_butCanStillBeRetrievedByName`：`getObjectType=null` 的边界
+
+- `SpringCoreBeansContainerLabTest.factoryBeanByNameReturnsProductAndAmpersandReturnsFactory()`
+
+实验里定义了一个 `SequenceFactoryBean implements FactoryBean<Long>`：
+
+## 源码锚点（建议从这里下断点）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+把断点打在上面几个方法，然后跑：
+
+- `SpringCoreBeansFactoryBeanDeepDiveLabTest`
+- `SpringCoreBeansFactoryBeanEdgeCasesLabTest`
+
 下一章我们讲一个更偏“容器内部”的现象：循环依赖。
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
 推荐断点：`AbstractBeanFactory#getObjectForBeanInstance`、`FactoryBeanRegistrySupport#getObjectFromFactoryBean`、`AbstractBeanFactory#doGetBean`
 
-## 面试常问（FactoryBean）
+## F. 常见坑与边界
+
+## 4. 常见坑
 
 - 常问：`FactoryBean` 是什么？为什么 `getBean("x")` 拿到的是 product 而不是 factory？
   - 答题要点：`FactoryBean<T>` 是“工厂 bean”；默认通过 beanName 暴露的是它生产的 product；用 `&beanName` 才能拿到 factory 本身。
@@ -125,4 +154,19 @@
 - 常见追问：`getObjectType()` 返回 `null` 有什么坑？为什么 `allowEagerInit=false` 会放大它？
   - 答题要点：会影响 type-based 查找与条件装配（例如 `@ConditionalOnMissingBean`）；需要时对照 [23](../part-04-wiring-and-boundaries/23-factorybean-deep-dive.md) 与 [29](../part-04-wiring-and-boundaries/29-factorybean-edge-cases.md) 深挖。
 
-上一章：[07. `@Configuration` 增强与 `@Bean` 语义（proxyBeanMethods）](07-configuration-enhancement.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[09. 循环依赖：现象、原因与规避（constructor vs setter）](09-circular-dependencies.md)
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansContainerLabTest` / `SpringCoreBeansFactoryBeanDeepDiveLabTest` / `SpringCoreBeansFactoryBeanEdgeCasesLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansFactoryBeanDeepDiveLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
+
+上一章：[07. @Configuration 增强：proxyBeanMethods 与 @Bean 语义](07-configuration-enhancement.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[09. 循环依赖概览：三级缓存与现象分类](09-circular-dependencies.md)
+
+<!-- BOOKIFY:END -->

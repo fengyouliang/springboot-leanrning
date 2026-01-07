@@ -1,17 +1,46 @@
 # 90. 常见坑清单（建议反复对照）
 
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**90. 常见坑清单（建议反复对照）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
+- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreAopLabTest` / `SpringCoreAopMultiProxyStackingLabTest` / `SpringCoreAopPointcutExpressionsLabTest`
+- 建议命令：`mvn -pl spring-core-aop test`（或在 IDE 直接运行上面的测试类）
+
+## F. 常见坑与边界
+
 ## 坑 1：自调用绕过代理
 
 - 现象：同类内部调用的方法不被拦截
-- 章节：见 [docs/03](03-self-invocation.md)
-- 解决：抽到另一个 bean；或 self 注入/`ObjectProvider`；或 exposeProxy（进阶，见 [docs/05](05-expose-proxy.md)）
+- 章节：见 [03. self-invocation](../part-01-proxy-fundamentals/03-self-invocation.md)
+- 解决：抽到另一个 bean；或 self 注入/`ObjectProvider`；或 exposeProxy（进阶，见 [05. expose-proxy](../part-01-proxy-fundamentals/05-expose-proxy.md)）
 - 对应 Lab：`SpringCoreAopLabTest#selfInvocationDoesNotTriggerAdviceForInnerMethod`
 - 推荐断点：`JdkDynamicAopProxy#invoke` / `CglibAopProxy.DynamicAdvisedInterceptor#intercept`
 
 ## 坑 2：JDK 代理导致“按实现类拿不到 bean”
 
 - 现象：按接口能注入/获取，按实现类类型获取失败
-- 章节：见 [docs/02](02-jdk-vs-cglib.md)
+- 章节：见 [02. jdk-vs-cglib](../part-01-proxy-fundamentals/02-jdk-vs-cglib.md)
 - 解决：用接口注入；或强制 CGLIB（理解取舍后再决定）
 - 对应 Lab：`SpringCoreAopProxyMechanicsLabTest#jdkDynamicProxyIsUsedForInterfaceBasedBeans_whenProxyTargetClassIsFalse`
 - 推荐断点：`DefaultAopProxyFactory#createAopProxy`
@@ -19,7 +48,7 @@
 ## 坑 3：`final` 方法/类拦截不到
 
 - 现象：明明加了注解，但方法完全不进入 advice
-- 章节：见 [docs/04](04-final-and-proxy-limits.md)
+- 章节：见 [04. final-and-proxy-limits](../part-01-proxy-fundamentals/04-final-and-proxy-limits.md)
 - 解决：避免把需要拦截的方法写成 final；或走接口代理
 - 对应 Lab：`SpringCoreAopProxyMechanicsLabTest#finalMethodsAreNotInterceptedByCglibProxies`
 
@@ -32,7 +61,7 @@
 ## 坑 5：切点写错导致“你以为学到了机制，其实是误命中”
 
 - 建议：从最小切点起步（`@annotation`），再逐步扩大范围（`execution`）
-- 章节：见 [docs/06](06-debugging.md)
+- 章节：见 [06. debugging](../part-01-proxy-fundamentals/06-debugging.md)
 - 对应 Exercise：`SpringCoreAopExerciseTest#exercise_changePointcutStyle`
 
 ## 坑 6：在 `@PostConstruct` / 构造器里调用被拦截方法，结果“怎么不生效？”
@@ -52,7 +81,7 @@
 - 不要依赖 AOP 去拦截构造期/初始化期内部调用
 - 把需要被拦截的逻辑放到真正的业务入口（例如 service public 方法），并确保调用链走 bean proxy
 
-深挖入口：见 [00 深挖指南](00-deep-dive-guide.md)
+深挖入口：见 [00. 深挖指南](../part-00-guide/00-deep-dive-guide.md)
 
 ## 坑 7：开启 exposeProxy 以后，“换线程/异步”突然拿不到 currentProxy
 
@@ -63,7 +92,7 @@
 建议：
 
 - exposeProxy 主要用于“理解机制/偶发修复”，不要作为常规架构方案
-- 工程上更推荐：重构拆分 bean 或自注入/`ObjectProvider`（见 docs/03、docs/05）
+- 工程上更推荐：重构拆分 bean 或自注入/`ObjectProvider`（见 [03. self-invocation](../part-01-proxy-fundamentals/03-self-invocation.md)、[05. expose-proxy](../part-01-proxy-fundamentals/05-expose-proxy.md)）
 
 ## 坑 8：多个切面顺序搞反，以为 `@Order` “越大越先执行”
 
@@ -94,7 +123,7 @@
 
 章节与 Lab：
 
-- 章节：见 [docs/08](08-pointcut-expression-system.md)
+- 章节：见 [08. pointcut-expression-system](../part-02-autoproxy-and-pointcuts/08-pointcut-expression-system.md)
 - Lab：`SpringCoreAopPointcutExpressionsLabTest`
 
 ## 坑 10：把“叠加”误认为“很多层 proxy”，排障方向跑偏
@@ -111,5 +140,22 @@
 
 章节与 Lab：
 
-- 章节：见 [docs/09](09-multi-proxy-stacking.md)
+- 章节：见 [09. multi-proxy-stacking](../part-03-proxy-stacking/09-multi-proxy-stacking.md)
 - Lab：`SpringCoreAopMultiProxyStackingLabTest`
+
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreAopLabTest` / `SpringCoreAopMultiProxyStackingLabTest` / `SpringCoreAopPointcutExpressionsLabTest` / `SpringCoreAopProxyMechanicsLabTest`
+- Exercise：`SpringCoreAopExerciseTest`
+
+上一章：[10-real-world-stacking-playbook](../part-03-proxy-stacking/10-real-world-stacking-playbook.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[99-self-check](99-self-check.md)
+
+<!-- BOOKIFY:END -->

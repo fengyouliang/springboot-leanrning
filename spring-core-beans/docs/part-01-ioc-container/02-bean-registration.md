@@ -1,12 +1,18 @@
 # 02. Bean 注册入口：扫描、@Bean、@Import、registrar
 
-## 0. 复现入口（可运行）
+<!-- AG-CONTRACT:START -->
 
-- 入口测试（推荐先跑通再下断点）：
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansComponentScanLabTest.java`
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportLabTest.java`
-- 推荐运行命令：
-  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansComponentScanLabTest test`
+## A. 本章定位
+
+- 本章主题：**02. Bean 注册入口：扫描、@Bean、@Import、registrar**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 这一章解决的问题是：**一个 Bean 是怎么“进入容器”的？**  
 你会看到：Spring 的“注册入口”不止 `@Component`。理解这些入口，是理解 Spring Boot 自动装配、以及各种框架“魔法”的前提。
@@ -35,8 +41,6 @@
 - 为每个候选类创建一个 `BeanDefinition`
 - 注册进容器
 
-你要记住两个常见“坑源”：
-
 1) **扫描范围**（base package）决定了“你以为存在的 bean”是否真的存在  
 2) 扫描产生的 beanName 有默认规则（通常是类名首字母小写），你也可以显式指定
 
@@ -47,12 +51,6 @@
 - basePackages 是否覆盖到目标类
 - 默认过滤器（stereotype 注解）是否启用
 - include/exclude filters 是否额外收窄/扩展了候选
-
-最小可复现实验（推荐先跑再下断点）：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansComponentScanLabTest.java`
-
-你在这个 Lab 里应该能断言并复述：
 
 - stereotype（`@Component/@Service`）如何变成候选
 - `@Component("explicitName")` 如何影响 beanName
@@ -76,8 +74,6 @@
 ## 4. `@Import`：把“注册入口”组合起来
 
 `@Import` 可以把另一个配置（或一组配置）引入当前配置。它是很多 `@EnableXxx` 的底层实现方式之一。
-
-它的本质不是“运行时动态装配”，而是**配置类解析阶段**的一部分（仍然属于“定义层”）。
 
 `@Import` 常见三种用法（理解概念即可）：
 
@@ -103,57 +99,22 @@ class AppConfig {}
    它不直接往容器里塞一个 bean；它返回“下一步要解析的配置来源”。  
    后面真正产出 `BeanDefinition` 的，仍然是配置类解析器（把返回的配置类继续解析）。
 
-2) **你以为它是运行时机制，但它发生在“定义层（解析阶段）”**  
-   `ImportSelector` 的执行时机很早，早到还没有进入“实例化 Bean”的主线。  
-   所以你用它的时候，心智模型应该是：**它改变的是“未来将有哪些 BeanDefinition”，不是“现有 Bean 的行为”**。
-
 3) **真实项目里它常常被 `@EnableXxx`/starter 包起来，你根本看不到它**  
    你写的是 `@EnableSomething`，但真正决定导入列表的是它背后的 selector（Boot 自动装配就是一个大号版本：DeferredImportSelector）。
 
-4) **缺少一个“最小闭环”会让人完全抓不住**  
-   对初学者来说，重要的不是“接口名”，而是：放在哪、怎么触发、返回什么、跑完看到什么现象、怎么下断点证明。
-
-#### 4.2.2 最小可运行写法（你可以把它当成“可控版自动装配”）
-
 最小闭环通常由 4 个部件组成：
-
-- 一个 `@EnableXxx` 注解（用 `@Import(YourSelector.class)` 把 selector 挂上去）
-- 一个 `ImportSelector`（读取注解属性/环境属性，返回配置类名数组）
-- 两个（或多个）候选配置类（分别提供不同 Bean）
-- 一个可运行入口（Lab/Test）
-
-本仓库已经把这 4 件套做成了可运行的 Lab：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportLabTest.java`
-  - `importSelectorChoosesConfigurationBasedOnEnvironmentProperty()`
-
-你可以先把它当成“读得懂的答案”，再回过头写 Exercise（见本章第 8 节）。
 
 #### 4.2.3 原理：把现象放回容器主线（它发生在哪个阶段？产物是什么？）
 
 把它放回 refresh 主线，你会更容易把“魔法入口”还原成确定步骤：
 
-1) `ConfigurationClassPostProcessor`（本质是一个 BDRPP）在 refresh 早期运行  
-2) 它驱动 `ConfigurationClassParser` 解析配置类  
-3) 解析到 `@Import` 时，会进入 import 处理分支  
-4) 如果 import 的是 `ImportSelector`：  
-   - Spring 实例化 selector（并回填 `Environment`/`ResourceLoader` 等 *Aware* 依赖）  
-   - 调用 `selectImports(...)` 得到“要导入的配置类名列表”  
-5) 返回的配置类会被继续解析，最终把它们的 `@Bean`/`@Import` 等注册为 `BeanDefinition`
-
 你会发现：`ImportSelector` 的“产物”不是 bean，而是**“更多配置输入”**。它改变的是“定义层的输入集合”，而不是“实例层的行为”。
-
-#### 4.2.4 怎么实现的：源码主线 + 断点入口 + 观察点（建议从这里下手）
-
-建议断点（从入口到闭环）：
 
 - `ConfigurationClassPostProcessor#processConfigBeanDefinitions`（配置解析总入口）
 - `ConfigurationClassParser#processImports`（处理 `@Import` 的主分支）
 - 你的 `ImportSelector#selectImports`（观察返回的 class names）
 - `ConfigurationClassBeanDefinitionReader#loadBeanDefinitionsForConfigurationClass`（把解析模型落到 BeanDefinitionRegistry）
 - `DefaultListableBeanFactory#registerBeanDefinition`（最终入库）
-
-建议观察点（你下断点时应该盯住这些变量）：
 
 - `importingClassMetadata.getClassName()`：是谁触发了 import（哪个 `@EnableXxx`）
 - `importingClassMetadata.getAnnotationAttributes(...)`：注解属性是否读取正确
@@ -172,9 +133,6 @@ class AppConfig {}
 
 常见风险：
 
-- 过度动态化导致可读性下降（IDE/搜索难追踪）
-- 注册时机/条件不清晰导致难调试
-
 ## 5. registrar / post-processor：到底谁更“底层”？
 
 你会在资料里看到：
@@ -190,8 +148,6 @@ class AppConfig {}
 3) `BeanFactoryPostProcessor`（BFPP）：主要用于“修改已有定义”
 4) `BeanPostProcessor`（BPP）：开始触达“实例层”
 
-本模块的实验里已经覆盖 BFPP/BPP 的差异，见 [06 章](06-post-processors.md)。
-
 ## 6. Spring Boot 自动装配：本质上是“批量 @Import”（但更复杂）
 
 理解 `@Import` 后，Boot 自动装配就不会那么“玄学”了：
@@ -204,42 +160,12 @@ class AppConfig {}
 
 - [10. Spring Boot 自动装配如何影响 Bean](../part-02-boot-autoconfig/10-spring-boot-auto-configuration.md)
 
-## 7. 在本模块里如何“跑起来验证”
-
-本模块已经提供了可运行的实验（Labs），专门把 `@Import` / `ImportSelector` / `ImportBeanDefinitionRegistrar` 做成“能跑、能断言、能观察输出”的案例：
-
-- 对应测试：`src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportLabTest.java`
-  - `importAnnotationBringsInAdditionalConfiguration()`：验证 `@Import` 确实把额外配置引入容器
-  - `importSelectorChoosesConfigurationBasedOnEnvironmentProperty()`：用环境属性驱动 `ImportSelector` 选择不同配置
-  - `importBeanDefinitionRegistrarCanRegisterBeanDefinitionProgrammatically()`：用 registrar 直接注册 `BeanDefinition` 并断言构造参数
-
-本章对应的 Exercise / Solution（可对照练习与答案）：
-
-- Exercise（默认 `@Disabled`）：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportExerciseTest.java`
-- Solution（默认参与回归）：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportExerciseSolutionTest.java`
-
-运行方式：
-
-```bash
-mvn -pl spring-core-beans test
-```
-
-运行时你会在测试输出里看到以 `OBSERVE:` 开头的少量提示行，用来解释“哪个分支生效、最终注册了哪个 Bean”。
-
 ## 8. 你应该能做到的“迁移练习”（强烈推荐）
-
-为了真正吃透注册入口，建议你自己做两个小实验（可以写在 `@Disabled` 的 exercise 里）：
 
 1) 用 `@Import(SomeConfig.class)` 引入一个额外 `@Bean`
 2) 写一个最小 `ImportSelector`，根据某个系统属性决定导入 `UpperCaseTextFormatter` 还是 `LowerCaseTextFormatter`
 
 如果你不确定“练习题该怎么写才算闭环”，可以先对照本仓库的 Solution：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportExerciseSolutionTest.java`
-
-你会直观感受到：“注册入口决定了最终有哪些 BeanDefinition”，而不是“运行时魔法注入”。
-对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportLabTest.java`
-推荐断点：`ConfigurationClassPostProcessor#processConfigBeanDefinitions`、`ClassPathBeanDefinitionScanner#doScan`、`DefaultListableBeanFactory#registerBeanDefinition`
 
 ## 9. 源码解析：这些“注册入口”最终如何落到 BeanDefinitionRegistry
 
@@ -268,8 +194,6 @@ mvn -pl spring-core-beans test
 - 配置类解析阶段发现了 `@ComponentScan`（或隐式的扫描配置）
 - 然后调用扫描器把候选类转成 `BeanDefinition` 并注册
 
-关键参与者（记住名字用于搜索/断点即可）：
-
 - `ComponentScanAnnotationParser`（解析 `@ComponentScan` 元信息）
 - `ClassPathBeanDefinitionScanner#doScan`（真正执行扫描）
 - `ClassPathScanningCandidateComponentProvider`（找到候选）
@@ -297,8 +221,6 @@ public class UpperCaseTextFormatter implements TextFormatter { ... }
 - `ConfigurationClassParser`：把配置输入解析成配置模型
 - `ConfigurationClassBeanDefinitionReader`：把模型“落到 BeanDefinitionRegistry”
 
-仓库中的 `@Bean` 示例（`src/test/java`，最小片段）：
-
 ```java
 @Configuration
 static class ImportedConfiguration {
@@ -318,8 +240,6 @@ static class ImportedConfiguration {
 1) **import 配置类**：把另一个配置类当作输入（最终它的 `@Bean` 也会变成 BeanDefinition）
 2) **import selector**：在解析阶段返回“要导入的配置类列表”（Boot 自动装配是它的加强版：DeferredImportSelector）
 3) **import registrar**：直接拿到 `BeanDefinitionRegistry`，用代码注册任意定义（最强也最容易滥用）
-
-仓库中的 registrar 示例（`src/test/java`，最小片段）：
 
 ```java
 static class RegisteredMessageRegistrar implements ImportBeanDefinitionRegistrar {
@@ -341,6 +261,132 @@ static class RegisteredMessageRegistrar implements ImportBeanDefinitionRegistrar
 
 本模块已有可复用的小工具（测试辅助类）可以 dump 这些信息：
 
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansComponentScanLabTest` / `SpringCoreBeansImportLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansComponentScanLabTest.java`
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansComponentScanLabTest test`
+
+最小可复现实验（推荐先跑再下断点）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansComponentScanLabTest.java`
+
+你在这个 Lab 里应该能断言并复述：
+
+它的本质不是“运行时动态装配”，而是**配置类解析阶段**的一部分（仍然属于“定义层”）。
+
+2) **你以为它是运行时机制，但它发生在“定义层（解析阶段）”**  
+   `ImportSelector` 的执行时机很早，早到还没有进入“实例化 Bean”的主线。  
+   所以你用它的时候，心智模型应该是：**它改变的是“未来将有哪些 BeanDefinition”，不是“现有 Bean 的行为”**。
+
+4) **缺少一个“最小闭环”会让人完全抓不住**  
+   对初学者来说，重要的不是“接口名”，而是：放在哪、怎么触发、返回什么、跑完看到什么现象、怎么下断点证明。
+
+#### 4.2.2 最小可运行写法（你可以把它当成“可控版自动装配”）
+
+- 一个 `@EnableXxx` 注解（用 `@Import(YourSelector.class)` 把 selector 挂上去）
+- 一个 `ImportSelector`（读取注解属性/环境属性，返回配置类名数组）
+- 两个（或多个）候选配置类（分别提供不同 Bean）
+- 一个可运行入口（Lab/Test）
+
+本仓库已经把这 4 件套做成了可运行的 Lab：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportLabTest.java`
+  - `importSelectorChoosesConfigurationBasedOnEnvironmentProperty()`
+
+你可以先把它当成“读得懂的答案”，再回过头写 Exercise（见本章第 8 节）。
+
+1) `ConfigurationClassPostProcessor`（本质是一个 BDRPP）在 refresh 早期运行  
+2) 它驱动 `ConfigurationClassParser` 解析配置类  
+3) 解析到 `@Import` 时，会进入 import 处理分支  
+4) 如果 import 的是 `ImportSelector`：  
+   - Spring 实例化 selector（并回填 `Environment`/`ResourceLoader` 等 *Aware* 依赖）  
+   - 调用 `selectImports(...)` 得到“要导入的配置类名列表”  
+5) 返回的配置类会被继续解析，最终把它们的 `@Bean`/`@Import` 等注册为 `BeanDefinition`
+
+#### 4.2.4 怎么实现的：源码主线 + 断点入口 + 观察点（建议从这里下手）
+
+建议断点（从入口到闭环）：
+
+建议观察点（你下断点时应该盯住这些变量）：
+
+- 过度动态化导致可读性下降（IDE/搜索难追踪）
+- 注册时机/条件不清晰导致难调试
+
+本模块的实验里已经覆盖 BFPP/BPP 的差异，见 [06 章](06-post-processors.md)。
+
+## 7. 在本模块里如何“跑起来验证”
+
+本模块已经提供了可运行的实验（Labs），专门把 `@Import` / `ImportSelector` / `ImportBeanDefinitionRegistrar` 做成“能跑、能断言、能观察输出”的案例：
+
+- 对应测试：`src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportLabTest.java`
+  - `importAnnotationBringsInAdditionalConfiguration()`：验证 `@Import` 确实把额外配置引入容器
+  - `importSelectorChoosesConfigurationBasedOnEnvironmentProperty()`：用环境属性驱动 `ImportSelector` 选择不同配置
+  - `importBeanDefinitionRegistrarCanRegisterBeanDefinitionProgrammatically()`：用 registrar 直接注册 `BeanDefinition` 并断言构造参数
+
+本章对应的 Exercise / Solution（可对照练习与答案）：
+
+- Exercise（默认 `@Disabled`）：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportExerciseTest.java`
+- Solution（默认参与回归）：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportExerciseSolutionTest.java`
+
+运行方式：
+
+```bash
+mvn -pl spring-core-beans test
+```
+
+运行时你会在测试输出里看到以 `OBSERVE:` 开头的少量提示行，用来解释“哪个分支生效、最终注册了哪个 Bean”。
+
+为了真正吃透注册入口，建议你自己做两个小实验（可以写在 `@Disabled` 的 exercise 里）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportExerciseSolutionTest.java`
+
+你会直观感受到：“注册入口决定了最终有哪些 BeanDefinition”，而不是“运行时魔法注入”。
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportLabTest.java`
+推荐断点：`ConfigurationClassPostProcessor#processConfigBeanDefinitions`、`ClassPathBeanDefinitionScanner#doScan`、`DefaultListableBeanFactory#registerBeanDefinition`
+
+关键参与者（记住名字用于搜索/断点即可）：
+
+仓库中的 `@Bean` 示例（`src/test/java`，最小片段）：
+
+仓库中的 registrar 示例（`src/test/java`，最小片段）：
+
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/testsupport/BeanDefinitionOriginDumper.java`
 
+## F. 常见坑与边界
+
+你要记住两个常见“坑源”：
+
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansComponentScanLabTest` / `SpringCoreBeansImportLabTest`
+- Exercise：`SpringCoreBeansImportExerciseTest`
+- Solution：`SpringCoreBeansImportExerciseSolutionTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansComponentScanLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportExerciseTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportExerciseSolutionTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/testsupport/BeanDefinitionOriginDumper.java`
+
 上一章：[01. Bean 心智模型：BeanDefinition vs Bean 实例](01-bean-mental-model.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[03. 依赖注入解析：类型/名称/@Qualifier/@Primary](03-dependency-injection-resolution.md)
+
+<!-- BOOKIFY:END -->

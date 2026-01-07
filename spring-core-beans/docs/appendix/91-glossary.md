@@ -1,16 +1,20 @@
 # 91. 术语表（Glossary）
 
-## 0. 复现入口（可运行）
+<!-- AG-CONTRACT:START -->
 
-- 本章为索引/术语类内容，不直接提供单一 Lab 入口。
-- 建议做法：从本页跳转到对应章节后，按章节中的“复现入口（可运行）”运行对应 Test。
+## A. 本章定位
+
+- 本章主题：**91. 术语表（Glossary）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 这份术语表的目标不是“背概念”，而是解决两个学习痛点：
-
-1) 读文档/看断点时遇到名词能快速定位“它到底是什么、在哪个阶段出现、影响什么”
-2) 把同一类名词放在一起对比，避免“记得名字但不知道边界”
-
-> 使用建议：遇到不熟的名词先来这里查 10 秒，再回到对应章节跑 Lab。
 
 ---
 
@@ -32,21 +36,6 @@
 ---
 
 ## 注入与候选
-
-- **DependencyDescriptor**：注入点的“描述符”（需要什么类型/是否 required/是否带泛型/有哪些注解/名称等）。  
-  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)
-- **候选（candidates）**：按类型匹配得到的候选集合；单依赖需要进一步收敛为唯一胜者，否则失败。  
-  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)、[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
-- **`@Qualifier`**：缩小候选集合（精确选择）。  
-  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)
-- **`@Primary`**：默认胜者（没有更强限定条件时）。  
-  章节：[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
-- **`@Order` / Ordered**：主要影响集合注入/链路执行顺序，不等价于“单依赖选谁”。  
-  章节：[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)、[`14`](../part-03-container-internals/14-post-processor-ordering.md)
-- **ResolvableDependency**：可注入但不是 bean 的特殊依赖（例如 `ApplicationContext`、`Environment`）。  
-  章节：[`20`](../part-04-wiring-and-boundaries/20-resolvable-dependency.md)
-- **ResolvableType**：Spring 用来描述/匹配泛型的类型系统。  
-  章节：[`37`](../part-04-wiring-and-boundaries/37-generic-type-matching-pitfalls.md)
 
 ---
 
@@ -91,6 +80,33 @@
 
 ## AOT 与真实世界补齐
 
+---
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansContainerLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+> 验证入口（可跑）：`SpringCoreBeansContainerLabTest`
+
+## 0. 复现入口（可运行）
+
+- 本章为索引/术语类内容，不直接提供单一 Lab 入口。
+- 建议做法：从本页跳转到对应章节后，按章节中的“复现入口（可运行）”运行对应 Test。
+
+1) 读文档/看断点时遇到名词能快速定位“它到底是什么、在哪个阶段出现、影响什么”
+2) 把同一类名词放在一起对比，避免“记得名字但不知道边界”
+
+> 使用建议：遇到不熟的名词先来这里查 10 秒，再回到对应章节跑 Lab。
+
 - **AOT（Ahead-of-Time）**：把原本运行期才能完成的工作（分析/生成/裁剪元信息）前移到构建期执行，以换取更快启动与更强可预知性。  
   章节：[`40`](../part-05-aot-and-real-world/40-aot-and-native-overview.md)
 - **RuntimeHints**：AOT/Native 下的“构建期契约”数据结构，用于声明反射/代理/资源等运行期需求。  
@@ -106,6 +122,35 @@
 - **自定义 Qualifier（meta-annotation）**：通过注解做 `@Qualifier` 的元注解，把“候选收敛规则”提升为有业务语义的限定符（避免散落字符串）。  
   章节：[`45`](../part-05-aot-and-real-world/45-custom-qualifier-meta-annotation.md)
 
----
+## F. 常见坑与边界
+
+- **DependencyDescriptor**：注入点的“描述符”（需要什么类型/是否 required/是否带泛型/有哪些注解/名称等）。  
+  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)
+- **候选（candidates）**：按类型匹配得到的候选集合；单依赖需要进一步收敛为唯一胜者，否则失败。  
+  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)、[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
+- **`@Qualifier`**：缩小候选集合（精确选择）。  
+  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)
+- **`@Primary`**：默认胜者（没有更强限定条件时）。  
+  章节：[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
+- **`@Order` / Ordered**：主要影响集合注入/链路执行顺序，不等价于“单依赖选谁”。  
+  章节：[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)、[`14`](../part-03-container-internals/14-post-processor-ordering.md)
+- **ResolvableDependency**：可注入但不是 bean 的特殊依赖（例如 `ApplicationContext`、`Environment`）。  
+  章节：[`20`](../part-04-wiring-and-boundaries/20-resolvable-dependency.md)
+- **ResolvableType**：Spring 用来描述/匹配泛型的类型系统。  
+  章节：[`37`](../part-04-wiring-and-boundaries/37-generic-type-matching-pitfalls.md)
+
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansContainerLabTest`
 
 上一章：[90. 常见坑清单（建议反复对照）](90-common-pitfalls.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[92. 知识点地图（Concept → Chapter → Lab）](92-knowledge-map.md)
+
+<!-- BOOKIFY:END -->

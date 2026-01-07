@@ -1,11 +1,18 @@
 # 04. Scope 与 prototype 注入陷阱（ObjectProvider / @Lookup / scoped proxy）
 
-## 0. 复现入口（可运行）
+<!-- AG-CONTRACT:START -->
 
-- 入口测试（推荐先跑通再下断点）：
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`
-- 推荐运行命令：
-  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansLabTest test`
+## A. 本章定位
+
+- 本章主题：**04. Scope 与 prototype 注入陷阱（ObjectProvider / @Lookup / scoped proxy）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 这一章的主题是：**scope 不是“对象的特性”，而是“容器如何管理对象的策略”。**
 
@@ -18,8 +25,6 @@
 - `singleton`：**同一个容器**里，这个 beanName 对应的实例只有一个
 - `prototype`：容器**每次创建/获取**都会创建一个新实例；容器通常不缓存它（也不负责销毁回调）
 
-注意关键限定词：同一个容器。不同 `ApplicationContext` 里当然会有不同实例。
-
 ## 2. 本模块里你能直接观察到的现象
 
 代码对应：
@@ -28,14 +33,8 @@
 - 直接注入：`DirectPrototypeConsumer`
 - Provider 延迟获取：`ProviderPrototypeConsumer`
 
-运行测试你会看到：
-
 - `DirectPrototypeConsumer.currentId()` 连续两次拿到同一个 UUID
 - `ProviderPrototypeConsumer.newId()` 连续两次拿到不同 UUID
-
-对应验证：
-
-- `SpringCoreBeansLabTest.demonstratesPrototypeScopeBehavior()`
 
 ## 3. 为什么“prototype 注入 singleton”会看起来像单例？
 
@@ -72,16 +71,7 @@
 - Spring 生成一个子类/代理
 - 在方法调用时，由容器动态返回一个 bean
 
-本模块的容器实验覆盖了它：
-
-- `SpringCoreBeansContainerLabTest.lookupMethodCanObtainFreshPrototypeEachCall()`
-
 适用场景：
-
-- 你希望调用 `consumer.next()` 时每次都要一个新 prototype
-- 你不想显式注入 `ObjectProvider`
-
-注意：`@Lookup` 依赖运行时的增强/代理机制，阅读成本更高；学习阶段建议先掌握 `ObjectProvider`。
 
 ## 6. 解决方案 3：scoped proxy（谨慎使用）
 
@@ -89,9 +79,6 @@
 
 - singleton 持有的是“代理”
 - 代理在每次方法调用时去当前 scope 找真实对象
-
-优点：调用方代码很干净  
-缺点：引入代理语义，debug 成本上升；某些情况下会误以为自己拿到的是“真实对象”
 
 学习阶段建议把它当作“了解存在即可”的方案。
 
@@ -112,13 +99,6 @@
 - “我写了 `@PreDestroy` / `DisposableBean#destroy`，为什么 prototype 看起来不执行？”
   - 因为容器没有保存这些 prototype 实例的引用，无法在 close 时逐个回收
 
-### 7.1 最小复现入口（可断言）
-
-- 入口测试：
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPrototypeDestroySemanticsLabTest.java`
-- 推荐运行命令：
-  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansPrototypeDestroySemanticsLabTest test`
-
 你应该观察到：
 
 - `context.close()` 不会触发 prototype 的 `@PreDestroy`
@@ -129,9 +109,6 @@
 - 症状：连接/文件句柄/线程池等资源泄漏，但你确认 `@PreDestroy` 逻辑存在
 - 排查：这个 bean 是否是 prototype？它的创建者（调用方）是否负责 close/destroy？
 
-下一章我们把 scope 与生命周期合起来讲：什么时候创建、什么时候初始化、什么时候销毁（以及回调顺序）。
-如果你已经开始关心“销毁回调顺序/触发者”，可以直接跳到下一章 [05](05-lifecycle-and-callbacks.md)。
-
 ## 8. 一句话自检
 
 读完这一章你应该能回答：
@@ -139,6 +116,53 @@
 1) “prototype 的语义到底是什么？”
 2) “为什么直接注入 prototype 到 singleton 会得到同一个实例？”
 3) “`ObjectProvider` 和 `@Lookup` 的差别是什么？”
+
+- 常问：`prototype` 的真实语义是什么？为什么“prototype 注入 singleton”会像单例？
+  - 答题要点：prototype 的语义是“每次向容器要都是新的”；但注入发生在 singleton 创建时，只解析一次导致实例被“冻结”。
+- 常见追问：怎么修复？`ObjectProvider` / `@Lookup` / scoped proxy 什么时候用？
+  - 答题要点：需要“每次用都新”→ provider/lookup；需要“按上下文动态解析”→ scoped proxy；关键是让解析发生在“使用时”，不是“创建 singleton 时”。
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansContainerLabTest` / `SpringCoreBeansLabTest` / `SpringCoreBeansPrototypeDestroySemanticsLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansLabTest test`
+
+运行测试你会看到：
+
+对应验证：
+
+- `SpringCoreBeansLabTest.demonstratesPrototypeScopeBehavior()`
+
+本模块的容器实验覆盖了它：
+
+- `SpringCoreBeansContainerLabTest.lookupMethodCanObtainFreshPrototypeEachCall()`
+
+注意：`@Lookup` 依赖运行时的增强/代理机制，阅读成本更高；学习阶段建议先掌握 `ObjectProvider`。
+
+优点：调用方代码很干净  
+缺点：引入代理语义，debug 成本上升；某些情况下会误以为自己拿到的是“真实对象”
+
+### 7.1 最小复现入口（可断言）
+
+- 入口测试：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPrototypeDestroySemanticsLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansPrototypeDestroySemanticsLabTest test`
 
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`
 推荐断点：`AbstractBeanFactory#doGetBean`、`DefaultSingletonBeanRegistry#getSingleton`、`DefaultListableBeanFactory#doResolveDependency`
@@ -154,11 +178,31 @@
 - Solution（默认参与回归，可直接对照答案）：
   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansExerciseSolutionTest.java`
 
+## F. 常见坑与边界
+
+注意关键限定词：同一个容器。不同 `ApplicationContext` 里当然会有不同实例。
+
 ## 面试常问（prototype 注入陷阱）
 
-- 常问：`prototype` 的真实语义是什么？为什么“prototype 注入 singleton”会像单例？
-  - 答题要点：prototype 的语义是“每次向容器要都是新的”；但注入发生在 singleton 创建时，只解析一次导致实例被“冻结”。
-- 常见追问：怎么修复？`ObjectProvider` / `@Lookup` / scoped proxy 什么时候用？
-  - 答题要点：需要“每次用都新”→ provider/lookup；需要“按上下文动态解析”→ scoped proxy；关键是让解析发生在“使用时”，不是“创建 singleton 时”。
+## G. 小结与下一章
+
+- 你希望调用 `consumer.next()` 时每次都要一个新 prototype
+- 你不想显式注入 `ObjectProvider`
+
+下一章我们把 scope 与生命周期合起来讲：什么时候创建、什么时候初始化、什么时候销毁（以及回调顺序）。
+如果你已经开始关心“销毁回调顺序/触发者”，可以直接跳到下一章 [05](05-lifecycle-and-callbacks.md)。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansContainerLabTest` / `SpringCoreBeansLabTest` / `SpringCoreBeansPrototypeDestroySemanticsLabTest`
+- Exercise：`SpringCoreBeansExerciseTest`
+- Solution：`SpringCoreBeansExerciseSolutionTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPrototypeDestroySemanticsLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansExerciseTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansExerciseSolutionTest.java`
 
 上一章：[03. 依赖注入解析：类型/名称/@Qualifier/@Primary](03-dependency-injection-resolution.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[05. 生命周期：初始化、销毁与回调（@PostConstruct/@PreDestroy 等）](05-lifecycle-and-callbacks.md)
+
+<!-- BOOKIFY:END -->

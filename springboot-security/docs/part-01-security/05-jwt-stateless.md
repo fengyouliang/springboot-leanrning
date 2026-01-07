@@ -1,15 +1,18 @@
 # 05：JWT/Stateless：Bearer token + scope（最小闭环）
 
-本章的目标是：在不依赖外部 IdP 的情况下，用最小示例理解 JWT/Stateless 的工作方式，并通过 tests 固化结论。
+<!-- AG-CONTRACT:START -->
 
-## 实验入口
+## A. 本章定位
 
-- `springboot-security/src/test/java/com/learning/springboot/bootsecurity/part01_security/BootSecurityLabTest.java`
-  - `jwtSecureEndpointReturns401WhenMissingBearerToken`
-  - `jwtSecureEndpointIsAccessibleWithBearerToken`
-  - `jwtAdminEndpointReturns403WhenScopeMissing`
-  - `jwtAdminEndpointIsAccessibleWhenAdminScopePresent`
-  - `jwtPostDoesNotRequireCsrf`
+- 本章主题：**05：JWT/Stateless：Bearer token + scope（最小闭环）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 对应代码：
 
@@ -50,10 +53,6 @@ Spring Security 默认会把 JWT 的 `scope`（空格分隔）映射成 `SCOPE_x
 
 1) 启动 dev profile（启用 token 发行端点）：
 
-```bash
-mvn -pl springboot-security spring-boot:run -Dspring-boot.run.profiles=dev
-```
-
 2) 获取 token（scope=admin）：
 
 ```bash
@@ -66,5 +65,51 @@ curl 'http://localhost:8085/api/jwt/dev/token?subject=alice&scope=admin'
 curl -H "Authorization: Bearer <token>" http://localhost:8085/api/jwt/admin/ping
 ```
 
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`BootSecurityLabTest`
+- 建议命令：`mvn -pl springboot-security test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+本章的目标是：在不依赖外部 IdP 的情况下，用最小示例理解 JWT/Stateless 的工作方式，并通过 tests 固化结论。
+
+## 实验入口
+
+- `springboot-security/src/test/java/com/learning/springboot/bootsecurity/part01_security/BootSecurityLabTest.java`
+  - `jwtSecureEndpointReturns401WhenMissingBearerToken`
+  - `jwtSecureEndpointIsAccessibleWithBearerToken`
+  - `jwtAdminEndpointReturns403WhenScopeMissing`
+  - `jwtAdminEndpointIsAccessibleWhenAdminScopePresent`
+  - `jwtPostDoesNotRequireCsrf`
+
+```bash
+mvn -pl springboot-security spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+## F. 常见坑与边界
+
 > 注意：`/api/jwt/dev/token` 仅用于学习（dev profile），不是生产做法。
 
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`BootSecurityLabTest`
+- Test file：`springboot-security/src/test/java/com/learning/springboot/bootsecurity/part01_security/BootSecurityLabTest.java`
+
+上一章：[part-01-security/04-filter-chain-and-order.md](04-filter-chain-and-order.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[appendix/90-common-pitfalls.md](../appendix/90-common-pitfalls.md)
+
+<!-- BOOKIFY:END -->

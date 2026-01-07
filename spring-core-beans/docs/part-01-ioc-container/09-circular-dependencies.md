@@ -1,11 +1,18 @@
 # 09. 循环依赖：现象、原因与规避（constructor vs setter）
 
-## 0. 复现入口（可运行）
+<!-- AG-CONTRACT:START -->
 
-- 入口测试（推荐先跑通再下断点）：
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansEarlyReferenceLabTest.java`
-- 推荐运行命令：
-  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansEarlyReferenceLabTest test`
+## A. 本章定位
+
+- 本章主题：**09. 循环依赖：现象、原因与规避（constructor vs setter）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 循环依赖是 Spring 学习路上绕不开的一关。它既是“容器能力的体现”，也是“架构设计的警报”。
 
@@ -19,19 +26,11 @@
 
 ### 1.1 构造器循环（通常失败）
 
-本模块实验：
-
-- `SpringCoreBeansContainerLabTest.circularDependencyWithConstructorsFailsFast()`
-
 原因直观到一句话就够：
 
 > 构造器注入要求依赖在“创建对象之前”就必须准备好，因此环上任何一环都无法先完成实例化。
 
 ### 1.2 setter 循环（有时能成功）
-
-本模块实验：
-
-- `SpringCoreBeansContainerLabTest.circularDependencyWithSettersMaySucceedViaEarlySingletonExposure()`
 
 它能成功的关键在于 Spring 对 singleton 的一个机制：**提前暴露（early singleton exposure）**。
 
@@ -46,8 +45,6 @@
 这是一种“让环先跑起来”的机制，但它也带来风险：你可能拿到半初始化对象，或者代理/增强顺序更复杂。
 
 ## 2. Spring Framework vs Spring Boot：一个重要差异
-
-在纯 Spring Framework 容器里，setter 的单例循环依赖通常默认允许（如本模块实验所示）。
 
 但在 Spring Boot 里，循环依赖在较新的版本中往往默认更严格（常见做法是默认禁止），并提供开关允许：
 
@@ -87,17 +84,6 @@ setter 注入在某些情况下能让环跑起来，但会：
 - 增加半初始化风险
 - 让 bug 更隐蔽
 
-## 源码锚点（建议从这里下断点）
-
-如果你想把“为什么 setter 有时能救、constructor 基本救不了”彻底打穿，建议至少跑一次三层缓存断点闭环：
-
-- 取单例总入口：`DefaultSingletonBeanRegistry#getSingleton`
-  - 重点观察：是否命中 `singletonObjects` / `earlySingletonObjects` / `singletonFactories`
-- 创建 bean 主线：`AbstractAutowireCapableBeanFactory#doCreateBean`
-  - 重点观察：什么时候会 `addSingletonFactory`（提前暴露），什么时候才 `addSingleton`（完全初始化后）
-- 注入阶段：`AbstractAutowireCapableBeanFactory#populateBean`
-  - 重点观察：setter 注入为什么可能在“对象未完全初始化”时先拿到一个引用
-
 > 你不需要背三层缓存的字段名，但你必须能解释：**容器为了打断循环，允许在对象未完全初始化时先暴露一个引用**，并且这件事只对 singleton 才有意义。
 
 ## 源码解析：三层缓存（三级缓存）在源码里是怎么“救火”的
@@ -109,13 +95,9 @@ setter 注入在某些情况下能让环跑起来，但会：
 
 ### 1) `getSingleton` 的三层命中逻辑（精简伪代码）
 
-你在断点里看到的三层缓存通常对应这三类语义（字段名不必背，但建议能识别）：
-
 - `singletonObjects`：完全初始化完成的单例（最终成品）
 - `earlySingletonObjects`：早期引用（半成品/可能是代理）
 - `singletonFactories`：`ObjectFactory<?>`（用来“延迟生成 early reference”）
-
-精简伪代码（足够对照断点理解）：
 
 ```text
 getSingleton(beanName, allowEarlyReference):
@@ -139,8 +121,6 @@ getSingleton(beanName, allowEarlyReference):
 
 ### 2) early singleton exposure 是在 `doCreateBean` 哪一步发生的？
 
-对应到实例创建主线（`AbstractAutowireCapableBeanFactory#doCreateBean`），early exposure 的窗口期大致是：
-
 1) bean 实例已经创建出来（instantiate 已完成）
 2) 但还没有执行完整的 populate + initialize（因此仍然是“半成品”）
 3) 若允许循环依赖，容器会提前注册一个 `singletonFactory`，其 `getObject()` 通常会调用 `getEarlyBeanReference(...)`
@@ -161,8 +141,6 @@ getSingleton(beanName, allowEarlyReference):
 
 - `SmartInstantiationAwareBeanPostProcessor#getEarlyBeanReference`
 
-本模块的实验（`SpringCoreBeansEarlyReferenceLabTest`）用最小代码把这件事讲透：
-
 ```java
 static class EarlyProxyingPostProcessor implements SmartInstantiationAwareBeanPostProcessor {
     @Override
@@ -178,10 +156,6 @@ static class EarlyProxyingPostProcessor implements SmartInstantiationAwareBeanPo
 - 三级缓存不是“缓存技巧”，它承载的是“early reference 的时机与语义”
 - `getEarlyBeanReference` 决定了 early reference 是 raw 还是 proxy
 
-## 必要时用仓库 src 代码复现两类环（最小片段）
-
-**构造器循环（fail-fast）**：`SpringCoreBeansContainerLabTest`（最小片段）
-
 ```java
 record CycleA(CycleB cycleB) {}
 record CycleB(CycleA cycleA) {}
@@ -189,16 +163,7 @@ record CycleB(CycleA cycleA) {}
 
 **setter 循环（可能成功）**：同一文件里用 `@Autowired` setter 形成环，容器通过 early exposure 让引用先跑起来。
 
-## 断点闭环（用本仓库 Lab/Test 跑一遍）
-
 建议直接从这些测试方法开始（每个都对应一个经典结论）：
-
-- 构造器循环为什么失败：
-  - `SpringCoreBeansContainerLabTest#circularDependencyWithConstructorsFailsFast`
-- setter 循环为什么可能成功（early singleton exposure）：
-  - `SpringCoreBeansContainerLabTest#circularDependencyWithSettersMaySucceedViaEarlySingletonExposure`
-- 代理介入时，early reference 为什么更关键：
-  - `SpringCoreBeansEarlyReferenceLabTest#getEarlyBeanReference_canProvideEarlyProxyDuringCircularDependencyResolution`
 
 ## Boot vs Framework：你必须知道的“默认策略差异”
 
@@ -215,8 +180,87 @@ record CycleB(CycleA cycleA) {}
 2) “setter 循环为什么有时能成功？early exposure 是什么？”
 3) “为什么循环依赖在架构上通常是坏味道？”
 
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansContainerLabTest` / `SpringCoreBeansEarlyReferenceLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansEarlyReferenceLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansEarlyReferenceLabTest test`
+
+本模块实验：
+
+- `SpringCoreBeansContainerLabTest.circularDependencyWithConstructorsFailsFast()`
+
+本模块实验：
+
+- `SpringCoreBeansContainerLabTest.circularDependencyWithSettersMaySucceedViaEarlySingletonExposure()`
+
+在纯 Spring Framework 容器里，setter 的单例循环依赖通常默认允许（如本模块实验所示）。
+
+## 源码锚点（建议从这里下断点）
+
+如果你想把“为什么 setter 有时能救、constructor 基本救不了”彻底打穿，建议至少跑一次三层缓存断点闭环：
+
+你在断点里看到的三层缓存通常对应这三类语义（字段名不必背，但建议能识别）：
+
+精简伪代码（足够对照断点理解）：
+
+本模块的实验（`SpringCoreBeansEarlyReferenceLabTest`）用最小代码把这件事讲透：
+
+## 必要时用仓库 src 代码复现两类环（最小片段）
+
+**构造器循环（fail-fast）**：`SpringCoreBeansContainerLabTest`（最小片段）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+- 构造器循环为什么失败：
+  - `SpringCoreBeansContainerLabTest#circularDependencyWithConstructorsFailsFast`
+- setter 循环为什么可能成功（early singleton exposure）：
+  - `SpringCoreBeansContainerLabTest#circularDependencyWithSettersMaySucceedViaEarlySingletonExposure`
+- 代理介入时，early reference 为什么更关键：
+  - `SpringCoreBeansEarlyReferenceLabTest#getEarlyBeanReference_canProvideEarlyProxyDuringCircularDependencyResolution`
+
 下一章我们把这些概念和 Spring Boot 联系起来：自动装配如何“加入更多 bean”，从而让依赖图变复杂。
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
 推荐断点：`DefaultSingletonBeanRegistry#getSingleton`、`DefaultSingletonBeanRegistry#addSingletonFactory`、`AbstractAutowireCapableBeanFactory#doCreateBean`
 
-上一章：[08. `FactoryBean`：产品 vs 工厂（以及 `&` 前缀）](08-factorybean.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[10. Spring Boot 自动装配如何影响 Bean（Auto-configuration）](../part-02-boot-autoconfig/10-spring-boot-auto-configuration.md)
+## F. 常见坑与边界
+
+- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+
+## G. 小结与下一章
+
+- 取单例总入口：`DefaultSingletonBeanRegistry#getSingleton`
+  - 重点观察：是否命中 `singletonObjects` / `earlySingletonObjects` / `singletonFactories`
+- 创建 bean 主线：`AbstractAutowireCapableBeanFactory#doCreateBean`
+  - 重点观察：什么时候会 `addSingletonFactory`（提前暴露），什么时候才 `addSingleton`（完全初始化后）
+- 注入阶段：`AbstractAutowireCapableBeanFactory#populateBean`
+  - 重点观察：setter 注入为什么可能在“对象未完全初始化”时先拿到一个引用
+
+对应到实例创建主线（`AbstractAutowireCapableBeanFactory#doCreateBean`），early exposure 的窗口期大致是：
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansContainerLabTest` / `SpringCoreBeansEarlyReferenceLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansEarlyReferenceLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
+
+上一章：[08. FactoryBean：product vs factory（& 前缀）](08-factorybean.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[10. Spring Boot 自动装配如何影响 Bean（Auto-configuration）](../part-02-boot-autoconfig/10-spring-boot-auto-configuration.md)
+
+<!-- BOOKIFY:END -->

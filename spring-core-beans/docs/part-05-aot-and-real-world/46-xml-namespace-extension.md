@@ -1,8 +1,20 @@
 # 46. XML namespace 扩展：NamespaceHandler / Parser / spring.handlers
 
-这一章解决“遗留项目/三方组件里非常常见，但新手几乎没系统学过”的问题：
+<!-- AG-CONTRACT:START -->
 
-> **XML 里那些看起来像魔法的 `<context:...>` / `<tx:...>` 到底是怎么变成 BeanDefinition 的？我自己能不能做一个？出问题怎么断点排？**
+## A. 本章定位
+
+- 本章主题：**46. XML namespace 扩展：NamespaceHandler / Parser / spring.handlers**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
+这一章解决“遗留项目/三方组件里非常常见，但新手几乎没系统学过”的问题：
 
 结论先讲清楚：XML namespace 扩展不是魔法，它本质是一个“插件系统”：
 
@@ -12,24 +24,7 @@
 
 ---
 
-## 0. 复现入口（可运行）
-
-入口测试（建议先跑通再下断点）：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansXmlNamespaceExtensionLabTest.java`
-
-推荐运行命令：
-
-```bash
-mvn -pl spring-core-beans -Dtest=SpringCoreBeansXmlNamespaceExtensionLabTest test
-```
-
 配套资源（你可以用来定位/排障）：
-
-- `spring-core-beans/src/test/resources/META-INF/spring.handlers`
-- `spring-core-beans/src/test/resources/META-INF/spring.schemas`
-- `spring-core-beans/src/test/resources/part05_aot_and_real_world/xml/demo-namespace.xml`
-- `spring-core-beans/src/test/resources/META-INF/spring/demo.xsd`
 
 ---
 
@@ -61,11 +56,6 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansXmlNamespaceExtensionLabTest tes
 
 本仓库的最小实现已经给出（直接对照即可）：
 
-- Handler：`.../xmlns/DemoNamespaceHandler`
-- Parser：`.../xmlns/DemoMessageBeanDefinitionParser`
-- XML：`src/test/resources/.../demo-namespace.xml`
-- 映射：`src/test/resources/META-INF/spring.handlers` / `spring.schemas`
-
 ---
 
 ## 3. 原理：把自定义元素放回容器定义层主线
@@ -88,12 +78,6 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansXmlNamespaceExtensionLabTest tes
 
 ---
 
-## 4. 怎么实现的：关键类/方法 + 断点入口 + 观察点
-
-### 4.1 断点入口（建议从“能解释链路”到“看细节”）
-
-最推荐的断点组合（从入口到闭环）：
-
 1) `XmlBeanDefinitionReader#doLoadBeanDefinitions`（读入 XML 的入口）
 2) `DefaultBeanDefinitionDocumentReader#parseBeanDefinitions`（遍历/分派）
 3) `BeanDefinitionParserDelegate#parseCustomElement`（进入自定义元素分支）
@@ -102,7 +86,63 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansXmlNamespaceExtensionLabTest tes
 6) 你自己的 `BeanDefinitionParser#parse`（注册 BeanDefinition）
 7) `DefaultListableBeanFactory#registerBeanDefinition`（最终入库）
 
+---
+
+---
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansXmlNamespaceExtensionLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+> **XML 里那些看起来像魔法的 `<context:...>` / `<tx:...>` 到底是怎么变成 BeanDefinition 的？我自己能不能做一个？出问题怎么断点排？**
+
+## 0. 复现入口（可运行）
+
+入口测试（建议先跑通再下断点）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansXmlNamespaceExtensionLabTest.java`
+
+推荐运行命令：
+
+```bash
+mvn -pl spring-core-beans -Dtest=SpringCoreBeansXmlNamespaceExtensionLabTest test
+```
+
+- `spring-core-beans/src/test/resources/META-INF/spring.handlers`
+- `spring-core-beans/src/test/resources/META-INF/spring.schemas`
+- `spring-core-beans/src/test/resources/part05_aot_and_real_world/xml/demo-namespace.xml`
+- `spring-core-beans/src/test/resources/META-INF/spring/demo.xsd`
+
+- Handler：`.../xmlns/DemoNamespaceHandler`
+- Parser：`.../xmlns/DemoMessageBeanDefinitionParser`
+- XML：`src/test/resources/.../demo-namespace.xml`
+- 映射：`src/test/resources/META-INF/spring.handlers` / `spring.schemas`
+
+## 4. 怎么实现的：关键类/方法 + 断点入口 + 观察点
+
+### 4.1 断点入口（建议从“能解释链路”到“看细节”）
+
+最推荐的断点组合（从入口到闭环）：
+
 ### 4.2 观察点（你下断点时应该盯这些变量）
+
+1) **误区：自定义 namespace = 自定义标签语法**
+   - 真实本质：你是在写“把 XML 转成 BeanDefinition 的解析器”。
+2) **误区：XSD 一定会去网上下载**
+   - Spring 通过 `spring.schemas` 把 URL 映射到 classpath，正常不需要网络。
+3) **误区：看见 `<tx:...>` 就以为是 transaction 模块的“运行时能力”**
+   - `<tx:...>` 更多是“定义层注册基础设施 bean”，运行时能力通常由 BPP/代理实现。
+
+## F. 常见坑与边界
 
 - namespace URI：是否与你在 `spring.handlers` 的 key 一致（注意 `http\://` 的转义）
 - element 的 localName：是否命中 handler 里注册的 parser key
@@ -112,17 +152,21 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansXmlNamespaceExtensionLabTest tes
 - XSD 解析：
   - `spring.schemas` 是否命中（避免网络访问）
 
----
-
 ## 5. 常见误区（以及为什么你在真实项目里会踩）
 
-1) **误区：自定义 namespace = 自定义标签语法**
-   - 真实本质：你是在写“把 XML 转成 BeanDefinition 的解析器”。
-2) **误区：XSD 一定会去网上下载**
-   - Spring 通过 `spring.schemas` 把 URL 映射到 classpath，正常不需要网络。
-3) **误区：看见 `<tx:...>` 就以为是 transaction 模块的“运行时能力”**
-   - `<tx:...>` 更多是“定义层注册基础设施 bean”，运行时能力通常由 BPP/代理实现。
+## G. 小结与下一章
 
----
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansXmlNamespaceExtensionLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansXmlNamespaceExtensionLabTest.java`
 
 上一章：[45. 自定义 Qualifier：meta-annotation 与候选收敛](45-custom-qualifier-meta-annotation.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[47. BeanDefinitionReader：除了注解与 XML，还有 Properties / Groovy](47-beandefinitionreader-other-inputs-properties-groovy.md)
+
+<!-- BOOKIFY:END -->

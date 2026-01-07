@@ -1,5 +1,19 @@
 # 47. BeanDefinitionReader：除了注解与 XML，还有 Properties / Groovy
 
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**47. BeanDefinitionReader：除了注解与 XML，还有 Properties / Groovy**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
 这一章解决一个“源码视角必须掌握，但现代项目里容易被忽略”的问题：
 
 > **Spring 是怎么把不同输入源（注解、XML、properties、groovy）统一成 BeanDefinition 的？BeanDefinitionReader 到底干了什么？**
@@ -11,24 +25,9 @@
 
 ---
 
-## 0. 复现入口（可运行）
-
 入口测试：
 
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansPropertiesBeanDefinitionReaderLabTest.java`
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansGroovyBeanDefinitionReaderLabTest.java`
-
-推荐运行命令：
-
-```bash
-mvn -pl spring-core-beans -Dtest=SpringCoreBeansPropertiesBeanDefinitionReaderLabTest test
-mvn -pl spring-core-beans -Dtest=SpringCoreBeansGroovyBeanDefinitionReaderLabTest test
-```
-
 对应资源文件：
-
-- `spring-core-beans/src/test/resources/part05_aot_and_real_world/reader/beans.properties`
-- `spring-core-beans/src/test/resources/part05_aot_and_real_world/reader/beans.groovy`
 
 ---
 
@@ -80,9 +79,6 @@ BeanDefinitionReader 的价值在于：
 
 依赖说明：
 
-- `GroovyBeanDefinitionReader` 位于 Spring beans 包中，但运行时需要 Groovy 运行库
-- 本仓库已在 `spring-core-beans/pom.xml` 以 test scope 引入 `org.apache.groovy:groovy:4.0.21`，确保 Lab 可运行
-
 ---
 
 ## 3. 原理：Reader 把“输入”落到定义层主线的哪个位置？
@@ -99,18 +95,10 @@ BeanDefinitionReader 的价值在于：
 
 ---
 
-## 4. 怎么实现的：断点入口与观察点（从 reader 到 registry）
-
-建议断点（两条 reader 共通的收敛点）：
-
 - `AbstractBeanDefinitionReader#loadBeanDefinitions`（reader 抽象入口）
 - `DefaultListableBeanFactory#registerBeanDefinition`（定义入库统一入口）
 
-Properties reader 的典型断点：
-
 - `PropertiesBeanDefinitionReader#loadBeanDefinitions`
-
-Groovy reader 的典型断点：
 
 - `GroovyBeanDefinitionReader#loadBeanDefinitions`
 
@@ -122,6 +110,49 @@ Groovy reader 的典型断点：
 
 ---
 
+---
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansGroovyBeanDefinitionReaderLabTest` / `SpringCoreBeansPropertiesBeanDefinitionReaderLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+## 0. 复现入口（可运行）
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansPropertiesBeanDefinitionReaderLabTest.java`
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansGroovyBeanDefinitionReaderLabTest.java`
+
+推荐运行命令：
+
+```bash
+mvn -pl spring-core-beans -Dtest=SpringCoreBeansPropertiesBeanDefinitionReaderLabTest test
+mvn -pl spring-core-beans -Dtest=SpringCoreBeansGroovyBeanDefinitionReaderLabTest test
+```
+
+- `spring-core-beans/src/test/resources/part05_aot_and_real_world/reader/beans.properties`
+- `spring-core-beans/src/test/resources/part05_aot_and_real_world/reader/beans.groovy`
+
+- `GroovyBeanDefinitionReader` 位于 Spring beans 包中，但运行时需要 Groovy 运行库
+- 本仓库已在 `spring-core-beans/pom.xml` 以 test scope 引入 `org.apache.groovy:groovy:4.0.21`，确保 Lab 可运行
+
+## 4. 怎么实现的：断点入口与观察点（从 reader 到 registry）
+
+建议断点（两条 reader 共通的收敛点）：
+
+Properties reader 的典型断点：
+
+Groovy reader 的典型断点：
+
+## F. 常见坑与边界
+
 ## 5. 常见误区
 
 1) **误区：Reader = 创建对象**
@@ -129,6 +160,19 @@ Groovy reader 的典型断点：
 2) **误区：我写的是 Groovy/Properties，所以不属于 beans 体系**
    - 恰恰相反：这些机制说明 beans 体系的抽象能力（输入可扩展，输出统一）。
 
----
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansGroovyBeanDefinitionReaderLabTest` / `SpringCoreBeansPropertiesBeanDefinitionReaderLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansPropertiesBeanDefinitionReaderLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansGroovyBeanDefinitionReaderLabTest.java`
 
 上一章：[46. XML namespace 扩展：NamespaceHandler / Parser / spring.handlers](46-xml-namespace-extension.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[48. 方法注入：replaced-method / MethodReplacer（实例化策略分支）](48-method-injection-replaced-method.md)
+
+<!-- BOOKIFY:END -->

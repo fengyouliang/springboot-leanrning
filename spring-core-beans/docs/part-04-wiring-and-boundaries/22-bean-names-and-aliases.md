@@ -1,29 +1,26 @@
 # 22. Bean 名称与 alias：同一个实例，多一个名字
 
-## 0. 复现入口（可运行）
+<!-- AG-CONTRACT:START -->
 
-- 入口测试（推荐先跑通再下断点）：
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanNameAliasLabTest.java`
-- 推荐运行命令：
-  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansBeanNameAliasLabTest test`
+## A. 本章定位
+
+- 本章主题：**22. Bean 名称与 alias：同一个实例，多一个名字**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 很多人第一次见 alias 都会把它当成“复制一个 bean”。
 
-这一章用一个最小实验固定一个结论：
-
 - alias 只是名字映射，不会创建第二个实例
-
-对应实验：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanNameAliasLabTest.java`
 
 ## 1. 现象：两个名字拿到的是同一个对象
 
 对应测试：
-
-- `SpringCoreBeansBeanNameAliasLabTest.aliasResolvesToSameSingletonInstanceAsCanonicalName()`
-
-实验里我们：
 
 1) 注册 `primaryName`
 2) `registerAlias("primaryName", "aliasName")`
@@ -39,30 +36,13 @@
 - 从 `aliasName` 映射到 `primaryName`
 - 最终仍然是“同一个 beanDefinition/同一个 singleton instance”
 
-## 3. 常见坑
-
-- **坑 1：alias 冲突**
-  - alias 不能随意复用，否则会导致覆盖/异常（取决于容器设置）。
-
-- **坑 2：alias 不会改变类型**
-  - alias 只是名字；它不改变注入规则、不改变 `@Primary`/`@Qualifier` 的语义。
-
-## 源码锚点（建议从这里下断点）
-
 - `SimpleAliasRegistry#registerAlias`：alias 注册入口（aliasName → canonicalName 的映射建立在这里）
 - `SimpleAliasRegistry#canonicalName`：把 aliasName 解析成最终 canonicalName 的关键（查找/注入都会走到）
 - `AbstractBeanFactory#transformedBeanName`：统一的 beanName 规范化入口（含别名、FactoryBean `&` 等前缀处理）
 - `AbstractBeanFactory#doGetBean`：按 name 取 bean 的主流程（最终总是落到 canonicalName）
 - `DefaultSingletonBeanRegistry#getSingleton`：singleton 缓存只存一份实例（解释“alias 不会复制对象”）
 
-## 断点闭环（用本仓库 Lab/Test 跑一遍）
-
 入口：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanNameAliasLabTest.java`
-  - `aliasResolvesToSameSingletonInstanceAsCanonicalName()`
-
-建议断点：
 
 1) `SimpleAliasRegistry#registerAlias`：观察 aliasName → primaryName 的映射写入
 2) `SimpleAliasRegistry#canonicalName`：在 `getBean("aliasName")` 时观察解析过程
@@ -77,8 +57,72 @@
 
 ## 4. 一句话自检
 
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansBeanNameAliasLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanNameAliasLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansBeanNameAliasLabTest test`
+
+这一章用一个最小实验固定一个结论：
+
+对应实验：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanNameAliasLabTest.java`
+
+- `SpringCoreBeansBeanNameAliasLabTest.aliasResolvesToSameSingletonInstanceAsCanonicalName()`
+
+实验里我们：
+
+## 源码锚点（建议从这里下断点）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanNameAliasLabTest.java`
+  - `aliasResolvesToSameSingletonInstanceAsCanonicalName()`
+
+建议断点：
+
 - 你能解释清楚：alias 解决的是什么问题？（更灵活的名称入口，而不是复制对象）
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanNameAliasLabTest.java`
 推荐断点：`DefaultListableBeanFactory#registerAlias`、`DefaultListableBeanFactory#canonicalName`、`AbstractBeanFactory#doGetBean`
 
-上一章：[21. 父子 ApplicationContext：可见性与覆盖边界](21-context-hierarchy.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[23. FactoryBean 深潜：product vs factory、类型匹配、以及 isSingleton 缓存语义](23-factorybean-deep-dive.md)
+## F. 常见坑与边界
+
+## 3. 常见坑
+
+- **坑 1：alias 冲突**
+  - alias 不能随意复用，否则会导致覆盖/异常（取决于容器设置）。
+
+- **坑 2：alias 不会改变类型**
+  - alias 只是名字；它不改变注入规则、不改变 `@Primary`/`@Qualifier` 的语义。
+
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansBeanNameAliasLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanNameAliasLabTest.java`
+
+上一章：[21. 父子 ApplicationContext：可见性与覆盖边界](21-context-hierarchy.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[23. FactoryBean 深挖：getObjectType/isSingleton 与缓存](23-factorybean-deep-dive.md)
+
+<!-- BOOKIFY:END -->

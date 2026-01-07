@@ -1,20 +1,26 @@
 # 33. 候选选择 vs 顺序：`@Primary` / `@Priority` / `@Order` 到底各管什么？
 
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**33. 候选选择 vs 顺序：`@Primary` / `@Priority` / `@Order` 到底各管什么？**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
 这一章专门解决一个“老是被误用”的问题：
 
 > 我给 bean 加了 `@Order(1)`，为什么注入还是报 “候选太多（NoUniqueBeanDefinition）”？
 
 答案是：**你把“集合排序”当成了“单依赖选择”。**
 
-对应实验（可运行 + 可断言）：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
-
 建议直接跑：
-
-```bash
-mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansAutowireCandidateSelectionLabTest test
-```
 
 ## 1. 先把问题分清：你注入的是“一个”还是“一组”？
 
@@ -27,16 +33,6 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
 
 ### 面试常问：单注入 vs 集合注入（不要把排序当成选择）
 
-- 题目：`@Primary` / `@Priority` / `@Order` 分别解决什么问题？哪些只影响“集合顺序”，哪些会影响“单依赖候选收敛”？
-- 追问：
-  - 为什么 `@Order` 不能解决“单注入歧义”（`NoUniqueBeanDefinitionException`）？你如何用断点证明它根本不参与 `determineAutowireCandidate`？
-  - `@Primary` 与 `@Priority` 谁优先？在没有 `@Primary/@Qualifier` 时，`@Priority` 为什么有时能“打破平局”？
-- 复现入口（可断言）：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
-  - 单注入歧义：`orderAnnotation_doesNotResolveSingleInjectionAmbiguity()`
-  - `@Primary` vs `@Priority`：`primaryOverridesPriority_forSingleInjection()`
-  - tie-break：`priorityAnnotation_canBreakTieForSingleInjection_whenNoPrimaryOrQualifier()`
-  - 集合顺序：`orderAnnotation_affectsCollectionInjectionOrder()`
-
 ## 2. 单依赖注入：**解决的是“选谁”**
 
 当容器里有多个同类型候选时（`T` 有多个 bean），你需要的是 **候选选择规则**，常见工具是：
@@ -44,8 +40,6 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
 - `@Qualifier`：我明确指定要哪个（最直观，强确定性）
 - `@Primary`：我指定一个默认胜者（默认实现）
 - `@Priority`：在没有 `@Primary/@Qualifier` 时，用优先级“打破平局”
-
-对应 Lab 的结论（可断言）：
 
 1) **`@Order` 不能解决单依赖歧义**
    - 即使两个候选都有 `@Order`，单依赖注入仍应失败
@@ -66,8 +60,6 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
 - `@Order` / `Ordered`
 - `@Priority`（同样也会影响排序）
 
-对应 Lab 的结论（可断言）：
-
 - `@Order(0)` 的 bean 会排在 `@Order(1)` 前面（数字越小越靠前）
 
 关键澄清：
@@ -75,25 +67,16 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
 > **集合注入需要排序；单依赖注入需要选择。**  
 > 这两件事不是同一个问题。
 
-## 4. Debug / 排查建议（非常实用）
-
 遇到注入问题时，先问 3 个问题：
 
 1) 这是单依赖还是集合注入？
 2) 如果是单依赖：容器里有哪些候选？有没有 `@Qualifier/@Primary/@Priority`？
 3) 如果是集合注入：排序规则来自哪里？你写了 `@Order` 还是实现了 `Ordered`？
 
-并且记住一个常见误区：
-
-- “我加了 `@Order`，它应该自动帮我选一个 bean”  
-  ⇒ 这通常是不成立的（Lab 已固化为断言）
-
 ## 5. 延伸阅读（把规则放回更完整的 DI 体系）
 
 - DI 解析总览：`@Qualifier/@Primary` 的基本语义：[03. 依赖注入解析](../part-01-ioc-container/03-dependency-injection-resolution.md)
 - 如果你在看容器扩展点顺序（BPP/BFPP）：顺序体系更复杂（另一个层面）：[14. 顺序：PriorityOrdered / Ordered / 无序](../part-03-container-internals/14-post-processor-ordering.md)
-
-## 源码锚点（建议从这里下断点）
 
 - `DefaultListableBeanFactory#doResolveDependency`：单依赖注入的主入口（候选收集 → 选胜者 → 注入）
 - `DefaultListableBeanFactory#determineAutowireCandidate`：从多个候选里挑一个（会综合 qualifier/primary/priority/name 等）
@@ -101,13 +84,7 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
 - `DefaultListableBeanFactory#determineHighestPriorityCandidate`：`@Priority` 参与 tie-break 的关键分支
 - `AnnotationAwareOrderComparator#sort`：集合注入排序入口（`@Order/@Priority/Ordered` 影响的是这里）
 
-## 断点闭环（用本仓库 Lab/Test 跑一遍）
-
 入口：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
-
-建议断点：
 
 1) `DefaultListableBeanFactory#doResolveDependency`：对照单依赖注入场景，观察候选集合与最终胜者
 2) `DefaultListableBeanFactory#determinePrimaryCandidate`：观察 `@Primary` 为什么能压过 `@Priority`
@@ -116,6 +93,54 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
 
 ## 排障分流：这是定义层问题还是实例层问题？
 
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansAutowireCandidateSelectionLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+对应实验（可运行 + 可断言）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
+
+```bash
+mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansAutowireCandidateSelectionLabTest test
+```
+
+- 题目：`@Primary` / `@Priority` / `@Order` 分别解决什么问题？哪些只影响“集合顺序”，哪些会影响“单依赖候选收敛”？
+- 追问：
+  - 为什么 `@Order` 不能解决“单注入歧义”（`NoUniqueBeanDefinitionException`）？你如何用断点证明它根本不参与 `determineAutowireCandidate`？
+  - `@Primary` 与 `@Priority` 谁优先？在没有 `@Primary/@Qualifier` 时，`@Priority` 为什么有时能“打破平局”？
+- 复现入口（可断言）：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
+  - 单注入歧义：`orderAnnotation_doesNotResolveSingleInjectionAmbiguity()`
+  - `@Primary` vs `@Priority`：`primaryOverridesPriority_forSingleInjection()`
+  - tie-break：`priorityAnnotation_canBreakTieForSingleInjection_whenNoPrimaryOrQualifier()`
+  - 集合顺序：`orderAnnotation_affectsCollectionInjectionOrder()`
+
+对应 Lab 的结论（可断言）：
+
+对应 Lab 的结论（可断言）：
+
+## 4. Debug / 排查建议（非常实用）
+
+- “我加了 `@Order`，它应该自动帮我选一个 bean”  
+  ⇒ 这通常是不成立的（Lab 已固化为断言）
+
+## 源码锚点（建议从这里下断点）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
+
+建议断点：
+
 - “`NoUniqueBeanDefinitionException`（候选太多）” → **实例层（候选选择失败）**：`@Order` 不会帮你选胜者；用 `@Qualifier/@Primary/@Priority`（本章 + `doResolveDependency`）
 - “集合注入顺序不稳定/不符合预期” → **实例层（排序）**：看 `AnnotationAwareOrderComparator#sort`（本章第 3 节）
 - “我以为 `@Priority` 会影响一切注入场景” → **实例层规则差异**：它既可能参与单依赖 tie-break，也会影响集合排序，但优先级低于 `@Primary`（本章第 2/3 节）
@@ -123,4 +148,23 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
 推荐断点：`DefaultListableBeanFactory#determineAutowireCandidate`、`DefaultListableBeanFactory#doResolveDependency`、`AnnotationAwareOrderComparator#sort`
 
-上一章：[32. `@Resource` 注入：为什么它更像“按名称找 Bean”？](32-resource-injection-name-first.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[34. `@Value("${...}")` 占位符解析：默认 non-strict vs strict fail-fast](34-value-placeholder-resolution-strict-vs-non-strict.md)
+## F. 常见坑与边界
+
+并且记住一个常见误区：
+
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansAutowireCandidateSelectionLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
+
+上一章：[32. @Resource 的 name-first：CommonAnnotationBeanPostProcessor](32-resource-injection-name-first.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[34. @Value 占位符解析：strict vs non-strict](34-value-placeholder-resolution-strict-vs-non-strict.md)
+
+<!-- BOOKIFY:END -->

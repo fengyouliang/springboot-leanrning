@@ -1,11 +1,18 @@
 # 27. SmartLifecycle：start/stop 时机与 phase 顺序
 
-## 0. 复现入口（可运行）
+<!-- AG-CONTRACT:START -->
 
-- 入口测试（推荐先跑通再下断点）：
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansSmartLifecycleLabTest.java`
-- 推荐运行命令：
-  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansSmartLifecycleLabTest test`
+## A. 本章定位
+
+- 本章主题：**27. SmartLifecycle：start/stop 时机与 phase 顺序**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 `SmartLifecycle` 是容器提供的“启动/停止阶段”扩展点。
 
@@ -15,17 +22,9 @@
 - 我希望在容器 close 时 stop
 - 并且我希望多个组件之间按 phase 排序
 
-对应实验：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansSmartLifecycleLabTest.java`
-
 ## 1. 现象：start 按 phase 升序，stop 反向
 
 对应测试：
-
-- `SpringCoreBeansSmartLifecycleLabTest.smartLifecycleStartsInPhaseOrder_andStopsInReverseOrder()`
-
-实验里我们注册了两个 lifecycle：
 
 - A：phase=0
 - B：phase=1
@@ -44,25 +43,54 @@
 
 所以它不是“你手动调用 start/stop”，而是容器生命周期的一部分。
 
-## 3. 常见坑
-
-- **坑 1：把 SmartLifecycle 当成业务逻辑入口**
-  - 它更像基础设施启动/停止钩子。
-
-- **坑 2：stop(Runnable) 不调用 callback**
-  - 容器会等待 callback，用于支持异步 stop；如果你不调用 callback，关闭可能卡住。
-
-## 源码锚点（建议从这里下断点）
-
 - `AbstractApplicationContext#finishRefresh`：refresh 收尾阶段（触发 `LifecycleProcessor#onRefresh`）
 - `LifecycleProcessor#onRefresh`：生命周期统一入口（默认实现是 `DefaultLifecycleProcessor`）
 - `DefaultLifecycleProcessor#startBeans`：start 的排序与触发点（phase 升序）
 - `LifecycleProcessor#onClose`：close 阶段入口（触发 stop）
 - `DefaultLifecycleProcessor#stopBeans`：stop 的排序与触发点（phase 反序）
 
-## 断点闭环（用本仓库 Lab/Test 跑一遍）
-
 入口：
+
+## 排障分流：这是定义层问题还是实例层问题？
+
+- “SmartLifecycle 没自动 start” → **实例层（生命周期触发条件）**：`isAutoStartup()` 是否为 true？context 是否 refresh 完成？（看 `finishRefresh`）
+- “start/stop 顺序不符合预期” → **实例层（phase 语义）**：检查 `getPhase()` 值与依赖关系（本章第 1 节）
+- “close 卡住/stop 不返回” → **实例层（异步 stop）**：`stop(Runnable)` 必须调用 callback（本章第 3 节）
+- “把它当业务逻辑入口导致复杂副作用” → **设计风险**：它更适合作为基础设施 start/stop 钩子（本章第 3 节）
+
+## 4. 一句话自检
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansSmartLifecycleLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansSmartLifecycleLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansSmartLifecycleLabTest test`
+
+对应实验：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansSmartLifecycleLabTest.java`
+
+- `SpringCoreBeansSmartLifecycleLabTest.smartLifecycleStartsInPhaseOrder_andStopsInReverseOrder()`
+
+实验里我们注册了两个 lifecycle：
+
+## 源码锚点（建议从这里下断点）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
 
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansSmartLifecycleLabTest.java`
   - `smartLifecycleStartsInPhaseOrder_andStopsInReverseOrder()`
@@ -74,17 +102,33 @@
 3) `DefaultLifecycleProcessor#stopBeans`：观察 stop 为什么按 phase 反序
 4) `SmartLifecycle#stop` / `stop(Runnable)`：观察容器为什么需要 callback（否则可能卡关闭）
 
-## 排障分流：这是定义层问题还是实例层问题？
-
-- “SmartLifecycle 没自动 start” → **实例层（生命周期触发条件）**：`isAutoStartup()` 是否为 true？context 是否 refresh 完成？（看 `finishRefresh`）
-- “start/stop 顺序不符合预期” → **实例层（phase 语义）**：检查 `getPhase()` 值与依赖关系（本章第 1 节）
-- “close 卡住/stop 不返回” → **实例层（异步 stop）**：`stop(Runnable)` 必须调用 callback（本章第 3 节）
-- “把它当业务逻辑入口导致复杂副作用” → **设计风险**：它更适合作为基础设施 start/stop 钩子（本章第 3 节）
-
-## 4. 一句话自检
-
 - 你能解释清楚：为什么 stop 顺序是反向的吗？（提示：避免先停掉依赖者）
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansSmartLifecycleLabTest.java`
 推荐断点：`DefaultLifecycleProcessor#startBeans`、`DefaultLifecycleProcessor#stopBeans`、`SmartLifecycle#start`
 
-上一章：[26. SmartInitializingSingleton：所有单例都创建完之后再做事](26-smart-initializing-singleton.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[28. 自定义 Scope + scoped proxy：thread scope 的真实语义](28-custom-scope-and-scoped-proxy.md)
+## F. 常见坑与边界
+
+## 3. 常见坑
+
+- **坑 1：把 SmartLifecycle 当成业务逻辑入口**
+  - 它更像基础设施启动/停止钩子。
+
+- **坑 2：stop(Runnable) 不调用 callback**
+  - 容器会等待 callback，用于支持异步 stop；如果你不调用 callback，关闭可能卡住。
+
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansSmartLifecycleLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansSmartLifecycleLabTest.java`
+
+上一章：[26. SmartInitializingSingleton：容器就绪后回调](26-smart-initializing-singleton.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[28. 自定义 scope 与 scoped proxy：线程 scope 复现](28-custom-scope-and-scoped-proxy.md)
+
+<!-- BOOKIFY:END -->

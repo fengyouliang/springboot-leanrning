@@ -1,5 +1,19 @@
 # 08. Pointcut 表达式系统：execution/within/this/target/args/@annotation/...（以及常见误判）
 
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**08. Pointcut 表达式系统：execution/within/this/target/args/@annotation/...（以及常见误判）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
 pointcut 是 Spring AOP 里最容易“看起来懂了、其实误判”的部分。
 
 原因很简单：**pointcut 控制的是“哪些调用会进入 proxy 的拦截器链”**，而 proxy 的类型、调用入口、以及表达式语义都可能让你产生错觉。
@@ -9,17 +23,11 @@ pointcut 是 Spring AOP 里最容易“看起来懂了、其实误判”的部�
 1. **解释清楚每个常见 designator 的语义**（execution/within/this/target/args/@annotation/...）
 2. **在真实项目里遇到 AOP 不生效时，能把问题稳定分流**（call path / pointcut / 代理限制）
 
-> 推荐配套 Labs：`SpringCoreAopPointcutExpressionsLabTest`（重点 this vs target）。
-
 ---
 
 ## 0. 先把“匹配发生在哪里”说清楚
 
 Spring AOP（proxy-based）里，匹配的大前提是：
-
-1. **调用必须先进入 proxy**（否则没有机会匹配与执行链，见 docs/01）
-2. **proxy 在收到方法调用时**，会根据目标方法与 advisors 组装拦截器链（见 docs/06）
-3. pointcut 的匹配决定：哪些 advisor 进入这次调用的链条
 
 所以你排查 pointcut 的第一句话不应该是“表达式写对了吗”，而应该是：
 
@@ -71,9 +79,7 @@ Spring AOP（proxy-based）里，匹配的大前提是：
 
 > **this 看的是“代理对象的类型”，target 看的是“目标对象的类型”。**
 
-而代理对象的类型会随 JDK/CGLIB 改变（见 docs/02）。
-
-### 2.1 结论表（先背结论，再用 Labs 验证）
+而代理对象的类型会随 JDK/CGLIB 改变（见 [02. jdk-vs-cglib](../part-01-proxy-fundamentals/02-jdk-vs-cglib.md)）。
 
 假设你的目标实现类是 `Impl`，接口是 `Api`：
 
@@ -97,21 +103,12 @@ Spring AOP（proxy-based）里，匹配的大前提是：
 - 但项目里实际用的是 JDK proxy（接口代理）
 - 于是 this(Impl) 永远不命中，导致你误判 AOP 失效
 
-配套 Lab 会把这个误判做成可断言结论：`SpringCoreAopPointcutExpressionsLabTest`。
-
 ---
-
-## 3. args(...)：按“运行时参数类型”匹配（常被误用）
-
-`args` 的直觉是“参数类型匹配”，但你必须注意它更偏 **运行时**：
 
 - `args(SomeType)` 更关注调用时传入的对象类型
 - 与 `execution(.., SomeType, ..)` 这种“签名层面”的静态模式不同
 
 常见误判：
-
-- 你以为 args(String) 匹配“声明是 String 的参数”，但实际可能是运行时传入的子类型/代理类型
-- 在泛型/集合参数下，args 往往不是你想要的语义（更建议把范围收敛到 execution + within）
 
 ---
 
@@ -119,15 +116,7 @@ Spring AOP（proxy-based）里，匹配的大前提是：
 
 这一组的核心差异在于“注解贴在哪里、匹配看的是谁”：
 
-- `@annotation(X)`：方法上有注解 X
-- `@within(X)`：声明该方法的类上有注解 X（更偏静态）
-- `@target(X)`：运行时目标对象的类上有注解 X（更偏运行时）
-
 常见误判：
-
-- 你把注解贴在接口方法上，但运行时调用的是实现类方法（代理/桥接方法/合成方法会让你更迷惑）
-- 你把注解贴在类上却用 `@annotation` 匹配方法
-- 你以为 `@within` 与 `@target` 等价，但在代理/继承/元注解场景下可能不同
 
 > 学习路径建议：先用 `@annotation` 建立最小闭环（“我能拦截”），再逐步扩展到 execution/within/this/target 等通用表达式。
 
@@ -151,17 +140,76 @@ Spring AOP（proxy-based）里，匹配的大前提是：
 
 当你怀疑 pointcut 没命中时，不要靠猜，按下面步骤做闭环：
 
+如果你能把这四步跑通，真实项目里 80% 的“我以为 AOP 不生效”都会被快速分流定位。
+
+---
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreAopPointcutExpressionsLabTest`
+- 建议命令：`mvn -pl spring-core-aop test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+> 推荐配套 Labs：`SpringCoreAopPointcutExpressionsLabTest`（重点 this vs target）。
+
+1. **调用必须先进入 proxy**（否则没有机会匹配与执行链，见 [01. aop-proxy-mental-model](../part-01-proxy-fundamentals/01-aop-proxy-mental-model.md)）
+2. **proxy 在收到方法调用时**，会根据目标方法与 advisors 组装拦截器链（见 [06. debugging](../part-01-proxy-fundamentals/06-debugging.md)）
+3. pointcut 的匹配决定：哪些 advisor 进入这次调用的链条
+
+### 2.1 结论表（先背结论，再用 Labs 验证）
+
+配套 Lab 会把这个误判做成可断言结论：`SpringCoreAopPointcutExpressionsLabTest`。
+
+## 3. args(...)：按“运行时参数类型”匹配（常被误用）
+
+`args` 的直觉是“参数类型匹配”，但你必须注意它更偏 **运行时**：
+
+- 你以为 args(String) 匹配“声明是 String 的参数”，但实际可能是运行时传入的子类型/代理类型
+- 在泛型/集合参数下，args 往往不是你想要的语义（更建议把范围收敛到 execution + within）
+
+- `@annotation(X)`：方法上有注解 X
+- `@within(X)`：声明该方法的类上有注解 X（更偏静态）
+- `@target(X)`：运行时目标对象的类上有注解 X（更偏运行时）
+
+- 你把注解贴在接口方法上，但运行时调用的是实现类方法（代理/桥接方法/合成方法会让你更迷惑）
+- 你把注解贴在类上却用 `@annotation` 匹配方法
+- 你以为 `@within` 与 `@target` 等价，但在代理/继承/元注解场景下可能不同
+
 1. **确认调用走 proxy**：在 `JdkDynamicAopProxy#invoke` / `CglibAopProxy.DynamicAdvisedInterceptor#intercept` 下断点
 2. **确认 proxy 上挂了 advisor**：`bean instanceof Advised`，看 `((Advised) bean).getAdvisors()`
 3. **确认这次调用的链条**：在 `DefaultAdvisorChainFactory#getInterceptorsAndDynamicInterceptionAdvice` 看拦截器链是否包含你的 advice
 4. **从最小切点开始回退**：`@annotation` → `execution` → 加 within/args/this/target 收敛
 
-如果你能把这四步跑通，真实项目里 80% 的“我以为 AOP 不生效”都会被快速分流定位。
-
----
-
 ## 7. Labs 对应关系（建议按顺序跑）
 
 - this vs target（JDK/CGLIB 差异，可断言）：`SpringCoreAopPointcutExpressionsLabTest`
 - 从最小切点换到 execution（练习题）：`SpringCoreAopExerciseTest#exercise_changePointcutStyle`
-- 代理与链条断点导航：见 `docs/00`、`docs/06`
+- 代理与链条断点导航：见 [00. 深挖指南](../part-00-guide/00-deep-dive-guide.md)、[06. debugging](../part-01-proxy-fundamentals/06-debugging.md)
+
+## F. 常见坑与边界
+
+- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreAopPointcutExpressionsLabTest`
+- Exercise：`SpringCoreAopExerciseTest`
+
+上一章：[07-autoproxy-creator-mainline](07-autoproxy-creator-mainline.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[09-multi-proxy-stacking](../part-03-proxy-stacking/09-multi-proxy-stacking.md)
+
+<!-- BOOKIFY:END -->

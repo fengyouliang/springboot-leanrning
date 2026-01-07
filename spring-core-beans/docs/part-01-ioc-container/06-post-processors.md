@@ -1,11 +1,18 @@
 # 06. 容器扩展点：BFPP vs BPP（以及它们能/不能做什么）
 
-## 0. 复现入口（可运行）
+<!-- AG-CONTRACT:START -->
 
-- 入口测试（推荐先跑通再下断点）：
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPostProcessorOrderingLabTest.java`
-- 推荐运行命令：
-  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansPostProcessorOrderingLabTest test`
+## A. 本章定位
+
+- 本章主题：**06. 容器扩展点：BFPP vs BPP（以及它们能/不能做什么）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 这一章是理解 Spring “高级玩法”的关键。很多你觉得像“魔法”的特性，本质都是某个 post-processor 在某个阶段做了事。
 
@@ -16,22 +23,12 @@
 
 ## 1. BFPP：`BeanFactoryPostProcessor`
 
-### 1.1 它在什么时候运行？
-
-在容器已经收集完 `BeanDefinition` 之后、创建大部分 bean 之前运行。
-
 因此它的典型能力是：
 
 - 修改已有 `BeanDefinition`（属性、scope、依赖、lazy 等）
 - （通过更底层的接口）注册额外的 `BeanDefinition`
 
-### 1.2 本模块的实验：BFPP 修改定义再生效
-
 对应测试：
-
-- `SpringCoreBeansContainerLabTest.beanFactoryPostProcessorCanModifyBeanDefinitionBeforeInstantiation()`
-
-实验做的事情是：
 
 - 先注册 `ExampleBean` 的定义
 - BFPP 在实例化前把 `value` 属性写进定义里
@@ -50,8 +47,6 @@
 
 ## 2. BPP：`BeanPostProcessor`
 
-### 2.1 它在什么时候运行？
-
 在每个 bean 初始化前后都会被调用（更准确地说：在 bean 创建流程的某些钩子点）。
 
 它的典型能力是：
@@ -59,13 +54,7 @@
 - 修改 bean 实例的属性
 - 用代理包装 bean（AOP 的基础）
 
-### 2.2 本模块的实验：BPP 修改实例
-
 对应测试：
-
-- `SpringCoreBeansContainerLabTest.beanPostProcessorCanModifyBeanInstanceAfterInitialization()`
-
-实验做的事情是：
 
 - 工厂方法先创建一个 `ExampleBean`
 - BPP 在初始化后把它的 `value` 改成新值
@@ -73,15 +62,7 @@
 
 ### 2.3 BPP 与“你以为的对象”之间的差距
 
-这也是为什么很多时候你 debug 会发现：
-
-- 你注入的类型看起来是 `MyService`
-- 但运行时对象可能是 `MyService$$SpringCGLIB$$...` 或 JDK proxy
-
 因为 BPP 有机会把实例替换成代理。
-
-在真实项目里，这个“代理/增强”的典型实现就是 AutoProxyCreator（AOP/事务/缓存/安全等最终都会走到“BPP 替换 bean”这一层）。  
-对应完整版本的容器主线与断点导航：见 `spring-core-aop/docs/part-02-autoproxy-and-pointcuts/07-autoproxy-creator-mainline.md`。
 
 ## 3. 顺序（Ordering）：为什么同一个扩展点里顺序也很重要
 
@@ -121,17 +102,12 @@ Spring 通常用这些规则决定顺序：
 
 这也是为什么：
 
-- BFPP/BDRPP 更像“编译期改元数据”
-- BPP 更像“运行期改对象/换代理”
-
 ## 3.3 源码解析：`PostProcessorRegistrationDelegate` 的两段核心算法
 
 这一节的目标是把你前面记住的结论（BDRPP 更早、BFPP 改定义、BPP 改实例、顺序受 PriorityOrdered/Ordered 影响），落到 Spring 源码里最核心的两段逻辑：
 
 1) `invokeBeanFactoryPostProcessors`：**定义层**（registry/factory）post-processors 的执行算法  
 2) `registerBeanPostProcessors`：**实例层**（BeanPostProcessor）链路的注册算法
-
-你不需要逐行背源码，但你必须能回答：“为什么它这么设计？这个设计会造成哪些现象/坑？”
 
 ### 3.3.1 `invokeBeanFactoryPostProcessors`：为什么 BDRPP 会“先 registry 再 factory”，还要“反复扫描”
 
@@ -140,8 +116,6 @@ Spring 通常用这些规则决定顺序：
 - **BDRPP 有能力在 registry 阶段注册新的 BeanDefinition**
 - 而新注册的 BeanDefinition 里，可能又包含新的 BDRPP/BFPP
 - 因此必须先把 registry 相关的事情跑到“稳定”（否则定义层永远不确定）
-
-精简伪代码（足够对照断点理解，不追求逐行一致）：
 
 ```text
 invokeBeanFactoryPostProcessors(beanFactory):
@@ -184,28 +158,10 @@ invokeBeanFactoryPostProcessors(beanFactory):
 
 精简伪代码（同样只保留关键分叉）：
 
-```text
-registerBeanPostProcessors(beanFactory):
-  names = getBeanNamesForType(BeanPostProcessor)
-
-  // A) 先注册一个“检查器”（BeanPostProcessorChecker）
-  //    用于提示：某些 bean 在 BPP 链尚未完整时就被创建了，因此无法被所有 BPP 处理
-
-  // B) 分三组：PriorityOrdered / Ordered / unordered
-  //    先注册 PriorityOrdered，再注册 Ordered，最后注册无序
-  //    注意：注册过程会 instantiate BPP（BPP 本身也是 bean）
-
-  // C) internal BPP 往往会被最后再补一遍（确保排序稳定）
-```
-
 “为什么会出现没被所有 BPP 处理”的现象？根因只有一句话：
 
 > **BPP 是“创建时拦截链”，不是“创建后补丁”。**  
 > 某个 bean 如果在 BPP 链未完整时就被创建，那么后续 BPP 不会 retroactively 生效。
-
-这也是为什么 docs/06 的坑 4.1 会出现：如果你在 BDRPP/BFPP 阶段（定义层）就 `getBean()`，就可能把某些 bean 提前创建出来，导致它错过后续 BPP（包括代理、@Autowired/@PostConstruct 等处理器）。
-
-### 3.3.3 为什么很多 BFPP/BPP 建议写成 `static @Bean`（源码级原因 + 最小复现）
 
 你在资料里经常看到一句建议：
 
@@ -217,13 +173,6 @@ registerBeanPostProcessors(beanFactory):
 - 如果 BFPP 是一个 **non-static `@Bean` 工厂方法**，Spring 为了调用这个方法，就必须先实例化配置类（`@Configuration` bean）
 - 但配置类此时被创建得太早，会错过后续注册的普通 BPP（因为 BPP 链还没完整）
 - 如果 BFPP 是 **static `@Bean` 工厂方法**，Spring 可以直接调用静态工厂方法创建 BFPP，不需要提前实例化配置类，从而避免该配置类“过早出生”
-
-本模块提供了最小可运行复现（事件断言，不依赖日志）：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansStaticBeanFactoryPostProcessorLabTest.java`
-
-你可以把它当作面试题的“可证据化答案”：  
-**non-static BFPP 迫使配置类早实例化 ⇒ 配置类错过普通 BPP ⇒ 行为/增强出现顺序陷阱。**
 
 最小片段（对比关键点：static vs non-static）：
 
@@ -241,9 +190,81 @@ static class StaticBfppConfig {
 }
 ```
 
-## 3.4 断点闭环（用本仓库 Lab/Test 跑一遍）
-
 建议用这些测试把“时机”变成手感（每个都对应非常典型的真实问题）：
+
+### 4.1 在 BFPP 里 `getBean()` 触发提前实例化
+
+BFPP 本该在“定义层”工作，如果你在里面直接拿 bean（实例层），可能会触发一些 bean 提前创建，导致：
+
+- 后续的 BPP 没机会介入
+- 生命周期回调顺序变得反直觉
+
+### 4.2 BPP 写成“全局修改器”导致不可预测
+
+如果你在 BPP 里对很多 bean 做复杂逻辑，会让系统变得：
+
+学习阶段建议把 BPP 当作“理解容器机制”的窗口，而不是“解决业务问题的日常手段”。
+
+## 面试常问（BFPP / BPP / BDRPP）
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansContainerLabTest` / `SpringCoreBeansPostProcessorOrderingLabTest` / `SpringCoreBeansProgrammaticBeanPostProcessorLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPostProcessorOrderingLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansPostProcessorOrderingLabTest test`
+
+### 1.1 它在什么时候运行？
+
+在容器已经收集完 `BeanDefinition` 之后、创建大部分 bean 之前运行。
+
+### 1.2 本模块的实验：BFPP 修改定义再生效
+
+- `SpringCoreBeansContainerLabTest.beanFactoryPostProcessorCanModifyBeanDefinitionBeforeInstantiation()`
+
+实验做的事情是：
+
+### 2.1 它在什么时候运行？
+
+### 2.2 本模块的实验：BPP 修改实例
+
+- `SpringCoreBeansContainerLabTest.beanPostProcessorCanModifyBeanInstanceAfterInitialization()`
+
+实验做的事情是：
+
+这也是为什么很多时候你 debug 会发现：
+
+- 你注入的类型看起来是 `MyService`
+- 但运行时对象可能是 `MyService$$SpringCGLIB$$...` 或 JDK proxy
+
+在真实项目里，这个“代理/增强”的典型实现就是 AutoProxyCreator（AOP/事务/缓存/安全等最终都会走到“BPP 替换 bean”这一层）。  
+对应完整版本的容器主线与断点导航：见 `spring-core-aop/docs/part-02-autoproxy-and-pointcuts/07-autoproxy-creator-mainline.md`。
+
+- BFPP/BDRPP 更像“编译期改元数据”
+- BPP 更像“运行期改对象/换代理”
+
+精简伪代码（足够对照断点理解，不追求逐行一致）：
+
+### 3.3.3 为什么很多 BFPP/BPP 建议写成 `static @Bean`（源码级原因 + 最小复现）
+
+本模块提供了最小可运行复现（事件断言，不依赖日志）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansStaticBeanFactoryPostProcessorLabTest.java`
+
+## 3.4 断点闭环（用本仓库 Lab/Test 跑一遍）
 
 - BFPP 影响定义，再影响实例：
   - `SpringCoreBeansContainerLabTest#beanFactoryPostProcessorCanModifyBeanDefinitionBeforeInstantiation`
@@ -258,6 +279,46 @@ static class StaticBfppConfig {
 
 ### 3.5 推荐断点（够用版）
 
+- 难以推理
+- 难以测试
+- 难以 debug
+
+下一章我们看一个特别常见、也特别容易误解的点：`@Configuration(proxyBeanMethods=...)`。
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
+推荐断点：`PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`、`PostProcessorRegistrationDelegate#registerBeanPostProcessors`、`AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`
+
+## F. 常见坑与边界
+
+你不需要逐行背源码，但你必须能回答：“为什么它这么设计？这个设计会造成哪些现象/坑？”
+
+```text
+registerBeanPostProcessors(beanFactory):
+  names = getBeanNamesForType(BeanPostProcessor)
+
+  // A) 先注册一个“检查器”（BeanPostProcessorChecker）
+  //    用于提示：某些 bean 在 BPP 链尚未完整时就被创建了，因此无法被所有 BPP 处理
+
+  // B) 分三组：PriorityOrdered / Ordered / unordered
+  //    先注册 PriorityOrdered，再注册 Ordered，最后注册无序
+  //    注意：注册过程会 instantiate BPP（BPP 本身也是 bean）
+
+  // C) internal BPP 往往会被最后再补一遍（确保排序稳定）
+```
+
+这也是为什么 [06. 容器扩展点：BFPP vs BPP（以及它们能/不能做什么）](06-post-processors.md) 的坑 4.1 会出现：如果你在 BDRPP/BFPP 阶段（定义层）就 `getBean()`，就可能把某些 bean 提前创建出来，导致它错过后续 BPP（包括代理、@Autowired/@PostConstruct 等处理器）。
+
+你可以把它当作面试题的“可证据化答案”：  
+**non-static BFPP 迫使配置类早实例化 ⇒ 配置类错过普通 BPP ⇒ 行为/增强出现顺序陷阱。**
+
+## 4. 典型误用与坑
+
+- 常问：BFPP、BPP、BDRPP 分别是什么？分别能做什么？
+  - 答题要点：BDRPP 能在“注册阶段”新增定义；BFPP 能在实例化前修改定义；BPP 介入实例创建链路，能改实例，甚至替换成 proxy。
+- 常见追问：为什么很多 BFPP 建议写成 `static @Bean`？
+  - 答题要点：避免过早实例化配置类/减少循环依赖与顺序陷阱；更贴近“定义层扩展点”的职责。
+
+## G. 小结与下一章
+
 - 入口时间线：
   - `AbstractApplicationContext#refresh`
   - `PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`
@@ -266,34 +327,15 @@ static class StaticBfppConfig {
   - `AbstractAutowireCapableBeanFactory#doCreateBean`
   - `AbstractAutowireCapableBeanFactory#initializeBean`
 
-## 4. 典型误用与坑
+<!-- AG-CONTRACT:END -->
 
-### 4.1 在 BFPP 里 `getBean()` 触发提前实例化
+<!-- BOOKIFY:START -->
 
-BFPP 本该在“定义层”工作，如果你在里面直接拿 bean（实例层），可能会触发一些 bean 提前创建，导致：
+### 对应 Lab/Test
 
-- 后续的 BPP 没机会介入
-- 生命周期回调顺序变得反直觉
+- Lab：`SpringCoreBeansContainerLabTest` / `SpringCoreBeansPostProcessorOrderingLabTest` / `SpringCoreBeansProgrammaticBeanPostProcessorLabTest` / `SpringCoreBeansStaticBeanFactoryPostProcessorLabTest` / `SpringCoreBeansRegistryPostProcessorLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPostProcessorOrderingLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansStaticBeanFactoryPostProcessorLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
 
-### 4.2 BPP 写成“全局修改器”导致不可预测
+上一章：[05. 生命周期：初始化、销毁与回调（@PostConstruct/@PreDestroy 等）](05-lifecycle-and-callbacks.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[07. @Configuration 增强：proxyBeanMethods 与 @Bean 语义](07-configuration-enhancement.md)
 
-如果你在 BPP 里对很多 bean 做复杂逻辑，会让系统变得：
-
-- 难以推理
-- 难以测试
-- 难以 debug
-
-学习阶段建议把 BPP 当作“理解容器机制”的窗口，而不是“解决业务问题的日常手段”。
-
-下一章我们看一个特别常见、也特别容易误解的点：`@Configuration(proxyBeanMethods=...)`。
-对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
-推荐断点：`PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`、`PostProcessorRegistrationDelegate#registerBeanPostProcessors`、`AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`
-
-## 面试常问（BFPP / BPP / BDRPP）
-
-- 常问：BFPP、BPP、BDRPP 分别是什么？分别能做什么？
-  - 答题要点：BDRPP 能在“注册阶段”新增定义；BFPP 能在实例化前修改定义；BPP 介入实例创建链路，能改实例，甚至替换成 proxy。
-- 常见追问：为什么很多 BFPP 建议写成 `static @Bean`？
-  - 答题要点：避免过早实例化配置类/减少循环依赖与顺序陷阱；更贴近“定义层扩展点”的职责。
-
-上一章：[05. 生命周期：初始化、销毁与回调（@PostConstruct/@PreDestroy 等）](05-lifecycle-and-callbacks.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[07. `@Configuration` 增强与 `@Bean` 语义（proxyBeanMethods）](07-configuration-enhancement.md)
+<!-- BOOKIFY:END -->

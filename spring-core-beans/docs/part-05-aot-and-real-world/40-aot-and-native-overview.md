@@ -1,10 +1,22 @@
 # 40. AOT / Native 总览：为什么“JVM 能跑”不等于“Native 能跑”
 
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**40. AOT / Native 总览：为什么“JVM 能跑”不等于“Native 能跑”**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
 这一章不是教你“如何构建 native image”，而是回答一个更关键的问题：
 
 > **为什么同一套 Spring 应用，在 JVM 模式里能工作，但切到 AOT/Native 就可能失败？**
-
-学习阶段只要抓住一个主线：**AOT/Native 把很多“运行时的猜测与反射”前移到“构建期的显式声明”**。
 
 ---
 
@@ -12,15 +24,7 @@
 
 你可以把 JVM 与 Native 的差异理解为：
 
-- JVM：反射、动态代理、类路径扫描等“运行期能力”默认可用（成本是启动慢/内存大/可预知性较差）。
-- Native（AOT）：运行期能力被收紧（换来启动快/内存小/可预知性强），你必须在构建期把需求“说清楚”。
-
 因此在 Spring 世界里，AOT/Native 的核心问题往往不是“业务逻辑”，而是：
-
-1) 你有没有用到反射？（例如框架要反射调用构造器/方法/字段）  
-2) 你有没有用到动态代理？（JDK/CGLIB proxy）  
-3) 你有没有依赖运行期扫描/注册？（classpath 扫描、动态注册 bean 定义）  
-4) 这些需求能不能在构建期被推导/声明？
 
 ---
 
@@ -35,8 +39,6 @@
 你暂时不需要记住所有 hints 的分类，只需要建立一个工程直觉：
 
 > **AOT/Native 下失败的很多问题，本质都是 “hints 缺失”。**
-
-下一章会把它落成“可断言”的最小实验：[41. RuntimeHints 入门](41-runtimehints-basics.md)。
 
 ### 2.1 spring-beans 的 AOT 基础设施：`META-INF/spring/aot.factories` 与 `AotServices`
 
@@ -58,16 +60,64 @@
 
 下面这些“看起来像业务 bug”的问题，常见根因其实是 AOT/Native 约束：
 
-- 反射访问失败（NoSuchMethod/NoSuchField/IllegalAccess）
-- 代理类生成/使用失败（尤其是动态代理/接口代理）
-- 资源缺失（`ClassPathResource` 找不到、模板/配置加载失败）
-- 运行期扫描失效（“JVM 下能发现、Native 下发现不了”）
-
 这一章的目标是让你知道：这些问题都可以被归类到“契约缺失”，并能落到一个具体入口：
 
 - **RuntimeHints**（声明反射/代理/资源等需求）
 
 ---
+
+---
+
+学习阶段你只需要能回答两件事：
+
+1) hints 在哪里被“注册/汇总”？  
+2) 我怎么证明“现在 hints 有/没有”？
+
+- `RuntimeHintsRegistrar#registerHints`（你定义的注册入口）
+
+当你想把 AOT 放回 `spring-beans` 的真实基础设施时（而不是只停留在“我自己写 hints”）：
+
+- `AotServices#factories`（定位 `META-INF/spring/aot.factories` 的加载入口）
+- `AotServices.Loader#load`（观察：某个 service interface 最终加载到了哪些实现类）
+- `BeanFactoryInitializationAotProcessor`（BeanFactory 初始化阶段的 AOT processor 入口）
+
+---
+
+---
+
+如果你把这一章读成一句话，就是：
+
+---
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansAotFactoriesLabTest` / `SpringCoreBeansAotRuntimeHintsLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+学习阶段只要抓住一个主线：**AOT/Native 把很多“运行时的猜测与反射”前移到“构建期的显式声明”**。
+
+- JVM：反射、动态代理、类路径扫描等“运行期能力”默认可用（成本是启动慢/内存大/可预知性较差）。
+- Native（AOT）：运行期能力被收紧（换来启动快/内存小/可预知性强），你必须在构建期把需求“说清楚”。
+
+1) 你有没有用到反射？（例如框架要反射调用构造器/方法/字段）  
+2) 你有没有用到动态代理？（JDK/CGLIB proxy）  
+3) 你有没有依赖运行期扫描/注册？（classpath 扫描、动态注册 bean 定义）  
+4) 这些需求能不能在构建期被推导/声明？
+
+下一章会把它落成“可断言”的最小实验：[41. RuntimeHints 入门](41-runtimehints-basics.md)。
+
+- 反射访问失败（NoSuchMethod/NoSuchField/IllegalAccess）
+- 代理类生成/使用失败（尤其是动态代理/接口代理）
+- 资源缺失（`ClassPathResource` 找不到、模板/配置加载失败）
+- 运行期扫描失效（“JVM 下能发现、Native 下发现不了”）
 
 ## 4. 复现入口（可运行）
 
@@ -83,39 +133,14 @@
 mvn -pl spring-core-beans -Dtest=SpringCoreBeansAotRuntimeHintsLabTest,SpringCoreBeansAotFactoriesLabTest test
 ```
 
----
-
 ## 5. Debug / 断点建议（够用版）
 
-学习阶段你只需要能回答两件事：
-
-1) hints 在哪里被“注册/汇总”？  
-2) 我怎么证明“现在 hints 有/没有”？
-
 本模块把断点聚焦到“hints 的注册”与“hints 的断言”上：
-
-- `RuntimeHintsRegistrar#registerHints`（你定义的注册入口）
-
-当你想把 AOT 放回 `spring-beans` 的真实基础设施时（而不是只停留在“我自己写 hints”）：
-
-- `AotServices#factories`（定位 `META-INF/spring/aot.factories` 的加载入口）
-- `AotServices.Loader#load`（观察：某个 service interface 最终加载到了哪些实现类）
-- `BeanFactoryInitializationAotProcessor`（BeanFactory 初始化阶段的 AOT processor 入口）
-
----
-
-## 6. 常见误区
 
 1) **误区：AOT/Native = 更快的 JVM**
    - 更准确的理解：AOT/Native = “约束更强的运行环境 + 构建期契约”。
 2) **误区：只要加了 hints，就一定能跑**
    - hints 只解决“反射/代理/资源”等契约问题；业务逻辑、条件装配、初始化时机仍然需要正确性。
-
----
-
-## 7. 小结与下一章预告
-
-如果你把这一章读成一句话，就是：
 
 > **AOT/Native 的关键是把“运行期才能知道的事”变成“构建期必须说清楚的事”。**
 
@@ -123,6 +148,23 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansAotRuntimeHintsLabTest,SpringCor
 
 - [41. RuntimeHints 入门：如何把“需求”变成可验证的契约](41-runtimehints-basics.md)
 
----
+## F. 常见坑与边界
+
+## 6. 常见误区
+
+## G. 小结与下一章
+
+## 7. 小结与下一章预告
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansAotFactoriesLabTest` / `SpringCoreBeansAotRuntimeHintsLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAotRuntimeHintsLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAotFactoriesLabTest.java`
 
 上一章：[39. BeanFactory API 深挖：接口族谱与手动 bootstrap 的边界](../part-04-wiring-and-boundaries/39-beanfactory-api-deep-dive.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[41. RuntimeHints 入门：把构建期契约跑通](41-runtimehints-basics.md)
+
+<!-- BOOKIFY:END -->

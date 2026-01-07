@@ -1,5 +1,34 @@
 # 90. 常见坑清单（建议反复对照）
 
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**90. 常见坑清单（建议反复对照）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
+- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansAutowireCandidateSelectionLabTest` / `SpringCoreBeansContainerLabTest` / `SpringCoreBeansEarlyReferenceLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+## F. 常见坑与边界
+
 ## 0. 复现入口（可运行）
 
 - 入口测试：
@@ -157,7 +186,7 @@
 事实：
 
 - `@PostConstruct` 发生在：实例化完成 + 依赖注入完成之后（属于初始化阶段的一部分）
-- 它依赖后处理器触发（不是 Java 语法自带能力），见 docs/12
+- 它依赖后处理器触发（不是 Java 语法自带能力），见 [12. 容器启动与基础设施处理器：为什么注解能工作？](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
 
 如何验证：
 
@@ -183,7 +212,7 @@
 事实：
 
 - setter 循环能救，靠的是“提前暴露引用”（early singleton exposure），这意味着你可能拿到半初始化对象
-- 一旦代理介入，early 与 final 不一致会让问题更隐蔽（见 docs/16）
+- 一旦代理介入，early 与 final 不一致会让问题更隐蔽（见 [16. early reference 与循环依赖：getEarlyBeanReference 到底解决什么？](../part-03-container-internals/16-early-reference-and-circular.md)）
 
 如何验证：
 
@@ -255,4 +284,19 @@
 
 见：[36. 类型转换：BeanWrapper / ConversionService / PropertyEditor 的边界](../part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md)
 
-上一章：[37. 泛型匹配与注入坑：ResolvableType 与代理导致的类型信息丢失](../part-04-wiring-and-boundaries/37-generic-type-matching-pitfalls.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[91. 术语表（Glossary）](91-glossary.md)
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansAutowireCandidateSelectionLabTest` / `SpringCoreBeansContainerLabTest` / `SpringCoreBeansEarlyReferenceLabTest` / `SpringCoreBeansLabTest` / `SpringCoreBeansLifecycleCallbackOrderLabTest` / `SpringCoreBeansProxyingPhaseLabTest` / `SpringCoreBeansFactoryBeanEdgeCasesLabTest` / `SpringCoreBeansGenericTypeMatchingPitfallsLabTest` / `SpringCoreBeansTypeConversionLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`
+
+上一章：[50. PropertyEditor 与 BeanDefinition 值解析：值从定义层落到对象](../part-05-aot-and-real-world/50-property-editor-and-value-resolution.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[91. 术语表（Glossary）](91-glossary.md)
+
+<!-- BOOKIFY:END -->

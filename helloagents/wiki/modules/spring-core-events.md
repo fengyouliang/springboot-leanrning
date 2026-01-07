@@ -8,7 +8,7 @@
 
 - **Responsibility:** 通过最小示例与 Labs/Exercises 展示事件系统的机制与常见坑。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-04
+- **Last Updated:** 2026-01-07
 
 ## Specifications
 
@@ -36,9 +36,13 @@
 
 ## Change History
 
+- [202601071034_all_modules_docs_ag_contract](../../history/2026-01/202601071034_all_modules_docs_ag_contract/) - ✅ 已执行：全模块 docs 升级 A–G 章节契约（每章 A–G + 对应 Lab/Test + 至少 1 个 LabTest），并更新根 README 跨模块入口
+- [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过 `scripts/check-docs.sh`
+- [202601061556_spring_core_modules_teaching_rollout](../../history/2026-01/202601061556_spring_core_modules_teaching_rollout/) - ✅ 已执行：补齐 docs/07（TransactionalEventListener）可运行闭环（新增事务事件 Lab + docs 入口块），并对齐 docs 目录页/入口块规范与自检脚本
 - [202601021322_complete_spring_core_fundamentals_remaining](../../history/2026-01/202601021322_complete_spring_core_fundamentals_remaining/) - ✅ 已执行：补齐 `EventsDemoRunner` 结构化输出（线程/异常传播）与 throwing listener（特定输入触发）
 - [202601041046_spring-core-part-structure-sync](../../history/2026-01/202601041046_spring-core-part-structure-sync/) - ✅ 已执行：对齐 docs Part 目录结构与 src/main+src/test 分包结构（语义化 Part 命名），并修复 README/跨模块引用路径
 
 ## Dependencies
 
 - 基于 `spring-core-beans` 的 IoC/Bean 基础（学习路径依赖）
+- 测试实验引入 `spring-tx`（用于 `@TransactionalEventListener` 的事务同步回调语义）

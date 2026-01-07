@@ -8,7 +8,7 @@
 
 - **Responsibility:** 提供 AOP 的最小可运行示例与测试实验，帮助理解代理行为与切面生效边界。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-04
+- **Last Updated:** 2026-01-07
 
 ## Specifications
 
@@ -79,9 +79,13 @@
 
 - 依赖 `spring-core-beans` 的 Bean/容器基础概念（学习路径依赖）
 - 测试范围引入 `spring-tx` 与 `spring-security-config`，用于“真实叠加”集成 Lab（不依赖外部 DB/Web）
+- 进阶扩展：`spring-core-aop-weaving`（AspectJ weaving：LTW/CTW、更多 join point/高级表达式，用于理解 proxy AOP 的能力边界）
 
 ## Change History
 
+- [202601071034_all_modules_docs_ag_contract](../../history/2026-01/202601071034_all_modules_docs_ag_contract/) - ✅ 已执行：全模块 docs 升级 A–G 章节契约（每章 A–G + 对应 Lab/Test + 至少 1 个 LabTest），并更新根 README 跨模块入口
+- [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过 `scripts/check-docs.sh`
+- [202601061556_spring_core_modules_teaching_rollout](../../history/2026-01/202601061556_spring_core_modules_teaching_rollout/) - ✅ 已执行：对齐 docs 目录页/Part 编号与章节末尾“对应 Lab/Test”入口块，清理正文 `docs/NN` 缩写引用，并通过断链检查与教学覆盖检查
 - [202601010804_spring-core-aop-deep-dive](../../history/2026-01/202601010804_spring-core-aop-deep-dive/) - ✅ 已执行：新增深挖指南/自测题，扩写 01-06/90，补齐源码级断点与排障闭环
 - [202601010845_beans-aop-deep-dive-v2](../../history/2026-01/202601010845_beans-aop-deep-dive-v2/) - ✅ 已执行：新增 07-09（AutoProxyCreator 主线/pointcut/多代理叠加），并新增 Labs 覆盖 proceed 嵌套、this vs target、多 advisor vs 套娃 proxy
 - [202601011121_aop-real-stacking-labs](../../history/2026-01/202601011121_aop-real-stacking-labs/) - ✅ 已执行：新增 10（真实叠加 Debug Playbook）与集成 Lab（Tx/Cache/Method Security），补齐“真实叠加”断点与排障闭环

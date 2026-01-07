@@ -8,7 +8,7 @@
 
 - **Responsibility:** 用最小示例与测试验证 JPA 行为、映射与查询方式。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-04
+- **Last Updated:** 2026-01-07
 
 ## Specifications
 
@@ -28,6 +28,7 @@
 - **Docs Index:** `springboot-data-jpa/docs/README.md`
 - **Docs Guide:** `springboot-data-jpa/docs/part-00-guide/00-deep-dive-guide.md`
 - **Lab:** `springboot-data-jpa/src/test/java/com/learning/springboot/bootdatajpa/part01_data_jpa/BootDataJpaLabTest.java`
+- **Lab (Debug SQL):** `springboot-data-jpa/src/test/java/com/learning/springboot/bootdatajpa/part01_data_jpa/BootDataJpaDebugSqlLabTest.java`
 - **Exercise:** `springboot-data-jpa/src/test/java/com/learning/springboot/bootdatajpa/part00_guide/BootDataJpaExerciseTest.java`
 
 ## Source Layout（与 docs Part 对齐）
@@ -37,4 +38,7 @@
 
 ## Change History
 
+- [202601071034_all_modules_docs_ag_contract](../../history/2026-01/202601071034_all_modules_docs_ag_contract/) - ✅ 已执行：全模块 docs 升级 A–G 章节契约（每章 A–G + 对应 Lab/Test + 至少 1 个 LabTest），并更新根 README 跨模块入口
+- [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过 `scripts/check-docs.sh`
 - [202601041358_springboot-part-structure-sync](../../history/2026-01/202601041358_springboot-part-structure-sync/) - ✅ 已执行：对齐 docs Part 与 src/main/src/test 分包，并修复 README/docs 引用
+- [202601062024_springboot_modules_teaching_rollout](../../history/2026-01/202601062024_springboot_modules_teaching_rollout/) - ✅ 已执行：docs/README 章节链接 SSOT 化 + debug-sql 章节缺口补齐 + 补齐 min-labs=2 + 自检闸门覆盖

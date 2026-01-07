@@ -1,22 +1,26 @@
 # 03. 自调用（self-invocation）：为什么 `this.inner()` 不会被拦截？
 
-这是 Spring AOP 的经典“入门必踩坑”，而且它不止影响 AOP：事务（`@Transactional`）也会踩同一个坑。
+<!-- AG-CONTRACT:START -->
 
-## 现象（在本模块如何复现）
+## A. 本章定位
+
+- 本章主题：**03. 自调用（self-invocation）：为什么 `this.inner()` 不会被拦截？**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 看 `SelfInvocationExampleService`：
 
 - `outer(...)` 和 `inner(...)` 都标了 `@Traced`
 - `outer(...)` 内部调用 `inner(...)`
 
-在测试 `SpringCoreAopLabTest#selfInvocationDoesNotTriggerAdviceForInnerMethod` 里：
-
 - 调用 `selfInvocationExampleService.outer("Bob")`
 - 你会看到 `InvocationLog` 只记录了一次（只拦截了 `outer`）
-
-如果你想把“怎么修复”也做成可验证的闭环，直接看练习：
-
-- `SpringCoreAopExerciseTest#exercise_makeSelfInvocationTriggerAdvice`
 
 ## 原因（一句话版本）
 
@@ -41,7 +45,7 @@
    - 优点：不需要依赖 `AopContext` 的 thread-local 语义，可读性也通常更好
 
 3) **通过代理对象调用自己（进阶，理解机制用）**
-   - `exposeProxy` + `AopContext.currentProxy()`（见 [docs/05](05-expose-proxy.md)）
+   - `exposeProxy` + `AopContext.currentProxy()`（见 [05. expose-proxy](05-expose-proxy.md)）
    - 代价：更“技巧化”，容易滥用；但非常适合用来理解“call path 必须走 proxy”
 
 4) **AspectJ 编译期/加载期织入**
@@ -56,18 +60,60 @@
 2. 调用入口是否走代理（是否发生自调用）
 3. 代理类型/限制（JDK/CGLIB、`final` 等）
 
-## 源码锚点：怎么在断点里证明“inner 根本没进代理”？
-
-最直接的方法是把断点打在“代理接管调用”的入口：
-
 - JDK proxy：`JdkDynamicAopProxy#invoke`
 - CGLIB proxy：`CglibAopProxy.DynamicAdvisedInterceptor#intercept`
 
 然后跑：
 
-- `SpringCoreAopLabTest#selfInvocationDoesNotTriggerAdviceForInnerMethod`
-
 你会看到：
 
 - 外部调用 `outer(...)` 会命中代理入口
 - `outer(...)` 内部的 `this.inner(...)` 根本不会命中代理入口（因为它是目标对象内部的普通方法调用）
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreAopLabTest`
+- 建议命令：`mvn -pl spring-core-aop test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+## 现象（在本模块如何复现）
+
+在测试 `SpringCoreAopLabTest#selfInvocationDoesNotTriggerAdviceForInnerMethod` 里：
+
+如果你想把“怎么修复”也做成可验证的闭环，直接看练习：
+
+- `SpringCoreAopExerciseTest#exercise_makeSelfInvocationTriggerAdvice`
+
+## 源码锚点：怎么在断点里证明“inner 根本没进代理”？
+
+最直接的方法是把断点打在“代理接管调用”的入口：
+
+- `SpringCoreAopLabTest#selfInvocationDoesNotTriggerAdviceForInnerMethod`
+
+## F. 常见坑与边界
+
+这是 Spring AOP 的经典“入门必踩坑”，而且它不止影响 AOP：事务（`@Transactional`）也会踩同一个坑。
+
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreAopLabTest`
+- Exercise：`SpringCoreAopExerciseTest`
+
+上一章：[02-jdk-vs-cglib](02-jdk-vs-cglib.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[04-final-and-proxy-limits](04-final-and-proxy-limits.md)
+
+<!-- BOOKIFY:END -->

@@ -1,23 +1,24 @@
 # 18. Lazy：lazy-init bean vs `@Lazy` 注入点（懒代理）
 
-## 0. 复现入口（可运行）
+<!-- AG-CONTRACT:START -->
 
-- 入口测试（推荐先跑通再下断点）：
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansLazyLabTest.java`
-- 推荐运行命令：
-  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansLazyLabTest test`
+## A. 本章定位
+
+- 本章主题：**18. Lazy：lazy-init bean vs `@Lazy` 注入点（懒代理）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 懒加载经常被误用：很多人以为“加了 `@Lazy` 就不会启动慢了”，但实际效果取决于你把 lazy 放在哪里。
-
-对应实验：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansLazyLabTest.java`
 
 ## 1. lazy-init bean：refresh 阶段不创建
 
 对应测试：
-
-- `SpringCoreBeansLazyLabTest.lazyInitBean_isNotInstantiatedDuringRefresh_butCreatedOnFirstGetBean()`
 
 当 bean 定义是 lazy-init：
 
@@ -27,8 +28,6 @@
 ## 2. 关键反直觉点：lazy-init 也挡不住“被别人依赖”
 
 对应测试：
-
-- `SpringCoreBeansLazyLabTest.lazyInitDoesNotHelpIfAConsumerEagerlyDependsOnTheBean()`
 
 如果 A（非 lazy）依赖 B（lazy-init）：
 
@@ -45,44 +44,15 @@
 
 对应测试：
 
-- `SpringCoreBeansLazyLabTest.lazyInjectionPoint_canDeferCreationOfLazyBeanUntilFirstUse()`
-
 当你把 `@Lazy` 放在依赖注入点：
 
 - 容器会注入一个 proxy
 - proxy 在第一次真正调用时，再去容器里解析目标 bean
 
-本实验还配合把目标 bean 标成 lazy-init，从而确保：
-
 - 没有“外部因素”提前创建目标 bean
 - 你能清晰观测到：目标 bean 的构造器是在“第一次调用”时才执行
 
-## 4. 常见坑
-
-- **坑 1：以为 `@Lazy` 能让所有依赖都不创建**
-  - 如果目标 bean 不是 lazy-init，它仍可能在 refresh 阶段被 pre-instantiate。
-
-- **坑 2：在 proxy 上调用 `toString()` / `equals()` 触发真实创建**
-  - 学习阶段尽量不要依赖日志；用断言固定“构造器是否被调用”。
-
-## 源码锚点（建议从这里下断点）
-
-- `DefaultListableBeanFactory#preInstantiateSingletons`：refresh 时批量创建非 lazy 单例（lazy-init bean 会被跳过）
-- `AbstractBeanFactory#doGetBean`：第一次 `getBean(...)` 触发真正创建（lazy-init 的典型入口）
-- `DefaultListableBeanFactory#doResolveDependency`：依赖解析入口（解释“lazy bean 仍可能因为被依赖而提前创建”）
-- `ContextAnnotationAutowireCandidateResolver#getLazyResolutionProxyIfNecessary`：注入点 `@Lazy` 的关键（决定是否注入一个懒代理）
-- `AbstractAutowireCapableBeanFactory#createBean`：创建入口（对照“什么时候真的 new 出目标对象”）
-
-## 断点闭环（用本仓库 Lab/Test 跑一遍）
-
 入口：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansLazyLabTest.java`
-  - `lazyInitBean_isNotInstantiatedDuringRefresh_butCreatedOnFirstGetBean()`
-  - `lazyInitDoesNotHelpIfAConsumerEagerlyDependsOnTheBean()`
-  - `lazyInjectionPoint_canDeferCreationOfLazyBeanUntilFirstUse()`
-
-建议断点：
 
 1) lazy 目标 bean 的构造器：作为“到底什么时候创建”的最直观观察点
 2) `DefaultListableBeanFactory#preInstantiateSingletons`：在 refresh 期间观察 lazy-init bean 是否被跳过
@@ -99,11 +69,6 @@
 
 ## 5. 一句话自检
 
-- 你能解释清楚：为什么“lazy-init 的 bean”仍可能在 refresh 期间被创建吗？
-- 你能解释清楚：注入点 `@Lazy` 的本质是“注入 proxy”吗？
-对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansLazyLabTest.java`
-推荐断点：`AbstractBeanFactory#doGetBean`、`DefaultListableBeanFactory#preInstantiateSingletons`、`ContextAnnotationAutowireCandidateResolver#getLazyResolutionProxyIfNecessary`
-
 ## 面试常问（`@Lazy` 的两种语义）
 
 - 常问：`lazy-init` 与注入点 `@Lazy` 有什么本质差别？
@@ -111,4 +76,81 @@
 - 常见追问：为什么标了 lazy-init 仍可能在 refresh 时被创建？
   - 答题要点：被 eager 依赖/被提前触发（例如非 lazy 单例依赖它）时仍会创建；排障要找“谁触发了依赖解析”。
 
-上一章：[17. 生命周期回调顺序：Aware / BPP / init / destroy（以及 prototype 为什么不销毁）](../part-03-container-internals/17-lifecycle-callback-order.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[19. dependsOn：强制初始化顺序（即使没有显式依赖）](19-depends-on.md)
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansLazyLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansLazyLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansLazyLabTest test`
+
+对应实验：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansLazyLabTest.java`
+
+- `SpringCoreBeansLazyLabTest.lazyInitBean_isNotInstantiatedDuringRefresh_butCreatedOnFirstGetBean()`
+
+- `SpringCoreBeansLazyLabTest.lazyInitDoesNotHelpIfAConsumerEagerlyDependsOnTheBean()`
+
+- `SpringCoreBeansLazyLabTest.lazyInjectionPoint_canDeferCreationOfLazyBeanUntilFirstUse()`
+
+本实验还配合把目标 bean 标成 lazy-init，从而确保：
+
+## 源码锚点（建议从这里下断点）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansLazyLabTest.java`
+  - `lazyInitBean_isNotInstantiatedDuringRefresh_butCreatedOnFirstGetBean()`
+  - `lazyInitDoesNotHelpIfAConsumerEagerlyDependsOnTheBean()`
+  - `lazyInjectionPoint_canDeferCreationOfLazyBeanUntilFirstUse()`
+
+建议断点：
+
+- 你能解释清楚：为什么“lazy-init 的 bean”仍可能在 refresh 期间被创建吗？
+- 你能解释清楚：注入点 `@Lazy` 的本质是“注入 proxy”吗？
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansLazyLabTest.java`
+推荐断点：`AbstractBeanFactory#doGetBean`、`DefaultListableBeanFactory#preInstantiateSingletons`、`ContextAnnotationAutowireCandidateResolver#getLazyResolutionProxyIfNecessary`
+
+## F. 常见坑与边界
+
+## 4. 常见坑
+
+- **坑 1：以为 `@Lazy` 能让所有依赖都不创建**
+  - 如果目标 bean 不是 lazy-init，它仍可能在 refresh 阶段被 pre-instantiate。
+
+- **坑 2：在 proxy 上调用 `toString()` / `equals()` 触发真实创建**
+  - 学习阶段尽量不要依赖日志；用断言固定“构造器是否被调用”。
+
+## G. 小结与下一章
+
+- `DefaultListableBeanFactory#preInstantiateSingletons`：refresh 时批量创建非 lazy 单例（lazy-init bean 会被跳过）
+- `AbstractBeanFactory#doGetBean`：第一次 `getBean(...)` 触发真正创建（lazy-init 的典型入口）
+- `DefaultListableBeanFactory#doResolveDependency`：依赖解析入口（解释“lazy bean 仍可能因为被依赖而提前创建”）
+- `ContextAnnotationAutowireCandidateResolver#getLazyResolutionProxyIfNecessary`：注入点 `@Lazy` 的关键（决定是否注入一个懒代理）
+- `AbstractAutowireCapableBeanFactory#createBean`：创建入口（对照“什么时候真的 new 出目标对象”）
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansLazyLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansLazyLabTest.java`
+
+上一章：[17. 生命周期回调顺序：Aware/@PostConstruct/afterPropertiesSet/initMethod](../part-03-container-internals/17-lifecycle-callback-order.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[19. dependsOn：强制初始化顺序与依赖关系记录](19-depends-on.md)
+
+<!-- BOOKIFY:END -->

@@ -1,8 +1,20 @@
 # 94. 生产排障清单（异常分型 → 入口 → 观察点 → 修复策略）
 
-本章目标：把 Spring Bean 排障从“靠经验”变成“有固定路线的收敛流程”。
+<!-- AG-CONTRACT:START -->
 
-核心原则：**先分型，再下断点**。
+## A. 本章定位
+
+- 本章主题：**94. 生产排障清单（异常分型 → 入口 → 观察点 → 修复策略）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
+本章目标：把 Spring Bean 排障从“靠经验”变成“有固定路线的收敛流程”。
 
 ---
 
@@ -14,11 +26,6 @@
 - 定义层：BeanDefinition 读/解析/注册阶段失败（refresh 前半段）
 - 实例层：create/populate/initialize 阶段失败（refresh 后半段或 getBean 时）
 - 最终暴露对象：proxy/early reference 导致“注入/调用行为”不符合直觉
-
-2) **定位：选 1 个主入口断点**
-- 定义层：`DefaultListableBeanFactory#registerBeanDefinition` / `XmlBeanDefinitionReader#loadBeanDefinitions`
-- 实例层：`AbstractAutowireCapableBeanFactory#doCreateBean` / `populateBean` / `initializeBean`
-- 注入相关：`DefaultListableBeanFactory#doResolveDependency`
 
 3) **观察：用固定 watch list 收敛原因**
 - `beanName` / `mbd`（merged definition）
@@ -37,8 +44,6 @@
 - 条件装配没 match（auto-config 条件失败）
 - 类型匹配失败（泛型/FactoryBean product type/代理导致的类型信息）
 
-### 入口断点
-
 - `DefaultListableBeanFactory#doResolveDependency`
 - `DefaultListableBeanFactory#findAutowireCandidates`
 
@@ -49,9 +54,6 @@
 
 对应章节：
 
-- DI 决策树：`docs/part-01-ioc-container/03-dependency-injection-resolution.md`
-- 泛型匹配坑：`docs/part-04-wiring-and-boundaries/37-generic-type-matching-pitfalls.md`
-
 ---
 
 ## 2) NoUniqueBeanDefinitionException（候选太多）
@@ -60,8 +62,6 @@
 
 - 多实现同时存在，注入点是单依赖
 - auto-config 没退让（覆盖 bean 出现得太晚）
-
-### 入口断点
 
 - `DefaultListableBeanFactory#findAutowireCandidates`（候选集合）
 - `DefaultListableBeanFactory#determineAutowireCandidate`（收敛规则）
@@ -73,9 +73,6 @@
 2) **让 back-off 生效**：覆盖 bean 必须在条件评估前可见（更干净）
 
 对应章节：
-
-- 候选选择边界：`docs/part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md`
-- auto-config 覆盖/back-off：`docs/part-02-boot-autoconfig/10-spring-boot-auto-configuration.md`
 
 ---
 
@@ -89,8 +86,6 @@
 - 类型转换失败（`@Value` / populateBean）
 - 依赖链上游创建失败（构造器异常、init 异常、BPP 包装异常）
 
-### 入口断点
-
 - `DefaultListableBeanFactory#doResolveDependency`
 - `AutowiredAnnotationBeanPostProcessor#postProcessProperties`
 
@@ -102,9 +97,6 @@
 
 对应章节：
 
-- 排障主入口：`docs/part-02-boot-autoconfig/11-debugging-and-observability.md`
-- 值解析与转换：`docs/part-04-wiring-and-boundaries/34-value-placeholder-resolution-strict-vs-non-strict.md`、`docs/part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md`
-
 ---
 
 ## 4) BeanCreationException（创建链路失败）
@@ -115,12 +107,6 @@
 - `@PostConstruct` / initMethod 抛异常
 - BPP 包装失败/短路异常
 - 循环依赖失败（BeanCurrentlyInCreation / early reference 相关）
-
-### 入口断点
-
-- `AbstractAutowireCapableBeanFactory#doCreateBean`
-- `AbstractAutowireCapableBeanFactory#createBeanInstance`
-- `AbstractAutowireCapableBeanFactory#initializeBean`
 
 对应章节：
 
@@ -138,16 +124,9 @@
 - definition 解析失败（占位符/资源缺失）
 - 注册冲突（同名覆盖策略/非法定义）
 
-### 入口断点
-
 - `XmlBeanDefinitionReader#loadBeanDefinitions`
 - `DefaultListableBeanFactory#registerBeanDefinition`
 - `AbstractApplicationContext#refresh`
-
-对应章节 + Lab：
-
-- 章节：`docs/part-05-aot-and-real-world/42-xml-bean-definition-reader.md`
-- Lab：`SpringCoreBeansXmlBeanDefinitionReaderLabTest`
 
 ---
 
@@ -158,11 +137,6 @@
 - 注入进来的对象不是你写的类，而是 proxy
 - self-invocation（自调用）导致拦截不生效
 - early reference 导致注入到的对象与最终对象不一致
-
-### 入口断点
-
-- `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`
-- `AbstractAutowireCapableBeanFactory#getEarlyBeanReference`
 
 对应章节：
 
@@ -185,5 +159,71 @@
 
 ---
 
-上一章：[93. 面试复述模板（决策树 → Lab → 断点入口）](93-interview-playbook.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[99. 自测题：你是否真的理解了？](99-self-check.md)
+## D. 源码与断点
 
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansXmlBeanDefinitionReaderLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+核心原则：**先分型，再下断点**。
+
+2) **定位：选 1 个主入口断点**
+- 定义层：`DefaultListableBeanFactory#registerBeanDefinition` / `XmlBeanDefinitionReader#loadBeanDefinitions`
+- 实例层：`AbstractAutowireCapableBeanFactory#doCreateBean` / `populateBean` / `initializeBean`
+- 注入相关：`DefaultListableBeanFactory#doResolveDependency`
+
+### 入口断点
+
+### 入口断点
+
+### 入口断点
+
+- 排障主入口：`docs/part-02-boot-autoconfig/11-debugging-and-observability.md`
+- 值解析与转换：`docs/part-04-wiring-and-boundaries/34-value-placeholder-resolution-strict-vs-non-strict.md`、`docs/part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md`
+
+### 入口断点
+
+### 入口断点
+
+对应章节 + Lab：
+
+- 章节：`docs/part-05-aot-and-real-world/42-xml-bean-definition-reader.md`
+- Lab：`SpringCoreBeansXmlBeanDefinitionReaderLabTest`
+
+### 入口断点
+
+## F. 常见坑与边界
+
+- DI 决策树：`docs/part-01-ioc-container/03-dependency-injection-resolution.md`
+- 泛型匹配坑：`docs/part-04-wiring-and-boundaries/37-generic-type-matching-pitfalls.md`
+
+- 候选选择边界：`docs/part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md`
+- auto-config 覆盖/back-off：`docs/part-02-boot-autoconfig/10-spring-boot-auto-configuration.md`
+
+## G. 小结与下一章
+
+- `AbstractAutowireCapableBeanFactory#doCreateBean`
+- `AbstractAutowireCapableBeanFactory#createBeanInstance`
+- `AbstractAutowireCapableBeanFactory#initializeBean`
+
+- `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`
+- `AbstractAutowireCapableBeanFactory#getEarlyBeanReference`
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansXmlBeanDefinitionReaderLabTest`
+
+上一章：[93. 面试复述模板（决策树 → Lab → 断点入口）](93-interview-playbook.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[95. spring-beans Public API 索引（按类型检索）](95-spring-beans-public-api-index.md)
+
+<!-- BOOKIFY:END -->

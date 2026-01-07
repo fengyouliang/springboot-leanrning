@@ -1,5 +1,34 @@
 # 90. 常见坑清单（建议反复对照）
 
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**90. 常见坑清单（建议反复对照）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
+- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章未显式引用 LabTest，先注入模块默认 LabTest 作为“合规兜底入口”（后续可逐章细化）。
+- Lab：`SpringCoreTxLabTest` / `SpringCoreTxSelfInvocationPitfallLabTest`
+- 建议命令：`mvn -pl spring-core-tx test`（或在 IDE 直接运行上面的测试类）
+
+## F. 常见坑与边界
+
 ## 坑 1：同类自调用导致 `@Transactional` 不生效
 
 - 现象：你给 `inner()` 加了 `@Transactional`，但从 `outer()` 调 `inner()` 时事务没生效
@@ -14,17 +43,33 @@
 
 ## 坑 3：checked exception 默认不回滚
 
-- 对照：见 [docs/03](03-rollback-rules.md)
+- 对照：见 [03. rollback-rules](../part-01-transaction-basics/03-rollback-rules.md)
 - 解决：显式写 `rollbackFor`
 
 ## 坑 4：`REQUIRES_NEW` 不是“神奇回滚开关”
 
 - 它只是把事务边界拆成两段：内层提交/回滚不直接决定外层
-- 对照：见 [docs/04](04-propagation.md)
+- 对照：见 [04. propagation](../part-01-transaction-basics/04-propagation.md)
 
 ## 坑 5：事务=代理，因此也会受到代理限制
 
 - `final` 方法拦截不到（CGLIB 情况）
 - private 方法通常也不会被拦截
-- 对照：AOP 模块的 [spring-core-aop/docs/04](../../spring-core-aop/docs/part-01-proxy-fundamentals/04-final-and-proxy-limits.md)
+- 对照：AOP 模块的 [04. final-and-proxy-limits](../../../spring-core-aop/docs/part-01-proxy-fundamentals/04-final-and-proxy-limits.md)
 
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreTxLabTest` / `SpringCoreTxSelfInvocationPitfallLabTest`
+- Exercise：`SpringCoreTxExerciseTest`
+
+上一章：[06-debugging](../part-02-template-and-debugging/06-debugging.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[99-self-check](99-self-check.md)
+
+<!-- BOOKIFY:END -->

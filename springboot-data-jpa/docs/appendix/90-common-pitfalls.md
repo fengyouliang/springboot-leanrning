@@ -1,20 +1,49 @@
 # 90. 常见坑清单（建议反复对照）
 
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**90. 常见坑清单（建议反复对照）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
+- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`BootDataJpaDebugSqlLabTest` / `BootDataJpaLabTest`
+- 建议命令：`mvn -pl springboot-data-jpa test`（或在 IDE 直接运行上面的测试类）
+
+## F. 常见坑与边界
+
 ## 坑 1：把 persistence context 当成数据库
 
 - 现象：你改了对象字段，立刻 `findById` 看到“变了”，误以为 DB 已更新
 - 解决：`entityManager.flush()` + `entityManager.clear()` 再查，避免一级缓存假象
-- 对照：见 [docs/04](04-dirty-checking.md)
+- 对照：见 [docs/04](../part-01-data-jpa/04-dirty-checking.md)
 
 ## 坑 2：不理解 flush 导致“JDBC 查不到/查到了但没提交”
 
 - 现象：你用 `JdbcTemplate` 直接查表，结果和你想象不一致
-- 解决：理解 flush vs commit 的差异（见 [docs/03](03-flush-and-visibility.md)）
+- 解决：理解 flush vs commit 的差异（见 [docs/03](../part-01-data-jpa/03-flush-and-visibility.md)）
 
 ## 坑 3：懒加载 + 循环访问触发 N+1
 
 - 现象：查列表很快，但访问关联属性时 SQL 爆炸
-- 解决：先把问题复现清楚，再讨论 fetch 策略（见 [docs/05](05-fetching-and-n-plus-one.md)）
+- 解决：先把问题复现清楚，再讨论 fetch 策略（见 [docs/05](../part-01-data-jpa/05-fetching-and-n-plus-one.md)）
 
 ## 坑 4：在事务外访问懒加载属性
 
@@ -25,5 +54,25 @@
 
 - 现象：你想“写入后在下一个测试里看到”，但看不到
 - 原因：测试默认回滚
-- 对照：见 [docs/06](06-datajpatest-slice.md)
+- 对照：见 [docs/06](../part-01-data-jpa/06-datajpatest-slice.md)
 
+## 对应 Lab（可运行）
+
+- `BootDataJpaLabTest`
+- `BootDataJpaDebugSqlLabTest`
+
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`BootDataJpaDebugSqlLabTest` / `BootDataJpaLabTest`
+
+上一章：[part-01-data-jpa/07-debug-sql.md](../part-01-data-jpa/07-debug-sql.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[appendix/99-self-check.md](99-self-check.md)
+
+<!-- BOOKIFY:END -->

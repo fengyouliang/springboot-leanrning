@@ -1,5 +1,34 @@
 # 37. 泛型匹配与注入坑：ResolvableType 与代理导致的类型信息丢失
 
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**37. 泛型匹配与注入坑：ResolvableType 与代理导致的类型信息丢失**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
+- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansGenericTypeMatchingPitfallsLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+## F. 常见坑与边界
+
 这一章解决一个“看起来很合理，但在真实项目里经常踩坑”的问题：
 
 > 我明明在容器里有一个 `Handler<String>`，  
@@ -73,7 +102,7 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansGenericTypeMatchingPitfallsLa
 2) **手工注册 singleton 实例**（`registerSingleton`）  
    - 容器拿到的是一个对象，不一定能反推出“它原本的泛型语义”
 3) **FactoryBean 的类型预测**  
-   - `FactoryBean#getObjectType()` 返回不准确/为 `null` 时，按类型发现会出现边界问题（见 docs/23 与 docs/29）
+   - `FactoryBean#getObjectType()` 返回不准确/为 `null` 时，按类型发现会出现边界问题（见 [23. FactoryBean 深潜：product vs factory、类型匹配、以及 isSingleton 缓存语义](23-factorybean-deep-dive.md) 与 [29. FactoryBean 边界：getObjectType 返回 null 会让“按类型发现”失效](29-factorybean-edge-cases.md)）
 
 ---
 
@@ -122,4 +151,19 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansGenericTypeMatchingPitfallsLa
 
 ---
 
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansGenericTypeMatchingPitfallsLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/appendix/SpringCoreBeansGenericTypeMatchingPitfallsLabTest.java`
+
 上一章：[36. 类型转换：BeanWrapper / ConversionService / PropertyEditor 的边界](36-type-conversion-and-beanwrapper.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[38. Environment Abstraction：PropertySource / @PropertySource / 优先级与排障主线](38-environment-and-propertysource.md)
+
+<!-- BOOKIFY:END -->

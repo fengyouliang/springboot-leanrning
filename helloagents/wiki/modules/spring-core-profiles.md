@@ -8,7 +8,7 @@
 
 - **Responsibility:** 通过最小示例与测试实验理解 profile 选择与条件生效边界。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-04
+- **Last Updated:** 2026-01-07
 
 ## Specifications
 
@@ -34,6 +34,9 @@
 
 ## Change History
 
+- [202601071034_all_modules_docs_ag_contract](../../history/2026-01/202601071034_all_modules_docs_ag_contract/) - ✅ 已执行：全模块 docs 升级 A–G 章节契约（每章 A–G + 对应 Lab/Test + 至少 1 个 LabTest），并更新根 README 跨模块入口
+- [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过 `scripts/check-docs.sh`
+- [202601061556_spring_core_modules_teaching_rollout](../../history/2026-01/202601061556_spring_core_modules_teaching_rollout/) - ✅ 已执行：对齐 docs 目录页/Part 编号与章节末尾“对应 Lab/Test”入口块，清理正文 `docs/NN` 缩写引用，并通过断链检查与教学覆盖检查
 - [202601041046_spring-core-part-structure-sync](../../history/2026-01/202601041046_spring-core-part-structure-sync/) - ✅ 已执行：补齐 docs 书本骨架（含目录页/深挖指南/附录），并对齐 src/main+src/test 分包结构（语义化 Part 命名）
 
 ## Dependencies

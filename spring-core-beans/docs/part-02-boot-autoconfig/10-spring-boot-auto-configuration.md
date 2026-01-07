@@ -1,6 +1,18 @@
 # 10. Spring Boot 自动装配如何影响 Bean（Auto-configuration）
 
-这一章的目标是：把 Spring Boot 的自动装配从“玄学”变成“可解释、可调试、可覆盖”的机制。
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**10. Spring Boot 自动装配如何影响 Bean（Auto-configuration）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 你会发现它并不神秘：它本质上就是一套更系统化的 **配置导入（@Import）+ 条件判断（@Conditional...）+ bean 注册**。
 
@@ -54,14 +66,6 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
 
 学习阶段你不需要背排序实现，但你要能做到：
 
-1) 能观测排序结果（排序后 class 序列是什么）  
-2) 能解释排序为什么会影响条件/覆盖  
-3) 能给出断点入口（从排序到条件评估）
-
-复现入口（可断言）：
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansAutoConfigurationImportOrderingLabTest.java`
-
-
 ## 4. 为什么自动配置不是“全都生效”？——条件（Conditions）
 
 自动配置类几乎都带条件，例如（只记语义）：
@@ -73,8 +77,6 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
 所以最终的 bean graph 是：
 
 > 你写的配置 + 自动配置清单 - 条件失败的部分
-
-### 4.1 `matchIfMissing`：缺省值语义（面试高频坑）
 
 很多人背得出 `@ConditionalOnProperty`，但一到 `matchIfMissing` 就容易“凭感觉答题”。
 
@@ -88,17 +90,7 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
 - property=false：明确关闭（条件不匹配）
 - property=true：明确开启（条件匹配）
 
-复现入口（可断言）：
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansConditionEvaluationReportLabTest.java`
-  - `conditionalOnProperty_matchesWhenPropertyIsMissing_ifMatchIfMissingIsTrue`
-  - `conditionalOnProperty_doesNotMatchWhenPropertyIsExplicitlyFalse_evenIfMatchIfMissingIsTrue`
-
-### 4.2 `@ConditionalOnBean`：为什么“运行时有 bean，但条件仍不生效”？（顺序/时机）
-
 这个问题很适合用来区分“背概念”与“理解容器/自动装配时机”的人：
-
-- 你在容器里确实能看到某个 bean（运行时存在）
-- 但另一个 auto-config 上的 `@ConditionalOnBean(ThatBean)` 却没有 match（导致 dependent bean 缺失）
 
 这通常不是“Spring 乱了”，而是你没把两个概念分开：
 
@@ -109,11 +101,6 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
 
 - 为什么“最终容器状态”不能反推“条件评估当时的状态”？
 - 如何把这种顺序/时机敏感，变成确定性行为？（答案通常是：`@AutoConfiguration(after/before=...)`）
-
-复现入口（可断言）：
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansAutoConfigurationOrderingLabTest.java`
-  - `conditionalOnBean_canFailAcrossAutoConfigurations_whenOrderingIsNotDefined`
-  - `autoConfigurationAfter_canMakeCrossAutoConfigConditionsDeterministic_evenIfImportOrderIsReversed`
 
 ## 5. 你如何“覆盖”自动配置？
 
@@ -142,18 +129,6 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
 
 追问（加分点）：
 
-1) 为什么“运行时 bean 已存在”不能推出“当时条件就能看到它”？
-2) 哪些方式会让覆盖 bean 出现得太晚？（例如某些 `BeanDefinitionRegistryPostProcessor` 在 `ConfigurationClassPostProcessor` 之后注册定义）
-3) 你如何用断点证明：条件评估发生在 refresh 前半段（注册阶段），而不是 after refresh？
-
-复现入口（可断言）：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansAutoConfigurationBackoffTimingLabTest.java`
-  - `lateBeanDefinitionRegistration_canBypassConditionalOnMissingBean_andCauseDuplicateCandidates`
-  - `earlyBeanDefinitionRegistration_runsBeforeConfigurationClassPostProcessor_soAutoConfigurationBacksOffDeterministically`
-
-推荐断点（从现象到闭环）：
-
 - 条件评估入口：`ConditionEvaluator#shouldSkip`
 - Bean 条件细节：`OnBeanCondition#getMatchOutcome`
 - refresh 主线定位：`AbstractApplicationContext#refresh` → `invokeBeanFactoryPostProcessors`
@@ -173,17 +148,9 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
 1) `@Primary/@Qualifier`：让注入变成确定性选择（候选可能仍然有多个）  
 2) 让 back-off 生效：确保覆盖 bean 在条件评估前就可见（更干净）
 
-复现入口（可断言）：
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansAutoConfigurationOverrideMatrixLabTest.java`
-
 ## 6. 你如何“看见”自动装配做了什么？
 
 学习阶段建议掌握两种手段：
-
-1) **打开调试报告**（Condition Evaluation Report）  
-2) **直接在运行时查询容器**（beans by type/name、BeanDefinition 等）
-
-具体做法放在下一章：[11. 调试与自检](11-debugging-and-observability.md)。
 
 ### 6.1 Bean 来源追踪：这个 bean 到底是谁注册的？
 
@@ -194,6 +161,69 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
 - 为什么它会在容器里出现（条件 match 了吗？有没有覆盖/back-off）？
 
 最通用的入口是：**看 BeanDefinition**。
+
+## 8. 与本模块的关系：你应该带走什么
+
+学完本章，你至少要能把下面这句话解释清楚：
+
+## 面试常问（自动配置与条件装配怎么定位）
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansAutoConfigurationBackoffTimingLabTest` / `SpringCoreBeansAutoConfigurationImportOrderingLabTest` / `SpringCoreBeansAutoConfigurationLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+这一章的目标是：把 Spring Boot 的自动装配从“玄学”变成“可解释、可调试、可覆盖”的机制。
+
+1) 能观测排序结果（排序后 class 序列是什么）  
+2) 能解释排序为什么会影响条件/覆盖  
+3) 能给出断点入口（从排序到条件评估）
+
+复现入口（可断言）：
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansAutoConfigurationImportOrderingLabTest.java`
+
+复现入口（可断言）：
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansConditionEvaluationReportLabTest.java`
+  - `conditionalOnProperty_matchesWhenPropertyIsMissing_ifMatchIfMissingIsTrue`
+  - `conditionalOnProperty_doesNotMatchWhenPropertyIsExplicitlyFalse_evenIfMatchIfMissingIsTrue`
+
+### 4.2 `@ConditionalOnBean`：为什么“运行时有 bean，但条件仍不生效”？（顺序/时机）
+
+- 你在容器里确实能看到某个 bean（运行时存在）
+- 但另一个 auto-config 上的 `@ConditionalOnBean(ThatBean)` 却没有 match（导致 dependent bean 缺失）
+
+复现入口（可断言）：
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansAutoConfigurationOrderingLabTest.java`
+  - `conditionalOnBean_canFailAcrossAutoConfigurations_whenOrderingIsNotDefined`
+  - `autoConfigurationAfter_canMakeCrossAutoConfigConditionsDeterministic_evenIfImportOrderIsReversed`
+
+1) 为什么“运行时 bean 已存在”不能推出“当时条件就能看到它”？
+2) 哪些方式会让覆盖 bean 出现得太晚？（例如某些 `BeanDefinitionRegistryPostProcessor` 在 `ConfigurationClassPostProcessor` 之后注册定义）
+3) 你如何用断点证明：条件评估发生在 refresh 前半段（注册阶段），而不是 after refresh？
+
+复现入口（可断言）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansAutoConfigurationBackoffTimingLabTest.java`
+  - `lateBeanDefinitionRegistration_canBypassConditionalOnMissingBean_andCauseDuplicateCandidates`
+  - `earlyBeanDefinitionRegistration_runsBeforeConfigurationClassPostProcessor_soAutoConfigurationBacksOffDeterministically`
+
+推荐断点（从现象到闭环）：
+
+复现入口（可断言）：
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansAutoConfigurationOverrideMatrixLabTest.java`
+
+1) **打开调试报告**（Condition Evaluation Report）  
+2) **直接在运行时查询容器**（beans by type/name、BeanDefinition 等）
+
+具体做法放在下一章：[11. 调试与自检](11-debugging-and-observability.md)。
 
 复现入口（可断言）：
 
@@ -246,10 +276,6 @@ mvn -pl spring-core-beans test
 
 运行时你会在测试输出里看到以 `OBSERVE:` 开头的少量提示行，解释“哪个条件命中、最终注册/选择了哪个 bean”。
 
-## 8. 与本模块的关系：你应该带走什么
-
-学完本章，你至少要能把下面这句话解释清楚：
-
 > Spring Boot 自动装配不是“替你注入”，而是“替你导入配置并注册 BeanDefinition”，最终依赖注入仍遵循 Spring 容器的解析规则（类型、`@Qualifier`、`@Primary`、scope、生命周期……）。
 对应 Lab/Test：
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansAutoConfigurationLabTest.java`
@@ -265,8 +291,6 @@ mvn -pl spring-core-beans test
 - 条件评估主线：`ConditionEvaluator#shouldSkip`
 - 条件细节（Bean 条件）：`OnBeanCondition#getMatchOutcome`
 - 注册定义：`DefaultListableBeanFactory#registerBeanDefinition`
-
-## 面试常问（自动配置与条件装配怎么定位）
 
 - 常问：Spring Boot 自动装配到底做了什么？它和依赖注入是什么关系？
   - 答题要点：自动装配本质是“按条件导入配置并注册 BeanDefinition”；注入仍走 Spring 容器的依赖解析规则（type/qualifier/primary/scope/lifecycle）。
@@ -291,4 +315,24 @@ mvn -pl spring-core-beans test
   - 答题要点：重复候选不一定立刻炸；只要出现单注入点就会触发候选收敛并 fail-fast。修复分两类：`@Primary/@Qualifier` 确定化选择（候选仍可能多个） vs 让 auto-config back-off 生效（更干净）。
   - 复现入口：`SpringCoreBeansAutoConfigurationOverrideMatrixLabTest`
 
-上一章：[09. 循环依赖：现象、原因与规避（constructor vs setter）](../part-01-ioc-container/09-circular-dependencies.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[11. 调试与自检：如何“看见”容器正在做什么](11-debugging-and-observability.md)
+## F. 常见坑与边界
+
+### 4.1 `matchIfMissing`：缺省值语义（面试高频坑）
+
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansAutoConfigurationBackoffTimingLabTest` / `SpringCoreBeansAutoConfigurationImportOrderingLabTest` / `SpringCoreBeansAutoConfigurationLabTest` / `SpringCoreBeansConditionEvaluationReportLabTest` / `SpringCoreBeansAutoConfigurationOrderingLabTest` / `SpringCoreBeansAutoConfigurationOverrideMatrixLabTest` / `SpringCoreBeansBeanDefinitionOriginLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansAutoConfigurationImportOrderingLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansConditionEvaluationReportLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansAutoConfigurationOrderingLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansAutoConfigurationBackoffTimingLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansAutoConfigurationOverrideMatrixLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansBeanDefinitionOriginLabTest.java`
+- （另有 1 个 test file 路径引用，略）
+
+上一章：[09. 循环依赖概览：三级缓存与现象分类](../part-01-ioc-container/09-circular-dependencies.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[11. 调试与可观察性：从异常到断点入口](11-debugging-and-observability.md)
+
+<!-- BOOKIFY:END -->

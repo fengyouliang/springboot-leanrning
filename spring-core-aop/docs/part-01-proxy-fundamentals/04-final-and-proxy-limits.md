@@ -1,5 +1,19 @@
 # 04. `final` 与代理限制：为什么 final method 拦截不到？
 
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**04. `final` 与代理限制：为什么 final method 拦截不到？**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
 Spring AOP 的默认实现依赖“代理”，而代理的实现方式会带来一些**语言层面的硬限制**。
 
 ## CGLIB 为什么会受 `final` 限制？
@@ -24,11 +38,7 @@ CGLIB 代理的核心是：**生成目标类的子类**，然后覆盖（overrid
    - bean 还没被 BPP 换成 proxy 前，构造器里发生的调用不可能被 AOP 拦截
    - 同理，很多初始化阶段（尤其是对象内部 `this.xxx()`）也容易让你误判
 4. **同类内部调用（self-invocation）**
-   - 不是语言限制，但效果类似：不走 proxy 就不拦截（见 docs/03）
-
-## 在本模块如何验证
-
-看测试：`SpringCoreAopProxyMechanicsLabTest#finalMethodsAreNotInterceptedByCglibProxies`
+   - 不是语言限制，但效果类似：不走 proxy 就不拦截（见 [03. self-invocation](03-self-invocation.md)）
 
 它的关键断言是：
 
@@ -37,16 +47,40 @@ CGLIB 代理的核心是：**生成目标类的子类**，然后覆盖（overrid
 
 如果你想同时理解“代理类型与限制”，建议顺序跑：
 
-- `SpringCoreAopProxyMechanicsLabTest#jdkDynamicProxyIsUsedForInterfaceBasedBeans_whenProxyTargetClassIsFalse`
-- `SpringCoreAopProxyMechanicsLabTest#cglibProxyIsUsedForClassBasedBeans_whenProxyTargetClassIsTrue`
-- `SpringCoreAopProxyMechanicsLabTest#finalMethodsAreNotInterceptedByCglibProxies`
-
 ## 学习仓库里你应该怎么用这个结论？
 
 1) 不要把“需要被 AOP/Tx/Validation 拦截的方法”写成 final  
 2) 如果你更喜欢使用 `final`（例如偏函数式/不可变风格），那就更推荐：
    - 通过接口 + JDK 代理（拦截接口方法），或
    - 避免依赖基于代理的拦截（在学习仓库里先理解机制，再谈取舍）
+
+你会发现这样设计以后：
+
+- “我给方法加了注解，但为什么完全没效果？”  
+  很多时候不是注解没生效，而是 **这个方法从代理角度根本拦不住**（final/private/self-invocation）。
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreAopProxyMechanicsLabTest`
+- 建议命令：`mvn -pl spring-core-aop test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+## 在本模块如何验证
+
+看测试：`SpringCoreAopProxyMechanicsLabTest#finalMethodsAreNotInterceptedByCglibProxies`
+
+- `SpringCoreAopProxyMechanicsLabTest#jdkDynamicProxyIsUsedForInterfaceBasedBeans_whenProxyTargetClassIsFalse`
+- `SpringCoreAopProxyMechanicsLabTest#cglibProxyIsUsedForClassBasedBeans_whenProxyTargetClassIsTrue`
+- `SpringCoreAopProxyMechanicsLabTest#finalMethodsAreNotInterceptedByCglibProxies`
+
+## F. 常见坑与边界
 
 ### 一个更实用的工程建议：把“可被拦截”的逻辑放在 public 的边界方法上
 
@@ -55,12 +89,23 @@ CGLIB 代理的核心是：**生成目标类的子类**，然后覆盖（overrid
 - 权限/审计/事务/缓存一般都挂在边界方法上
 - 内部私有方法更多是实现细节，不要依赖 AOP 去“拦住它”
 
-你会发现这样设计以后：
-
 - AOP 的边界更清晰
 - 自调用/私有方法/final 等限制影响更小
 
 ## 常见误区
 
-- “我给方法加了注解，但为什么完全没效果？”  
-  很多时候不是注解没生效，而是 **这个方法从代理角度根本拦不住**（final/private/self-invocation）。
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreAopProxyMechanicsLabTest`
+
+上一章：[03-self-invocation](03-self-invocation.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[05-expose-proxy](05-expose-proxy.md)
+
+<!-- BOOKIFY:END -->

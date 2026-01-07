@@ -1,5 +1,19 @@
 # 49. 内置 FactoryBean 图鉴：MethodInvoking / ServiceLocator / & 前缀
 
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**49. 内置 FactoryBean 图鉴：MethodInvoking / ServiceLocator / & 前缀**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
 这一章补齐一个“你不一定会手写，但排障/读源码时必遇到”的知识点：
 
 > **Spring 自带那么多 `*FactoryBean` 到底是干嘛的？`&beanName` 为什么能拿到另一个对象？**
@@ -17,20 +31,7 @@
 
 ---
 
-## 0. 复现入口（可运行）
-
 入口测试：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansBuiltInFactoryBeansLabTest.java`
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansServiceLoaderFactoryBeansLabTest.java`
-
-推荐运行命令：
-
-```bash
-mvn -pl spring-core-beans -Dtest=SpringCoreBeansBuiltInFactoryBeansLabTest,SpringCoreBeansServiceLoaderFactoryBeansLabTest test
-```
-
-你要观察的现象（Lab 里都有断言）：
 
 1) `getBean("uuidSingleton")` 多次返回同一个 `UUID`（product 被缓存）  
 2) `getBean("uuidPrototype")` 多次返回不同 `UUID`（product 不缓存）  
@@ -79,11 +80,6 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansBuiltInFactoryBeansLabTest,Sprin
 
 这类机制常见于：
 
-- 需要“运行时决定拿哪个实现”（按名字/按策略）
-- 需要“每次调用都重新拿一个 prototype”（典型：状态型对象、短生命周期对象）
-
-但是注意：这是一种 **service locator 模式**，会把依赖关系从“注入点”挪到“调用点”，可读性更差，能不用就不用。
-
 ### 2.3 `ServiceLoader*FactoryBean`（把 Java SPI provider 变成 bean）
 
 这组内置 FactoryBean 面向的是 Java 标准的 SPI 机制（`ServiceLoader`）：
@@ -118,11 +114,7 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansBuiltInFactoryBeansLabTest,Sprin
 
 ---
 
-## 4. 怎么实现的：关键类/方法 + 断点入口 + 观察点
-
 ### 4.1 `&beanName` 分支（你排障最常用的入口）
-
-推荐断点：
 
 1) `AbstractBeanFactory#doGetBean`  
 2) `AbstractBeanFactory#getObjectForBeanInstance`
@@ -135,8 +127,6 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansBuiltInFactoryBeansLabTest,Sprin
 
 ### 4.2 product 缓存与 FactoryBeanRegistry
 
-推荐断点：
-
 - `FactoryBeanRegistrySupport#getObjectFromFactoryBean`
 
 观察点：
@@ -145,8 +135,6 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansBuiltInFactoryBeansLabTest,Sprin
 - `factoryBeanObjectCache`：product 是否命中缓存
 
 ### 4.3 `MethodInvokingFactoryBean` 关键入口
-
-推荐断点：
 
 - `MethodInvokingFactoryBean#afterPropertiesSet`（准备与首次 invoke）
 - `MethodInvokingFactoryBean#getObject`（返回 product，可能每次 invoke）
@@ -157,8 +145,6 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansBuiltInFactoryBeansLabTest,Sprin
 - `this.cachedObject`（或类似字段）：是否缓存了结果
 
 ### 4.4 `ServiceLocatorFactoryBean` 关键入口
-
-推荐断点：
 
 - `ServiceLocatorFactoryBean#afterPropertiesSet`（创建代理）
 - `ServiceLocatorFactoryBean$ServiceLocatorInvocationHandler#invoke`（每次方法调用都会到这里）
@@ -171,7 +157,46 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansBuiltInFactoryBeansLabTest,Sprin
 
 ---
 
-## 5. 常见边界与误区（你为什么会在真实项目里踩）
+---
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansBuiltInFactoryBeansLabTest` / `SpringCoreBeansServiceLoaderFactoryBeansLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+## 0. 复现入口（可运行）
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansBuiltInFactoryBeansLabTest.java`
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansServiceLoaderFactoryBeansLabTest.java`
+
+推荐运行命令：
+
+```bash
+mvn -pl spring-core-beans -Dtest=SpringCoreBeansBuiltInFactoryBeansLabTest,SpringCoreBeansServiceLoaderFactoryBeansLabTest test
+```
+
+你要观察的现象（Lab 里都有断言）：
+
+- 需要“运行时决定拿哪个实现”（按名字/按策略）
+- 需要“每次调用都重新拿一个 prototype”（典型：状态型对象、短生命周期对象）
+
+## 4. 怎么实现的：关键类/方法 + 断点入口 + 观察点
+
+推荐断点：
+
+推荐断点：
+
+推荐断点：
+
+推荐断点：
 
 1) **误区：`getBean("x")` 就是拿到名为 x 的 bean 本体**
    - 对 FactoryBean 来说，`getBean("x")` 默认拿到的是 product，不是 factory。
@@ -180,6 +205,25 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansBuiltInFactoryBeansLabTest,Sprin
 3) **误区：ServiceLocator 只是“语法糖”**
    - 它改变了依赖关系表达方式：从注入时确定 → 运行时决定；排障更难，慎用。
 
----
+## F. 常见坑与边界
+
+但是注意：这是一种 **service locator 模式**，会把依赖关系从“注入点”挪到“调用点”，可读性更差，能不用就不用。
+
+## 5. 常见边界与误区（你为什么会在真实项目里踩）
+
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansBuiltInFactoryBeansLabTest` / `SpringCoreBeansServiceLoaderFactoryBeansLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansBuiltInFactoryBeansLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansServiceLoaderFactoryBeansLabTest.java`
 
 上一章：[48. 方法注入：replaced-method / MethodReplacer（实例化策略分支）](48-method-injection-replaced-method.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[50. PropertyEditor 与 BeanDefinition 值解析：值从定义层落到对象](50-property-editor-and-value-resolution.md)
+
+<!-- BOOKIFY:END -->

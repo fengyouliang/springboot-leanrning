@@ -4,7 +4,20 @@
 
 ## [Unreleased]
 
+### Added
+- `scripts`：新增教学化覆盖度自检脚本 `scripts/check-teaching-coverage.py`（面向所有包含 `docs/README.md` 的模块：`spring-core-*` + `springboot-*`），并提供聚合闸门脚本 `scripts/check-docs.sh`（断链检查 + 教学覆盖），用于验收“每章至少 1 个可跑入口 + 每模块至少 N 个 LabTest”。
+- `scripts`：新增 docs 书本化批处理脚本 `scripts/bookify-docs.py`：以 `docs/README.md` 为 SSOT，对每章 upsert 统一尾部区块（`### 对应 Lab/Test` + `上一章｜目录｜下一章`），确保可重复执行。
+- `spring-core-events`：补齐事务事件最小闭环（`@TransactionalEventListener` AFTER_COMMIT/rollback）Lab，并在 docs/07 增加对应入口块；测试依赖补齐 `spring-tx`。
+- `springboot-web-mvc`：补齐传统 MVC（HTML）页面渲染主线（Thymeleaf/表单提交/校验回显/PRG/错误页/Accept 内容协商），新增对应 docs 与 MockMvc + 端到端 Labs，并补齐 API 侧 malformed JSON/type mismatch 的统一错误体。
+- `springboot-web-mvc`：安全基线补充：模板输出默认使用转义（`th:text`），错误页仅展示必要信息，不输出堆栈与敏感细节（为后续接入安全模块预留空间）。
+
+- `scripts`：新增章节契约自检脚本 `scripts/check-chapter-contract.py`（A–G 七段 + 对应 Lab/Test + 至少 1 个 LabTest），并接入 `scripts/check-docs.sh`。
+- `scripts`：新增 A–G 批处理重写脚本 `scripts/ag-contract-docs.py`：以 `docs/README.md` 为 SSOT，对章节执行结构化重写并注入模块默认 LabTest 兜底。
 ### Changed
+- 全模块 docs：将 `docs/README.md` 引用的全部章节升级为 A–G 章节契约（统一二级标题 A–G，并保留 BOOKIFY 尾部导航）；新增闸门确保每章至少 1 个 LabTest 引用可解析。
+- 根 `README.md`：跨模块学习路线入口统一指向 `<module>/docs/README.md`（Docs TOC）。
+- `spring-core-*`：对齐教学化文档规范：清理 docs 正文中的 `docs/NN` 缩写引用，统一替换为可解析的 Markdown 相对链接；统一章节末尾 `### 对应 Lab/Test` 入口块；并通过断链检查与教学覆盖检查。
+- `scripts/check-md-relative-links.py`：支持传入 docs 目录或单个 .md 文件进行模块级自检；默认扫描所有 `spring-core-*/docs` 与 `springboot-*/docs`。
 - `spring-core-beans`：将源码分组目录命名语义化（`part00/part01/...` → `part00_guide/part01_ioc_container/...`），提升与 docs Part（具名章节域）的对齐程度。
 - `spring-core-beans`：源码与测试按 docs Part 结构分组：将 `src/main/java` 与 `src/test/java` 从平铺改为 `part00_guide/part01_ioc_container/part02_boot_autoconfig/part03_container_internals/part04_wiring_and_boundaries/appendix` 分包，并新增跨 Part 复用的 `testsupport`；同时全量修复 docs/README/知识库中的源码路径引用；保留 `com.learning.springboot.springcorebeans.SpringCoreBeansApplication` 包名不变。
 - `spring-core-beans`：docs 书本化（Bookify）：引入 `docs/README.md` 目录页与 Part 结构，对 docs 章节进行移动/重命名/重新分组；统一每章 A–G 章节契约（定位/结论/主线/源码/实验/坑点/小结预告）并补齐“上一章｜目录｜下一章”导航；同时全局修复 docs 内链与模块 README 的入口链接。
@@ -28,10 +41,13 @@
 - `spring-core-beans`：补齐 Spring Framework `spring-beans` 包 5 组机制闭环：XML namespace 扩展（`spring.handlers/schemas` + `NamespaceHandler/Parser`）、Properties/Groovy `BeanDefinitionReader`、`replaced-method` 方法注入、内置 FactoryBean（`MethodInvokingFactoryBean`/`ServiceLocatorFactoryBean`/`&beanName`）、以及 PropertyEditor 与 `BeanDefinitionValueResolver` 值解析主线；新增 docs 46–50 与对应 Labs（默认参与回归），并引入 test scope `org.apache.groovy:groovy:4.0.21` 以开箱运行 Groovy Reader Lab。
 - `spring-core-beans`：补齐 Spring Framework `BeanFactory API` 与 `Environment Abstraction` 的系统化深挖闭环：新增 docs 38–39（主线/边界/误区 + 断点入口/观察点）与对应 Labs（默认参与回归），并同步更新 docs/README 与知识点地图索引入口。
 - `spring-core-beans`：面向 Spring Framework `spring-beans` 模块的 Public API 全覆盖：新增 Appendix（`95` Public API 索引 + `96` Gap 清单）用于“按类型检索/可审计”，并补齐 `META-INF/spring/aot.factories`/`AotServices` 与 `ServiceLoader*FactoryBean` 机制的 docs+Labs；新增 `97` Explore/Debug 用例与显式开关（不影响默认回归）。
+- `spring-core-beans`：补齐 `org.springframework.beans.support` support 工具类闭环（`ArgumentConvertingMethodInvoker`/`ResourceEditorRegistrar`/`PropertyComparator`/`PagedListHolder`/`SortDefinition`）：扩写 docs/36 并新增可运行 Lab；同步更新 Appendix 95/96 生成规则并重新生成，使 Gap 清单归零（0 partial）。
 - `scripts`：新增 Markdown 相对链接存在性检查脚本（用于文档 0 断链自检）。
 - 深化 `spring-core-aop` 核心章节：新增 docs/00（深挖指南）与 docs/99（自测题），扩写 docs/01-06、docs/90（常见坑），补齐源码断点入口/观察点与排障闭环。
 - 二次深化 `spring-core-aop`：新增 docs/07-09（AutoProxyCreator 主线 / pointcut 表达式系统 / 多代理叠加与顺序），并新增 4 组 Labs 覆盖 BPP 主线、proceed 嵌套、this vs target、以及多 advisor vs 套娃 proxy 的可断言闭环；同时在 `spring-core-beans` 的 BPP/代理/顺序章节补齐 AutoProxyCreator 承接与跨模块链接。
 - 三次深化 `spring-core-aop`：新增 docs/10（真实叠加 Debug Playbook）与集成 Lab（Tx/Cache/Method Security），把“多代理叠加”落到真实基础设施断点与可断言语义，并更新 README/深挖指南/多代理章节导航。
+- 新增 `spring-core-aop-weaving`：AspectJ weaving 深挖模块（LTW/CTW），覆盖 `call`/`execution`、constructor、field `get/set`、`withincode`/`cflow` 等 join point 与表达式，并提供 docs + Labs/Exercises 可验证闭环。
 - `spring-core-aop`/`spring-core-events`/`spring-core-tx`：补齐 DemoRunner 结构化输出（`AOP:`/`EVENTS:`/`TX:` 前缀），在 events 增加可控的异常传播演示（特定输入触发 throwing listener）；`spring-core-tx` 新增“自调用绕过事务”Lab，并同步 README/根 README/progress 的入口索引。
 - `spring-core-aop`/`spring-core-events`/`spring-core-profiles`/`spring-core-resources`/`spring-core-tx`/`spring-core-validation`：对齐 docs Part 目录结构与 src/main+src/test 分包结构（语义化 Part 命名），并同步修复 README/文档中的源码路径与跨模块引用；保持各模块 `*Application` 入口包名不变。
 - `springboot-*`：将 Part 结构（docs + src/test + src/main 最小分组）推广到全部 `springboot-*` 模块：新增 `docs/README.md` 与 `part-00-guide/`、迁移 docs 章节到 `part-01-*/` 与 `appendix/`；tests 按 `part00_guide`（Exercises）/ `part01_*`（Labs）分包；在不修改各模块 `*Application` 入口包名的前提下，将示例代码迁移到 `part01_*`（`springboot-business-case` 例外：为保留领域分层，仅对 tests 与 docs 对齐）；同时修复各模块 README 与 docs 内的源码路径引用。
+- `springboot-*`：补齐教学化“可跑入口闭环”：将 `docs/README.md` 的章节清单统一为 Markdown 链接（SSOT），并补齐 `part-00-guide/00-deep-dive-guide.md` 与 `appendix/90/99` 的“对应 Lab/Exercise（可运行）”入口块；对缺口模块补齐 `min-labs=2`（新增 5 个 `*LabTest.java`）。

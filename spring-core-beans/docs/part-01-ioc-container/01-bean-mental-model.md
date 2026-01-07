@@ -1,6 +1,18 @@
 # 01. Bean 心智模型：BeanDefinition vs Bean 实例
 
-这一章的目标是先把“Bean 到底是什么”这件事说清楚：**Bean 不是对象本身，而是“容器管理对象的一整套机制”**。如果你脑子里只有“Bean = 被 `@Component` 标注的类”，后面一定会在 Scope、生命周期、代理、自动装配上不断踩坑。
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**01. Bean 心智模型：BeanDefinition vs Bean 实例**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 ## 1. 你要建立的 3 层心智模型
 
@@ -34,16 +46,6 @@
 
 ### 面试常问：BeanDefinition / 原始实例 / 最终暴露对象（三层心智模型）
 
-- 题目：`BeanDefinition`、bean instance、最终 `getBean()` 拿到的对象分别是什么？它们之间有什么关系？
-- 追问：为什么说“最终拿到的对象可能不是你写的那个类的实例”？这通常发生在容器的哪个阶段？
-- 复现入口（建议先跑再下断点）：
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
-    - `beanDefinitionIsNotTheBeanInstance()`
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProxyingPhaseLabTest.java`
-    - `beanPostProcessorCanReturnAProxyAsTheFinalExposedBean_andSelfInvocationStillBypassesTheProxy()`
-
-## 3. BeanFactory vs ApplicationContext：责任边界
-
 很多学习资料把它们混在一起讲，导致初学者误以为它们是“同一个东西的不同名字”。
 
 - `BeanFactory`：最核心的容器能力（Bean 的创建、依赖注入、Scope、生命周期的骨架）
@@ -55,17 +57,6 @@
   - 更丰富的自动检测与装配逻辑（配合各种后处理器）
 
 ### 面试常问：BeanFactory vs ApplicationContext（层次与 refresh 主线）
-
-- 题目：两者核心差异是什么？为什么 `ApplicationContext` 更适合“应用”，而 `BeanFactory` 更偏“底层容器”？
-- 追问：
-  - `ApplicationContext#refresh` 相比“只用 BeanFactory”，额外做了哪些事？（事件、多语言、资源加载、环境等）
-  - 这些能力分别插入到 `AbstractApplicationContext#refresh` 的哪几个步骤？你会怎么下断点证明？
-- 复现入口（可断言 + 可断点，建议从这里 step into `refresh()`）：
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansBeanFactoryVsApplicationContextLabTest.java`
-    - `beanFactory_isTheCoreContainer_withoutApplicationLevelFacilities()`
-    - `applicationContext_addsEventsMessagesAndResources_andHooksThemIntoRefresh()`
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansBootstrapInternalsLabTest.java`
-    - `registerAnnotationConfigProcessors_enablesAutowiredAndPostConstruct()`
 
 在 Spring Boot 应用中，你基本总是在使用 `ApplicationContext`（因为 Boot 启动时创建的就是它的某个实现）。
 
@@ -80,16 +71,7 @@
 5) **创建单例 Bean**（非 lazy 的单例通常会在 refresh 过程中预实例化）
 6) **发布容器就绪相关事件**（这是 `ApplicationContext` 的能力）
 
-注意：**“注册定义”与“创建实例”是两个阶段**。这句话会贯穿你对 Spring 的全部理解。
-
 ## 5. 在本模块里如何“看见”这件事
-
-你可以用容器内部实验直接确认“定义不等于实例”：
-
-- 对应实验：`src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
-  - `beanDefinitionIsNotTheBeanInstance()`
-
-这个实验想传达的是：
 
 - 你可以从 `BeanFactory` 拿到 `BeanDefinition`
 - 也可以从容器拿到 `ExampleBean` 实例
@@ -103,41 +85,13 @@
 2) “为什么说 BFPP 更像是在改‘配方’，BPP 更像是在改‘做出来的菜’？”
 3) “为什么 Spring Boot 的自动装配本质上就是在某个阶段批量注册 BeanDefinition？”
 
-下一章开始我们会从“BeanDefinition 从哪里来”讲起：扫描、`@Bean`、`@Import`、registrar，以及它们和 Spring Boot 自动装配的关系。
-
 ## 7. 深入建议：从“概念正确”到“能定位问题”
-
-如果你觉得这一章“太简单”，通常意味着你已经进入下一阶段：你需要的不再是概念本身，而是**把概念落到可验证的流程与观察点**。
 
 建议你沿着两条线把本章吃透：
 
 ### 7.1 把 3 层模型映射到“关键参与者”（源码导航）
 
-- **定义层主角**：`DefaultListableBeanFactory`（保存与管理 `BeanDefinition`）
-- **实例层主角**：`AbstractAutowireCapableBeanFactory`（`doCreateBean → populateBean → initializeBean`）
-- **扩展点介入**：BDRPP/BFPP/BPP（分别在“多早、改定义还是改实例”上不同）
-- **循环依赖相关**：`DefaultSingletonBeanRegistry`（单例缓存与 early reference）
-
-不要求你背源码，但建议你知道“该去哪里看”。更系统的断点与路线见：
-
-- [00. 深挖指南：把“Bean 三层模型”落到源码与断点](../part-00-guide/00-deep-dive-guide.md)
-
-### 7.2 用实验建立“阶段感”（强烈推荐）
-
-本模块的 Labs 已经把“定义 vs 实例”做成了可重复的实验，你可以用它来建立阶段感：
-
-- `SpringCoreBeansContainerLabTest.beanDefinitionIsNotTheBeanInstance()`
-
 如果你愿意再深入一步（开始进入“为什么注解能工作 / 为什么会被代理 / 为什么会短路”），建议按这个顺序继续读：
-
-1) [12. 容器启动与基础设施处理器](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)（注解能力来自哪些处理器）
-2) [14. PostProcessor 顺序](../part-03-container-internals/14-post-processor-ordering.md)（很多坑的根源是顺序）
-3) [15. 实例化前短路](../part-03-container-internals/15-pre-instantiation-short-circuit.md)（为什么有时“还没 new”就拿到对象了）
-4) [16. early reference 与循环依赖](../part-03-container-internals/16-early-reference-and-circular.md)（循环依赖到底怎么救）
-
-到这里为止，你就不再是“懂概念”，而是能把问题定位到：定义层（注册/顺序/条件）还是实例层（注入/代理/回调）。
-对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
-推荐断点：`DefaultListableBeanFactory#getBeanDefinition`、`AbstractBeanFactory#getMergedLocalBeanDefinition`、`AbstractAutowireCapableBeanFactory#doCreateBean`
 
 ## 8. 源码解析：把“三层心智模型”落到 Spring 主线
 
@@ -154,7 +108,7 @@
 
 为什么你有时会看到“同一个 beanName 的定义好像变了”？常见原因是：
 
-1) **原始定义（raw definition）会被“合并”**：例如 parent/child、`@Bean` 方法元信息等会合成 `RootBeanDefinition`（对应你在 docs/35 看到的 merged definition）
+1) **原始定义（raw definition）会被“合并”**：例如 parent/child、`@Bean` 方法元信息等会合成 `RootBeanDefinition`（对应你在 [35. BeanDefinition 的合并（MergedBeanDefinition）：RootBeanDefinition 从哪里来？](../part-04-wiring-and-boundaries/35-merged-bean-definition.md) 看到的 merged definition）
 2) **定义会被 BFPP/BDRPP 改写**：发生在实例化之前（refresh 很早期），因此你在 `doCreateBean` 里看到的可能已经不是“最初注册进去的那份 definition”
 
 一个非常实用的分界线：
@@ -163,8 +117,6 @@
 - `getMergedBeanDefinition(beanName)` 更像“读最终配方（包含合并/补全后的元信息）”
 
 ### 8.2 instances：实例创建的主线在哪里（instantiate → populate → initialize）
-
-**实例层主线基本都收敛在：`AbstractAutowireCapableBeanFactory#doCreateBean`。**
 
 你可以把它当作一个非常稳定的“阶段框架”（精简伪代码）：
 
@@ -181,9 +133,9 @@ doCreateBean(beanName, mbd):
 
 把这条主线记住，你就能把很多“现象”放回正确阶段：
 
-- 注入报错（NoSuch/NoUnique）通常是在 `populateBean` 的依赖解析过程中爆出来的（见 docs/03）
-- 生命周期回调链（Aware/@PostConstruct/afterPropertiesSet/initMethod）发生在 `initializeBean`（见 docs/05）
-- 循环依赖的 early reference 发生在“实例已经有了，但还没 initialize 完”的窗口期（见 docs/09、docs/16）
+- 注入报错（NoSuch/NoUnique）通常是在 `populateBean` 的依赖解析过程中爆出来的（见 [03. 依赖注入解析：类型/名称/@Qualifier/@Primary](03-dependency-injection-resolution.md)）
+- 生命周期回调链（Aware/@PostConstruct/afterPropertiesSet/initMethod）发生在 `initializeBean`（见 [05. 生命周期：初始化、销毁与回调（@PostConstruct/@PreDestroy 等）](05-lifecycle-and-callbacks.md)）
+- 循环依赖的 early reference 发生在“实例已经有了，但还没 initialize 完”的窗口期（见 [09. 循环依赖：现象、原因与规避（constructor vs setter）](09-circular-dependencies.md)、[16. early reference 与循环依赖：getEarlyBeanReference 到底解决什么？](../part-03-container-internals/16-early-reference-and-circular.md)）
 
 ### 8.3 最终暴露对象：为什么 getBean() 拿到的可能不是“原始实例”
 
@@ -191,9 +143,9 @@ doCreateBean(beanName, mbd):
 
 常见的三类替换点（只记住它们存在即可，后续章节会分别深挖）：
 
-1) **实例化前短路**：`resolveBeforeInstantiation` → `postProcessBeforeInstantiation`（见 docs/15）
-2) **early reference**：`getEarlyBeanReference`（循环依赖窗口期，见 docs/16）
-3) **初始化后替换**：`postProcessAfterInitialization`（最常见的代理产生点，见 docs/31）
+1) **实例化前短路**：`resolveBeforeInstantiation` → `postProcessBeforeInstantiation`（见 [15. 实例化前短路：postProcessBeforeInstantiation 能让构造器根本不执行](../part-03-container-internals/15-pre-instantiation-short-circuit.md)）
+2) **early reference**：`getEarlyBeanReference`（循环依赖窗口期，见 [16. early reference 与循环依赖：getEarlyBeanReference 到底解决什么？](../part-03-container-internals/16-early-reference-and-circular.md)）
+3) **初始化后替换**：`postProcessAfterInitialization`（最常见的代理产生点，见 [31. 代理/替换阶段：`BeanPostProcessor` 如何把 Bean “换成 Proxy”](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)）
 
 这也是为什么你在排障时不能只问“这个类有没有被 new”，而要问：
 
@@ -204,8 +156,6 @@ doCreateBean(beanName, mbd):
 
 **例 1：definition != instance（定义层对象和实例层对象不是一个概念）**
 
-来自 `spring-core-beans/src/test/java/.../SpringCoreBeansContainerLabTest.java`（最小片段）：
-
 ```java
 try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SimpleBeanConfig.class)) {
     BeanDefinition beanDefinition = context.getBeanFactory().getBeanDefinition("exampleBean");
@@ -215,9 +165,101 @@ try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicatio
 
 **例 2：最终暴露对象可被 BPP 替换成 proxy（按接口能拿到、按实现类可能拿不到）**
 
-来自 `spring-core-beans/src/test/java/.../SpringCoreBeansBeanCreationTraceLabTest.java`：
-
 - 它会在 after-initialization 阶段返回一个 JDK proxy（只实现接口）
 - 因此 `context.getBean(WorkService.class)` 成功，但按具体类取可能失败（典型“最终暴露对象 != 原始实例”）
 
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansBeanCreationTraceLabTest` / `SpringCoreBeansBeanFactoryVsApplicationContextLabTest` / `SpringCoreBeansBootstrapInternalsLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+- 题目：`BeanDefinition`、bean instance、最终 `getBean()` 拿到的对象分别是什么？它们之间有什么关系？
+- 追问：为什么说“最终拿到的对象可能不是你写的那个类的实例”？这通常发生在容器的哪个阶段？
+- 复现入口（建议先跑再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
+    - `beanDefinitionIsNotTheBeanInstance()`
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProxyingPhaseLabTest.java`
+    - `beanPostProcessorCanReturnAProxyAsTheFinalExposedBean_andSelfInvocationStillBypassesTheProxy()`
+
+- 题目：两者核心差异是什么？为什么 `ApplicationContext` 更适合“应用”，而 `BeanFactory` 更偏“底层容器”？
+- 追问：
+  - `ApplicationContext#refresh` 相比“只用 BeanFactory”，额外做了哪些事？（事件、多语言、资源加载、环境等）
+  - 这些能力分别插入到 `AbstractApplicationContext#refresh` 的哪几个步骤？你会怎么下断点证明？
+- 复现入口（可断言 + 可断点，建议从这里 step into `refresh()`）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansBeanFactoryVsApplicationContextLabTest.java`
+    - `beanFactory_isTheCoreContainer_withoutApplicationLevelFacilities()`
+    - `applicationContext_addsEventsMessagesAndResources_andHooksThemIntoRefresh()`
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansBootstrapInternalsLabTest.java`
+    - `registerAnnotationConfigProcessors_enablesAutowiredAndPostConstruct()`
+
+你可以用容器内部实验直接确认“定义不等于实例”：
+
+- 对应实验：`src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
+  - `beanDefinitionIsNotTheBeanInstance()`
+
+这个实验想传达的是：
+
+如果你觉得这一章“太简单”，通常意味着你已经进入下一阶段：你需要的不再是概念本身，而是**把概念落到可验证的流程与观察点**。
+
+不要求你背源码，但建议你知道“该去哪里看”。更系统的断点与路线见：
+
+- [00. 深挖指南：把“Bean 三层模型”落到源码与断点](../part-00-guide/00-deep-dive-guide.md)
+
+### 7.2 用实验建立“阶段感”（强烈推荐）
+
+本模块的 Labs 已经把“定义 vs 实例”做成了可重复的实验，你可以用它来建立阶段感：
+
+- `SpringCoreBeansContainerLabTest.beanDefinitionIsNotTheBeanInstance()`
+
+到这里为止，你就不再是“懂概念”，而是能把问题定位到：定义层（注册/顺序/条件）还是实例层（注入/代理/回调）。
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
+推荐断点：`DefaultListableBeanFactory#getBeanDefinition`、`AbstractBeanFactory#getMergedLocalBeanDefinition`、`AbstractAutowireCapableBeanFactory#doCreateBean`
+
+来自 `spring-core-beans/src/test/java/.../SpringCoreBeansContainerLabTest.java`（最小片段）：
+
+来自 `spring-core-beans/src/test/java/.../SpringCoreBeansBeanCreationTraceLabTest.java`：
+
+## F. 常见坑与边界
+
+这一章的目标是先把“Bean 到底是什么”这件事说清楚：**Bean 不是对象本身，而是“容器管理对象的一整套机制”**。如果你脑子里只有“Bean = 被 `@Component` 标注的类”，后面一定会在 Scope、生命周期、代理、自动装配上不断踩坑。
+
+## 3. BeanFactory vs ApplicationContext：责任边界
+
+注意：**“注册定义”与“创建实例”是两个阶段**。这句话会贯穿你对 Spring 的全部理解。
+
+1) [12. 容器启动与基础设施处理器](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)（注解能力来自哪些处理器）
+2) [14. PostProcessor 顺序](../part-03-container-internals/14-post-processor-ordering.md)（很多坑的根源是顺序）
+3) [15. 实例化前短路](../part-03-container-internals/15-pre-instantiation-short-circuit.md)（为什么有时“还没 new”就拿到对象了）
+4) [16. early reference 与循环依赖](../part-03-container-internals/16-early-reference-and-circular.md)（循环依赖到底怎么救）
+
+## G. 小结与下一章
+
+下一章开始我们会从“BeanDefinition 从哪里来”讲起：扫描、`@Bean`、`@Import`、registrar，以及它们和 Spring Boot 自动装配的关系。
+
+- **定义层主角**：`DefaultListableBeanFactory`（保存与管理 `BeanDefinition`）
+- **实例层主角**：`AbstractAutowireCapableBeanFactory`（`doCreateBean → populateBean → initializeBean`）
+- **扩展点介入**：BDRPP/BFPP/BPP（分别在“多早、改定义还是改实例”上不同）
+- **循环依赖相关**：`DefaultSingletonBeanRegistry`（单例缓存与 early reference）
+
+**实例层主线基本都收敛在：`AbstractAutowireCapableBeanFactory#doCreateBean`。**
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansBeanCreationTraceLabTest` / `SpringCoreBeansBeanFactoryVsApplicationContextLabTest` / `SpringCoreBeansBootstrapInternalsLabTest` / `SpringCoreBeansContainerLabTest` / `SpringCoreBeansProxyingPhaseLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProxyingPhaseLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansBeanFactoryVsApplicationContextLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansBootstrapInternalsLabTest.java`
+
 上一章：[00. 深挖指南：把“Bean 三层模型”落到源码与断点](../part-00-guide/00-deep-dive-guide.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[02. Bean 注册入口：扫描、@Bean、@Import、registrar](02-bean-registration.md)
+
+<!-- BOOKIFY:END -->

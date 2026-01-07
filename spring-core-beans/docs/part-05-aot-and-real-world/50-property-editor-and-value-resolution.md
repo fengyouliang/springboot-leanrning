@@ -1,32 +1,27 @@
 # 50. PropertyEditor 与 BeanDefinition 值解析：值从定义层落到对象
 
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**50. PropertyEditor 与 BeanDefinition 值解析：值从定义层落到对象**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
 新手在学 Spring Beans 时最容易卡在一个“看起来像黑盒”的问题上：
-
-> **我在配置里写的是字符串/引用/集合，为什么运行起来就变成了对象？这一步发生在哪里？怎么断点证明？**
-
-这一章把两个常被混在一起的机制拆开讲清楚，并用 Lab 让你能下断点验证：
 
 1) **PropertyEditor（可插拔的类型转换）**：决定 “字符串怎么变成目标类型”
 2) **BeanDefinition 值解析（BeanDefinitionValueResolver）**：决定 “引用/集合/Map/Properties 等 value 怎么被解析成可注入的最终值”
 
 ---
 
-## 0. 复现入口（可运行）
-
 本章有 2 个入口测试：
-
-1) PropertyEditor（自定义 editor）
-   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansPropertyEditorLabTest.java`
-
-2) BeanDefinitionValueResolver（引用/集合/Map/Properties）
-   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansBeanDefinitionValueResolutionLabTest.java`
-
-推荐运行命令：
-
-```bash
-mvn -pl spring-core-beans -Dtest=SpringCoreBeansPropertyEditorLabTest test
-mvn -pl spring-core-beans -Dtest=SpringCoreBeansBeanDefinitionValueResolutionLabTest test
-```
 
 你要观察的现象：
 
@@ -63,8 +58,6 @@ PropertyEditor 是一种“老机制”，但它仍然在 beans 主线上存在�
 
 ---
 
-## 2. 怎么用：最小可用写法（以 Lab 为准）
-
 ### 2.1 自定义 PropertyEditor（用 `CustomEditorConfigurer` 注册）
 
 最小闭环就是三件事：
@@ -75,12 +68,6 @@ PropertyEditor 是一种“老机制”，但它仍然在 beans 主线上存在�
 
 你可以直接对照本仓库的最小实现：
 
-- `SpringCoreBeansPropertyEditorLabTest#HostAndPortEditor`
-- `SpringCoreBeansPropertyEditorLabTest#HostAndPortRegistrar`
-- `SpringCoreBeansPropertyEditorLabTest#withCustomPropertyEditor_stringToCustomType_shouldSucceed`
-
-### 2.2 显式构造“定义层 value”（以便断点命中不同分支）
-
 如果你想看清 `BeanDefinitionValueResolver` 的分支，最直接的方式是显式使用这些类型：
 
 - `RuntimeBeanReference("h1")`
@@ -88,8 +75,6 @@ PropertyEditor 是一种“老机制”，但它仍然在 beans 主线上存在�
 - `ManagedList / ManagedMap / ManagedProperties`
 
 对应示例见：
-
-- `SpringCoreBeansBeanDefinitionValueResolutionLabTest#registerDemoBean`
 
 ---
 
@@ -102,18 +87,12 @@ PropertyEditor 是一种“老机制”，但它仍然在 beans 主线上存在�
 3) **值解析：** 把“定义层 value”解析成可注入对象（引用/集合/占位符）
 4) **类型转换：** 把解析后的 value 转成目标属性类型（PropertyEditor/ConversionService）
 
-所以很多新手误区来自于把 1) 和 2) 混在一起：
-
 - “我注册了 BeanDefinition 就等于创建了对象” → 错
 - “类型转换发生在注册阶段” → 错，通常发生在属性填充阶段
 
 ---
 
-## 4. 怎么实现的：关键类/方法 + 断点入口 + 观察点
-
 ### 4.1 PropertyEditor 的注册（为什么它能影响注入）
-
-推荐断点：
 
 1) `CustomEditorConfigurer#postProcessBeanFactory`
 2) `PropertyEditorRegistrySupport#registerCustomEditor`
@@ -125,11 +104,6 @@ PropertyEditor 是一种“老机制”，但它仍然在 beans 主线上存在�
 - 它注册到了哪个 registry（通常最终影响 `BeanWrapper`/`TypeConverter`）
 
 ### 4.2 BeanDefinitionValueResolver（引用/集合/Map 的解析入口）
-
-推荐断点组合：
-
-1) `AbstractAutowireCapableBeanFactory#applyPropertyValues`（主线入口）
-2) `BeanDefinitionValueResolver#resolveValueIfNecessary`（按类型分派）
 
 如果你想看清不同分支：
 
@@ -146,8 +120,6 @@ PropertyEditor 是一种“老机制”，但它仍然在 beans 主线上存在�
 
 ### 4.3 类型转换（字符串如何变成目标属性类型）
 
-推荐断点：
-
 - `TypeConverterDelegate#convertIfNecessary`
 - `BeanWrapperImpl#convertForProperty`（或类似转换入口）
 
@@ -159,6 +131,62 @@ PropertyEditor 是一种“老机制”，但它仍然在 beans 主线上存在�
 
 ---
 
+---
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansBeanDefinitionValueResolutionLabTest` / `SpringCoreBeansPropertyEditorLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+> **我在配置里写的是字符串/引用/集合，为什么运行起来就变成了对象？这一步发生在哪里？怎么断点证明？**
+
+这一章把两个常被混在一起的机制拆开讲清楚，并用 Lab 让你能下断点验证：
+
+## 0. 复现入口（可运行）
+
+1) PropertyEditor（自定义 editor）
+   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansPropertyEditorLabTest.java`
+
+2) BeanDefinitionValueResolver（引用/集合/Map/Properties）
+   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansBeanDefinitionValueResolutionLabTest.java`
+
+推荐运行命令：
+
+```bash
+mvn -pl spring-core-beans -Dtest=SpringCoreBeansPropertyEditorLabTest test
+mvn -pl spring-core-beans -Dtest=SpringCoreBeansBeanDefinitionValueResolutionLabTest test
+```
+
+## 2. 怎么用：最小可用写法（以 Lab 为准）
+
+- `SpringCoreBeansPropertyEditorLabTest#HostAndPortEditor`
+- `SpringCoreBeansPropertyEditorLabTest#HostAndPortRegistrar`
+- `SpringCoreBeansPropertyEditorLabTest#withCustomPropertyEditor_stringToCustomType_shouldSucceed`
+
+### 2.2 显式构造“定义层 value”（以便断点命中不同分支）
+
+- `SpringCoreBeansBeanDefinitionValueResolutionLabTest#registerDemoBean`
+
+## 4. 怎么实现的：关键类/方法 + 断点入口 + 观察点
+
+推荐断点：
+
+推荐断点组合：
+
+推荐断点：
+
+## F. 常见坑与边界
+
+所以很多新手误区来自于把 1) 和 2) 混在一起：
+
 ## 5. 常见边界与误区
 
 1) **误区：类型转换都由 ConversionService 负责**
@@ -168,7 +196,20 @@ PropertyEditor 是一种“老机制”，但它仍然在 beans 主线上存在�
 3) **误区：看到 `RuntimeBeanReference` 就以为“这是 XML 才有的东西”**
    - 这是 beans 的抽象：你在任何输入源（XML/Properties/Groovy/程序化注册）都可以表达“引用”。
 
----
+## G. 小结与下一章
+
+1) `AbstractAutowireCapableBeanFactory#applyPropertyValues`（主线入口）
+2) `BeanDefinitionValueResolver#resolveValueIfNecessary`（按类型分派）
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansBeanDefinitionValueResolutionLabTest` / `SpringCoreBeansPropertyEditorLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansPropertyEditorLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansBeanDefinitionValueResolutionLabTest.java`
 
 上一章：[49. 内置 FactoryBean 图鉴：MethodInvoking / ServiceLocator / & 前缀](49-built-in-factorybeans-gallery.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[90. 常见坑清单（建议反复对照）](../appendix/90-common-pitfalls.md)
 
+<!-- BOOKIFY:END -->

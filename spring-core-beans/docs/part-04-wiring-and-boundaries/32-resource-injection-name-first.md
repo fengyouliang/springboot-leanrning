@@ -1,31 +1,26 @@
 # 32. `@Resource` 注入：为什么它更像“按名称找 Bean”？
 
-## 0. 复现入口（可运行）
+<!-- AG-CONTRACT:START -->
 
-- 入口测试（推荐先跑通再下断点）：
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResourceInjectionLabTest.java`
-- 推荐运行命令：
-  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test`
+## A. 本章定位
 
-这一章补齐一个非常高频、也非常容易踩坑的点：`@Resource`（Jakarta / JSR-250）注入到底是怎么解析候选的？
+- 本章主题：**32. `@Resource` 注入：为什么它更像“按名称找 Bean”？**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 很多人会把它当成 “另一个 `@Autowired`”，但它更像：
 
 > **先按名称（name）找，再按类型（type）兜底。**
 
-对应实验（可运行 + 可断言）：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResourceInjectionLabTest.java`
-
 建议直接跑：
 
-```bash
-mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
-```
-
 ## 1. 现象：没注册 annotation processors 时，`@Resource` 会“失效”
-
-实验第一段故意使用一个“什么处理器都不注册”的最小容器：`GenericApplicationContext`。
 
 你会观察到：
 
@@ -42,16 +37,12 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
 
 ## 2. 现象：注册 processors 后，`@Resource` 默认按字段名注入（name-first）
 
-实验第二段调用：
-
 - `AnnotationConfigUtils.registerAnnotationConfigProcessors(context)`
 
 之后再 `refresh()`，你会看到：
 
 - `@Resource` 注入生效
 - 即使容器里有多个同类型候选，依然能稳定注入正确对象（因为按名称先锁定了候选）
-
-在 Lab 里我们同时验证了两种常见写法：
 
 1) `@Resource`（不写 name）：默认使用 **字段名** 当 beanName
 2) `@Resource(name = "...")`：显式指定 beanName
@@ -70,10 +61,6 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
 
 它是一个 `BeanPostProcessor`，在 bean 的创建过程中参与属性填充 / 注入阶段，把 `@Resource` 这种注解“翻译”为实际的依赖解析与赋值动作。
 
-这也是 Lab 里 “注册 processors 前后行为差异” 的根因：**你有没有把这个处理器注册进容器**。
-
-## 4. Debug / 观察建议
-
 当你在真实项目里遇到 “`@Resource` 怎么没注入？” 时，建议按这个顺序排查：
 
 1) 先确认容器是不是“注解能力完整”的容器
@@ -85,8 +72,6 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
    - name 找不到时是否兜底按 type
    - type 兜底时如果同类型多个候选，仍可能出现歧义（参考第 33 章）
 
-## 5. 常见坑与实践建议
-
 - **不要把 `@Resource` 当成 “按类型注入” 的默认选择**：它更偏 name-first
 - 如果你希望“按类型 + 规则选胜者”：优先 `@Autowired` + `@Qualifier/@Primary`
 - 如果你希望“按名称精确绑定”：`@Resource(name="...")` 往往更直观
@@ -97,21 +82,7 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
 - 注入发生在容器的哪个阶段：[`postProcessProperties` 与 field vs constructor](30-injection-phase-field-vs-constructor.md)
 - 注解能力从哪来：[`registerAnnotationConfigProcessors`](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
 
-## 源码锚点（建议从这里下断点）
-
-- `AnnotationConfigUtils#registerAnnotationConfigProcessors`：把 `CommonAnnotationBeanPostProcessor` 等基础设施装进容器的入口
-- `CommonAnnotationBeanPostProcessor#postProcessProperties`：处理 `@Resource` 注入的关键阶段（属性填充阶段）
-- `AbstractAutowireCapableBeanFactory#populateBean`：属性填充主流程（`@Autowired/@Resource` 都在这里发生）
-- `AbstractBeanFactory#doGetBean`：name-first 的常见落点（`@Resource` 往往会先按 beanName 走 name-based lookup）
-- `DefaultListableBeanFactory#doResolveDependency`：当 name 找不到或需要按 type 兜底时，会回到 type-based 候选解析
-
-## 断点闭环（用本仓库 Lab/Test 跑一遍）
-
 入口：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResourceInjectionLabTest.java`
-
-建议断点：
 
 1) `AnnotationConfigUtils#registerAnnotationConfigProcessors`：对照“注册前/注册后”差异，确认 `CommonAnnotationBeanPostProcessor` 是否存在
 2) `CommonAnnotationBeanPostProcessor#postProcessProperties`：观察 `@Resource` 是如何把 name/type 解析翻译成实际赋值动作的
@@ -120,13 +91,6 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
 
 ## 排障分流：这是定义层问题还是实例层问题？
 
-- “`@Resource` 字段一直为 null” → **优先定义层/基础设施问题**：容器是否注册了 `CommonAnnotationBeanPostProcessor`？（看 `registerAnnotationConfigProcessors`）
-- “注入到了错误的 bean / name 对不上” → **实例层（name-first 解析）**：字段名/显式 name 是否真的对应 beanName？（本章第 2 节）
-- “name 找不到后兜底 type 还是报多候选” → **实例层（候选解析）**：转到 [33](33-autowire-candidate-selection-primary-priority-order.md) 的选择规则
-- “以为它等价于 `@Autowired`” → **概念差异**：`@Resource` 默认 name-first，`@Autowired` 默认 type-first（对照 [03](../part-01-ioc-container/03-dependency-injection-resolution.md)）
-对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResourceInjectionLabTest.java`
-推荐断点：`CommonAnnotationBeanPostProcessor#postProcessProperties`、`CommonAnnotationBeanPostProcessor#autowireResource`、`DefaultListableBeanFactory#doResolveDependency`
-
 ## 面试常问（`@Resource` vs `@Autowired`）
 
 - 常问：`@Resource` 与 `@Autowired` 的核心差异是什么？
@@ -134,4 +98,82 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
 - 常见追问：为什么很多团队更推荐“构造注入 + `@Autowired`（可省略）”？
   - 答题要点：依赖显式、可测试性更好；避免 name-first 在重构字段/beanName 时引入隐性回归。
 
-上一章：[31. 代理/替换阶段：`BeanPostProcessor` 如何把 Bean “换成 Proxy”](31-proxying-phase-bpp-wraps-bean.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[33. 候选选择 vs 顺序：`@Primary` / `@Priority` / `@Order` 到底各管什么？](33-autowire-candidate-selection-primary-priority-order.md)
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansResourceInjectionLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResourceInjectionLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test`
+
+对应实验（可运行 + 可断言）：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResourceInjectionLabTest.java`
+
+```bash
+mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
+```
+
+实验第一段故意使用一个“什么处理器都不注册”的最小容器：`GenericApplicationContext`。
+
+实验第二段调用：
+
+在 Lab 里我们同时验证了两种常见写法：
+
+这也是 Lab 里 “注册 processors 前后行为差异” 的根因：**你有没有把这个处理器注册进容器**。
+
+## 4. Debug / 观察建议
+
+## 源码锚点（建议从这里下断点）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResourceInjectionLabTest.java`
+
+建议断点：
+
+- “`@Resource` 字段一直为 null” → **优先定义层/基础设施问题**：容器是否注册了 `CommonAnnotationBeanPostProcessor`？（看 `registerAnnotationConfigProcessors`）
+- “注入到了错误的 bean / name 对不上” → **实例层（name-first 解析）**：字段名/显式 name 是否真的对应 beanName？（本章第 2 节）
+- “name 找不到后兜底 type 还是报多候选” → **实例层（候选解析）**：转到 [33](33-autowire-candidate-selection-primary-priority-order.md) 的选择规则
+- “以为它等价于 `@Autowired`” → **概念差异**：`@Resource` 默认 name-first，`@Autowired` 默认 type-first（对照 [03](../part-01-ioc-container/03-dependency-injection-resolution.md)）
+对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResourceInjectionLabTest.java`
+推荐断点：`CommonAnnotationBeanPostProcessor#postProcessProperties`、`CommonAnnotationBeanPostProcessor#autowireResource`、`DefaultListableBeanFactory#doResolveDependency`
+
+## F. 常见坑与边界
+
+这一章补齐一个非常高频、也非常容易踩坑的点：`@Resource`（Jakarta / JSR-250）注入到底是怎么解析候选的？
+
+## 5. 常见坑与实践建议
+
+## G. 小结与下一章
+
+- `AnnotationConfigUtils#registerAnnotationConfigProcessors`：把 `CommonAnnotationBeanPostProcessor` 等基础设施装进容器的入口
+- `CommonAnnotationBeanPostProcessor#postProcessProperties`：处理 `@Resource` 注入的关键阶段（属性填充阶段）
+- `AbstractAutowireCapableBeanFactory#populateBean`：属性填充主流程（`@Autowired/@Resource` 都在这里发生）
+- `AbstractBeanFactory#doGetBean`：name-first 的常见落点（`@Resource` 往往会先按 beanName 走 name-based lookup）
+- `DefaultListableBeanFactory#doResolveDependency`：当 name 找不到或需要按 type 兜底时，会回到 type-based 候选解析
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansResourceInjectionLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResourceInjectionLabTest.java`
+
+上一章：[31. 代理产生在哪个阶段：BPP 如何把 Bean 换成 Proxy](31-proxying-phase-bpp-wraps-bean.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[33. 候选选择与优先级：@Primary/@Priority/@Order 的边界](33-autowire-candidate-selection-primary-priority-order.md)
+
+<!-- BOOKIFY:END -->

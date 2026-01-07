@@ -1,11 +1,18 @@
 # 28. 自定义 Scope + scoped proxy：thread scope 的真实语义
 
-## 0. 复现入口（可运行）
+<!-- AG-CONTRACT:START -->
 
-- 入口测试（推荐先跑通再下断点）：
-  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansCustomScopeLabTest.java`
-- 推荐运行命令：
-  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansCustomScopeLabTest test`
+## A. 本章定位
+
+- 本章主题：**28. 自定义 Scope + scoped proxy：thread scope 的真实语义**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
 
 Spring 的 scope 机制是可扩展的：你可以注册自定义 scope。
 
@@ -14,10 +21,6 @@ Spring 的 scope 机制是可扩展的：你可以注册自定义 scope。
 - 自定义 scope 如何注册
 - scope 的“每次从容器获取”语义
 - 为什么把短生命周期 scope 注入到 singleton 里需要 `ObjectProvider` 或 scoped proxy
-
-对应实验：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansCustomScopeLabTest.java`
 
 ## 1. 注册自定义 scope（thread）
 
@@ -28,13 +31,7 @@ Spring 的 scope 机制是可扩展的：你可以注册自定义 scope。
 
 对应测试：
 
-- `SpringCoreBeansCustomScopeLabTest.threadScope_createsOneInstancePerThread_whenAccessedDirectly()`
-
-## 2. 关键陷阱：把 scoped bean 直接注入 singleton，会被冻结在“注入那一刻”
-
 对应测试：
-
-- `SpringCoreBeansCustomScopeLabTest.injectingThreadScopedBeanIntoSingleton_withoutProxy_freezesTheTargetAtInjectionTime()`
 
 原因与你在 prototype 注入 singleton 看到的现象一致：
 
@@ -46,30 +43,16 @@ Spring 的 scope 机制是可扩展的：你可以注册自定义 scope。
 
 对应测试：
 
-- `SpringCoreBeansCustomScopeLabTest.objectProvider_honorsThreadScope_whenUsedInsideSingleton()`
-
 你注入的是 provider（容器句柄），每次调用时再去容器按当前 thread 解析目标对象。
 
 ## 4. 解法 2：scoped proxy（更“无感”，但引入代理语义）
 
 对应测试：
 
-- `SpringCoreBeansCustomScopeLabTest.scopedProxy_honorsThreadScope_whenInjectedIntoSingleton()`
-
 本质：
 
 - singleton 注入到的是一个 proxy
 - proxy 在每次方法调用时从当前 scope 找到真实目标再转发
-
-## 5. 常见坑
-
-- **坑 1：以为 scope 会自动传播到注入点**
-  - scope 的语义是“容器如何管理对象”；注入点如果不做延迟解析，仍然只取一次。
-
-- **坑 2：scoped proxy 的调试成本**
-  - 你看到的对象类型是 proxy，不是目标类；需要学会区分。
-
-## 源码锚点（建议从这里下断点）
 
 - `AbstractBeanFactory#registerScope`：注册自定义 scope 的入口（没有注册就不会走 scope 分发）
 - `AbstractBeanFactory#doGetBean`：按 scope 分发的主入口（singleton/prototype/custom scope 都会在这里分流）
@@ -77,17 +60,7 @@ Spring 的 scope 机制是可扩展的：你可以注册自定义 scope。
 - `ObjectProvider#getObject`：provider 的延迟解析入口（每次调用都回到容器重新解析目标）
 - `ScopedProxyFactoryBean#getObject`：scoped proxy 的生成入口（注入的是 proxy，调用时再定位目标）
 
-## 断点闭环（用本仓库 Lab/Test 跑一遍）
-
 入口：
-
-- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansCustomScopeLabTest.java`
-  - `threadScope_createsOneInstancePerThread_whenAccessedDirectly()`
-  - `injectingThreadScopedBeanIntoSingleton_withoutProxy_freezesTheTargetAtInjectionTime()`
-  - `objectProvider_honorsThreadScope_whenUsedInsideSingleton()`
-  - `scopedProxy_honorsThreadScope_whenInjectedIntoSingleton()`
-
-建议断点：
 
 1) `AbstractBeanFactory#registerScope`：确认 thread scope 的注册发生在 refresh 之前
 2) `SimpleThreadScope#get`：在同线程/不同线程获取时观察缓存命中与新建
@@ -97,16 +70,87 @@ Spring 的 scope 机制是可扩展的：你可以注册自定义 scope。
 
 ## 排障分流：这是定义层问题还是实例层问题？
 
+## 6. 一句话自检
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreBeansCustomScopeLabTest`
+- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+## 0. 复现入口（可运行）
+
+- 入口测试（推荐先跑通再下断点）：
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansCustomScopeLabTest.java`
+- 推荐运行命令：
+  - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansCustomScopeLabTest test`
+
+对应实验：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansCustomScopeLabTest.java`
+
+- `SpringCoreBeansCustomScopeLabTest.threadScope_createsOneInstancePerThread_whenAccessedDirectly()`
+
+- `SpringCoreBeansCustomScopeLabTest.injectingThreadScopedBeanIntoSingleton_withoutProxy_freezesTheTargetAtInjectionTime()`
+
+- `SpringCoreBeansCustomScopeLabTest.objectProvider_honorsThreadScope_whenUsedInsideSingleton()`
+
+- `SpringCoreBeansCustomScopeLabTest.scopedProxy_honorsThreadScope_whenInjectedIntoSingleton()`
+
+- **坑 2：scoped proxy 的调试成本**
+  - 你看到的对象类型是 proxy，不是目标类；需要学会区分。
+
+## 源码锚点（建议从这里下断点）
+
+## 断点闭环（用本仓库 Lab/Test 跑一遍）
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansCustomScopeLabTest.java`
+  - `threadScope_createsOneInstancePerThread_whenAccessedDirectly()`
+  - `injectingThreadScopedBeanIntoSingleton_withoutProxy_freezesTheTargetAtInjectionTime()`
+  - `objectProvider_honorsThreadScope_whenUsedInsideSingleton()`
+  - `scopedProxy_honorsThreadScope_whenInjectedIntoSingleton()`
+
+建议断点：
+
 - “thread scope 没起作用/所有线程都拿到同一个实例” → **优先定义层（scope 注册）**：是否真的 `registerScope("thread", ...)`？（看 `registerScope`）
 - “把 scoped bean 注入 singleton 后总是同一个实例” → **实例层（注入时机）**：这是 direct injection 的冻结效应；用 provider 或 scoped proxy（本章第 2/3/4 节）
 - “调试时看到的类型是 proxy，不是目标类” → **实例层（代理语义）**：这是 scoped proxy 的预期形态（对照 [31](31-proxying-phase-bpp-wraps-bean.md)）
 - “想当然认为 scope 会自动传播到注入点” → **概念澄清**：scope 管的是“容器如何取对象”，不自动改变注入点的解析次数（本章第 5 节）
-
-## 6. 一句话自检
 
 - 你能解释清楚：为什么 direct injection 会让 thread scope 失效？
 - 你能解释清楚：ObjectProvider 与 scoped proxy 的差别吗？
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansCustomScopeLabTest.java`
 推荐断点：`AbstractBeanFactory#doGetBean`、`SimpleThreadScope#get`、`ScopedProxyFactoryBean#getObject`
 
-上一章：[27. SmartLifecycle：start/stop 时机与 phase 顺序](27-smart-lifecycle-phase.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[29. FactoryBean 边界：getObjectType 返回 null 会让“按类型发现”失效](29-factorybean-edge-cases.md)
+## F. 常见坑与边界
+
+## 2. 关键陷阱：把 scoped bean 直接注入 singleton，会被冻结在“注入那一刻”
+
+## 5. 常见坑
+
+- **坑 1：以为 scope 会自动传播到注入点**
+  - scope 的语义是“容器如何管理对象”；注入点如果不做延迟解析，仍然只取一次。
+
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`SpringCoreBeansCustomScopeLabTest`
+- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansCustomScopeLabTest.java`
+
+上一章：[27. SmartLifecycle：phase 与 start/stop 顺序](27-smart-lifecycle-phase.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[29. FactoryBean 边界坑：泛型/代理/对象类型推断](29-factorybean-edge-cases.md)
+
+<!-- BOOKIFY:END -->
