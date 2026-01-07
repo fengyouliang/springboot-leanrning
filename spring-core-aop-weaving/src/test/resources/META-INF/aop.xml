@@ -1,0 +1,11 @@
+<!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "https://www.eclipse.org/aspectj/dtd/aspectj.dtd">
+<aspectj>
+    <weaver options="-showWeaveInfo">
+        <include within="com.learning.springboot.springcoreaopweaving.ltwtargets..*"/>
+        <include within="com.learning.springboot.springcoreaopweaving.part02_ltw_fundamentals..*"/>
+    </weaver>
+
+    <aspects>
+        <aspect name="com.learning.springboot.springcoreaopweaving.part02_ltw_fundamentals.LtwWeavingAspect"/>
+    </aspects>
+</aspectj>

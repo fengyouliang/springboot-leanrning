@@ -38,6 +38,7 @@
         <module>springboot-cache</module>
         <module>spring-core-beans</module>
         <module>spring-core-aop</module>
+        <module>spring-core-aop-weaving</module>
         <module>spring-core-events</module>
         <module>spring-core-validation</module>
         <module>spring-core-resources</module>

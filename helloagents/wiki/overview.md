@@ -29,6 +29,7 @@
 | `springboot-cache` | 缓存 | 🚧 | [modules/springboot-cache.md](modules/springboot-cache.md) |
 | `spring-core-beans` | IoC 容器与 Bean | 🚧 | [modules/spring-core-beans.md](modules/spring-core-beans.md) |
 | `spring-core-aop` | AOP 与代理 | 🚧 | [modules/spring-core-aop.md](modules/spring-core-aop.md) |
+| `spring-core-aop-weaving` | AspectJ weaving（LTW/CTW） | 🚧 | [modules/spring-core-aop-weaving.md](modules/spring-core-aop-weaving.md) |
 | `spring-core-events` | 应用事件 | 🚧 | [modules/spring-core-events.md](modules/spring-core-events.md) |
 | `spring-core-validation` | 校验（Validation） | 🚧 | [modules/spring-core-validation.md](modules/spring-core-validation.md) |
 | `spring-core-resources` | 资源抽象与加载 | 🚧 | [modules/spring-core-resources.md](modules/spring-core-resources.md) |
@@ -42,4 +43,3 @@
 - [API 说明](api.md)
 - [数据模型说明](data.md)
 - [变更历史索引](../history/index.md)
-
