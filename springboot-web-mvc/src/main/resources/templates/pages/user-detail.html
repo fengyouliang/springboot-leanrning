@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>用户详情</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<main class="container">
+    <h1 data-testid="page-title">用户详情</h1>
+
+    <div class="flash"
+         data-testid="flash-message"
+         th:if="${flashMessage}"
+         th:text="${flashMessage}">提交成功</div>
+
+    <div class="kv">
+        <div class="k">ID</div>
+        <div class="v" data-testid="user-id" th:text="${user.id}">0</div>
+    </div>
+    <div class="kv">
+        <div class="k">姓名</div>
+        <div class="v" data-testid="user-name" th:text="${user.name}">Alice</div>
+    </div>
+    <div class="kv">
+        <div class="k">Email</div>
+        <div class="v" data-testid="user-email" th:text="${user.email}">alice@example.com</div>
+    </div>
+
+    <p class="hint">
+        <a th:href="@{/pages/users/new}">继续创建</a>
+    </p>
+</main>
+</body>
+</html>

@@ -1,12 +1,18 @@
 # springboot-web-mvc
 
-本模块用于学习 Spring MVC 的常见入门点：**REST Controller**、**参数校验（Validation）**、**统一错误处理（ControllerAdvice）**。
+本模块用于学习 Spring MVC 的常见入门点，并覆盖两条主线：
+
+- **REST API（JSON）主线**：`@RestController`、参数校验（Validation）、统一错误响应（`@RestControllerAdvice`）
+- **传统 MVC（HTML）主线**：`@Controller`、Thymeleaf 页面渲染、表单提交（绑定/校验/回显/PRG）、错误页与内容协商（Accept：HTML vs JSON）
 
 ## 你将学到什么
 
 - 用 `@RestController` 编写 JSON API
 - 用 `@Valid` + `jakarta.validation` 做请求参数校验
 - 用 `@RestControllerAdvice` 统一返回错误响应
+- 用 `@Controller` 返回 viewName / `ModelAndView` 渲染 Thymeleaf 页面
+- 表单提交闭环：`@ModelAttribute` + `BindingResult` + 校验失败回显 + PRG（Post-Redirect-Get）+ Flash Attributes
+- 错误页模板（`templates/error/*`）与 Accept 驱动的响应形态（HTML vs JSON）
 - 对比 `@WebMvcTest`（切片）与 `@SpringBootTest`（全量上下文）的测试体验
 
 ## 前置知识
@@ -49,6 +55,15 @@ curl -X POST http://localhost:8081/api/users \
   -d '{"name":"","email":"not-an-email"}'
 ```
 
+- 访问页面（HTML）：
+
+```bash
+curl -H 'Accept: text/html' http://localhost:8081/pages/ping
+```
+
+- 表单页（建议用浏览器打开）：
+  - `http://localhost:8081/pages/users/new`
+
 ### 测试
 
 ```bash
@@ -57,7 +72,7 @@ mvn -pl springboot-web-mvc test
 
 ## 推荐 docs 阅读顺序
 
-建议按 “入口 → 校验与错误形状 → 异常处理 → 绑定扩展 → 入口增强（拦截器/过滤器）” 的顺序学习：
+建议按 “入口 → REST 主线 → 页面主线 → 常见坑/自测题” 的顺序学习：
 
 （docs 目录页：[`docs/README.md`](docs/README.md)）
 
@@ -65,11 +80,17 @@ mvn -pl springboot-web-mvc test
 2. [统一异常处理与坏输入](docs/part-01-web-mvc/02-exception-handling.md)
 3. [请求绑定与 Converter/Formatter](docs/part-01-web-mvc/03-binding-and-converters.md)
 4. [Interceptor vs Filter：入口与顺序](docs/part-01-web-mvc/04-interceptor-and-filter-ordering.md)
-5. [常见坑清单](docs/appendix/90-common-pitfalls.md)
+5. [传统 MVC 页面渲染入门（Thymeleaf/ViewResolver）](docs/part-02-view-mvc/01-thymeleaf-and-view-resolver.md)
+6. [表单提交闭环（绑定/校验/回显/PRG）](docs/part-02-view-mvc/02-form-binding-validation-prg.md)
+7. [错误页与内容协商（Accept：HTML vs JSON）](docs/part-02-view-mvc/03-error-pages-and-content-negotiation.md)
+8. [常见坑清单](docs/appendix/90-common-pitfalls.md)
 
 对应的可运行实验（先跑后读）：
 - `src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcLabTest.java`（`@WebMvcTest` 切片）
 - `src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcSpringBootLabTest.java`（`@SpringBootTest` 全量）
+- `src/test/java/com/learning/springboot/bootwebmvc/part02_view_mvc/BootWebMvcViewLabTest.java`（页面渲染 MockMvc）
+- `src/test/java/com/learning/springboot/bootwebmvc/part02_view_mvc/BootWebMvcErrorViewLabTest.java`（错误页 + Accept）
+- `src/test/java/com/learning/springboot/bootwebmvc/part02_view_mvc/BootWebMvcViewSpringBootLabTest.java`（页面渲染端到端）
     
 ## 概念 → 在本模块哪里能“看见”
 
@@ -80,6 +101,9 @@ mvn -pl springboot-web-mvc test
 | malformed JSON vs 校验失败 | [docs/part-01/02](docs/part-01-web-mvc/02-exception-handling.md) | `BootWebMvcLabTest#returnsBadRequestWhenJsonIsMalformed` + `BootWebMvcExerciseTest#exercise_handleMalformedJson` | 两类 400 的根因差异 |
 | Converter/Formatter 扩展绑定 | [docs/part-01/03](docs/part-01-web-mvc/03-binding-and-converters.md) | `BootWebMvcExerciseTest#exercise_converterFormatter` | String 如何变成自定义类型 |
 | Interceptor 生效范围与顺序 | [docs/part-01/04](docs/part-01-web-mvc/04-interceptor-and-filter-ordering.md) | `BootWebMvcExerciseTest#exercise_interceptor` | 为什么它只对 `/api/**` 生效 |
+| `@Controller` 返回 viewName | [docs/part-02/01](docs/part-02-view-mvc/01-thymeleaf-and-view-resolver.md) | `MvcPingController` + `ping.html` | 为什么返回 String 却渲染了 HTML |
+| 表单校验回显（BindingResult） | [docs/part-02/02](docs/part-02-view-mvc/02-form-binding-validation-prg.md) | `MvcUserController` + `user-form.html` | 为什么校验失败不会抛异常，而是回到表单页 |
+| 错误页与 Accept | [docs/part-02/03](docs/part-02-view-mvc/03-error-pages-and-content-negotiation.md) | `templates/error/*` + `MvcExceptionHandler` | 为什么同一个错误在浏览器和脚本里长得不一样 |
 
 > 想从机制层理解“校验为什么有时不生效”，可进一步阅读 `spring-core-validation/docs/part-01-validation-core/03-method-validation-proxy.md`（方法参数校验与代理）。
 
@@ -92,13 +116,17 @@ mvn -pl springboot-web-mvc test
 | Lab | `src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcLabTest.java` | `@WebMvcTest` 切片：Controller/校验/错误结构 | ⭐ | 看 `GlobalExceptionHandler` 的错误结构与字段 |
 | Lab | `src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcSpringBootLabTest.java` | `@SpringBootTest`：RANDOM_PORT 下的端到端行为 | ⭐ | 对比切片与全量上下文加载范围 |
 | Exercise | `src/test/java/com/learning/springboot/bootwebmvc/part00_guide/BootWebMvcExerciseTest.java` | 按提示扩展字段/错误响应/测试断言 | ⭐–⭐⭐ | 从“新增字段 + 校验”开始 |
+| Lab | `src/test/java/com/learning/springboot/bootwebmvc/part02_view_mvc/BootWebMvcViewLabTest.java` | 页面渲染：viewName/model/HTML 断言 + 表单回显/redirect | ⭐ | 对照 `MvcUserController` 与 templates 的绑定关系 |
+| Lab | `src/test/java/com/learning/springboot/bootwebmvc/part02_view_mvc/BootWebMvcErrorViewLabTest.java` | 错误页：404/5xx HTML 模板 + Accept=JSON 分支 | ⭐–⭐⭐ | 对照 `templates/error/*` 与 `MvcExceptionHandler` |
+| Lab | `src/test/java/com/learning/springboot/bootwebmvc/part02_view_mvc/BootWebMvcViewSpringBootLabTest.java` | 页面渲染：端到端获取 HTML（真实端口） | ⭐ | 对比 MockMvc 与真实运行差异 |
 
 ## 常见 Debug 路径
 
 - `400 Bad Request`：先看响应体里 `fieldErrors`，再定位到对应 DTO 的校验注解
 - 校验没触发：确认 controller 入参是否带 `@Valid`、是否走到 `GlobalExceptionHandler`
 - JSON 解析失败：优先检查请求体是否是合法 JSON（以及字段名是否匹配）
-- 404：确认路由是否正确（`/api/...`）、是否加了类级别 `@RequestMapping`
+- 页面回显没生效：确认 POST 方法里参数是否为 `@Valid @ModelAttribute` + `BindingResult`（并且 BindingResult 紧跟其后）
+- 404：确认路由是否正确（`/api/...` 或 `/pages/...`），并观察自定义错误页是否生效（`templates/error/404.html`）
 
 ## 扩展练习（可选）
 

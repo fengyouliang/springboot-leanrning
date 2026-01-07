@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>404 - Not Found</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<main class="container" data-testid="error-404">
+    <h1>404 - 页面不存在</h1>
+
+    <p class="hint">
+        path: <span data-testid="error-path" th:text="${path}">/unknown</span>
+    </p>
+
+    <p class="hint">
+        <a th:href="@{/pages/ping}">返回 Ping</a>
+    </p>
+</main>
+</body>
+</html>

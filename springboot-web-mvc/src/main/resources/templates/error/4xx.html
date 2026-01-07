@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>4xx - Client Error</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<main class="container" data-testid="error-4xx">
+    <h1>请求有问题（4xx）</h1>
+
+    <p class="hint">
+        status: <span data-testid="error-status" th:text="${status}">400</span>
+    </p>
+    <p class="hint">
+        path: <span data-testid="error-path" th:text="${path}">/path</span>
+    </p>
+    <p class="hint" th:if="${customMessage}">
+        message: <span data-testid="error-message" th:text="${customMessage}">custom</span>
+    </p>
+
+    <p class="hint">
+        <a th:href="@{/pages/ping}">返回 Ping</a>
+    </p>
+</main>
+</body>
+</html>

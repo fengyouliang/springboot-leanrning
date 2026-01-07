@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>创建用户</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<main class="container">
+    <h1 data-testid="page-title">创建用户</h1>
+
+    <form data-testid="user-create-form"
+          th:action="@{/pages/users}"
+          th:object="${form}"
+          method="post">
+        <div class="field">
+            <label for="name">姓名</label>
+            <input id="name" type="text" th:field="*{name}" data-testid="input-name"/>
+            <div class="error"
+                 data-testid="error-name"
+                 th:if="${#fields.hasErrors('name')}"
+                 th:errors="*{name}">name error</div>
+        </div>
+
+        <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="text" th:field="*{email}" data-testid="input-email"/>
+            <div class="error"
+                 data-testid="error-email"
+                 th:if="${#fields.hasErrors('email')}"
+                 th:errors="*{email}">email error</div>
+        </div>
+
+        <button type="submit" data-testid="submit">提交</button>
+    </form>
+</main>
+</body>
+</html>

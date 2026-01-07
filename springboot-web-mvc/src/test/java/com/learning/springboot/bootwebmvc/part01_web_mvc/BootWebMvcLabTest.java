@@ -53,7 +53,8 @@ class BootWebMvcLabTest {
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Alice\","))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("malformed_json"));
     }
 
     @Test

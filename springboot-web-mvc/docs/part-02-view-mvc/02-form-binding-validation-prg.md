@@ -1,0 +1,111 @@
+# 02：表单提交闭环（@ModelAttribute / BindingResult / 校验回显 / PRG）
+
+<!-- AG-CONTRACT:START -->
+
+## A. 本章定位
+
+- 本章主题：**02：表单提交闭环（@ModelAttribute / BindingResult / 校验回显 / PRG）**
+- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+
+## B. 核心结论
+
+- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+
+## C. 机制主线
+
+本章补齐传统 MVC 最常见的交互：**表单提交**。
+
+- GET 展示表单（form backing object）
+- POST 提交表单（绑定 + 校验）
+- 校验失败：回到原页面并回显错误与用户输入
+- 校验成功：redirect（PRG）到详情页，并使用 flash attribute 提示一次性消息
+
+## 你应该观察到什么（What to observe）
+
+1) GET `/pages/users/new` 返回表单页
+- HTML 中存在表单
+- model 中存在 `form`
+
+2) POST `/pages/users`（非法输入）不会 redirect
+- 仍然返回 `pages/user-form`
+- 页面中出现字段错误信息
+- 已输入的值会回显（避免用户重填）
+
+3) POST `/pages/users`（合法输入）走 PRG
+- 响应是 3xx redirect
+- Location 指向 `/pages/users/{id}`
+- redirect 后页面可展示用户信息与 flash message
+
+## 机制解释（Why）
+
+### 1) 绑定对象：@ModelAttribute
+
+传统表单通常是 `application/x-www-form-urlencoded`，Spring MVC 会把表单字段绑定到 `@ModelAttribute` 对象上。
+
+### 2) 校验：@Valid + BindingResult
+
+对 `@ModelAttribute` 使用 `@Valid` 后，校验结果会写入 `BindingResult`。
+
+关键点：`BindingResult` 必须紧跟在被校验的参数之后，否则校验失败会变成异常流程（更难以做“回显”）。
+
+### 3) PRG：Post-Redirect-Get
+
+成功后 redirect 的原因：
+- 避免浏览器刷新导致重复提交（重复创建）
+- URL 更“资源化”，更适合分享与回退
+
+### 4) Flash Attributes：一次性消息
+
+`RedirectAttributes#addFlashAttribute` 用于跨 redirect 传递一次性消息（提示“创建成功”等），在下一次请求中可读到并展示。
+
+## 在本模块里去哪里看
+
+- Controller：`springboot-web-mvc/src/main/java/com/learning/springboot/bootwebmvc/part02_view_mvc/MvcUserController.java`
+- 表单 DTO：`springboot-web-mvc/src/main/java/com/learning/springboot/bootwebmvc/part02_view_mvc/MvcCreateUserForm.java`
+- 表单模板：`springboot-web-mvc/src/main/resources/templates/pages/user-form.html`
+- 详情模板：`springboot-web-mvc/src/main/resources/templates/pages/user-detail.html`
+
+## D. 源码与断点
+
+- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
+- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+
+## E. 最小可运行实验（Lab）
+
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`BootWebMvcViewLabTest`
+- 建议命令：`mvn -pl springboot-web-mvc test`（或在 IDE 直接运行上面的测试类）
+
+### 复现/验证补充说明（来自原文迁移）
+
+目标是把一个完整闭环跑通并可测试验证：
+
+## 实验入口（先跑再看）
+
+- MockMvc（建议先看这个）：
+  - `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part02_view_mvc/BootWebMvcViewLabTest.java`
+    - `rendersUserFormPage`
+    - `reRendersFormWhenPostIsInvalid`
+    - `redirectsWhenPostIsValid`
+
+## F. 常见坑与边界
+
+- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+
+## G. 小结与下一章
+
+- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
+
+<!-- AG-CONTRACT:END -->
+
+<!-- BOOKIFY:START -->
+
+### 对应 Lab/Test
+
+- Lab：`BootWebMvcViewLabTest`
+- Test file：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part02_view_mvc/BootWebMvcViewLabTest.java`
+
+上一章：[part-02-view-mvc/01-thymeleaf-and-view-resolver.md](01-thymeleaf-and-view-resolver.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-02-view-mvc/03-error-pages-and-content-negotiation.md](03-error-pages-and-content-negotiation.md)
+
+<!-- BOOKIFY:END -->
