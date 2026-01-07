@@ -103,7 +103,7 @@
 
 ## Change History
 
-- [202601071034_all_modules_docs_ag_contract](../../history/2026-01/202601071034_all_modules_docs_ag_contract/) - ✅ 已执行：全模块 docs 升级 A–G 章节契约（每章 A–G + 对应 Lab/Test + 至少 1 个 LabTest），并更新根 README 跨模块入口
+- [202601071034_all_modules_docs_ag_contract](../../history/2026-01/202601071034_all_modules_docs_ag_contract/) - ✅ 已执行：全模块 docs 章节结构整理（A–G 结构 + 对应 Lab/Test 入口块）；后续不再推荐 A–G 作为写作规范/闸门
 - [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过 `scripts/check-docs.sh`
 - [202601061556_spring_core_modules_teaching_rollout](../../history/2026-01/202601061556_spring_core_modules_teaching_rollout/) - ✅ 已执行：清理 docs 正文残留的 `docs/NN` 缩写引用，统一替换为“章节名 + 真实相对路径”的 Markdown 链接，并通过断链检查与教学覆盖检查
 - [202601010649_spring-core-beans-deep-dive](../../history/2026-01/202601010649_spring-core-beans-deep-dive/) - ✅ 已执行：深化 DI/生命周期/PostProcessor/循环依赖/@Configuration/FactoryBean，并补齐坑点与自测题的闭环指引
@@ -120,7 +120,7 @@
 - [202601030731_spring-core-beans-post-processors-bootstrap-source-deepening](../../history/2026-01/202601030731_spring-core-beans-post-processors-bootstrap-source-deepening/) - ✅ 已执行：深化 docs/06 与 docs/12 的源码解析（PostProcessorRegistrationDelegate 算法/annotation processors bootstrap），并新增 “static @Bean BFPP” 最小可运行 Lab
 - [202601030752_spring-core-beans-ordering-programmatic-bpp-deepening](../../history/2026-01/202601030752_spring-core-beans-ordering-programmatic-bpp-deepening/) - ✅ 已执行：把 docs/14 与 docs/25 补成“算法级 + 可复现”版本（排序器规则/分段执行/手工 addBeanPostProcessor 的 list 语义与时机陷阱），并增强 ordering Lab 覆盖 order 数值与 @Order 反例
 - [202601031508_spring-core-beans-docs-coherence](../../history/2026-01/202601031508_spring-core-beans-docs-coherence/) - ✅ 已执行：优化 docs/01-03 连贯性（本章定位/主线 vs 深挖/下一章预告），让 01→02→03 主线阅读更顺畅且不丢知识点
-- [202601032012_spring-core-beans-bookify-docs](../../history/2026-01/202601032012_spring-core-beans-bookify-docs/) - ✅ 已执行：docs 书本化（目录页 + Part 结构 + 全章 A–G 契约 + 上下章导航），并全局修复 docs 内链与模块 README 入口
+- [202601032012_spring-core-beans-bookify-docs](../../history/2026-01/202601032012_spring-core-beans-bookify-docs/) - ✅ 已执行：docs 书本化（目录页 + Part 结构 + 全章结构统一（A–G） + 上下章导航），并全局修复 docs 内链与模块 README 入口
 - [202601032124_spring-core-beans-src-part-grouping](../../history/2026-01/202601032124_spring-core-beans-src-part-grouping/) - ✅ 已执行：src/main 与 src/test 按 docs Part 分组（分包 + testsupport），并同步修复 docs/README/知识库中的源码路径引用
 - [202601041013_spring-core-beans-src-part-naming](../../history/2026-01/202601041013_spring-core-beans-src-part-naming/) - ✅ 已执行：将 src 分组目录命名语义化（partXX → partXX_<topic>），进一步对齐 docs Part 的具名章节域
 - [202601051050_spring_core_beans_deepen](../../history/2026-01/202601051050_spring_core_beans_deepen/) - ✅ 已执行：补齐 docs 目录页索引与跳读地图，新增类型转换/泛型匹配章节，并新增 component-scan/profile/optional injection/type conversion Labs 形成可复现实验闭环

@@ -68,8 +68,8 @@
 - [202601030731_spring-core-beans-post-processors-bootstrap-source-deepening](2026-01/202601030731_spring-core-beans-post-processors-bootstrap-source-deepening/) - spring-core-beans：继续深化 docs/06/12（PostProcessors 算法与注解基础设施 bootstrap），新增 static @Bean BFPP 最小复现 Lab
 - [202601030752_spring-core-beans-ordering-programmatic-bpp-deepening](2026-01/202601030752_spring-core-beans-ordering-programmatic-bpp-deepening/) - spring-core-beans：补齐 docs/14/25（Ordering + programmatic BPP 注册）源码算法级解析，并增强 ordering Lab 覆盖 order 数值与 @Order 反例
 - [202601031327_first-pass-content-merge-into-existing-docs](2026-01/202601031327_first-pass-content-merge-into-existing-docs/) - spring-core-beans：将 First Pass 的最小实验入口融入 docs/00 与 docs/99（不新增独立文件）
-- [202601031508_spring-core-beans-docs-coherence](2026-01/202601031508_spring-core-beans-docs-coherence/) - spring-core-beans：优化 docs/01-03 连贯性（章节契约/桥接段/下一章预告），让 01→02→03 主线阅读更顺畅
-- [202601032012_spring-core-beans-bookify-docs](2026-01/202601032012_spring-core-beans-bookify-docs/) - spring-core-beans：docs 书本化（目录页 + Part 结构 + 全章 A–G 契约 + 上下章导航），并全局修复内链与 README 入口
+- [202601031508_spring-core-beans-docs-coherence](2026-01/202601031508_spring-core-beans-docs-coherence/) - spring-core-beans：优化 docs/01-03 连贯性（桥接段/下一章预告/阅读结构统一），让 01→02→03 主线阅读更顺畅
+- [202601032012_spring-core-beans-bookify-docs](2026-01/202601032012_spring-core-beans-bookify-docs/) - spring-core-beans：docs 书本化（目录页 + Part 结构 + 全章结构统一（A–G） + 上下章导航），并全局修复内链与 README 入口
 - [202601032124_spring-core-beans-src-part-grouping](2026-01/202601032124_spring-core-beans-src-part-grouping/) - spring-core-beans：src/main 与 src/test 按 docs Part 分组（分包 + testsupport），并同步修复文档源码路径引用
 - [202601041013_spring-core-beans-src-part-naming](2026-01/202601041013_spring-core-beans-src-part-naming/) - spring-core-beans：将分组目录命名语义化（partXX → partXX_<topic>），进一步对齐 docs Part
 - [202601041046_spring-core-part-structure-sync](2026-01/202601041046_spring-core-part-structure-sync/) - 将 spring-core-beans 的 Part 结构（docs + src/main + src/test）同步到其他 spring-core-* 模块，并修复跨模块引用与路径一致性问题
@@ -88,4 +88,4 @@
 - [202601061556_spring_core_modules_teaching_rollout](2026-01/202601061556_spring_core_modules_teaching_rollout/) - spring-core-*：推广教学化文档规范（目录页/Part 编号/章节入口块/清理 docs/NN 缩写引用）并新增自检闸门脚本，保证全量断链=0、min-labs=2
 - [202601062024_springboot_modules_teaching_rollout](2026-01/202601062024_springboot_modules_teaching_rollout/) - springboot-*：推广教学化文档规范（docs/README Markdown 链接目录页 SSOT + guide/appendix 可跑入口块），并扩展自检闸门覆盖 springboot，同时补齐 min-labs=2（新增 5 个 LabTest）
 - [202601062218_all_modules_docs_bookify](2026-01/202601062218_all_modules_docs_bookify/) - 全模块：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过闸门与抽样回归
-- [202601071034_all_modules_docs_ag_contract](2026-01/202601071034_all_modules_docs_ag_contract/) - 全模块：升级 A–G 章节契约（每章 A–G + 对应 Lab/Test + 至少 1 个 LabTest），新增契约闸门并更新根 README 入口
+- [202601071034_all_modules_docs_ag_contract](2026-01/202601071034_all_modules_docs_ag_contract/) - 全模块：整理 docs 章节结构（A–G + 对应 Lab/Test 入口块）；后续不再推荐 A–G 作为写作规范/闸门
