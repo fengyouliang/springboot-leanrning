@@ -19,5 +19,9 @@
 # Logs
 *.log
 
+# Python
+__pycache__/
+*.py[cod]
+
 # Local Maven repo (optional)
 .m2/
