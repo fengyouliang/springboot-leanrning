@@ -45,6 +45,11 @@
 | 202601062024 | springboot_modules_teaching_rollout | Enhancement | ✅Completed | [202601062024_springboot_modules_teaching_rollout](2026-01/202601062024_springboot_modules_teaching_rollout/) |
 | 202601062218 | all_modules_docs_bookify | Enhancement | ✅Completed | [202601062218_all_modules_docs_bookify](2026-01/202601062218_all_modules_docs_bookify/) |
 | 202601071034 | all_modules_docs_ag_contract | Enhancement | ✅Completed | [202601071034_all_modules_docs_ag_contract](2026-01/202601071034_all_modules_docs_ag_contract/) |
+| 202601071635 | springboot-web-mvc-advanced-deep-dive | Enhancement | ✅Completed | [202601071635_springboot-web-mvc-advanced-deep-dive](2026-01/202601071635_springboot-web-mvc-advanced-deep-dive/) |
+| 202601080925 | springboot-web-mvc-deep-dive-part08-security-observability | Enhancement | ✅Completed | [202601080925_springboot-web-mvc-deep-dive-part08-security-observability](2026-01/202601080925_springboot-web-mvc-deep-dive-part08-security-observability/) |
+| 202601081108 | springboot-web-mvc-deepen-more | Enhancement | ✅Completed | [202601081108_springboot-web-mvc-deepen-more](2026-01/202601081108_springboot-web-mvc-deepen-more/) |
+| 202601081308 | springboot-web-mvc-deepen-even-more | Enhancement | ✅Completed | [202601081308_springboot-web-mvc-deepen-even-more](2026-01/202601081308_springboot-web-mvc-deepen-even-more/) |
+| 202601081505 | springboot-web-mvc-deepen-v3 | Enhancement | ✅Completed | [202601081505_springboot-web-mvc-deepen-v3](2026-01/202601081505_springboot-web-mvc-deepen-v3/) |
 
 ---
 
@@ -89,3 +94,8 @@
 - [202601062024_springboot_modules_teaching_rollout](2026-01/202601062024_springboot_modules_teaching_rollout/) - springboot-*：推广教学化文档规范（docs/README Markdown 链接目录页 SSOT + guide/appendix 可跑入口块），并扩展自检闸门覆盖 springboot，同时补齐 min-labs=2（新增 5 个 LabTest）
 - [202601062218_all_modules_docs_bookify](2026-01/202601062218_all_modules_docs_bookify/) - 全模块：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过闸门与抽样回归
 - [202601071034_all_modules_docs_ag_contract](2026-01/202601071034_all_modules_docs_ag_contract/) - 全模块：整理 docs 章节结构（A–G + 对应 Lab/Test 入口块）；后续不再推荐 A–G 作为写作规范/闸门
+- [202601071635_springboot-web-mvc-advanced-deep-dive](2026-01/202601071635_springboot-web-mvc-advanced-deep-dive/) - springboot-web-mvc：新增 advanced deep dive（机制内核/契约与 Jackson/真实 HTTP/Async/SSE/排障）+ 对应 docs Part 03–07 与 Labs
+- [202601080925_springboot-web-mvc-deep-dive-part08-security-observability](2026-01/202601080925_springboot-web-mvc-deep-dive-part08-security-observability/) - springboot-web-mvc：新增知识地图、ProblemDetail 对照、ETag/304、Part 08（Security/Observability）与对应 Labs/排障升级
+- [202601081108_springboot-web-mvc-deepen-more](2026-01/202601081108_springboot-web-mvc-deepen-more/) - springboot-web-mvc：再深化一层（ExceptionResolvers 主线、Trace：Filter/Interceptor sync+async lifecycle、条件请求对照（Last-Modified/ETag Filter）、DeferredResult timeout/fallback、坑点清单与测试入口绑定）
+- [202601081308_springboot-web-mvc-deepen-even-more](2026-01/202601081308_springboot-web-mvc-deepen-even-more/) - springboot-web-mvc：补齐导读/自测/坑点占位，并新增工程化边界 Labs（mass assignment 防护、ControllerAdvice @Order 优先级）
+- [202601081505_springboot-web-mvc-deepen-v3](2026-01/202601081505_springboot-web-mvc-deepen-v3/) - springboot-web-mvc：深化 v3（ControllerAdvice 匹配规则可复现、binder suppressedFields 证据链、MessageConverter 选择可观测、docs Part 03 新增章节与排障升级）

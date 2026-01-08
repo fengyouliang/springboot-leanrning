@@ -10,6 +10,11 @@
 - `spring-core-events`：补齐事务事件最小闭环（`@TransactionalEventListener` AFTER_COMMIT/rollback）Lab，并在 docs/07 增加对应入口块；测试依赖补齐 `spring-tx`。
 - `springboot-web-mvc`：补齐传统 MVC（HTML）页面渲染主线（Thymeleaf/表单提交/校验回显/PRG/错误页/Accept 内容协商），新增对应 docs 与 MockMvc + 端到端 Labs，并补齐 API 侧 malformed JSON/type mismatch 的统一错误体。
 - `springboot-web-mvc`：安全基线补充：模板输出默认使用转义（`th:text`），错误页仅展示必要信息，不输出堆栈与敏感细节（为后续接入安全模块预留空间）。
+- `springboot-web-mvc`：新增 advanced deep dive：补齐 MVC 机制内核（DispatcherServlet/ArgumentResolver/MessageConverter）、REST 契约与 Jackson（406/415/strict media type）、真实 HTTP 场景（CORS/上传下载/静态资源）、Async/SSE 与排障工具箱，并新增对应 Labs/章节入口。
+- `springboot-web-mvc`：进一步深化：新增知识地图、绑定/校验分支补齐（@ModelAttribute/BindException）、ProblemDetail 对照、ETag/304、以及 Part 08（Security/Observability：401/403/CSRF + metrics）与对应 Labs/排障升级。
+- `springboot-web-mvc`：再深化一层：新增 ExceptionResolvers 主线章节、Filter/Interceptor（sync+async lifecycle）可断言 Lab、条件请求对照（静态资源 If-Modified-Since/304 + ShallowEtagHeaderFilter）、以及 DeferredResult（timeout/fallback）测试闭环；同步补齐“坑点清单 → 可复现测试入口”绑定。
+- `springboot-web-mvc`：继续深化：补齐导读/自测/Part01+Part02 的“坑点待补齐”占位内容，并新增两组工程化边界 Labs：`@InitBinder#setAllowedFields` 防 mass assignment、`@ControllerAdvice` 的 `@Order` 优先级可复现验证。
+- `springboot-web-mvc`：深化 v3：新增 `@ControllerAdvice` 匹配规则可复现 Labs（`basePackages/annotations/assignableTypes` + selector 并集 OR 语义 + `@Order` 叠加），新增 binder `BindingResult#getSuppressedFields()` 证据链，以及 HttpMessageConverter 选择可观测（`ResponseBodyAdvice` 写入 `selectedConverterType/selectedContentType` 到响应头）与对应 docs 章节/排障清单升级。
 
 ### Removed
 - `scripts`：移除章节契约相关脚本：`scripts/check-chapter-contract.py`、`scripts/ag-contract-docs.py`（不再推荐 A–G 作为写作规范，也不再提供相关闸门/自检工具）。
