@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import com.learning.springboot.bootwebmvc.part08_security_observability.SecurityConfig;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -15,7 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = {MvcErrorDemoController.class, MvcUserController.class})
-@Import(MvcExceptionHandler.class)
+@Import({MvcExceptionHandler.class, SecurityConfig.class})
 class BootWebMvcErrorViewLabTest {
 
     @Autowired

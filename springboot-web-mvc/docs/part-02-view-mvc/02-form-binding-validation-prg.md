@@ -91,7 +91,40 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 1) BindingResult 位置不对，导致“回显链路”断掉
+
+关键规则：`BindingResult` 必须紧跟在被校验的 `@ModelAttribute` 参数之后。
+
+否则校验失败会直接走异常流程（而不是回到页面渲染），你会观察到：
+- 页面没有错误回显
+- 甚至直接变成 400/错误页
+
+对照证据：`BootWebMvcViewLabTest#reRendersFormWhenPostIsInvalid`
+
+### 2) 校验失败后 redirect（错误做法）
+
+校验失败通常不应该 redirect，否则：
+- 错误信息会丢失（除非你做额外的 flash 传递）
+- 用户输入也无法自然回显（体验差）
+
+正确做法：失败时返回同一个 form view，保留 model + errors。
+
+对照证据：`BootWebMvcViewLabTest#reRendersFormWhenPostIsInvalid`
+
+### 3) PRG 的“Get”阶段忘了消费 flash attribute
+
+成功后 redirect（PRG）依赖 flash attribute 传递一次性消息。
+如果你在 GET 详情页没有读取/渲染该消息，就会出现：
+- 创建成功但用户没看到提示
+- 或提示信息永远显示/永远不显示
+
+对照证据：`BootWebMvcViewLabTest#redirectsWhenPostIsValid`
+
+### 4) 只用手工点浏览器，不写测试
+
+表单闭环一旦不写测试，很容易在重构 controller/template 时悄悄断掉（尤其是错误回显与 redirect）。
+
+建议：以 MockMvc 断言“viewName + model attribute + redirect location”为主，把 UI 行为固化。
 
 ## G. 小结与下一章
 

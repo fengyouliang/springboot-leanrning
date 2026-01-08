@@ -61,7 +61,46 @@ Spring MVC 的异常可能来自不同阶段：
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+把“统一异常处理”做成工程闭环时，最容易翻车的不是写不出 `@ExceptionHandler`，而是 **分支没分清/匹配没看懂/测试没锁住**。
+
+### 1) 400 不是一个原因（先分类再处理）
+
+同样是 400，常见根因至少三类（对应不同阶段与断点）：
+
+- **JSON 解析失败**（body 路径）→ `HttpMessageNotReadableException` → `malformed_json`
+- **类型不匹配**（binder/param 路径）→ `MethodArgumentTypeMismatchException` → `type_mismatch`
+- **校验失败**（validation）→ `MethodArgumentNotValidException`（@RequestBody）或 `BindException`（@ModelAttribute）→ `validation_failed`
+
+建议做法：先用测试把三类分开固化（status + message + fieldErrors），再谈“统一错误体”。
+
+### 2) @WebMvcTest 里“看不到你的错误体”
+
+如果你在 slice 测试里没有显式纳入对应的 `@ControllerAdvice`（例如 `@Import(GlobalExceptionHandler)`），你看到的可能是 MVC 默认行为，而不是你期望的契约。
+
+建议：在 LabTest 里显式 `@Import` 你的 advice，避免“偶然生效”。
+
+### 3) ControllerAdvice 的匹配规则（为什么我的 advice 不生效）
+
+常见原因：
+
+- `@RestControllerAdvice(basePackages = ...)` 的包范围不包含你的 controller
+- `annotations/assignableTypes` 等 selector 没命中（你以为“全局”，但实际上只作用于某些 controller 类型）
+- 多个 selector 的组合是“并集（OR）”语义：你以为自己在“再收敛范围”，实际上可能在“扩大适用范围”
+- controller 在另一个 module/package，被 slice 测试排除
+- 你处理的异常类型不对（异常发生在 converter/binder 阶段，而不是你以为的业务异常）
+
+建议：第一步永远是拿证据——用 `MvcResult#getResolvedException()` 固定异常类型，再回头调整 `@ExceptionHandler`。
+
+本模块提供了可复现证据链：
+- Lab：`BootWebMvcAdviceMatchingLabTest`（覆盖 selector：basePackages / annotations / assignableTypes，并包含与 @Order 叠加的对照）
+- 延伸阅读：Part 03 - Internals 的 `05-controlleradvice-matching-and-ordering.md`
+
+### 4) 两个 advice 都能处理时，谁生效（@Order）
+
+当两个 `@ControllerAdvice` 都能处理同一异常时，优先级由 `@Order` 决定（数值越小优先级越高）。
+
+本模块提供了可复现证据链：
+- Lab：`BootWebMvcAdviceOrderLabTest`（断言高优先级 advice 生效）
 
 ## G. 小结与下一章
 
@@ -74,8 +113,10 @@ Spring MVC 的异常可能来自不同阶段：
 ### 对应 Lab/Test
 
 - Lab：`BootWebMvcLabTest`
+- Lab：`BootWebMvcAdviceOrderLabTest`
+- Lab：`BootWebMvcAdviceMatchingLabTest`
 - Exercise：`BootWebMvcExerciseTest`
-- Test file：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcLabTest.java` / `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part00_guide/BootWebMvcExerciseTest.java`
+- Test file：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcLabTest.java` / `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part09_advice_order/BootWebMvcAdviceOrderLabTest.java` / `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part10_advice_matching/BootWebMvcAdviceMatchingLabTest.java` / `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part00_guide/BootWebMvcExerciseTest.java`
 
 上一章：[part-01-web-mvc/01-validation-and-error-shaping.md](01-validation-and-error-shaping.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-01-web-mvc/03-binding-and-converters.md](03-binding-and-converters.md)
 

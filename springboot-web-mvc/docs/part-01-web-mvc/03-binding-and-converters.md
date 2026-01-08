@@ -18,24 +18,73 @@
 
 ## 你应该观察到什么
 
+同样是“请求不合法”，但它们发生在不同阶段、对应不同异常（这决定了你应该从哪里排查）：
+
+- **JSON 解析失败**（body → Java 失败）：典型是 `HttpMessageNotReadableException`
+- **校验失败**（`@Valid`）：典型是 `MethodArgumentNotValidException`（`@RequestBody`）或 `BindException`（`@ModelAttribute`）
+- **类型不匹配**（String → 目标类型失败）：典型是 `MethodArgumentTypeMismatchException`
+
+本模块的目标是：把这些分支都“塑形”为可控的响应（例如 `ApiError`），并用测试锁住它。
+
 ## 机制解释（Why）
 
-你可以把请求绑定理解为两条路径：
+你可以把“请求绑定”理解为两条路径（这也是排障时最重要的第一步：**先判断走哪条路**）：
 
 1) **请求体（body）**：由 message converter 完成（JSON → Java）
 2) **路径/查询参数（path/query）**：由 conversion service 完成（String → Java）
 
 Converter/Formatter 属于第二条路径：它让 Spring MVC 知道怎么把字符串转换成你的领域类型。
 
+## @RequestBody vs @ModelAttribute：它们到底差在哪
+
+| 维度 | `@RequestBody`（body 路径） | `@ModelAttribute`（binder 路径） |
+| --- | --- | --- |
+| 输入来源 | 请求体（JSON/XML 等） | path/query/form 参数（默认） |
+| 关键组件 | `HttpMessageConverter` | `DataBinder` + `ConversionService` |
+| 常见异常 | `HttpMessageNotReadableException` | `BindException` / `MethodArgumentTypeMismatchException` |
+| 校验异常（无 BindingResult 时） | `MethodArgumentNotValidException` | `BindException`（常见） |
+| 常见误区 | 把 415/400 当成 controller 问题 | 以为加了约束注解就一定触发校验 |
+
+如果你遇到 400：不要直接去 controller 里打印日志。先用测试或断点确认它属于哪条路径。
+
+## @InitBinder：它的价值不是“花活”，而是边界
+
+`@InitBinder` 的常见用途（面向真实工程）：
+- **输入收敛**：例如 trim 空白、统一日期格式、注册局部 converter/formatter
+- **绑定边界**：例如设置 allowed/disallowed fields，降低“批量绑定（mass assignment）”风险
+- **错误信息可控**：让错误更可读、更可定位（结合统一错误响应）
+
+本模块提供了一个可复现证据链：在 binder 路径提交表单时，即使携带了 `admin=true`，也不会被绑定（因为 controller 的 `@InitBinder` 设置了 allowedFields 白名单）。
+
+- 证据链：`BootWebMvcBindingDeepDiveLabTest#preventsMassAssignmentViaInitBinderAllowedFields`
+
+进一步（更适合排障）：Spring 6.2+ 的 `BindingResult#getSuppressedFields()` 可以把“被阻止绑定字段”变成可观测证据。本模块提供了对应的 debug endpoint 与断言：
+
+- endpoint：`POST /api/advanced/binding/mass-assignment-debug`
+- 证据链：`BootWebMvcBindingDeepDiveLabTest#exposesSuppressedFieldsAsEvidenceWhenBindingBlockedFields`
+
 ## D. 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
+推荐断点（按路径）：
+
+- body 路径（`@RequestBody`）：
+  - `RequestResponseBodyMethodProcessor#resolveArgument`
+  - `AbstractMessageConverterMethodArgumentResolver#readWithMessageConverters`
+- binder 路径（`@ModelAttribute` / `@RequestParam` / `@PathVariable`）：
+  - `ServletModelAttributeMethodProcessor#resolveArgument`
+  - `WebDataBinder#bind`
+  - `DataBinder#validate`
+- 统一异常塑形：
+  - `ExceptionHandlerExceptionResolver`
+
 ## E. 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`BootWebMvcLabTest`
+- Lab：`BootWebMvcBindingDeepDiveLabTest`
 - 建议命令：`mvn -pl springboot-web-mvc test`（或在 IDE 直接运行上面的测试类）
 
 ### 复现/验证补充说明（来自原文迁移）
@@ -56,11 +105,14 @@ Converter/Formatter 属于第二条路径：它让 Spring MVC 知道怎么把字
 
 ## Debug 建议
 
-- 绑定失败时先确认“走的是哪条路径”（body 还是 path/query），不要在错误的地方加断点。
+- 绑定失败时先确认“走的是哪条路径”（body 还是 binder），不要在错误的地方加断点。
+- 建议优先用测试把分支固化出来：400 并不等于校验失败，也可能是解析失败或类型不匹配。
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+- DTO 上写了约束注解，但 controller 入参没加 `@Valid`：校验不会触发。
+- `@ModelAttribute` 的校验失败常见是 `BindException`，不要只处理 `MethodArgumentNotValidException`。
+- 400 不是一个原因：建议把 **解析失败 / 类型不匹配 / 校验失败** 三类错误响应区分开（至少 message 不同）。
 
 ## G. 小结与下一章
 
@@ -73,8 +125,9 @@ Converter/Formatter 属于第二条路径：它让 Spring MVC 知道怎么把字
 ### 对应 Lab/Test
 
 - Lab：`BootWebMvcLabTest`
+- Lab：`BootWebMvcBindingDeepDiveLabTest`
 - Exercise：`BootWebMvcExerciseTest`
-- Test file：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcLabTest.java` / `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part00_guide/BootWebMvcExerciseTest.java`
+- Test file：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcLabTest.java` / `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcBindingDeepDiveLabTest.java` / `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part00_guide/BootWebMvcExerciseTest.java`
 
 上一章：[part-01-web-mvc/02-exception-handling.md](02-exception-handling.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-01-web-mvc/04-interceptor-and-filter-ordering.md](04-interceptor-and-filter-ordering.md)
 

@@ -109,4 +109,76 @@ class BootWebMvcExerciseTest {
                         """)
                 .isFalse();
     }
+
+    @Test
+    @Disabled("练习：实现/调整 @ClientIp ArgumentResolver，并用测试固定解析规则")
+    void exercise_clientIpArgumentResolver() {
+        assertThat(true)
+                .as("""
+                        练习：实现/调整 @ClientIp ArgumentResolver，并用测试固定解析规则。
+
+                        目标：把“Client IP 从哪里来”做成可解释、可回归的行为（不要靠日志猜）。
+
+                        下一步（建议顺序）：
+                        1) 阅读 `BootWebMvcInternalsLabTest`，先看断言，再看实现。
+                        2) 在 `ClientIpArgumentResolver` 中调整解析策略（示例：优先 X-Forwarded-For；为空时回退 remoteAddr）。
+                        3) 写/改 MockMvc 测试，固定以下场景：
+                           - `X-Forwarded-For: 1.2.3.4, 5.6.7.8` 时取第一个
+                           - 不带 `X-Forwarded-For` 时取 remoteAddr
+
+                        参考：
+                        - `springboot-web-mvc/src/main/java/com/learning/springboot/bootwebmvc/part03_internals/ClientIpArgumentResolver.java`
+                        - `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part03_internals/BootWebMvcInternalsLabTest.java`
+                        """)
+                .isFalse();
+    }
+
+    @Test
+    @Disabled("练习：strict JSON 下把“未知字段名”写进 ApiError.fieldErrors，并写测试固定")
+    void exercise_strictJsonUnknownFieldErrorDetails() {
+        assertThat(true)
+                .as("""
+                        练习：strict JSON 下把“未知字段名”写进 ApiError.fieldErrors，并写测试固定。
+
+                        背景：当前 strict media type 触发未知字段时会走 `malformed_json`，但 fieldErrors 为空。
+                        目标：让调用方能明确看到“哪个字段多出来了”，便于排障。
+
+                        下一步：
+                        1) 复现现状：运行 `BootWebMvcContractJacksonLabTest#strictMediaTypeRejectsUnknownFields`。
+                        2) 在 `AdvancedApiExceptionHandler#handleMalformedJson` 中，尝试从 `HttpMessageNotReadableException` 提取根因信息（常见是 Jackson 的 UnknownProperty 异常）。
+                        3) 把未知字段名放入 `ApiError.fieldErrors`（例如 key="extra", value="未知字段"）。
+                        4) 为 strict 用例补充断言：`$.fieldErrors.extra` 存在。
+
+                        参考：
+                        - `springboot-web-mvc/src/main/java/com/learning/springboot/bootwebmvc/part04_contract/AdvancedApiExceptionHandler.java`
+                        - `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part04_contract/BootWebMvcContractJacksonLabTest.java`
+                        """)
+                .isFalse();
+    }
+
+    @Test
+    @Disabled("练习：文件不存在时返回 404 + ApiError（而不是默认错误体），并写测试固定")
+    void exercise_fileNotFoundReturnsApiError() {
+        assertThat(true)
+                .as("""
+                        练习：文件不存在时返回 404 + ApiError（而不是默认错误体），并写测试固定。
+
+                        目标：把“资源不存在”也纳入可控错误契约（便于前端/调用方统一处理）。
+
+                        下一步：
+                        1) 为 `GET /api/advanced/files/{id}` 增加一个找不到文件的测试：
+                           - 请求一个不存在的 id（例如 999）
+                           - 断言 status=404，且返回 `ApiError` 形状（至少包含 message）
+                        2) 选择一种实现方式：
+                           - 在 `InMemoryFileStore#getRequired` 抛出你自定义的异常（或 `ResponseStatusException`）
+                           - 在 `AdvancedApiExceptionHandler` 中新增对该异常的处理，返回 `ApiError(message="file_not_found")`
+                        3) 确保不会影响现有上传/下载闭环测试。
+
+                        参考：
+                        - `springboot-web-mvc/src/main/java/com/learning/springboot/bootwebmvc/part05_real_world/InMemoryFileStore.java`
+                        - `springboot-web-mvc/src/main/java/com/learning/springboot/bootwebmvc/part04_contract/AdvancedApiExceptionHandler.java`
+                        - `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part05_real_world/BootWebMvcRealWorldHttpLabTest.java`
+                        """)
+                .isFalse();
+    }
 }

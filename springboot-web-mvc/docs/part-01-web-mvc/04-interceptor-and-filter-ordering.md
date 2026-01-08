@@ -35,8 +35,8 @@
 
 ## E. 最小可运行实验（Lab）
 
-- 本章未显式引用 LabTest，先注入模块默认 LabTest 作为“合规兜底入口”（后续可逐章细化）。
-- Lab：`BootWebMvcErrorViewLabTest` / `BootWebMvcLabTest`
+- 本章用“事件序列”把顺序变成可断言证据：
+- Lab：`BootWebMvcTraceLabTest`（Filter vs Interceptor 的相对位置 + async lifecycle 对照）
 - 建议命令：`mvn -pl springboot-web-mvc test`（或在 IDE 直接运行上面的测试类）
 
 ### 复现/验证补充说明（来自原文迁移）
@@ -53,7 +53,9 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+- 把“顺序问题”当成“业务问题”：很多 401/403/302/304/406 并不在 controller 内发生，先确认你处于 Filter 还是 Interceptor 还是 MessageConverter 阶段。
+- 只用 Interceptor 解决跨域/认证：CORS 与认证通常发生在 Filter（尤其是 Security FilterChain）层，Interceptor 更适合做“靠近 handler 的增强”（计时/审计/统一 header）。
+- async 场景回调缺失：异步请求第一次 dispatch 可能不触发 `postHandle/afterCompletion`，要结合 `afterConcurrentHandlingStarted` 与二次 dispatch 理解（详见下一章）。
 
 ## G. 小结与下一章
 
@@ -66,9 +68,10 @@
 ### 对应 Lab/Test
 
 - Lab：`BootWebMvcErrorViewLabTest` / `BootWebMvcLabTest`
+- Lab：`BootWebMvcTraceLabTest`
 - Exercise：`BootWebMvcExerciseTest`
 - Test file：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part00_guide/BootWebMvcExerciseTest.java`
 
-上一章：[part-01-web-mvc/03-binding-and-converters.md](03-binding-and-converters.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-02-view-mvc/01-thymeleaf-and-view-resolver.md](../part-02-view-mvc/01-thymeleaf-and-view-resolver.md)
+上一章：[part-01-web-mvc/03-binding-and-converters.md](03-binding-and-converters.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-01-web-mvc/05-interceptor-async-lifecycle.md](05-interceptor-async-lifecycle.md)
 
 <!-- BOOKIFY:END -->

@@ -82,6 +82,6 @@
 - Lab：`BootWebMvcViewLabTest` / `BootWebMvcViewSpringBootLabTest`
 - Test file：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part02_view_mvc/BootWebMvcViewLabTest.java` / `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part02_view_mvc/BootWebMvcViewSpringBootLabTest.java`
 
-上一章：[part-01-web-mvc/04-interceptor-and-filter-ordering.md](../part-01-web-mvc/04-interceptor-and-filter-ordering.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-02-view-mvc/02-form-binding-validation-prg.md](02-form-binding-validation-prg.md)
+上一章：[part-01-web-mvc/05-interceptor-async-lifecycle.md](../part-01-web-mvc/05-interceptor-async-lifecycle.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-02-view-mvc/02-form-binding-validation-prg.md](02-form-binding-validation-prg.md)
 
 <!-- BOOKIFY:END -->

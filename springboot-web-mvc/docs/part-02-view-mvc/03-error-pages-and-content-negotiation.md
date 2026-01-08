@@ -82,7 +82,41 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 1) 404 的来源不同：路由 404 vs 业务 404
+
+- **路由 404**：根本没有匹配到 handler（controller 方法不会执行）
+  - 这类 404 更依赖 Boot 的错误页模板（`error/404.html`）
+  - 对照证据：`BootWebMvcErrorViewLabTest#returnsCustom404HtmlPageForUnknownRoute`
+- **业务 404**：handler 执行了，但你主动返回 404（例如找不到资源）
+  - 这类 404 更依赖你的业务异常/契约（ApiError/ProblemDetail）
+
+先分清来源，才能知道该打断点在 HandlerMapping 还是在 controller/exception handler。
+
+### 2) 浏览器的 Accept 不是“只有 text/html”
+
+真实浏览器通常会带一个很长的 Accept（包含 `text/html`、`application/xhtml+xml`、`*/*` 等）。
+如果你写了过于严格的判断（例如只等于 `text/html`），可能会出现：
+- 浏览器访问却返回 JSON
+- 或 API 调用却被当成页面渲染
+
+建议做法：
+- controller mapping 用 `produces` 明确约束（API vs 页面）
+- 错误处理尽量以“可解释的规则”实现，并用测试固化
+
+### 3) @WebMvcTest 与端到端行为差异
+
+错误页模板、静态资源链路等，在 slice 测试与端到端测试中可能存在差异：
+- slice：更快、更适合固定 handler 行为与视图名
+- 端到端：更适合验证模板解析/错误页是否真的生效
+
+对照证据：
+- slice：`BootWebMvcErrorViewLabTest`
+- 端到端：`BootWebMvcViewSpringBootLabTest`
+
+### 4) Security 介入后错误页“看起来不对”
+
+如果错误发生在 FilterChain（例如 401/403），它可能不会走到 MVC 的错误页渲染。
+排障顺序应优先从 FilterChainProxy/ExceptionTranslationFilter 入手（详见 Part 08）。
 
 ## G. 小结与下一章
 
