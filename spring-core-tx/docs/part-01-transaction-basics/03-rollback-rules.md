@@ -38,6 +38,7 @@ Spring 事务默认回滚规则经常让人困惑：
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreTxLabTest`
+- Lab：`SpringCoreTxRollbackRulesLabTest`（Runtime vs Checked + rollbackFor/noRollbackFor）
 - 建议命令：`mvn -pl spring-core-tx test`（或在 IDE 直接运行上面的测试类）
 
 ### 复现/验证补充说明（来自原文迁移）
@@ -51,6 +52,14 @@ Spring 事务默认回滚规则经常让人困惑：
   - 对应断言：`SpringCoreTxLabTest#checkedExceptionsDoNotRollbackByDefault`
 - `insertThenThrowCheckedWithRollback()`：加了 `@Transactional(rollbackFor = ...)` 后 **会回滚**
   - 对应断言：`SpringCoreTxLabTest#rollbackForCheckedExceptionsCanBeConfigured`
+
+如果你想把“规则矩阵”固化成更直观的对照（避免只看单个方法），建议再跑：
+
+- `SpringCoreTxRollbackRulesLabTest`：
+  - `runtimeExceptionRollsBackByDefault`：RuntimeException 默认回滚
+  - `checkedExceptionCommitsByDefault`：CheckedException 默认提交
+  - `checkedExceptionRollsBackWhenRollbackForIsSpecified`：`rollbackFor` 覆盖默认规则
+  - `runtimeExceptionCommitsWhenNoRollbackForIsSpecified`：`noRollbackFor` 覆盖默认规则
 
 ## F. 常见坑与边界
 
@@ -67,6 +76,7 @@ Spring 事务默认回滚规则经常让人困惑：
 ### 对应 Lab/Test
 
 - Lab：`SpringCoreTxLabTest`
+- Lab：`SpringCoreTxRollbackRulesLabTest`
 
 上一章：[02-transactional-proxy](02-transactional-proxy.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[04-propagation](04-propagation.md)
 

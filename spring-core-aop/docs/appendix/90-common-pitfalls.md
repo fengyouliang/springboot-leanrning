@@ -35,6 +35,7 @@
 - 章节：见 [03. self-invocation](../part-01-proxy-fundamentals/03-self-invocation.md)
 - 解决：抽到另一个 bean；或 self 注入/`ObjectProvider`；或 exposeProxy（进阶，见 [05. expose-proxy](../part-01-proxy-fundamentals/05-expose-proxy.md)）
 - 对应 Lab：`SpringCoreAopLabTest#selfInvocationDoesNotTriggerAdviceForInnerMethod`
+- 对应 Lab（exposeProxy 对照）：`SpringCoreAopExposeProxyLabTest#exposeProxyAllowsSelfInvocationToTriggerAdvice`
 - 推荐断点：`JdkDynamicAopProxy#invoke` / `CglibAopProxy.DynamicAdvisedInterceptor#intercept`
 
 ## 坑 2：JDK 代理导致“按实现类拿不到 bean”

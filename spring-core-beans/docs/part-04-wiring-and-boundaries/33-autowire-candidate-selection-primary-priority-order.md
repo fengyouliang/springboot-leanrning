@@ -39,6 +39,7 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
 
 - `@Qualifier`：我明确指定要哪个（最直观，强确定性）
 - `@Primary`：我指定一个默认胜者（默认实现）
+- **by-name fallback**：当你没写 `@Qualifier/@Primary` 时，`@Autowired` 可能会尝试用“依赖名匹配 beanName”收敛（它很脆弱：重构改名就可能注错/注不进）
 - `@Priority`：在没有 `@Primary/@Qualifier` 时，用优先级“打破平局”
 
 1) **`@Order` 不能解决单依赖歧义**
@@ -49,7 +50,7 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
    - 即使另一个候选的 `@Priority` 更高，`@Primary` 仍会赢
 
 > 你可以把它记成一句话：  
-> **“明确指定（Qualifier） > 默认胜者（Primary） > 优先级（Priority） > 否则失败”**
+> **“明确指定（Qualifier） > 默认胜者（Primary） > 按名字回退（by-name fallback） > 优先级（Priority） > 否则失败”**
 
 ## 3. 集合注入：**解决的是“按什么顺序给我”**
 
@@ -70,7 +71,7 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
 遇到注入问题时，先问 3 个问题：
 
 1) 这是单依赖还是集合注入？
-2) 如果是单依赖：容器里有哪些候选？有没有 `@Qualifier/@Primary/@Priority`？
+2) 如果是单依赖：容器里有哪些候选？有没有 `@Qualifier/@Primary/@Priority`？依赖名是否能匹配某个 beanName（by-name fallback）？
 3) 如果是集合注入：排序规则来自哪里？你写了 `@Order` 还是实现了 `Ordered`？
 
 ## 5. 延伸阅读（把规则放回更完整的 DI 体系）
@@ -81,6 +82,7 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
 - `DefaultListableBeanFactory#doResolveDependency`：单依赖注入的主入口（候选收集 → 选胜者 → 注入）
 - `DefaultListableBeanFactory#determineAutowireCandidate`：从多个候选里挑一个（会综合 qualifier/primary/priority/name 等）
 - `DefaultListableBeanFactory#determinePrimaryCandidate`：`@Primary` 胜出的关键分支
+- `DefaultListableBeanFactory#determineAutowireCandidate`（by-name fallback 分支）：观察 dependency name 如何参与“按名字回退”的收敛
 - `DefaultListableBeanFactory#determineHighestPriorityCandidate`：`@Priority` 参与 tie-break 的关键分支
 - `AnnotationAwareOrderComparator#sort`：集合注入排序入口（`@Order/@Priority/Ordered` 影响的是这里）
 
@@ -120,11 +122,15 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansAutowireCandidateSelectionLab
   - `@Primary` 与 `@Priority` 谁优先？在没有 `@Primary/@Qualifier` 时，`@Priority` 为什么有时能“打破平局”？
 - 复现入口（可断言）：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java`
   - 单注入歧义：`orderAnnotation_doesNotResolveSingleInjectionAmbiguity()`
+  - by-name fallback：`byNameFallback_canResolveSingleInjectionAmbiguity_forAutowiredFieldInjection()`
+  - `@Primary` 压过 by-name fallback：`primaryOverridesByNameFallback_forSingleInjection()`
+  - `@Qualifier` 压过 `@Primary`：`qualifierOverridesPrimary_forSingleInjection()`
   - `@Primary` vs `@Priority`：`primaryOverridesPriority_forSingleInjection()`
   - tie-break：`priorityAnnotation_canBreakTieForSingleInjection_whenNoPrimaryOrQualifier()`
   - 集合顺序：`orderAnnotation_affectsCollectionInjectionOrder()`
-
-对应 Lab 的结论（可断言）：
+  - `ObjectProvider#getIfUnique()`：`objectProvider_getIfUnique_returnsNull_whenMultipleCandidatesExist()`
+  - `ObjectProvider#orderedStream()`：`objectProvider_orderedStream_respectsOrderAnnotation()`
+  - 泛型收敛（可用时）：`genericType_canNarrowCandidates_forSingleInjection()`
 
 对应 Lab 的结论（可断言）：
 
@@ -142,6 +148,8 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansAutowireCandidateSelectionLab
 建议断点：
 
 - “`NoUniqueBeanDefinitionException`（候选太多）” → **实例层（候选选择失败）**：`@Order` 不会帮你选胜者；用 `@Qualifier/@Primary/@Priority`（本章 + `doResolveDependency`）
+- “我没写 `@Qualifier/@Primary`，为什么却没报歧义（甚至注入进来了）？” → **实例层（by-name fallback）**：看 `determineAutowireCandidate` 的 dependency-name 分支（本章 by-name fallback 用例）
+- “我明明写了 `@Primary`，但注入的不是 primary” → **实例层（Qualifier/Resource 更强信号）**：确认注入点是否存在 `@Qualifier` 或走了 `@Resource` 的 name-first（本章 qualifierOverridesPrimary 用例 + [32 章](32-resource-injection-name-first.md)）
 - “集合注入顺序不稳定/不符合预期” → **实例层（排序）**：看 `AnnotationAwareOrderComparator#sort`（本章第 3 节）
 - “我以为 `@Priority` 会影响一切注入场景” → **实例层规则差异**：它既可能参与单依赖 tie-break，也会影响集合排序，但优先级低于 `@Primary`（本章第 2/3 节）
 - “候选选择行为跟想象不一致” → **先确认注入点类型**：单依赖 vs 集合是两套规则（本章第 1 节）

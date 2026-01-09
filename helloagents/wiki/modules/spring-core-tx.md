@@ -8,7 +8,7 @@
 
 - **Responsibility:** 用最小业务场景与测试实验理解事务传播/回滚，并能定位常见坑。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-07
+- **Last Updated:** 2026-01-09
 
 ## Specifications
 
@@ -34,8 +34,14 @@
 
 #### Scenario: 不同传播行为差异可被断言
 - REQUIRED/REQUIRES_NEW 等差异在测试中可稳定验证
+- 传播行为进阶差异（MANDATORY/NEVER/NESTED）可通过矩阵 Lab 固化为断言
 - 自调用绕过 `@Transactional` 的陷阱可最小复现并对比修复（Lab）
 - `spring-boot:run` 可观察事务活跃状态与回滚/提交差异（结构化前缀 `TX:`）
+- 对应可复现闭环入口：
+  - `spring-core-tx/docs/part-01-transaction-basics/04-propagation.md`
+  - `spring-core-tx/src/test/java/com/learning/springboot/springcoretx/part01_transaction_basics/SpringCoreTxPropagationMatrixLabTest.java`
+  - `spring-core-tx/docs/part-01-transaction-basics/03-rollback-rules.md`
+  - `spring-core-tx/src/test/java/com/learning/springboot/springcoretx/part01_transaction_basics/SpringCoreTxRollbackRulesLabTest.java`
 
 ## Change History
 

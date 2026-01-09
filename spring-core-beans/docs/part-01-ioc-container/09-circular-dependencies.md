@@ -188,7 +188,7 @@ record CycleB(CycleA cycleA) {}
 ## E. 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
-- Lab：`SpringCoreBeansContainerLabTest` / `SpringCoreBeansEarlyReferenceLabTest`
+- Lab：`SpringCoreBeansContainerLabTest` / `SpringCoreBeansEarlyReferenceLabTest` / `SpringCoreBeansCircularDependencyBoundaryLabTest`
 - 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
 
 ### 复现/验证补充说明（来自原文迁移）
@@ -239,7 +239,19 @@ record CycleB(CycleA cycleA) {}
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+- **坑 1：误以为“Spring 能解决所有循环依赖”**
+  - 事实：Spring 只能在非常特定的窗口期（singleton + early exposure）里“救活某些环”，constructor 环通常 fail-fast。
+  - 对照：`SpringCoreBeansContainerLabTest#circularDependencyWithConstructorsFailsFast`
+- **坑 2：为了让它“能启动”把所有依赖改成 setter 注入**
+  - setter 有时能救活环，但会引入半初始化窗口与更隐蔽的 bug。
+  - 学习阶段可以用 setter 环理解机制；工程上仍优先消除环（重构职责边界）。
+- **坑 3：把 `@Lazy` 当作默认解法（只看结果不看代价）**
+  - `@Lazy` 注入点通常会注入一个延迟解析的代理：能打断 constructor 环，但也会让类型/调试复杂度上升（尤其在代理叠加场景）。
+  - 对照：`SpringCoreBeansCircularDependencyBoundaryLabTest#constructorCycleCanBeBrokenViaLazyInjectionPointProxy`
+- **坑 4：`ObjectProvider<T>` 能救场，但别把依赖“藏起来”**
+  - `ObjectProvider` 的核心价值是 **延迟获取**：把“必须立刻拿到依赖”变成“需要时再拿”。
+  - 代价是：依赖关系从“构造器签名”退化为“运行时分支”，需要更强的自检与测试覆盖来兜底。
+  - 对照：`SpringCoreBeansCircularDependencyBoundaryLabTest#constructorCycleCanBeBrokenViaObjectProvider`
 
 ## G. 小结与下一章
 
@@ -258,7 +270,7 @@ record CycleB(CycleA cycleA) {}
 
 ### 对应 Lab/Test
 
-- Lab：`SpringCoreBeansContainerLabTest` / `SpringCoreBeansEarlyReferenceLabTest`
+- Lab：`SpringCoreBeansContainerLabTest` / `SpringCoreBeansEarlyReferenceLabTest` / `SpringCoreBeansCircularDependencyBoundaryLabTest`
 - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansEarlyReferenceLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
 
 上一章：[08. FactoryBean：product vs factory（& 前缀）](08-factorybean.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[10. Spring Boot 自动装配如何影响 Bean（Auto-configuration）](../part-02-boot-autoconfig/10-spring-boot-auto-configuration.md)

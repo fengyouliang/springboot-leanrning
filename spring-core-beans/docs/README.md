@@ -34,6 +34,7 @@
 
 - 注入失败（NoSuch/NoUnique/UnsatisfiedDependency）→ [03](part-01-ioc-container/03-dependency-injection-resolution.md) / [33](part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md) / [11](part-02-boot-autoconfig/11-debugging-and-observability.md)
   - Lab：`SpringCoreBeansInjectionAmbiguityLabTest` / `SpringCoreBeansAutowireCandidateSelectionLabTest` / `SpringCoreBeansExceptionNavigationLabTest`
+  - 现象补充：没写 `@Qualifier/@Primary` 却没报歧义（by-name fallback：依赖名匹配 beanName）→ 见 33 章与 `SpringCoreBeansAutowireCandidateSelectionLabTest`（byNameFallback 用例）
 - prototype 注入 singleton 后“像单例” → [04](part-01-ioc-container/04-scope-and-prototype.md)
   - Lab：`SpringCoreBeansLabTest`（prototype 用例）/ Exercises（改造题）
 - `@Value("${missing}")` 没失败，值变成 `"${...}"` → [34](part-04-wiring-and-boundaries/34-value-placeholder-resolution-strict-vs-non-strict.md)

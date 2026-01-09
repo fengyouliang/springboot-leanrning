@@ -15,6 +15,13 @@
 - `springboot-web-mvc`：再深化一层：新增 ExceptionResolvers 主线章节、Filter/Interceptor（sync+async lifecycle）可断言 Lab、条件请求对照（静态资源 If-Modified-Since/304 + ShallowEtagHeaderFilter）、以及 DeferredResult（timeout/fallback）测试闭环；同步补齐“坑点清单 → 可复现测试入口”绑定。
 - `springboot-web-mvc`：继续深化：补齐导读/自测/Part01+Part02 的“坑点待补齐”占位内容，并新增两组工程化边界 Labs：`@InitBinder#setAllowedFields` 防 mass assignment、`@ControllerAdvice` 的 `@Order` 优先级可复现验证。
 - `springboot-web-mvc`：深化 v3：新增 `@ControllerAdvice` 匹配规则可复现 Labs（`basePackages/annotations/assignableTypes` + selector 并集 OR 语义 + `@Order` 叠加），新增 binder `BindingResult#getSuppressedFields()` 证据链，以及 HttpMessageConverter 选择可观测（`ResponseBodyAdvice` 写入 `selectedConverterType/selectedContentType` 到响应头）与对应 docs 章节/排障清单升级。
+- `spring-core-beans`：新增循环依赖边界 Lab `SpringCoreBeansCircularDependencyBoundaryLabTest`（constructor cycle fail-fast vs `@Lazy`/`ObjectProvider` 打断），并同步补齐循环依赖章节与 early reference 交叉链接入口。
+- `spring-core-aop`：新增 exposeProxy 可验证 Lab `SpringCoreAopExposeProxyLabTest` + 示例 `ExposeProxyExampleService`，并补齐 exposeProxy 文档与“自调用绕过代理”排障条目。
+- `spring-core-tx`：新增传播行为进阶 Lab `SpringCoreTxPropagationMatrixLabTest`（MANDATORY/NEVER/NESTED 对照）与回滚规则 Lab `SpringCoreTxRollbackRulesLabTest`（Runtime vs Checked + rollbackFor/noRollbackFor），并补齐 propagation/rollback 文档与 appendix（pitfalls/self-check）入口。
+- `springboot-web-mvc`：新增异常解析链路 Lab `BootWebMvcExceptionResolverChainLabTest` + `ExceptionResolverChainController`，用 resolvedException 固化 BindException/MethodArgumentNotValidException/HttpMessageNotReadableException 三类 400 根因差异，并更新对应章节入口块。
+- `helloagents`：补齐 `project.md` 的测试类型约定与 Troubleshooting 条目模板（文档↔测试入口↔排障清单对齐）。
+- `spring-core-beans`：增强依赖注入候选选择对照：补齐 by-name fallback、`@Qualifier` vs `@Primary`、泛型收敛与 `ObjectProvider#getIfUnique()/orderedStream()` 语义，并同步更新 docs/33 与 appendix（pitfalls/self-check）。
+- `springboot-web-mvc`：新增 Security FilterChain vs MVC 异常链路边界 Lab `BootWebMvcSecurityVsMvcExceptionBoundaryLabTest`（`handler/resolvedException` 证据链），并同步更新 part-08/part-03/part-07 与 appendix（pitfalls/self-check）入口。
 
 ### Removed
 - `scripts`：移除章节契约相关脚本：`scripts/check-chapter-contract.py`、`scripts/ag-contract-docs.py`（不再推荐 A–G 作为写作规范，也不再提供相关闸门/自检工具）。

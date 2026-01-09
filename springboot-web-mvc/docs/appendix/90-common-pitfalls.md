@@ -69,8 +69,20 @@
 ## 401/403（Security/CSRF）相关
 
 - 引入 `spring-boot-starter-security` 后，很多 401/403 发生在 MVC 之前：优先从 FilterChainProxy 入手，不要先改 controller。
+- **坑：试图用 `@ControllerAdvice/@ExceptionHandler` 统一处理 401/403**  
+  - 这类分支通常发生在 DispatcherServlet 之前，MVC 的异常解析链路根本没机会运行
+  - 证据链建议：断言 `handler == null && resolvedException == null`（说明没进入 HandlerMethod/ExceptionResolvers）
+  - 对照证据：`BootWebMvcSecurityVsMvcExceptionBoundaryLabTest`
 - 403 很多时候不是“没权限”，而是 **CSRF 缺失**（尤其是 POST/PUT/DELETE）。
   - 对照证据：`BootWebMvcSecurityLabTest`（401/403/CSRF）
+  - 对照证据（边界）：`BootWebMvcSecurityVsMvcExceptionBoundaryLabTest`（403 时 `handler/resolvedException` 为空）
+
+推荐断点（401/403/CSRF）：
+
+- `org.springframework.web.filter.DelegatingFilterProxy#doFilter`
+- `org.springframework.security.web.FilterChainProxy#doFilterInternal`
+- `org.springframework.security.web.access.ExceptionTranslationFilter#doFilter`
+- `org.springframework.security.web.csrf.CsrfFilter#doFilterInternal`
 
 ## 406/415（内容协商）相关
 
@@ -112,6 +124,10 @@
 
 - `@WebMvcTest` 只加载 Web 层：如果 controller 依赖 service/repository，通常需要 `@MockBean` 或显式 `@Import`。
 - `@WebMvcTest` 的“更快”来自加载范围更小：如果你把太多东西 `@Import` 进来，它就不再快了。
+- **坑：`@WebMvcTest` 下突然出现 401/403**  
+  - slice 测试默认也会走 filters；当 Security 在 classpath 且 filter chain 生效时，你可能“还没进 controller 就被拦了”
+  - 建议：显式导入你想演示的 `SecurityFilterChain`（教学端点隔离），不要全局禁用 filters（否则你会学到错误结论）
+  - 对照证据：`BootWebMvcSecurityVsMvcExceptionBoundaryLabTest`（401/403 时 `handler/resolvedException` 为 `null`）
 
 ## 404/路由相关
 

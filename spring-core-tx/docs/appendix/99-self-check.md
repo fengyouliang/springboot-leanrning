@@ -24,18 +24,23 @@
 ## E. 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
-- Lab：`SpringCoreTxLabTest` / `SpringCoreTxSelfInvocationPitfallLabTest`
+- Lab：`SpringCoreTxLabTest` / `SpringCoreTxPropagationMatrixLabTest` / `SpringCoreTxRollbackRulesLabTest` / `SpringCoreTxSelfInvocationPitfallLabTest`
 - 建议命令：`mvn -pl spring-core-tx test`（或在 IDE 直接运行上面的测试类）
 
 ### 复现/验证补充说明（来自原文迁移）
 
-> 验证入口（可跑）：`SpringCoreTxLabTest` / `SpringCoreTxSelfInvocationPitfallLabTest`
+> 验证入口（可跑）：`SpringCoreTxLabTest` / `SpringCoreTxPropagationMatrixLabTest` / `SpringCoreTxRollbackRulesLabTest` / `SpringCoreTxSelfInvocationPitfallLabTest`
 
 1. `@Transactional` 的“边界”是如何确定的？为什么不等于“方法开始到方法结束”？
 2. 为什么自调用（self-invocation）会绕过事务？如何最小复现？
 3. 默认回滚规则是什么？`checked exception` 与 `runtime exception` 的差异在哪里？
 4. 传播行为（propagation）解决的核心问题是什么？最常见误用是什么？
 5. 什么时候应该用 `TransactionTemplate`？如何验证它与注解事务的差异？
+6. `MANDATORY` 的设计目的是什么？当你在“无事务”调用它时会发生什么？对应哪条可复现测试？
+7. `NEVER` 的设计目的是什么？当你在“有事务”调用它时会发生什么？对应哪条可复现测试？
+8. `NESTED` 与 `REQUIRES_NEW` 的核心区别是什么？你如何用最小对照用例证明它们的差异？
+9. 为什么“内层抛异常但外层 catch 住”可能导致最终提交？你如何判断 outer 是否被标记为 rollback-only？
+10. 为什么排查事务问题时，建议以“数据是否落库/行数变化”作为最终证据，而不是只看异常或日志？
 
 ## F. 常见坑与边界
 
@@ -51,7 +56,7 @@
 
 ### 对应 Lab/Test
 
-- Lab：`SpringCoreTxLabTest` / `SpringCoreTxSelfInvocationPitfallLabTest`
+- Lab：`SpringCoreTxLabTest` / `SpringCoreTxPropagationMatrixLabTest` / `SpringCoreTxRollbackRulesLabTest` / `SpringCoreTxSelfInvocationPitfallLabTest`
 
 上一章：[90-common-pitfalls](90-common-pitfalls.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[Docs TOC](../README.md)
 

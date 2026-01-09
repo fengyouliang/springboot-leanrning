@@ -87,6 +87,21 @@
 18) 为什么 `DefaultListableBeanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(Handler.class, String.class))` 可能返回空？
 19) 你会用什么工程策略避免“靠泛型匹配做关键依赖注入”带来的不确定性？
 
+## J. 候选收敛决策树（对应 33/32/37）
+
+> 这一组题专门练“注入失败/注错”的排障能力：你要能把现象落到候选收敛的具体分支上。
+
+20) by-name fallback 什么时候会触发？它依赖什么信息（field name vs constructor parameter name、是否需要 `-parameters`）？
+21) 为什么 `@Qualifier` 可以“压过” `@Primary`？你会用哪一个 Lab 用例证明？
+22) `@Resource` 的 name-first 与 `@Autowired` 的 by-name fallback 有什么本质差异？你会用哪个章节/断点证明？
+23) 多候选时，`ObjectProvider#getIfUnique()` 与 `getObject()` 各自会怎样表现？为什么这会影响“可选依赖”的写法？
+24) `ObjectProvider#orderedStream()` 的排序规则来自哪里？它与 `List<T>` 注入排序是同一套机制吗？
+25) 泛型参与候选收敛时，哪些场景可靠、哪些场景不可靠？（提示：class metadata vs 运行时 proxy 实例）
+26) 你如何把 `UnsatisfiedDependencyException` 拆成“外层包装异常 + root cause（NoUnique/NoSuch）”？排查顺序是什么？
+27) 在断点里你会观察哪些字段来确认“dependency 的名字/类型/是否 required”？（提示：DependencyDescriptor）
+28) alias 会不会影响候选选择？它主要影响哪些匹配路径（按名匹配、qualifier 匹配）？
+29) 什么时候应该避免 relying on by-name fallback？你会如何把依赖关系改写得更明确？
+
 ## F. 动手题（建议直接做 Exercises）
 
 这些题都已经在本模块的 Exercises 里给出（默认 `@Disabled`）：

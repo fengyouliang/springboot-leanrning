@@ -81,8 +81,8 @@
 
 ## E. 最小可运行实验（Lab）
 
-- 本章未显式引用 LabTest，先注入模块默认 LabTest 作为“合规兜底入口”（后续可逐章细化）。
-- Lab：`SpringCoreAopAutoProxyCreatorInternalsLabTest` / `SpringCoreAopLabTest`
+- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
+- Lab：`SpringCoreAopExposeProxyLabTest` / `SpringCoreAopLabTest`
 - 建议命令：`mvn -pl spring-core-aop test`（或在 IDE 直接运行上面的测试类）
 
 ### 复现/验证补充说明（来自原文迁移）
@@ -105,7 +105,7 @@
 
 ### 对应 Lab/Test
 
-- Lab：`SpringCoreAopAutoProxyCreatorInternalsLabTest` / `SpringCoreAopLabTest`
+- Lab：`SpringCoreAopExposeProxyLabTest` / `SpringCoreAopLabTest`
 - Exercise：`SpringCoreAopExerciseTest`
 
 上一章：[04-final-and-proxy-limits](04-final-and-proxy-limits.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[06-debugging](06-debugging.md)

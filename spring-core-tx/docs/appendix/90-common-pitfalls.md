@@ -24,7 +24,7 @@
 ## E. 最小可运行实验（Lab）
 
 - 本章未显式引用 LabTest，先注入模块默认 LabTest 作为“合规兜底入口”（后续可逐章细化）。
-- Lab：`SpringCoreTxLabTest` / `SpringCoreTxSelfInvocationPitfallLabTest`
+- Lab：`SpringCoreTxLabTest` / `SpringCoreTxPropagationMatrixLabTest` / `SpringCoreTxRollbackRulesLabTest` / `SpringCoreTxSelfInvocationPitfallLabTest`
 - 建议命令：`mvn -pl spring-core-tx test`（或在 IDE 直接运行上面的测试类）
 
 ## F. 常见坑与边界
@@ -57,6 +57,20 @@
 - private 方法通常也不会被拦截
 - 对照：AOP 模块的 [04. final-and-proxy-limits](../../../spring-core-aop/docs/part-01-proxy-fundamentals/04-final-and-proxy-limits.md)
 
+## 坑 6：`MANDATORY`/`NEVER` 是“边界约束”，不是默认选择
+
+- 现象：你一调用就抛 `IllegalTransactionStateException`，以为“事务坏了”
+- 原因：这是传播行为的设计语义：用来把边界写死
+- 对照：
+  - `SpringCoreTxPropagationMatrixLabTest#mandatoryThrowsWhenNoExistingTransaction`
+  - `SpringCoreTxPropagationMatrixLabTest#neverThrowsWhenTransactionExists`
+
+## 坑 7：把 `NESTED` 当成 `REQUIRES_NEW`，结果语义误判
+
+- 误判：以为 `NESTED` 会开新事务（其实更像 savepoint）
+- 正确理解：外层事务存在时，`NESTED` 在同一个物理事务里创建 savepoint
+- 对照：`SpringCoreTxPropagationMatrixLabTest#nestedRollsBackOnlyInnerWhenOuterCatchesException`
+
 ## G. 小结与下一章
 
 - 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
@@ -67,7 +81,7 @@
 
 ### 对应 Lab/Test
 
-- Lab：`SpringCoreTxLabTest` / `SpringCoreTxSelfInvocationPitfallLabTest`
+- Lab：`SpringCoreTxLabTest` / `SpringCoreTxPropagationMatrixLabTest` / `SpringCoreTxRollbackRulesLabTest` / `SpringCoreTxSelfInvocationPitfallLabTest`
 - Exercise：`SpringCoreTxExerciseTest`
 
 上一章：[06-debugging](../part-02-template-and-debugging/06-debugging.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[99-self-check](99-self-check.md)

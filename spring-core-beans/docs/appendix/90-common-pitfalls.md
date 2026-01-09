@@ -284,6 +284,77 @@
 
 见：[36. 类型转换：BeanWrapper / ConversionService / PropertyEditor 的边界](../part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md)
 
+## 18) 以为 `@Autowired` 永远只按类型，不会按名字回退（by-name fallback）
+
+典型症状：
+
+- 明明容器里有多个同类型候选，你没写 `@Qualifier/@Primary`，却没有报歧义
+- 或者在重构/改字段名后，突然开始报 `NoUniqueBeanDefinitionException` 或注入到了“另一个实现”
+
+事实：
+
+- `@Autowired` 的候选决胜过程中，可能会出现 **by-name fallback**：用“依赖名（dependency name）匹配 beanName”收敛候选
+- 它属于“隐式规则”：一旦依赖名变化（字段名/参数名/注入点 name 变化），结果就会变化
+
+如何验证：
+
+- 对应 Lab/Test：
+  - `SpringCoreBeansAutowireCandidateSelectionLabTest#byNameFallback_canResolveSingleInjectionAmbiguity_forAutowiredFieldInjection`
+  - `SpringCoreBeansAutowireCandidateSelectionLabTest#primaryOverridesByNameFallback_forSingleInjection`
+
+推荐断点：
+
+- `DefaultListableBeanFactory#determineAutowireCandidate`
+- `DefaultListableBeanFactory#doResolveDependency`
+
+建议：
+
+- 生产代码里不要“依赖 by-name fallback 的侥幸收敛”，优先显式表达依赖关系：`@Qualifier` / `@Primary`
+
+## 19) 混淆 `ObjectProvider#getIfAvailable()` 与 `getIfUnique()`（以及多候选时的行为）
+
+典型症状：
+
+- 你以为 `ObjectProvider` “永远不会失败”，结果在多候选时仍然抛异常（或返回不符合预期的对象）
+- 你以为 `getIfAvailable()` 与 `getIfUnique()` 都是“拿不到就 null”，但它们语义不同
+
+事实：
+
+- `getIfUnique()` 的核心语义是：**只有唯一候选时才返回，否则返回 null**
+- `ObjectProvider` 的意义不是“让容器更聪明”，而是让你把“可选/延迟/多候选”这些语义写清楚
+
+如何验证：
+
+- 对应 Lab/Test：`SpringCoreBeansAutowireCandidateSelectionLabTest#objectProvider_getIfUnique_returnsNull_whenMultipleCandidatesExist`
+
+推荐断点：
+
+- `DefaultListableBeanFactory#doResolveDependency`
+- `DefaultListableBeanFactory#resolveDependency`
+
+## 20) 以为 `@Primary` “覆盖一切”，忽略了更强的限定信号（`@Qualifier` / `@Resource`）
+
+典型症状：
+
+- 容器里明明有一个 `@Primary`，但最终注入的却是另一个实现
+- 或者你看见了 `@Primary`，就下意识认为“这就是默认实现”，却忘了注入点可能带了更强限定
+
+事实：
+
+- `@Primary` 只是“默认胜者”，它只在 **没有更强信号** 时才提供默认选择
+- 更强的限定信号包括（但不限于）：
+  - `@Qualifier`（显式缩小候选集合/指定目标）
+  - `@Resource` 的 name-first（按名字优先匹配，见 32 章）
+
+如何验证：
+
+- 对应 Lab/Test：`SpringCoreBeansAutowireCandidateSelectionLabTest#qualifierOverridesPrimary_forSingleInjection`
+
+推荐断点：
+
+- `DefaultListableBeanFactory#doResolveDependency`
+- `DefaultListableBeanFactory#determineAutowireCandidate`
+
 ## G. 小结与下一章
 
 - 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。

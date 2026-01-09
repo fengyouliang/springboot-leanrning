@@ -28,6 +28,29 @@
 
 因此：当你看到 401/403，第一反应应该是“我有没有走到 DispatcherServlet”，而不是“controller 写错了”。
 
+### C.1 如何证明“没进入 DispatcherServlet”（证据链优先）
+
+只看 status code 很容易误判（尤其是 403：权限不足 vs CSRF）。更稳妥的方式是直接拿证据：
+
+在 MockMvc 测试里抓 `MvcResult`：
+
+- `MvcResult#getHandler()`
+- `MvcResult#getResolvedException()`
+
+常见判定（经验 → 证据链）：
+
+1. **401/403 且 `handler == null`**
+   - 大概率发生在 **Security FilterChain**（DispatcherServlet 之前）
+   - 此时你再去加 `@ControllerAdvice` 往往是“改不到点上”
+2. **400/5xx 且 `handler != null`（且 `resolvedException != null`）**
+   - 说明已经进入 **DispatcherServlet / HandlerMethod**，问题更可能在 MVC 的 binder/converter/exception resolver 段落
+
+对应可运行证据链：
+
+- Lab：`BootWebMvcSecurityVsMvcExceptionBoundaryLabTest`
+  - 401/403：断言 `handler/resolvedException` 为 `null`
+  - 400（binder/validation/converter）：断言 `resolvedException` 是具体异常类型（例如 `BindException`/`MethodArgumentNotValidException`/`HttpMessageNotReadableException`）
+
 ## D. 源码与断点
 
 推荐断点（按常见问题）：
@@ -47,6 +70,7 @@
 ## E. 最小可运行实验（Lab）
 
 - Lab：`BootWebMvcSecurityLabTest`
+  - （边界证据链增强）`BootWebMvcSecurityVsMvcExceptionBoundaryLabTest`
   - 401：未认证访问 `/api/advanced/secure/ping`
   - 403：普通用户访问 `/api/advanced/secure/admin/ping`
   - 403（CSRF）：认证后 POST `/api/advanced/secure/update` 不带 token
@@ -75,4 +99,3 @@
 上一章：[part-07-testing-debugging/01-webmvc-testing-and-troubleshooting.md](../part-07-testing-debugging/01-webmvc-testing-and-troubleshooting.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-08-security-observability/02-observability-and-metrics.md](02-observability-and-metrics.md)
 
 <!-- BOOKIFY:END -->
-

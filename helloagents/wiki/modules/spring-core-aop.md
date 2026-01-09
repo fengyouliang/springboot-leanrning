@@ -8,7 +8,7 @@
 
 - **Responsibility:** 提供 AOP 的最小可运行示例与测试实验，帮助理解代理行为与切面生效边界。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-07
+- **Last Updated:** 2026-01-09
 
 ## Specifications
 
@@ -58,6 +58,10 @@
 #### Scenario: 能解释 self-invocation 与 exposeProxy 的取舍
 - 能解释 why：call path 必须走 proxy
 - 能说明常见工程解法（拆分 bean / 自注入 / exposeProxy）与风险
+- 对应可复现闭环入口：
+  - `spring-core-aop/docs/part-01-proxy-fundamentals/05-expose-proxy.md`
+  - `spring-core-aop/src/main/java/com/learning/springboot/springcoreaop/part01_proxy_fundamentals/ExposeProxyExampleService.java`
+  - `spring-core-aop/src/test/java/com/learning/springboot/springcoreaop/part01_proxy_fundamentals/SpringCoreAopExposeProxyLabTest.java`
 
 #### Scenario: 能解释并验证 advice 链顺序
 - 能解释多个切面嵌套关系与 `@Order` 的影响

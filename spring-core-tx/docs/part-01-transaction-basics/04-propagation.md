@@ -39,6 +39,29 @@
 
 关键观察点：
 
+## 三个常见的“进阶传播行为”（用来固定边界，不是日常默认）
+
+> 这些传播行为的价值往往不在“更强大”，而在“**把边界写死，避免误用**”。
+
+### `MANDATORY`：必须存在外层事务，否则直接失败
+
+- 语义：调用方必须已经在事务中，否则抛 `IllegalTransactionStateException`
+- 适用：你希望强制某段逻辑只能在事务内执行（例如必须和上游同生共死）
+- 对照用例：`SpringCoreTxPropagationMatrixLabTest#mandatoryThrowsWhenNoExistingTransaction`
+
+### `NEVER`：必须不存在事务，否则直接失败
+
+- 语义：如果当前已有事务，直接抛 `IllegalTransactionStateException`
+- 适用：你希望强制某段逻辑只能在“非事务”环境执行（例如明确不允许在事务里做某些外部交互）
+- 对照用例：`SpringCoreTxPropagationMatrixLabTest#neverThrowsWhenTransactionExists`
+
+### `NESTED`：在同一个物理事务里创建 savepoint（内层回滚不必然影响外层）
+
+- 语义：外层事务存在时，内层会创建 savepoint；内层失败可以回滚到 savepoint
+- 常见误区：把 `NESTED` 当作 `REQUIRES_NEW`（它们不是一回事）
+- 约束：需要底层事务管理器支持 savepoint（典型：JDBC `DataSourceTransactionManager`）
+- 对照用例：`SpringCoreTxPropagationMatrixLabTest#nestedRollsBackOnlyInnerWhenOuterCatchesException`
+
 ## D. 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
@@ -47,7 +70,7 @@
 ## E. 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
-- Lab：`SpringCoreTxLabTest`
+- Lab：`SpringCoreTxLabTest` / `SpringCoreTxPropagationMatrixLabTest`
 - 建议命令：`mvn -pl spring-core-tx test`（或在 IDE 直接运行上面的测试类）
 
 ### 复现/验证补充说明（来自原文迁移）
@@ -71,7 +94,7 @@
 
 ### 对应 Lab/Test
 
-- Lab：`SpringCoreTxLabTest`
+- Lab：`SpringCoreTxLabTest` / `SpringCoreTxPropagationMatrixLabTest`
 
 上一章：[03-rollback-rules](03-rollback-rules.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[05-transaction-template](../part-02-template-and-debugging/05-transaction-template.md)
 

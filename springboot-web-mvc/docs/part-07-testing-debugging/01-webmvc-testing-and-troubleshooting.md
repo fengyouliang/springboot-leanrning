@@ -12,6 +12,7 @@
 - 看到 406/415，不要盯 controller：先看 `Accept`/`Content-Type`/`produces`/`consumes`，再看 converter 选择。
 - 用 MockMvc 的 `MvcResult#getResolvedException()` 能快速把“猜”变成“证据”：异常类型就是分支位置。
 - 看到 401/403，优先怀疑 Filter/Security，而不是 MVC handler：**很多安全分支发生在 DispatcherServlet 之前**。
+  - 证据链建议：用 `MvcResult#getHandler()` / `MvcResult#getResolvedException()` 先证明“是否进入了 HandlerMethod”（见 `BootWebMvcSecurityVsMvcExceptionBoundaryLabTest`）。
 - 当你需要“确认到底选了哪个 HttpMessageConverter”：可以用 `ResponseBodyAdvice#beforeBodyWrite` 把 `selectedConverterType/selectedContentType` 写进响应头，再用测试固化它（证据链优先）。
 
 ## C. 机制主线
@@ -19,6 +20,10 @@
 - 本章用 `BootWebMvcTestingDebuggingLabTest` 固定两条排障证据链：
   - 415 → `HttpMediaTypeNotSupportedException`
   - 406 → `HttpMediaTypeNotAcceptableException`
+- 并用 `BootWebMvcExceptionResolverChainLabTest` 固定“400 的三类根因”：
+  - binder/validation → `BindException`
+  - @RequestBody validation → `MethodArgumentNotValidException`
+  - converter/read → `HttpMessageNotReadableException`
 
 ## D. 源码与断点
 
@@ -32,6 +37,7 @@
 
 - Lab：`BootWebMvcTestingDebuggingLabTest`
 - Lab：`BootWebMvcMessageConverterTraceLabTest`（converter 选择证据：响应头）
+- Lab：`BootWebMvcExceptionResolverChainLabTest`（400 分支定位：resolvedException）
 
 ## F. 常见坑与边界
 
@@ -51,6 +57,7 @@
 
 - Lab：`BootWebMvcTestingDebuggingLabTest`
 - Lab：`BootWebMvcMessageConverterTraceLabTest`
+- Lab：`BootWebMvcExceptionResolverChainLabTest`
 
 上一章：[part-06-async-sse/03-deferredresult-and-timeout.md](../part-06-async-sse/03-deferredresult-and-timeout.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-08-security-observability/01-security-filterchain-and-mvc.md](../part-08-security-observability/01-security-filterchain-and-mvc.md)
 

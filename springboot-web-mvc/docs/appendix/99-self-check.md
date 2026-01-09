@@ -20,7 +20,7 @@
 3. Filter 与 Interceptor 的执行顺序与作用域差异是什么？
 4. `@RequestBody` 与 `@ModelAttribute` 分别走哪条路径？它们的“校验失败”常见异常类型分别是什么？
 5. 406 与 415 的本质差异是什么？你会在哪两个断点上分别观察 read/write 的分支？
-6. 接入 Spring Security 后，401 与 403 通常发生在 MVC 的哪个位置之前/之后？CSRF 缺失导致的 403 如何在测试里稳定复现？
+6. 接入 Spring Security 后，401 与 403 通常发生在 MVC 的哪个位置之前/之后？你如何用 `handler/resolvedException` 证明“没进入 DispatcherServlet”？CSRF 缺失导致的 403 如何在测试里稳定复现？
 7. ETag/If-None-Match 触发 304 的条件是什么？为什么 304 通常不返回响应体？
 8. async（Callable/DeferredResult）为什么会触发两次 dispatch？Interceptor 的回调为什么“少一截”？
 
@@ -40,7 +40,7 @@
 | 3 | `BootWebMvcTraceLabTest` | `DispatcherServlet#doDispatch` / `HandlerExecutionChain#applyPreHandle` | events 顺序（REQUEST vs ASYNC） |
 | 4 | `BootWebMvcLabTest`（@RequestBody）/ `BootWebMvcBindingDeepDiveLabTest`（@ModelAttribute） | `RequestResponseBodyMethodProcessor#resolveArgument` / `ServletModelAttributeMethodProcessor#resolveArgument` | exception 类型差异 |
 | 5 | `BootWebMvcTestingDebuggingLabTest` / `BootWebMvcMessageConverterTraceLabTest` | `AbstractMessageConverterMethodArgumentResolver#readWithMessageConverters` / `AbstractMessageConverterMethodProcessor#writeWithMessageConverters` | 415 vs 406（read vs write）+ selectedConverterType/selectedContentType |
-| 6 | `BootWebMvcSecurityLabTest` | `FilterChainProxy#doFilterInternal` / `CsrfFilter#doFilterInternal` | 401 vs 403（发生在 MVC 之前） |
+| 6 | `BootWebMvcSecurityLabTest` / `BootWebMvcSecurityVsMvcExceptionBoundaryLabTest` | `FilterChainProxy#doFilterInternal` / `CsrfFilter#doFilterInternal` | 401 vs 403（发生在 MVC 之前）+ handler/resolvedException 证据链 |
 | 7 | `BootWebMvcRealWorldHttpLabTest` | `ServletWebRequest#checkNotModified` / `ShallowEtagHeaderFilter` | ETag/Last-Modified/304 |
 | 8 | `BootWebMvcAsyncSseLabTest` / `BootWebMvcTraceLabTest` | `WebAsyncManager#startDeferredResultProcessing` / `AsyncHandlerInterceptor#afterConcurrentHandlingStarted` | asyncStarted + 二次 dispatch |
 

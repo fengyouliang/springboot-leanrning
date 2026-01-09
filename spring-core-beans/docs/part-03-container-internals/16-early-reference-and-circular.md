@@ -25,6 +25,16 @@
 - 构造器循环依赖通常会失败（无法创建任何一方）
 - setter 循环依赖有时能成功
 
+补充一个容易被忽略的工程视角（与本章的 early reference 主题互补，不冲突）：
+
+- **构造器环并不等于“彻底无解”**：你可以通过“延迟获取依赖”的方式打断环（例如 `@Lazy` 注入点代理、`ObjectProvider<T>`）。
+- 但它解决的是“启动/实例化时机”的问题，不解决“架构设计上为什么会形成环”的问题。
+
+对应对照实验入口：
+
+- `SpringCoreBeansCircularDependencyBoundaryLabTest`（@Lazy/ObjectProvider 打断 constructor 环）
+- 以及上一章的“基础现象”：`SpringCoreBeansContainerLabTest`（constructor fail-fast vs setter 可能成功）
+
 成功的关键在于：容器允许在“对象还没完全初始化完成”时，先暴露一个 **early singleton reference**。
 
 ## 2. getEarlyBeanReference：为什么需要它？

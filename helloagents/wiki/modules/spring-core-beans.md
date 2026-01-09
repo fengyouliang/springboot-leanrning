@@ -10,7 +10,7 @@
 - **Docs Reading:** 推荐从 `spring-core-beans/docs/README.md` 开始（书本目录 + Part 划分）；主线可按 Part 顺读，每章顶部提供“上一章｜目录｜下一章”导航，降低章节切换成本。
 - **Highlights:** 在补齐类型转换/泛型匹配章节与 Labs 闭环的基础上，进一步统一 docs 的“上一章｜目录｜下一章”导航与“复现入口（可运行）”块；新增 JSR-330 `@Inject`/`Provider<T>` 对照 Lab，并增强 testsupport dumper 让排障输出更结构化；补齐 3 类易翻车边界机制 Labs（编程式注册差异 / allowRawInjectionDespiteWrapping / prototype 销毁语义），并将入口落位到 docs/04、docs/05、docs/16、docs/25；新增 Part 05（AOT/RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）与对应 Labs，并新增面试复述模板与生产排障清单用于体系化复盘；同时为 Exercises 补齐对应 Solution（默认参与回归），并在 docs/README 收敛“章节↔Lab↔Exercise↔Solution”对照表与运行建议，补强 ImportSelector 等新手高频卡点的“源码主线/断点/观察点”；进一步补齐 Spring Framework `spring-beans` 体系的 5 组“真实世界常见但容易缺失”的机制闭环（docs 46–50：XML namespace 扩展 / Properties+Groovy Reader / replaced-method 方法注入 / 内置 FactoryBean / PropertyEditor+值解析），并新增对应 Labs（默认参与回归）；补齐 Spring Framework `BeanFactory API` 与 `Environment Abstraction` 两类常用但容易“只会用不会解释”的主题：新增 docs/38–39 与对应可断言 Labs（默认参与回归）；新增 spring-beans Public API 索引（docs Appendix 95/96）用于“按类型检索/可审计”，并补齐 aot.factories/AotServices 与 ServiceLoader*FactoryBean 的闭环，新增 Explore/Debug 用例（docs Appendix 97，显式开关启用，不影响默认回归）；并补齐 `org.springframework.beans.support`（ArgumentConvertingMethodInvoker/ResourceEditorRegistrar/PropertyComparator/PagedListHolder/SortDefinition）闭环，新增可运行 Lab，并将 Appendix 96 Gap 归零。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-07
+- **Last Updated:** 2026-01-09
 
 ## Source Layout（与 docs Part 对齐）
 
@@ -39,8 +39,8 @@
 - 提供最小 Lab，使用户能在本地打断点观察 BFPP/BPP/单例实例化发生的顺序
 
 #### Scenario: 能从注入报错反推候选选择过程
-- 文档明确候选收集与缩小过程（@Primary/@Qualifier/名称匹配/集合注入排序）
-- 提供 Lab 覆盖：多实现歧义、@Primary、@Qualifier、集合注入排序与可选依赖
+- 文档明确候选收集与缩小过程（@Qualifier/@Primary/by-name fallback（依赖名匹配 beanName）/@Priority/名称匹配/集合注入排序）
+- 提供 Lab 覆盖：多实现歧义、@Primary、@Qualifier、by-name fallback、泛型收敛、集合注入排序、以及 `ObjectProvider#getIfUnique()` 的可选/多候选语义
 
 #### Scenario: 能把 Environment/PropertySource 放回容器主线解释（含覆盖优先级与时机）
 - 能解释 PropertySources 的优先级与“占位符解析”如何接入 BeanFactory 的值解析链路
@@ -59,6 +59,10 @@
 #### Scenario: 能讲清循环依赖“能救/不能救”的边界（含代理介入）
 - 文档解释三层缓存与 early reference 的真实语义
 - 提供 Lab 覆盖：构造器循环失败、setter 循环可能成功、代理介入导致 early reference 行为变化
+- 对应可复现闭环入口：
+  - `spring-core-beans/docs/part-01-ioc-container/09-circular-dependencies.md`
+  - `spring-core-beans/docs/part-03-container-internals/16-early-reference-and-circular.md`
+  - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansCircularDependencyBoundaryLabTest.java`
 
 #### Scenario: 能把 Bean 三层模型映射到关键类与扩展点
 - 文档明确：BeanDefinition/实例/生命周期 三层与关键参与者的关系

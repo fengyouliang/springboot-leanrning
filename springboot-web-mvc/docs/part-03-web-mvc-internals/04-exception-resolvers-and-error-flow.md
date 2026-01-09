@@ -50,6 +50,8 @@
 
 - **安全链路（Security FilterChain）**
   - 典型现象：401/403（常发生在 DispatcherServlet 之前）
+  - 排障建议：先证明“是否进入了 DispatcherServlet”（`handler/resolvedException` 证据链）再谈 resolver
+  - 参考：Security 与 MVC 相对位置（含边界 Lab）：[part-08-security-observability/01-security-filterchain-and-mvc.md](../part-08-security-observability/01-security-filterchain-and-mvc.md)
 
 ## D. 源码与断点（把“谁翻译的”看清）
 
@@ -67,8 +69,9 @@
 
 - 406/415 的 resolver 证据链：`BootWebMvcTestingDebuggingLabTest`
 - binder/校验分支证据链：`BootWebMvcBindingDeepDiveLabTest`
+- binder/校验/JSON parse 的 resolvedException 证据链：`BootWebMvcExceptionResolverChainLabTest`
 - ProblemDetail 对照：`BootWebMvcProblemDetailLabTest`
-- Security（401/403/CSRF）分支：`BootWebMvcSecurityLabTest`
+- Security（401/403/CSRF）分支：`BootWebMvcSecurityLabTest` / `BootWebMvcSecurityVsMvcExceptionBoundaryLabTest`
 
 ## F. 常见坑与边界
 
@@ -94,6 +97,7 @@
 
 - Lab：`BootWebMvcTestingDebuggingLabTest`
 - Lab：`BootWebMvcBindingDeepDiveLabTest`
+- Lab：`BootWebMvcExceptionResolverChainLabTest`
 - Lab：`BootWebMvcProblemDetailLabTest`
 - Lab：`BootWebMvcAdviceMatchingLabTest`
 - Lab：`BootWebMvcAdviceOrderLabTest`

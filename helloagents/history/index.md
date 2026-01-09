@@ -50,6 +50,8 @@
 | 202601081108 | springboot-web-mvc-deepen-more | Enhancement | ✅Completed | [202601081108_springboot-web-mvc-deepen-more](2026-01/202601081108_springboot-web-mvc-deepen-more/) |
 | 202601081308 | springboot-web-mvc-deepen-even-more | Enhancement | ✅Completed | [202601081308_springboot-web-mvc-deepen-even-more](2026-01/202601081308_springboot-web-mvc-deepen-even-more/) |
 | 202601081505 | springboot-web-mvc-deepen-v3 | Enhancement | ✅Completed | [202601081505_springboot-web-mvc-deepen-v3](2026-01/202601081505_springboot-web-mvc-deepen-v3/) |
+| 202601091043 | deepen_beans_aop_tx_web | Enhancement | ✅Completed | [202601091043_deepen_beans_aop_tx_web](2026-01/202601091043_deepen_beans_aop_tx_web/) |
+| 202601091353 | beans_webmvc_mainline_deepen | Enhancement | ✅Completed | [202601091353_beans_webmvc_mainline_deepen](2026-01/202601091353_beans_webmvc_mainline_deepen/) |
 
 ---
 
@@ -99,3 +101,5 @@
 - [202601081108_springboot-web-mvc-deepen-more](2026-01/202601081108_springboot-web-mvc-deepen-more/) - springboot-web-mvc：再深化一层（ExceptionResolvers 主线、Trace：Filter/Interceptor sync+async lifecycle、条件请求对照（Last-Modified/ETag Filter）、DeferredResult timeout/fallback、坑点清单与测试入口绑定）
 - [202601081308_springboot-web-mvc-deepen-even-more](2026-01/202601081308_springboot-web-mvc-deepen-even-more/) - springboot-web-mvc：补齐导读/自测/坑点占位，并新增工程化边界 Labs（mass assignment 防护、ControllerAdvice @Order 优先级）
 - [202601081505_springboot-web-mvc-deepen-v3](2026-01/202601081505_springboot-web-mvc-deepen-v3/) - springboot-web-mvc：深化 v3（ControllerAdvice 匹配规则可复现、binder suppressedFields 证据链、MessageConverter 选择可观测、docs Part 03 新增章节与排障升级）
+- [202601091043_deepen_beans_aop_tx_web](2026-01/202601091043_deepen_beans_aop_tx_web/) - Beans/AOP/Tx/Web：补齐循环依赖边界、exposeProxy 自调用、传播/回滚、MVC 异常链路等可验证入口（Labs + docs + 知识库同步）
+- [202601091353_beans_webmvc_mainline_deepen](2026-01/202601091353_beans_webmvc_mainline_deepen/) - Beans/Web MVC：候选收敛（by-name fallback/ObjectProvider/泛型）与 Security↔MVC 边界证据链（handler/resolvedException）深化（Labs + docs + wiki）
