@@ -56,6 +56,14 @@
 
 ## 多个 FilterChain 规则冲突
 
+### 坑点：更“宽”的 matcher 抢先匹配，导致你以为的链路根本没进来
+
+- Symptom：你以为 `/jwt/**` 会走 JWT 的那条 `SecurityFilterChain`，结果却走了另一条（常见表现：401/403 与预期不一致，或者根本没有走到你加的 Filter）。
+- Root Cause：`FilterChainProxy` 会按顺序遍历 `SecurityFilterChain`，**第一个 matches 的链就会被选中**；如果某条链的 matcher 过宽（例如 `/**`）且顺序更靠前，它会“吃掉”后续更具体的链。
+- Verification：`BootSecurityMultiFilterChainOrderLabTest#jwtPathMatchesJwtChain_andApiPathMatchesBasicChain`
+- Breakpoints：`FilterChainProxy#doFilterInternal`、`FilterChainProxy#getFilters`、`DefaultSecurityFilterChain#matches`
+- Fix：让 matcher 更具体（优先写清路径/方法），并显式控制链顺序（例如 `@Order`）；同时把“到底选了哪条链”用可断言的 Lab/Test 固化下来。
+
 - matcher 覆盖范围是否互斥？
 - `@Order` 是否符合你的预期？
 

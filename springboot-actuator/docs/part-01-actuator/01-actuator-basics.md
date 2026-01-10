@@ -14,7 +14,11 @@
 
 ## C. 机制主线
 
-- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+本章用最小心智模型把 Actuator 的“端点是否可用”拆成三段式分流：
+
+1. **Registered**：端点是否存在（是否有 endpoint bean）
+2. **Exposed**：端点是否暴露到 HTTP（include/exclude/base-path）
+3. **Accessible**：端点是否可访问（401/403/404 分流）
 
 ## D. 源码与断点
 
@@ -35,8 +39,18 @@
 
 ## F. 常见坑与边界
 
-## 本章定位
-本章给出 Actuator 最小心智模型：端点注册 → 暴露策略 → 访问路径与安全边界。
+### 坑点 1：把 401/403/404 混为一谈，导致排障方向完全错误
+
+- Symptom：访问 `/actuator/env` 失败后，只盯着安全配置或只盯着 exposure 配置，反复试错
+- Root Cause：三段式分流没有先做：
+  - 401：通常是认证问题（Authentication）
+  - 403：通常是鉴权/CSRF 等安全策略问题（Authorization/CSRF）
+  - 404：可能是没暴露（Exposed 集合不包含它）或路径/base-path 不对
+- Verification：
+  - 404（默认不暴露 env）：`BootActuatorLabTest#envEndpointIsNotExposedByDefault`
+  - 200（include env 后可访问）：`BootActuatorExposureOverrideLabTest#envEndpointCanBeExposedViaProperties`
+  - `/actuator` links 作为“暴露事实来源”：`BootActuatorLabTest#actuatorRootListsExposedEndpoints`
+- Fix：先用 `/actuator` + exposure 配置固定“暴露集合”，再根据 401/403 分流到安全层排障
 
 ## G. 小结与下一章
 

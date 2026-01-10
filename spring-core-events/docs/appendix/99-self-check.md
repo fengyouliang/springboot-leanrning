@@ -14,7 +14,12 @@
 
 ## C. 机制主线
 
-- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+这一章用“最小实验 + 可断言证据链”复盘 4 个核心分流：
+
+1. 同步默认值（线程模型）
+2. 多监听器与顺序（@Order）
+3. condition/payload（触发条件与类型匹配）
+4. 异常/事务/异步（失败是否影响发布方、何时触发）
 
 ## D. 源码与断点
 
@@ -24,12 +29,12 @@
 ## E. 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
-- Lab：`SpringCoreEventsLabTest` / `SpringCoreEventsMechanicsLabTest`
+- Lab：`SpringCoreEventsLabTest` / `SpringCoreEventsMechanicsLabTest` / `SpringCoreEventsListenerFilteringLabTest` / `SpringCoreEventsTransactionalEventLabTest` / `SpringCoreEventsAsyncMulticasterLabTest`
 - 建议命令：`mvn -pl spring-core-events test`（或在 IDE 直接运行上面的测试类）
 
 ### 复现/验证补充说明（来自原文迁移）
 
-> 验证入口（可跑）：`SpringCoreEventsLabTest` / `SpringCoreEventsMechanicsLabTest`
+> 验证入口（可跑）：`SpringCoreEventsLabTest` / `SpringCoreEventsMechanicsLabTest` / `SpringCoreEventsListenerFilteringLabTest` / `SpringCoreEventsTransactionalEventLabTest` / `SpringCoreEventsAsyncMulticasterLabTest`
 
 > 用来检查你是否能“复述机制 + 解释边界 + 给出最小复现”。
 
@@ -41,7 +46,15 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把事件当“最终一致性工具”却不区分同步/异步/事务阶段
+
+- Symptom：回滚时仍有副作用；或 afterCommit 没触发；或异常把发布方打断
+- Root Cause：事件机制的行为由“线程模型 + 异常传播 + 事务阶段”共同决定
+- Verification：
+  - 异常默认传播：`SpringCoreEventsMechanicsLabTest#listenerExceptionsPropagateToPublisher_byDefault`
+  - @Async 需要 EnableAsync：`SpringCoreEventsMechanicsLabTest#asyncAnnotationIsIgnored_withoutEnableAsync`
+  - 事务阶段：`SpringCoreEventsTransactionalEventLabTest#afterCommitDoesNotRunOnRollback_butAfterRollbackDoes`
+- Fix：先用测试把线程模型/异常策略/事务阶段锁住，再把“副作用”设计到合适的阶段（afterCommit/afterRollback/异步队列等）
 
 ## G. 小结与下一章
 
@@ -53,7 +66,7 @@
 
 ### 对应 Lab/Test
 
-- Lab：`SpringCoreEventsLabTest` / `SpringCoreEventsMechanicsLabTest`
+- Lab：`SpringCoreEventsLabTest` / `SpringCoreEventsMechanicsLabTest` / `SpringCoreEventsListenerFilteringLabTest` / `SpringCoreEventsTransactionalEventLabTest` / `SpringCoreEventsAsyncMulticasterLabTest`
 
 上一章：[90-common-pitfalls](90-common-pitfalls.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[Docs TOC](../README.md)
 

@@ -55,7 +55,16 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把 proxy AOP 的排障套路直接套到 weaving 上，导致方向跑偏
+
+- Symptom：你用“是否走代理/是否注入到 Spring bean”排查 weaving，结果越查越乱
+- Root Cause：weaving 不依赖 Spring 容器与 call path，它依赖的是：
+  - LTW：JVM agent + aop.xml + include 范围
+  - CTW：构建期织入产物
+- Verification：
+  - LTW 有 agent：`AspectjLtwLabTest#ltw_testJvmIsStartedWithJavaAgent`
+  - CTW 无 agent：`AspectjCtwLabTest#ctw_testJvmIsNotStartedWithAspectjJavaAgent`
+- Fix：先分流你处于 LTW 还是 CTW，再按对应的“生效前提”排障；不要把 weaving 当成 proxy 世界的问题
 
 ## G. 小结与下一章
 

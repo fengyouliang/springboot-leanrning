@@ -14,7 +14,10 @@
 
 ## C. 机制主线
 
-- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+这一章用“最小实验 + 断言”复盘两条主线：
+
+1. `@Async`：代理是否生效、线程是否切换、异常是否可观察
+2. `@Scheduled`：开关是否打开、任务是否注册、测试是否可确定性验证
 
 ## D. 源码与断点
 
@@ -40,7 +43,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：self-invocation 绕过代理，导致 `@Async`/`@Transactional` 类注解“看起来写了但不生效”
+
+- Symptom：你在同一个 bean 内部调用 `@Async` 方法，发现没有切线程
+- Root Cause：自调用不经过代理，拦截器不会触发（这是 AOP 的共同边界）
+- Verification：`BootAsyncSchedulingLabTest#selfInvocationBypassesAsyncAsAPitfall`
+- Fix：让调用跨越 bean 边界（或通过代理获取自身），并用线程名断言把行为锁住
 
 ## G. 小结与下一章
 

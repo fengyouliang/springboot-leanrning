@@ -52,6 +52,14 @@
 
 ## 坑 5：测试里忘记 `@DataJpaTest` 的默认回滚
 
+## 坑 6：以为 `merge()` 会“把原对象重新托管”，结果改了半天没生效
+
+- Symptom：你在 `detach()/clear()` 之后继续改对象，觉得“脏检查会帮我 UPDATE”，但数据库里啥都没变；或者你调用了 `merge()`，但后续仍然在 **原对象** 上继续改，结果再次不生效。
+- Root Cause：JPA 的 `merge()` 语义是 **复制状态到一个新的 managed 实例**，并返回这个 managed 实例；传入的那个对象本身仍然是 detached，后续修改不会被脏检查追踪。
+- Verification：`BootDataJpaMergeAndDetachLabTest#detached_changesWithoutMerge_shouldNotBePersisted`、`BootDataJpaMergeAndDetachLabTest#merge_shouldPersistDetachedChangesIntoManagedCopy`
+- Breakpoints：`org.hibernate.internal.SessionImpl#merge`、`org.hibernate.event.internal.DefaultMergeEventListener#onMerge`
+- Fix：后续操作一律使用 `merge()` 的返回值，或重新 `find()` 获取 managed；把“对象状态（managed/detached）→ 预期 SQL”用 Lab/Test 固化。
+
 - 现象：你想“写入后在下一个测试里看到”，但看不到
 - 原因：测试默认回滚
 - 对照：见 [docs/06](../part-01-data-jpa/06-datajpatest-slice.md)

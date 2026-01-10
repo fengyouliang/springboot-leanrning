@@ -63,7 +63,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：排障只看日志，不看 violations 证据链（路径/消息/group），导致越查越乱
+
+- Symptom：校验失败时你只能看到异常/日志，但不知道是哪条约束、哪个 group 生效
+- Root Cause：violations 是结构化证据；groups 决定“哪些约束参与本次校验”
+- Verification：
+  - group 分流：`SpringCoreValidationMechanicsLabTest#groupsControlWhichConstraintsApply`
+  - violation 证据字段：`SpringCoreValidationMechanicsLabTest#constraintViolationIncludesMessageAndPropertyPath`
+- Fix：先用测试最小化复现（固定 group/输入），再基于 violations 的 propertyPath/message 定位规则与触发点
 
 ## G. 小结与下一章
 

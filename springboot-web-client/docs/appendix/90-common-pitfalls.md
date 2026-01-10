@@ -43,6 +43,14 @@
 
 ## 幂等性没想清楚
 
+## Filter 顺序误判：request 顺序 ≠ response 顺序
+
+- Symptom：你按注册顺序写了多个 `ExchangeFilterFunction`，以为 request/response 都按同样顺序执行；结果 debug 时发现 response 相关逻辑“倒着来”。
+- Root Cause：`WebClient` 的 filter 本质上是对 `ExchangeFunction` 的一层层包裹：request 走外→内，response 信号回流时是内→外（表现为 response 侧顺序反转）。
+- Verification：`BootWebClientWebClientFilterOrderLabTest#webClientFilters_requestOrderAndResponseOrder_areDifferent`
+- Breakpoints：`DefaultWebClient$DefaultRequestBodyUriSpec#exchange`、`ExchangeFilterFunction` 链路的装配与调用
+- Fix：写 filter 时区分 request/response 侧的执行顺序；把“期望顺序”直接写进 Lab/Test，避免靠脑补。
+
 - GET 通常更安全重试
 - POST/PUT/DELETE 可能有副作用：重试前要想清楚（Exercise 有引导）
 

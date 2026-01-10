@@ -63,7 +63,14 @@ Spring 事务默认回滚规则经常让人困惑：
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：以为“抛异常就一定回滚”，结果 checked exception 仍然提交
+
+- Symptom：你抛了业务异常（checked），却发现数据仍然落库，误以为事务没生效
+- Root Cause：Spring 默认回滚规则：RuntimeException/Error 回滚；checked exception 默认不回滚
+- Verification：
+  - checked 默认不回滚：`SpringCoreTxLabTest#checkedExceptionsDoNotRollbackByDefault`
+  - 显式 rollbackFor 才回滚：`SpringCoreTxLabTest#rollbackForCheckedExceptionsCanBeConfigured`
+- Fix：把回滚规则当成显式契约写出来（rollbackFor/noRollbackFor），并用测试锁住“哪些异常会导致哪些数据落库结果”
 
 ## G. 小结与下一章
 

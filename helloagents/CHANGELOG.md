@@ -5,6 +5,8 @@
 ## [Unreleased]
 
 ### Added
+- `spring-core-events`：新增异步 multicaster 默认 Lab `SpringCoreEventsAsyncMulticasterLabTest`，用于可断言验证自定义 `ApplicationEventMulticaster` + `TaskExecutor` 的异步分发主线。
+- `springboot-data-jpa`：新增用于 N+1/EntityGraph 验证的示例实体与仓库（`LibraryAuthor/LibraryBook`），并增强 `BootDataJpaLabTest` 覆盖 `getReferenceById` 懒代理与 N+1/EntityGraph 边界的可断言证据链。
 - `scripts`：新增教学化覆盖度自检脚本 `scripts/check-teaching-coverage.py`（面向所有包含 `docs/README.md` 的模块：`spring-core-*` + `springboot-*`），并提供聚合闸门脚本 `scripts/check-docs.sh`（断链检查 + 教学覆盖），用于验收“每章至少 1 个可跑入口 + 每模块至少 N 个 LabTest”。
 - `scripts`：新增 docs 书本化批处理脚本 `scripts/bookify-docs.py`：以 `docs/README.md` 为 SSOT，对每章 upsert 统一尾部区块（`### 对应 Lab/Test` + `上一章｜目录｜下一章`），确保可重复执行。
 - `spring-core-events`：补齐事务事件最小闭环（`@TransactionalEventListener` AFTER_COMMIT/rollback）Lab，并在 docs/07 增加对应入口块；测试依赖补齐 `spring-tx`。
@@ -22,10 +24,15 @@
 - `helloagents`：补齐 `project.md` 的测试类型约定与 Troubleshooting 条目模板（文档↔测试入口↔排障清单对齐）。
 - `spring-core-beans`：增强依赖注入候选选择对照：补齐 by-name fallback、`@Qualifier` vs `@Primary`、泛型收敛与 `ObjectProvider#getIfUnique()/orderedStream()` 语义，并同步更新 docs/33 与 appendix（pitfalls/self-check）。
 - `springboot-web-mvc`：新增 Security FilterChain vs MVC 异常链路边界 Lab `BootWebMvcSecurityVsMvcExceptionBoundaryLabTest`（`handler/resolvedException` 证据链），并同步更新 part-08/part-03/part-07 与 appendix（pitfalls/self-check）入口。
+- `springboot-security`：新增多条 `SecurityFilterChain` 分流/顺序可断言 Lab `BootSecurityMultiFilterChainOrderLabTest`，用于验证 matcher 命中链路与 cross-cutting filter 的链内可见性。
+- `springboot-data-jpa`：新增 merge/detach 语义默认 Lab `BootDataJpaMergeAndDetachLabTest`，固化 detached 修改不落库与 `merge()` 返回 managed copy 的关键边界。
+- `spring-core-events`：新增 listener filtering 默认 Lab `SpringCoreEventsListenerFilteringLabTest`，用于可断言解释“监听器没触发”常见根因（参数类型过滤）。
+- `springboot-web-client`：新增 WebClient filter 顺序默认 Lab `BootWebClientWebClientFilterOrderLabTest`，用 `ExchangeFunction` stub 在无真实网络下可断言验证 request 顺序与 response 顺序反转。
 
 ### Removed
 - `scripts`：移除章节契约相关脚本：`scripts/check-chapter-contract.py`、`scripts/ag-contract-docs.py`（不再推荐 A–G 作为写作规范，也不再提供相关闸门/自检工具）。
 ### Changed
+- `springboot-*` 与 `spring-core-*`（除 `spring-core-beans`/`springboot-web-mvc`）：深挖对齐（对标 `spring-core-beans`），补齐各模块 Guide 机制主线（导航图）、章节可断言坑点/边界与断点入口，并同步更新 `helloagents/wiki/modules/*.md`。
 - 全模块 docs：将 `docs/README.md` 引用的全部章节整理为统一的章节结构（A–G 二级标题，并保留 BOOKIFY 尾部导航）。A–G 仅作为既有排版，不再作为写作规范/闸门。
 - 根 `README.md`：跨模块学习路线入口统一指向 `<module>/docs/README.md`（Docs TOC）。
 - `spring-core-*`：对齐教学化文档规范：清理 docs 正文中的 `docs/NN` 缩写引用，统一替换为可解析的 Markdown 相对链接；统一章节末尾 `### 对应 Lab/Test` 入口块；并通过断链检查与教学覆盖检查。

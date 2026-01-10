@@ -95,6 +95,22 @@ mvn -pl springboot-security spring-boot:run -Dspring-boot.run.profiles=dev
 
 ## F. 常见坑与边界
 
+### 坑点 1：Authorization 头里没有 `Bearer ` 前缀，结果永远是 401
+
+- Symptom：你确认带了 token，但接口仍然返回 401（尤其是把 `Authorization: <token>` 直接塞进去时）。
+- Root Cause：默认的 Bearer Token 解析器只认 `Authorization: Bearer <token>`；前缀不对就解析不到 token，最终认证上下文为空。
+- Verification：`BootSecurityLabTest#jwtSecureEndpointReturns401WhenBearerPrefixMissing_asPitfall`
+- Breakpoints：`BearerTokenAuthenticationFilter#doFilterInternal`、`DefaultBearerTokenResolver#resolve`
+- Fix：统一使用 `Authorization: Bearer <token>`；如必须兼容非标准格式，显式配置 `BearerTokenResolver`（并在文档/测试中固化约定）。
+
+### 坑点 2：token 带了 scope 但授权仍然 403（scope/authority 前缀不一致）
+
+- Symptom：JWT 认证通过（不再 401），但访问需要权限的接口返回 403。
+- Root Cause：Spring Security 对 scope 的默认映射通常会带 `SCOPE_` 前缀；如果你在规则里写 `hasRole("ADMIN")`/`ROLE_`，或 scope 名称与规则不一致，就会被拒绝。
+- Verification：`BootSecurityLabTest#jwtAdminEndpointReturns403WhenScopeMissing`
+- Breakpoints：`JwtAuthenticationProvider#authenticate`、`JwtGrantedAuthoritiesConverter#convert`、`AuthorizationFilter#doFilter`
+- Fix：对齐“token 里提供什么 → 代码里用什么做授权”的映射（例如统一使用 `hasAuthority("SCOPE_admin")` 或调整 converter）。
+
 > 注意：`/api/jwt/dev/token` 仅用于学习（dev profile），不是生产做法。
 
 ## G. 小结与下一章

@@ -49,6 +49,16 @@ MockWebServer 的优势：
 
 ## F. 常见坑与边界
 
+### 坑点 1：为了验证“客户端内部行为”也上 MockWebServer，导致测试变慢/变脆
+
+- Symptom：你只是想验证 `WebClient` 的 filter 顺序、Header 组装、错误映射等“纯客户端逻辑”，却引入了 MockWebServer；测试需要开端口、写 enqueue、还可能出现 `InterruptedException` 或偶发超时。
+- Root Cause：MockWebServer 本质上是一个真实的 HTTP server（socket + 线程 + I/O）；当目标只是验证 **ExchangeFilterFunction 链路** 时，引入网络层会增加不确定性与成本。
+- Verification：`BootWebClientWebClientFilterOrderLabTest#webClientFilters_requestOrderAndResponseOrder_areDifferent`
+- Breakpoints：`org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction#exchange`、`ExchangeFilterFunction` 链路（filter 的 request/response 包裹顺序）
+- Fix：把测试分层：
+  - 只测客户端链路（filters/错误映射）→ 用 `ExchangeFunction` stub
+  - 需要验证真实 HTTP 行为（path/query/body/headers/序列化）→ 再用 MockWebServer
+
 学习 HTTP client 的最大坑之一是：你不知道“请求到底发了什么”，以及你的 client 行为是否稳定（比如是否重试、header 是否注入、body 是否正确）。
 
 ## G. 小结与下一章

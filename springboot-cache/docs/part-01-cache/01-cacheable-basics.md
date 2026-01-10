@@ -40,7 +40,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把 `@Cacheable` 方法当成“每次都会执行”，忽略了命中短路
+
+- Symptom：你在方法里写了日志/计数/副作用，以为每次调用都会发生，但线上只发生一次或发生次数异常
+- Root Cause：`@Cacheable` 命中后会短路方法执行（直接返回缓存值）
+- Verification：`BootCacheLabTest#cacheableCachesResultForSameKey`（invocationCount 作为证据）
+- Fix：缓存方法尽量保持纯函数/无副作用；副作用需要单独设计，不要依赖“方法一定会被调用”
 
 ## G. 小结与下一章
 

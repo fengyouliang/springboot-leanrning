@@ -76,6 +76,16 @@ class BootSecurityLabTest {
     }
 
     @Test
+    @WithMockUser(authorities = "ADMIN")
+    void adminEndpointReturns403WhenAuthorityAdminButMissingRolePrefix_asPitfall() throws Exception {
+        mockMvc.perform(get("/api/admin/ping"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("forbidden"))
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.path").value("/api/admin/ping"));
+    }
+
+    @Test
     void csrfBlocksPostEvenWhenAuthenticated() throws Exception {
         mockMvc.perform(post("/api/secure/change-email")
                         .with(httpBasic("user", "password"))
@@ -115,6 +125,17 @@ class BootSecurityLabTest {
     @Test
     void jwtSecureEndpointReturns401WhenMissingBearerToken() throws Exception {
         mockMvc.perform(get("/api/jwt/secure/ping"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("unauthorized"))
+                .andExpect(jsonPath("$.path").value("/api/jwt/secure/ping"));
+    }
+
+    @Test
+    void jwtSecureEndpointReturns401WhenBearerPrefixMissing_asPitfall() throws Exception {
+        String token = jwtTokenService.issueToken("alice", "read");
+
+        mockMvc.perform(get("/api/jwt/secure/ping")
+                        .header("Authorization", token))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value("unauthorized"))
                 .andExpect(jsonPath("$.path").value("/api/jwt/secure/ping"));
@@ -172,6 +193,13 @@ class BootSecurityLabTest {
     }
 
     @Test
+    @WithMockUser(authorities = "ADMIN")
+    void methodSecurityDeniesAdminOnlyMethodWhenRolePrefixMissing_asPitfall() {
+        assertThatThrownBy(() -> adminOnlyService.adminOnlyAction())
+                .isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
     @WithMockUser(roles = "ADMIN")
     void methodSecurityAllowsAdminOnlyMethodForAdmin() {
         assertThat(adminOnlyService.adminOnlyAction()).isEqualTo("admin_action_done");
@@ -187,4 +215,3 @@ class BootSecurityLabTest {
                 .isEqualTo("outer:admin_only");
     }
 }
-

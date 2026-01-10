@@ -58,7 +58,16 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：只加了 `@Async` 却没想清“异步点在哪里”，导致线程模型与异常策略混乱
+
+- Symptom：你以为“事件已经异步”，但实际只有某个 listener 异步；或者你以为发布方不会被影响，结果仍被同步 listener 拖慢/异常打断
+- Root Cause：
+  - `@Async`：异步点在“监听器方法”
+  - async multicaster：异步点在“分发过程”（默认让所有 listener 异步）
+- Verification（用线程名把异步点固定成证据）：
+  - async multicaster：`SpringCoreEventsAsyncMulticasterLabTest#asyncMulticasterDispatchesListenersOnExecutorThread`
+  - @Async listener：`SpringCoreEventsMechanicsLabTest#asyncListenerRunsOnDifferentThread_whenEnableAsyncIsOn`
+- Fix：先选清楚你要异步的是“某个 listener”还是“整个分发过程”，再用可断言的线程名/执行时机把行为锁住
 
 ## G. 小结与下一章
 

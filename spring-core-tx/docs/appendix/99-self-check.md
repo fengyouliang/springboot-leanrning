@@ -14,7 +14,12 @@
 
 ## C. 机制主线
 
-- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+这一章用“最小实验 + 数据证据”复盘 4 条主线：
+
+1. 事务边界：代理是否参与、方法内是否真的有事务
+2. 回滚规则：runtime vs checked + rollbackFor/noRollbackFor
+3. 传播行为：外层/内层的提交与回滚如何交互
+4. 排障方法：以“数据是否落库”为最终证据，而不是只看异常/日志
 
 ## D. 源码与断点
 
@@ -44,7 +49,15 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：只看异常不看数据，导致对 commit/rollback 的判断经常反过来
+
+- Symptom：你以为回滚了，但表里数据还在；或你以为提交了，但数据没落库
+- Root Cause：异常只是触发条件之一；最终结果由事务边界、回滚规则、传播行为共同决定
+- Verification：
+  - runtime 回滚：`SpringCoreTxLabTest#rollsBackOnRuntimeException`
+  - checked 默认不回滚：`SpringCoreTxLabTest#checkedExceptionsDoNotRollbackByDefault`
+  - REQUIRES_NEW 独立提交：`SpringCoreTxLabTest#requiresNewCanCommitEvenIfOuterTransactionRollsBack`
+- Fix：把“行数变化/标签写入”作为最终证据链（本模块 tests 已提供），先锁住事实再讨论机制
 
 ## G. 小结与下一章
 

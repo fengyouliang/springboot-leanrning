@@ -54,7 +54,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：认为“改字段就立刻发 UPDATE”，忽略了 flush/commit 才是写入时机
+
+- Symptom：你修改字段后立刻去看 SQL/DB，发现没变化，于是误判“脏检查没生效”
+- Root Cause：dirty checking 会把变化记录在 persistence context，真正写入发生在 flush/commit
+- Verification：`BootDataJpaLabTest#dirtyCheckingPersistsChangesOnFlush`
+- Fix：学习阶段用 `entityManager.flush()` 主动触发同步，并在 `clear()` 后重新查询验证（避免一级缓存假象）
 
 ## G. 小结与下一章
 

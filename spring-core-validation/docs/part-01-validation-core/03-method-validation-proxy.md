@@ -63,7 +63,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：以为 method validation 是语言特性，忽略它依赖 Spring 代理
+
+- Symptom：你在 service 方法上写了约束，结果在某些调用路径上完全不生效
+- Root Cause：method validation 与 `@Transactional` 一样依赖 AOP 代理；绕开代理（new/自调用）就不会触发
+- Verification：
+  - 代理存在性：`SpringCoreValidationLabTest#methodValidatedServiceIsAnAopProxy`
+  - 无代理不触发（坑点）：`SpringCoreValidationMechanicsLabTest#methodValidationDoesNotRunWhenCallingAServiceDirectly_withoutSpringProxy`
+- Fix：让调用跨 bean 边界（走代理），并用测试锁住“无效入参必抛 ConstraintViolationException”
 
 ## G. 小结与下一章
 

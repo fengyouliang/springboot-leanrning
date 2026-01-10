@@ -46,7 +46,12 @@ Ticker 的核心价值是：让“时间推进”变成可控输入，从而写�
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：用真实时间 + sleep 测 TTL，导致 flaky 与慢测试
+
+- Symptom：缓存过期测试偶发失败（机器负载/调度抖动），或为避免失败把 sleep 写很长导致测试很慢
+- Root Cause：真实时间不可控，sleep 不是确定性输入
+- Verification：`BootCacheLabTest#expiryCanBeTestedDeterministicallyWithManualTicker`
+- Fix：用 `Ticker`（如 `ManualTicker`）把时间推进变成可控输入，把“过期”变成可断言事实
 
 ## G. 小结与下一章
 

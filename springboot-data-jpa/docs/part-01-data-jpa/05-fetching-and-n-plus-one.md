@@ -65,7 +65,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：循环里访问 lazy 关联，触发 N+1 但你毫无察觉
+
+- Symptom：功能测试都通过，但线上接口突然变慢；profiling 发现 SQL 数量暴涨
+- Root Cause：列表查询 + 循环访问 lazy 关联 → 触发额外 select（N+1）
+- Verification（本模块默认 Lab 给出可回归证据链）：
+  - N+1 发生：`BootDataJpaLabTest#nPlusOneHappensWhenAccessingLazyCollections`
+  - 常见修复思路（示例）：EntityGraph 预取集合：`BootDataJpaLabTest#entityGraphCanAvoidNPlusOne_whenFetchingCollections`
+- Fix：先用统计/日志把 N+1 变成事实，再选择 fetch join / entity graph / batch size 等手段，并用测试锁住“查询数不回退”
 
 ## G. 小结与下一章
 

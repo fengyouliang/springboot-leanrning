@@ -46,7 +46,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把底层异常直接抛给业务层，导致“上层无法分流处理”
+
+- Symptom：上层只拿到一个 `RuntimeException/RestClientException`，无法区分 4xx/5xx/超时；重试/告警/降级都做不了
+- Root Cause：没有把 HTTP 状态码映射成你的领域异常（并携带 status 作为分类依据）
+- Verification：
+  - RestClient：`BootWebClientRestClientLabTest#restClientMaps400ToDomainException`
+  - WebClient：`BootWebClientWebClientLabTest#webClientMaps500ToDomainException`
+- Fix：把“状态码 → 领域异常”固定成测试断言，并让异常携带 status（用于上层分流）
 
 ## G. 小结与下一章
 

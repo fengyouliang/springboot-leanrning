@@ -61,7 +61,28 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把 401/403 当成同一种失败，导致排障走错方向
+
+- Symptom：接口访问失败时只盯着“账号密码/权限配置”某一处反复试错
+- Root Cause：401 与 403 分别对应不同分流：
+  - 401：Authentication 没建立（匿名/认证失败）
+  - 403：Authentication 已建立，但 Authorization 不通过（权限不足/CSRF 等）
+- Verification：
+  - 401：`BootSecurityLabTest#secureEndpointReturns401WhenAnonymous`
+  - 403：`BootSecurityLabTest#adminEndpointReturns403ForNonAdminUser`
+- Fix：先根据响应码分流（401→认证；403→鉴权/CSRF），再回到 `SecurityConfig` 对齐规则
+
+### 坑点 2：`hasRole("ADMIN")` 不是 `authorities("ADMIN")`（ROLE_ 前缀边界）
+
+- Symptom：你以为“我已经给了 ADMIN 权限”，但访问 `/api/admin/**` 仍然 403
+- Root Cause：
+  - `hasRole("ADMIN")` 的语义是：需要 `ROLE_ADMIN`
+  - 仅有 `ADMIN` authority 并不等价于 `ROLE_ADMIN`
+- Verification：`BootSecurityLabTest#adminEndpointReturns403WhenAuthorityAdminButMissingRolePrefix_asPitfall`
+- Breakpoints：
+  - `SecurityConfig#apiChain`（`hasRole("ADMIN")` 规则定义）
+  - `JsonAccessDeniedHandler#handle`（403 塑形）
+- Fix：在需要 role 语义时给 `ROLE_ADMIN`（或改用 `hasAuthority("ADMIN")` 并统一你的权限命名）
 
 ## G. 小结与下一章
 

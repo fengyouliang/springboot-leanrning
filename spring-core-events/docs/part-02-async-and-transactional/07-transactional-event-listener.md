@@ -83,6 +83,14 @@ mvn -pl springboot-business-case test
 
 ## F. 常见坑与边界
 
+### 坑点 1：你以为 “after-commit 一定会触发”，但事务回滚/没有事务时它根本不会跑
+
+- Symptom：你发布了事件，但 `@TransactionalEventListener(phase = AFTER_COMMIT)` 的监听器完全没触发；或者本地调试“偶发触发/偶发不触发”。
+- Root Cause：`AFTER_COMMIT` 监听器依赖事务同步回调：**只有事务真正提交**才会触发；如果事务回滚，或者发布事件时根本没有活跃事务，就不会进入 after-commit（除非显式启用 fallback 行为）。
+- Verification：`SpringCoreEventsTransactionalEventLabTest#afterCommitListenerRunsOnlyAfterCommit`、`SpringCoreEventsTransactionalEventLabTest#afterCommitDoesNotRunOnRollback_butAfterRollbackDoes`
+- Breakpoints：`TransactionalApplicationListenerMethodAdapter#onApplicationEvent`、`TransactionSynchronizationManager#isSynchronizationActive`
+- Fix：确保事件发布发生在事务边界内，并根据语义选对 phase（需要回滚补偿就用 `AFTER_ROLLBACK` / `AFTER_COMPLETION`）；把“提交/回滚 → 哪些 listener 触发”的结论写进 Lab/Test，避免只靠经验判断。
+
 - `@EventListener` 默认是“同步回调”，它不理解事务边界  
 - 事务回滚只影响数据库提交，不会自动撤销你已经执行过的监听器逻辑
 

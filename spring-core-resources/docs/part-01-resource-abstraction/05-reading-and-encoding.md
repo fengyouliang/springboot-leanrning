@@ -55,7 +55,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：依赖平台默认编码读取文本，导致“本地正常、线上乱码”
+
+- Symptom：在某台机器上中文/特殊字符乱码，换环境又正常
+- Root Cause：平台默认编码不可控；文本读取必须显式指定 charset
+- Verification：`SpringCoreResourcesMechanicsLabTest#classpathResourceCanBeReadAsBytes`（bytes → UTF-8 text）
+- Fix：读取文本时始终显式指定 `StandardCharsets.UTF_8`；并把 `Resource#getDescription()` 打进异常或日志，提升可观察性
 
 ## G. 小结与下一章
 

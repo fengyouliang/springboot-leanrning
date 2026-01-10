@@ -49,7 +49,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：用 `Thread.sleep` 写调度测试，导致 flaky（偶现失败/偶现通过）
+
+- Symptom：本地能跑，CI 偶发失败；或者为了“等它触发”把 sleep 写得很长导致测试很慢
+- Root Cause：调度本身是时间相关行为，如果没有上限与同步点，很难稳定断言
+- Verification：
+  - 没有开关不会触发：`BootAsyncSchedulingLabTest#schedulingRequiresEnableScheduling`
+  - 开启后至少触发一次：`BootAsyncSchedulingLabTest#schedulingTriggersTaskWhenEnableSchedulingPresent`
+- Fix：用 `CountDownLatch` + 有上限的 await 固定“至少触发一次”的事实，不要靠长 sleep 试运气
 
 ## G. 小结与下一章
 

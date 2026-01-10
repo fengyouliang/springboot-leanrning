@@ -54,7 +54,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：自定义约束能跑但不可用（message/propertyPath 不清晰），导致调用方无法定位问题
+
+- Symptom：你做了自定义约束，但 violations 给出的信息不清晰，调用方不知道哪个字段因什么失败
+- Root Cause：自定义约束需要把 message 与 propertyPath 等“诊断信息”设计为可消费的契约
+- Verification：
+  - 自定义约束可用：`SpringCoreValidationMechanicsLabTest#customConstraintsCanBeDefinedWithConstraintValidator`
+  - violation 含 propertyPath/message：`SpringCoreValidationMechanicsLabTest#constraintViolationIncludesMessageAndPropertyPath`
+- Fix：把 message 设计成可读且可参数化（如 `{prefix}`），并用测试断言 violations 的 message 与 path
 
 ## G. 小结与下一章
 

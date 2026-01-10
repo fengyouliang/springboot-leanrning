@@ -141,7 +141,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：用 `getClass()` 误判代理类型与目标类型，导致排障结论完全错误
+
+- Symptom：你看到 `com.sun.proxy.$ProxyXX` 或 `$$SpringCGLIB$$` 就下结论，结果切点/注入/类型判断一路错
+- Root Cause：proxy 的运行时类型与目标类型不同；要用 AOP 工具类/Advised 来观测
+- Verification（把“代理类型差异”做成可断言事实）：
+  - JDK proxy：`SpringCoreAopProxyMechanicsLabTest#jdkDynamicProxyIsUsedForInterfaceBasedBeans_whenProxyTargetClassIsFalse`
+  - CGLIB proxy：`SpringCoreAopProxyMechanicsLabTest#cglibProxyIsUsedForClassBasedBeans_whenProxyTargetClassIsTrue`
+- Fix：判断 proxy 用 `AopUtils`；判断目标类型用 `AopUtils.getTargetClass`；需要看 advisors 用 `Advised#getAdvisors()`
 
 ## G. 小结与下一章
 

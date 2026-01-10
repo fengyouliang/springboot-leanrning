@@ -66,7 +66,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：修改 detached entity 以为能落库，结果“改了但没生效”
+
+- Symptom：你拿着一个对象改字段，flush/commit 后数据库没变化，于是怀疑“JPA 不可靠”
+- Root Cause：dirty checking 的前提是 entity 必须处于 managed 状态；detach/clear 后对象不再受 persistence context 管理
+- Verification：
+  - clear 后 contains=false（detached）：`BootDataJpaLabTest#entityManagerClearDetachesEntities`
+  - 只有 managed + flush 才会落库：`BootDataJpaLabTest#dirtyCheckingPersistsChangesOnFlush`
+- Fix：把“对象现在是不是 managed”作为排障第一问；需要重新纳管时用 merge/重新查询再修改
 
 ## G. 小结与下一章
 

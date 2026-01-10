@@ -18,6 +18,9 @@
 
 ## 你应该观察到什么
 
+- WebClient 返回的是 `Mono<T>`：成功/失败都在 reactive 流里表达（不是“抛异常/返回值”二选一）
+- `StepVerifier` 能把“next/error/complete”写成确定性断言，比随手 `.block()` 更稳定
+
 ## D. 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
@@ -43,7 +46,16 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：用 `.block()` 代替 StepVerifier，导致“错误路径没测到/测试挂死”
+
+- Symptom：测试看起来能跑通成功路径，但错误路径（4xx/5xx/timeout）没有任何断言；或者 `.block()` 没有超时导致卡住
+- Root Cause：
+  - reactive 流的错误是信号（error signal），需要你显式断言
+  - `.block()` 更像“临时把响应式当同步用”，容易漏掉语义与边界
+- Verification：
+  - StepVerifier 固定成功路径：`BootWebClientWebClientLabTest#webClientGetsGreeting`
+  - timeout 会失败（需要明确超时边界）：`BootWebClientWebClientLabTest#webClientResponseTimeoutFailsFast`
+- Fix：成功/失败都优先用 StepVerifier 写断言；不得不 block 时也要明确 timeout（并把超时作为可回归证据）
 
 ## G. 小结与下一章
 

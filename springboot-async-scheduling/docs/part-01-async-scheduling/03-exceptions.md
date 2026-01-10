@@ -43,7 +43,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：void 异步异常被“悄悄吞掉”，线上只有日志没有告警
+
+- Symptom：异步方法内部抛异常，调用方没有任何感知；线上只在日志里偶然看到 stacktrace
+- Root Cause：void async 的异常不会传回调用方，而是交给 `AsyncUncaughtExceptionHandler`
+- Verification：`BootAsyncSchedulingLabTest#asyncExceptionsFromVoidAreHandledByAsyncUncaughtExceptionHandler`
+- Fix：对需要反馈失败的异步操作优先用 `CompletableFuture`；对 void async 必须配置并验证 UncaughtExceptionHandler
 
 ## G. 小结与下一章
 

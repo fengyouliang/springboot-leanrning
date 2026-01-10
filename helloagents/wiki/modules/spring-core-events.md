@@ -8,7 +8,7 @@
 
 - **Responsibility:** 通过最小示例与 Labs/Exercises 展示事件系统的机制与常见坑。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-07
+- **Last Updated:** 2026-01-09
 
 ## Specifications
 
@@ -34,8 +34,25 @@
 - listener 抛异常能传播回 publisher（可断言）
 - `spring-boot:run` 可观察线程与异常传播（结构化前缀 `EVENTS:`）
 
+### Requirement: 深挖对齐（对标 spring-core-beans）
+**Module:** spring-core-events
+把“同步/异步/异常传播/事务事件回调”写成可断言主线，并补齐默认 Lab 入口与章节坑点证据链。
+
+#### Scenario: 关键分支可被稳定断言
+- 默认同步与异常传播可断言
+- 自定义 multicaster + TaskExecutor 的异步分发可通过默认 Lab 稳定复现
+
+### Labs & 复现入口
+- `spring-core-events/src/test/java/com/learning/springboot/springcoreevents/part01_event_basics/SpringCoreEventsLabTest.java`
+- `spring-core-events/src/test/java/com/learning/springboot/springcoreevents/part01_event_basics/SpringCoreEventsMechanicsLabTest.java`
+- `spring-core-events/src/test/java/com/learning/springboot/springcoreevents/part01_event_basics/SpringCoreEventsListenerFilteringLabTest.java`
+- `spring-core-events/src/test/java/com/learning/springboot/springcoreevents/part02_async_and_transactional/SpringCoreEventsTransactionalEventLabTest.java`
+- `spring-core-events/src/test/java/com/learning/springboot/springcoreevents/part02_async_and_transactional/SpringCoreEventsAsyncMulticasterLabTest.java`
+
 ## Change History
 
+- [202601091802_modules_depth_align_to_beans](../../history/2026-01/202601091802_modules_depth_align_to_beans/) - ✅ 已执行：对标 spring-core-beans 深挖升级（Guide 机制主线 + 每章可断言坑点 + 默认 Lab 覆盖补齐）
+- [202601092110_depth_align_v2_batch01_sec_jpa_events_client](../../history/2026-01/202601092110_depth_align_v2_batch01_sec_jpa_events_client/) - ✅ 已执行：batch01 深挖对齐 v2（补齐 listener filtering 默认 Lab + async/tx 章节坑点入口 + 自测入口补齐）
 - [202601071034_all_modules_docs_ag_contract](../../history/2026-01/202601071034_all_modules_docs_ag_contract/) - ✅ 已执行：全模块 docs 章节结构整理（A–G 结构 + 对应 Lab/Test 入口块）；后续不再推荐 A–G 作为写作规范/闸门
 - [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过 `scripts/check-docs.sh`
 - [202601061556_spring_core_modules_teaching_rollout](../../history/2026-01/202601061556_spring_core_modules_teaching_rollout/) - ✅ 已执行：补齐 docs/07（TransactionalEventListener）可运行闭环（新增事务事件 Lab + docs 入口块），并对齐 docs 目录页/入口块规范与自检脚本

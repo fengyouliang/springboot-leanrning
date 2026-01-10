@@ -62,7 +62,28 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：多个 `SecurityFilterChain` 匹配与顺序错误，导致“命中错链路”
+
+- Symptom：
+  - 你以为 `/api/jwt/**` 走的是 JWT chain，结果行为像 Basic chain（或反过来）
+  - 例如：JWT POST 本应不需要 CSRF，却被 CSRF 拦下；或某些 header/filter 只在部分响应出现
+- Root Cause：
+  - 多个 chain 的优先级由 matcher 匹配与顺序共同决定；顺序错误时请求可能先命中一个更“宽”的 chain
+- Verification（从行为侧锁住“到底命中了哪条链路”）：
+  - TraceId filter 即使在 401 上也会写 header：`BootSecurityLabTest#traceIdHeaderIsAddedEvenOnUnauthorizedResponses`
+  - Basic 链路受 CSRF 影响：`BootSecurityLabTest#csrfBlocksPostEvenWhenAuthenticated`
+  - JWT 链路不需要 CSRF：`BootSecurityLabTest#jwtPostDoesNotRequireCsrf`
+- Fix：为不同路径建立清晰 matcher，并用 `@Order` 固定优先级；用测试断言把链路行为锁住（避免“改配置后悄悄命中错链”）
+
+### 坑点 2：只靠“响应码/行为”判断命中哪条链路，容易误判（推荐用 Filter 列表做证据链）
+
+- Symptom：你看到某个路径返回 401/403/CSRF，就主观判断“它一定命中了某条链”，结果排障方向全错
+- Root Cause：行为是“链路整体结果”，很容易被多个因素影响；而 `FilterChainProxy#getFilters(request)` 能直接给出“命中了哪条链的 filters”，证据更硬
+- Verification：`BootSecurityMultiFilterChainOrderLabTest#jwtPathMatchesJwtChain_andApiPathMatchesBasicChain`
+- Breakpoints：
+  - `org.springframework.security.web.FilterChainProxy#doFilterInternal`
+  - `org.springframework.security.web.DefaultSecurityFilterChain#matches`
+- Fix：先用默认 Lab 证明“请求命中了哪条链”，再去讨论 CSRF/认证/鉴权的细节（把排障从猜测变成证据链）
 
 ## G. 小结与下一章
 

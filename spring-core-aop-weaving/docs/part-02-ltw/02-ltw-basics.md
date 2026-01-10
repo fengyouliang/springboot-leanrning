@@ -30,6 +30,13 @@ LTW 的一句话定义：
 
 本模块的 `aop.xml` 放在：
 
+- `spring-core-aop-weaving/src/test/resources/META-INF/aop.xml`
+
+放在 test resources 的好处是：
+
+- 织入配置只影响测试运行（学习用闭环更可控）
+- 不会“意外影响”你在其他模块/应用里的默认启动
+
 ### 1.3 织入范围必须覆盖到目标类
 
 `aop.xml` 里的 `<weaver><include within="..."/></weaver>` 决定了 weaving 的范围。  
@@ -62,6 +69,9 @@ LTW 的一句话定义：
 
 本模块通过 surefire 执行 `*Ltw*Test` 时自动附带：
 
+- agent jar：`spring-core-aop-weaving/target/aspectjweaver.jar`（由 `maven-dependency-plugin` 在 `process-test-classes` 复制）
+- JVM 参数：`-javaagent:${project.build.directory}/aspectjweaver.jar`（见 `spring-core-aop-weaving/pom.xml` 的 surefire execution）
+
 对应的 Lab 断言：
 
 - `AspectjLtwLabTest#ltw_testJvmIsStartedWithJavaAgent`
@@ -72,7 +82,14 @@ LTW 的一句话定义：
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把 “织入没发生” 误判成 “pointcut 写错了”
+
+- Symptom：你改了 pointcut/切面代码，但 advice 依然不触发，于是怀疑表达式
+- Root Cause：LTW 的前提没满足（缺 agent / 缺 aop.xml / include 范围没覆盖），pointcut 再对也没用
+- Verification：
+  - JVM 是否带 agent：`AspectjLtwLabTest#ltw_testJvmIsStartedWithJavaAgent`
+  - aop.xml 是否在 classpath：确认 `spring-core-aop-weaving/src/test/resources/META-INF/aop.xml`
+- Fix：先按“三前提”分流确认 LTW 环境，再讨论 join point/pointcut
 
 ## G. 小结与下一章
 

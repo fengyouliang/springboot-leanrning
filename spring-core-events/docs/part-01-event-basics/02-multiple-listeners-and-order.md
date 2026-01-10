@@ -66,7 +66,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：依赖“自然顺序”，导致监听器执行顺序在不同环境下不稳定
+
+- Symptom：本地顺序正常，换了 JVM/构建方式后顺序变化，引发副作用顺序问题（日志/审计/补偿）
+- Root Cause：不显式声明顺序时，监听器顺序不应被依赖；需要确定性就用 `@Order`
+- Verification：`SpringCoreEventsLabTest#orderedListenersFollowOrderAnnotation`
+- Fix：当顺序是业务语义的一部分时就显式 `@Order`；否则把监听器设计成顺序无关（幂等/无共享可变状态）
 
 ## G. 小结与下一章
 

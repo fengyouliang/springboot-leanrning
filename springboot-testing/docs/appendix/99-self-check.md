@@ -14,7 +14,11 @@
 
 ## C. 机制主线
 
-- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+这一章用“对照 + 断言”复盘三件事：
+
+1. **slice vs full 的 bean 图边界**：你到底启动了什么（决定你能断言什么）
+2. **mock 的替换边界**：`@MockBean` 是“替换 Spring 容器里的 bean”，不是 Mockito 的普通字段 mock
+3. **排障分流**：启动失败/bean 缺失/行为不一致时，先确认测试类型与上下文范围
 
 ## D. 源码与断点
 
@@ -39,7 +43,16 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把 `@Mock` 当成 `@MockBean`，导致“mock 了但并未生效”
+
+- Symptom：你以为某个依赖已经被 mock，但实际请求仍走真实实现（或直接 NPE/启动失败）
+- Root Cause：
+  - `@Mock` 只是 Mockito 字段 mock，不会自动替换 Spring 容器里的 bean
+  - `@MockBean` 才会把容器中的 bean 替换掉，进而影响注入与调用链
+- Verification：
+  - full context + `@MockBean` 覆盖真实 bean：`BootTestingMockBeanLabTest#mockBeanOverridesRealBeanInFullContext`
+  - slice（WebMvcTest）里用 `@MockBean` 兜底 controller 依赖：`GreetingControllerWebMvcLabTest#returnsGreetingFromMockedService`
+- Fix：需要影响 Spring 注入链就用 `@MockBean`；需要测试真实集成边界就减少 mock 并用 `@SpringBootTest`
 
 ## G. 小结与下一章
 

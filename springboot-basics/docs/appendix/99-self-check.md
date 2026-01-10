@@ -14,7 +14,14 @@
 
 ## C. 机制主线
 
-- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+这一章是“复盘用的自测入口”，不是新增概念章。你应该用它检验三件事：
+
+1. **你能否用证据链讲清“谁覆盖谁”**  
+   - 先跑 `BootBasicsOverrideLabTest#testPropertiesOverrideApplicationProperties`，再用 `Environment`/绑定对象断言解释原因
+2. **你能否用证据链讲清“Profile 到底影响了什么”**  
+   - 对照 `BootBasicsDefaultLabTest#activeProfilesDoNotContainDevByDefault` 与 `BootBasicsDevLabTest#activeProfilesContainDev`
+3. **你能否把“现象 → 机制分支 → 修复策略”说成可操作步骤**  
+   - 目标：遇到配置问题时，不靠“猜”，而是先把最终值与生效分支固定下来
 
 ## D. 源码与断点
 
@@ -40,7 +47,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把“属性覆盖”误当成“Bean 一定会切换”
+
+- Symptom：你修改了 `app.greeting`，但注入点的实现类没变；或实现类变了但属性值没变
+- Root Cause：属性覆盖与 Bean 注册是两条线：属性走 `Environment`，Bean 切换走条件注册（profile/条件装配）
+- Verification：对照 `BootBasicsDevLabTest#loadsDevProfileConfigurationAndBean` 与 `BootBasicsOverrideLabTest#beansSeeOverriddenProperties`
+- Fix：先用断言固定“active profiles 与最终属性值”，再排查实现类是否受 `@Profile`/条件影响
 
 ## G. 小结与下一章
 

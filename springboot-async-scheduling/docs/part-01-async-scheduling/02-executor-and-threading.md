@@ -40,7 +40,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：不固定线程池与线程名，导致“到底有没有切线程”无法断言
+
+- Symptom：你只能靠日志“感觉像是异步”，但无法在测试里稳定证明
+- Root Cause：默认 executor/线程名不稳定；当并发问题出现时，你缺少可回归观测点
+- Verification：`BootAsyncSchedulingLabTest#executorThreadNamePrefixIsAStableObservationPoint`
+- Fix：为 executor 设置可识别的 threadNamePrefix，并在测试里把线程名写成断言（把“线程切换”变成事实）
 
 ## G. 小结与下一章
 

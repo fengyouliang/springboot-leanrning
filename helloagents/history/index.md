@@ -52,6 +52,8 @@
 | 202601081505 | springboot-web-mvc-deepen-v3 | Enhancement | ✅Completed | [202601081505_springboot-web-mvc-deepen-v3](2026-01/202601081505_springboot-web-mvc-deepen-v3/) |
 | 202601091043 | deepen_beans_aop_tx_web | Enhancement | ✅Completed | [202601091043_deepen_beans_aop_tx_web](2026-01/202601091043_deepen_beans_aop_tx_web/) |
 | 202601091353 | beans_webmvc_mainline_deepen | Enhancement | ✅Completed | [202601091353_beans_webmvc_mainline_deepen](2026-01/202601091353_beans_webmvc_mainline_deepen/) |
+| 202601091802 | modules_depth_align_to_beans | Enhancement | ✅Completed | [202601091802_modules_depth_align_to_beans](2026-01/202601091802_modules_depth_align_to_beans/) |
+| 202601092110 | depth_align_v2_batch01_sec_jpa_events_client | Enhancement | ✅Completed | [202601092110_depth_align_v2_batch01_sec_jpa_events_client](2026-01/202601092110_depth_align_v2_batch01_sec_jpa_events_client/) |
 
 ---
 
@@ -103,3 +105,5 @@
 - [202601081505_springboot-web-mvc-deepen-v3](2026-01/202601081505_springboot-web-mvc-deepen-v3/) - springboot-web-mvc：深化 v3（ControllerAdvice 匹配规则可复现、binder suppressedFields 证据链、MessageConverter 选择可观测、docs Part 03 新增章节与排障升级）
 - [202601091043_deepen_beans_aop_tx_web](2026-01/202601091043_deepen_beans_aop_tx_web/) - Beans/AOP/Tx/Web：补齐循环依赖边界、exposeProxy 自调用、传播/回滚、MVC 异常链路等可验证入口（Labs + docs + 知识库同步）
 - [202601091353_beans_webmvc_mainline_deepen](2026-01/202601091353_beans_webmvc_mainline_deepen/) - Beans/Web MVC：候选收敛（by-name fallback/ObjectProvider/泛型）与 Security↔MVC 边界证据链（handler/resolvedException）深化（Labs + docs + wiki）
+- [202601091802_modules_depth_align_to_beans](2026-01/202601091802_modules_depth_align_to_beans/) - 全模块：对标 spring-core-beans 深挖升级（Guide 主线/章节坑点证据链/关键分支默认 Lab 入口 + wiki 同步）
+- [202601092110_depth_align_v2_batch01_sec_jpa_events_client](2026-01/202601092110_depth_align_v2_batch01_sec_jpa_events_client/) - Batch01：Security/JPA/Events/WebClient 深挖对齐 v2（新增默认 Labs + 坑点可回归 + 自检闸门全绿 + wiki 同步）

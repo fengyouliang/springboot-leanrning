@@ -50,6 +50,14 @@
 
 ## 坑 5：事件对象可变导致监听器互相污染
 
+## 坑 6：监听器“没触发”其实是被过滤掉了（参数类型/条件不匹配）
+
+- Symptom：你 `publishEvent(...)` 了，但某个 `@EventListener` 方法完全没进入；你甚至怀疑 multicaster/线程/事务有问题。
+- Root Cause：Spring 的监听器分发有“筛选”阶段：最常见的是 **按监听器方法参数类型过滤**（以及 `@EventListener(condition = ...)` 进一步过滤）；类型/条件不匹配时，监听器就会被跳过。
+- Verification：`SpringCoreEventsListenerFilteringLabTest#eventListener_shouldFilterByMethodParameterType`
+- Breakpoints：`SimpleApplicationEventMulticaster#multicastEvent`、`ApplicationListenerMethodAdapter#supportsEventType`
+- Fix：先把“到底有没有被分发/为什么被过滤”用可断言的最小 Lab 固化，再决定要不要换事件类型/改监听器签名/调整 condition。
+
 - 建议：学习阶段优先用不可变事件（record），减少副作用
 
 ## G. 小结与下一章

@@ -14,57 +14,76 @@
 
 ## C. 机制主线
 
-本模块分两条线：
+本模块要解决的第一个问题是“分流”：
 
-它们都属于 **AspectJ weaving**，与 `spring-core-aop`（Spring AOP 代理）是两个世界：
+- **Spring AOP（proxy）**：改调用链，必须“走代理”，所以 self-invocation 是坑点
+- **AspectJ Weaving（weaving）**：改字节码，不依赖 Spring 容器，也不依赖“走代理”，所以 self-invocation 不会绕过织入
 
-- Proxy：改调用链（必须走 proxy）
-- Weaving：改字节码（不依赖 proxy）
+本模块只讨论 AspectJ Weaving，并且拆成两条可回归路径：
 
----
+1. **LTW（Load-Time Weaving）**：运行时通过 `-javaagent` 在类加载阶段织入
+2. **CTW（Compile-Time Weaving）**：构建期直接把织入产物编译出来，运行时不需要 agent
 
-## 1. 最短闭环：先跑测试
+### 1) 时间线：LTW（带 -javaagent）是怎么“把 advice 插进目标类”的
 
-> 如果你在 IDE 单独跑 LTW 的某个测试，需要手动在 Run Configuration 里添加 `-javaagent:` 参数；命令行已由 surefire 自动处理。
+1. JVM 启动时携带 `-javaagent:aspectjweaver.jar`
+2. 类加载过程中 weaver 生效，读取 classpath 上的 `META-INF/aop.xml`
+3. 根据 aop.xml 的 include/pointcut 范围，对目标类字节码进行织入
+4. 运行时调用目标方法，advice 以“字节码层面插入”的方式被触发
 
----
+本模块的关键证据链（都能在测试里断言出来）：
 
-## 2. LTW 的关键开关：`META-INF/aop.xml`
+- JVM 参数确实带了 `-javaagent`：`AspectjLtwLabTest#ltw_testJvmIsStartedWithJavaAgent`
+- 普通对象（非 Spring bean）也会被织入：`AspectjLtwLabTest#ltw_canWeaveExecutionForNonSpringObjects`
 
-- **有没有 agent**：JVM 是否带 `-javaagent:aspectjweaver.jar`
-- **有没有织入配置**：classpath 上是否存在 `META-INF/aop.xml`
-- **织入范围对不对**：`<include within="...">` 是否覆盖到目标类
+**本模块的 `aop.xml` 放在：**`spring-core-aop-weaving/src/test/resources/META-INF/aop.xml`  
+（这也是为什么本模块的 LTW 实验主要用 test scope 来验证：你需要“可控且可重复”的 classpath。）
 
-本模块的 `aop.xml` 放在：
+### 2) 时间线：CTW（不带 agent）为什么也能拦截
 
----
+1. 构建期由 `aspectj-maven-plugin` 执行 compile-time weaving
+2. 织入后的 class 作为编译产物输出（运行时加载的就是“已经被改写的字节码”）
+3. 测试 JVM 无需 `-javaagent`，advice 仍会触发
 
-## 3. CTW 的关键开关：构建期织入产物
+关键证据链：
 
-CTW 的核心结论是：
+- JVM 启动参数不包含 aspectjweaver agent：`AspectjCtwLabTest#ctw_testJvmIsNotStartedWithAspectjJavaAgent`
+- weaving 在无 agent 情况下仍生效：`AspectjCtwLabTest#ctw_weavingWorksWithoutJavaAgent_forMethodExecutionAndCall`
 
-> **不带 `-javaagent`，也能触发 advice**，因为目标类的字节码已经在构建期被改写。
+### 3) 关键参与者（你应该能解释它们的作用）
 
-因此 CTW 的排障路径通常是：
+- `-javaagent:${project.build.directory}/aspectjweaver.jar`（LTW 开关，见 `spring-core-aop-weaving/pom.xml`）
+- `META-INF/aop.xml`（LTW 织入配置：要织谁、怎么织）
+- `aspectj-maven-plugin`（CTW 开关：构建期织入）
+- advice 的“证据载体”：本模块用 `InvocationLog` 把 advice 触发变成可断言事件
 
----
+### 4) 本模块的关键分支（2–5 条，默认可回归）
 
-## 4. 你需要会的排障分流（最重要）
-
-当你遇到“拦截没发生”的现象时，先问自己一句话：
-
-1. 我是在 proxy 世界，还是 weaving 世界？
-2. 如果是 proxy：是不是没走 proxy（call path 问题）？
-3. 如果是 weaving：
-   - LTW：是不是没带 agent / 没加载到 aop.xml / include 范围没覆盖？
-   - CTW：是不是构建没织入 / 织入范围不对 / 跑的是未织入 class？
-
----
+1. **LTW：带 agent 才会织入（启动参数证据）**
+   - 验证：`AspectjLtwLabTest#ltw_testJvmIsStartedWithJavaAgent`
+2. **CTW：不带 agent 也能织入（构建产物证据）**
+   - 验证：`AspectjCtwLabTest#ctw_testJvmIsNotStartedWithAspectjJavaAgent` / `AspectjCtwLabTest#ctw_weavingWorksWithoutJavaAgent_forMethodExecutionAndCall`
+3. **call vs execution：两种 join point 语义不同**
+   - 验证：`AspectjLtwLabTest#ltw_callVsExecution_areDifferentJoinPointKinds`
+4. **self-invocation 不会绕过 weaving（与 Spring AOP 的根本差异）**
+   - 验证：`AspectjLtwLabTest#ltw_selfInvocationDoesNotBypassWeaving` / `AspectjCtwLabTest#ctw_selfInvocationIsStillIntercepted`
+5. **高级 pointcut：constructor/field/withincode/cflow 都可断言**
+   - 验证：`AspectjLtwLabTest#ltw_constructorCallAndExecution_canBeIntercepted` / `AspectjLtwLabTest#ltw_withincode_limitsJoinPointByCallerMethodBody`
 
 ## D. 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+  
+建议断点（从“织入没发生”快速分流）：
+
+- 先看你跑的是 LTW 还是 CTW：
+  - LTW：确认 JVM 是否带 `-javaagent`（看 `AspectjLtwLabTest#ltw_testJvmIsStartedWithJavaAgent`）
+  - CTW：确认构建期是否执行了 weaving（看 `aspectj-maven-plugin` 的 weave info 输出）
+- 织入是否触发：
+  - 在 `LtwWeavingAspect`/对应 CTW aspect 的 advice 方法处下断点（最直观）
+- `aop.xml` 是否被加载：
+  - 确认 `spring-core-aop-weaving/src/test/resources/META-INF/aop.xml` 在 test classpath（否则 include 范围再对也不会织）
 
 ## E. 最小可运行实验（Lab）
 

@@ -55,6 +55,14 @@
 
 ## F. 常见坑与边界
 
+### 坑点 1：只盯着 SQL 日志，容易把“没 flush/没 commit”误判成“没执行”
+
+- Symptom：你在调试时“怎么没看到 UPDATE/INSERT？”——尤其是在 `@DataJpaTest` 或一个事务里做了修改后立刻查询/断点观察。
+- Root Cause：JPA/Hibernate 的写入通常是 **flush 时机驱动**（提交事务、显式 flush、某些查询触发 flush）；事务没结束时，不一定会立即把 SQL 打出来。
+- Verification：`BootDataJpaDebugSqlLabTest#showSqlHelpsExplainPersistenceBehavior_whenRunningTests`
+- Breakpoints：`org.springframework.orm.jpa.JpaTransactionManager#doCommit`、`org.hibernate.internal.SessionImpl#flush`
+- Fix：在“需要观察 SQL 的关键点”显式 `flush()`（并结合 `clear()`/重新查询），把“状态变化 → SQL 输出”锁定成可复现的最小闭环。
+
 （注意：这些配置不适合生产环境，学习完建议删除/降级）
 
 ## G. 小结与下一章

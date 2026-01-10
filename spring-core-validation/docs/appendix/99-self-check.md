@@ -14,7 +14,11 @@
 
 ## C. 机制主线
 
-- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+这一章用“最小实验 + 可断言证据链”复盘三条主线：
+
+1. programmatic validation：你显式触发，拿到 violations
+2. method validation：代理触发，失败时抛 `ConstraintViolationException`
+3. groups/custom constraint：决定哪些约束生效、如何扩展约束语义
 
 ## D. 源码与断点
 
@@ -38,7 +42,15 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把校验当成“注解装饰”，忽略触发边界与代理边界
+
+- Symptom：你写了很多注解，但在某些路径上没任何效果（或效果与预期不同）
+- Root Cause：校验是机制系统：触发点（programmatic/method）+ 代理边界（是否走 Spring）+ groups（生效范围）
+- Verification：
+  - programmatic：`SpringCoreValidationLabTest#programmaticValidationFindsViolations`
+  - method proxy 边界：`SpringCoreValidationMechanicsLabTest#methodValidationDoesNotRunWhenCallingAServiceDirectly_withoutSpringProxy`
+  - groups：`SpringCoreValidationMechanicsLabTest#groupsControlWhichConstraintsApply`
+- Fix：先把“触发边界”写成测试断言，再谈“规则设计/错误结构/工程化集成”
 
 ## G. 小结与下一章
 

@@ -56,7 +56,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：拿到 Resource 就以为“资源存在”，忽略了它只是句柄
+
+- Symptom：你拿到 `Resource` 直接读，结果在运行时抛异常；或者把 null/不存在当成路径拼错
+- Root Cause：`getResource(...)` 返回的是句柄（handle），资源是否存在需要 `exists()` 或读取时才能确定
+- Verification：
+  - 句柄存在但资源不存在：`SpringCoreResourcesMechanicsLabTest#getResourceReturnsAHandle_evenIfTheResourceDoesNotExist`
+  - 缺失资源读取会抛异常：`SpringCoreResourcesLabTest#missingResourceCausesUncheckedIOException`
+- Fix：定位与存在性分开处理：先 `exists()`（或尝试读取并转成更友好的异常），并在错误里输出 `getDescription()` 辅助排障
 
 ## G. 小结与下一章
 

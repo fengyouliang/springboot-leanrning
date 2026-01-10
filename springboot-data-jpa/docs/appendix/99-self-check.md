@@ -27,7 +27,7 @@
 ## E. 最小可运行实验（Lab）
 
 - 本章未显式引用 LabTest，先注入模块默认 LabTest 作为“合规兜底入口”（后续可逐章细化）。
-- Lab：`BootDataJpaDebugSqlLabTest` / `BootDataJpaLabTest`
+- Lab：`BootDataJpaDebugSqlLabTest` / `BootDataJpaLabTest` / `BootDataJpaMergeAndDetachLabTest`
 - 建议命令：`mvn -pl springboot-data-jpa test`（或在 IDE 直接运行上面的测试类）
 
 ### 复现/验证补充说明（来自原文迁移）
@@ -38,7 +38,16 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：只盯着 Repository API，不建立“证据链”，导致理解停留在玄学层
+
+- Symptom：面对 flush/dirty checking/N+1/getReferenceById 时只能靠猜；遇到慢 SQL 也不知道从哪里排查
+- Root Cause：JPA 的关键机制很多都发生在 persistence context 与事务边界里，不写断言就很难稳定复现
+- Verification（建议作为排障兜底入口）：
+  - dirty checking：`BootDataJpaLabTest#dirtyCheckingPersistsChangesOnFlush`
+  - flush 可见性：`BootDataJpaLabTest#flushMakesRowsVisibleToJdbcTemplateWithinSameTransaction`
+  - getReferenceById（lazy proxy）：`BootDataJpaLabTest#getReferenceByIdReturnsALazyProxy_andInitializesOnPropertyAccess`
+  - N+1：`BootDataJpaLabTest#nPlusOneHappensWhenAccessingLazyCollections`
+- Fix：像 spring-core-beans 一样，把每个关键分支都做成默认 Lab（可运行 + 可断言 + 可回归），再谈“最佳实践/优化方案”
 
 ## G. 小结与下一章
 
@@ -50,7 +59,7 @@
 
 ### 对应 Lab/Test
 
-- Lab：`BootDataJpaDebugSqlLabTest` / `BootDataJpaLabTest`
+- Lab：`BootDataJpaDebugSqlLabTest` / `BootDataJpaLabTest` / `BootDataJpaMergeAndDetachLabTest`
 - Exercise：`BootDataJpaExerciseTest`
 
 上一章：[appendix/90-common-pitfalls.md](90-common-pitfalls.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[Docs TOC](../README.md)

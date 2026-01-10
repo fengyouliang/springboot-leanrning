@@ -14,7 +14,16 @@
 
 ## C. 机制主线
 
-- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+把业务主线按“边界”拆开，你会更容易排障：
+
+1. **Controller（输入边界）**：参数绑定 + `@Valid` 校验 → 决定 200 还是 400
+2. **Service（事务边界）**：`@Transactional` → 决定能否回滚、回滚能否阻止落库
+3. **Repository（持久化边界）**：写入是否真的发生（以 count/查询为证据）
+4. **Events（副作用边界）**：
+   - 同步 listener：发布即执行（回滚也可能已经执行）
+   - afterCommit listener：只在 commit 后执行（更适合“最终落库后的副作用”）
+5. **AOP（横切边界）**：调用链记录/审计 → 需要代理参与
+6. **Exception shaping（对外契约边界）**：内部异常 → 统一响应结构（避免泄漏细节）
 
 ## D. 源码与断点
 
@@ -37,7 +46,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把“事件副作用”当成“事务的一部分”，导致回滚也产生副作用
+
+- Symptom：事务回滚后数据库没有落库，但你仍看到审计/通知等副作用发生
+- Root Cause：同步事件监听器与事务生命周期无关；它在 publish 时立即执行
+- Verification：
+  - 回滚时同步 listener 仍执行：`BootBusinessCaseLabTest#syncListenerRunsEvenWhenTransactionRollsBack_butAfterCommitDoesNot`
+  - 成功时 afterCommit listener 才执行：`BootBusinessCaseLabTest#afterCommitListenerRunsOnSuccess`
+- Fix：需要“只在成功提交后才执行”的副作用，用 `@TransactionalEventListener(phase = AFTER_COMMIT)`；同步 listener 只放“允许回滚也执行”的逻辑（或仅做记录/打点）
 
 ## G. 小结与下一章
 

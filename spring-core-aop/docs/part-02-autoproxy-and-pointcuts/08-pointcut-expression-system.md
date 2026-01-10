@@ -195,7 +195,12 @@ Spring AOP（proxy-based）里，匹配的大前提是：
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把 this/target 当成同一件事，JDK proxy 下“写对了也不命中”
+
+- Symptom：你写了 `this(实现类)` 以为命中实现类，但实际项目用 JDK proxy（接口代理），导致切面完全不生效
+- Root Cause：`this` 匹配的是“代理对象类型”，JDK proxy 不是实现类子类；`target` 匹配的才是目标对象类型
+- Verification：`SpringCoreAopPointcutExpressionsLabTest#this_vs_target_differs_between_JdkProxy_and_CglibProxy`
+- Fix：先确定项目是 JDK 还是 CGLIB，再选择 this/target；不确定时用更稳定的 `execution(...)` 建立基线
 
 ## G. 小结与下一章
 

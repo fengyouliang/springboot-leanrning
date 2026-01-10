@@ -71,7 +71,14 @@ Bean Validation 的价值在于：
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：只看“校验失败/成功”，忽略 violations 的证据字段，导致排障效率很低
+
+- Symptom：你知道失败了，但不知道“失败在哪个字段、因为什么规则”，只能靠日志/猜测
+- Root Cause：Bean Validation 的输出不是 boolean，而是 `ConstraintViolation` 集合（propertyPath/message 是第一现场）
+- Verification：
+  - violations 含字段路径：`SpringCoreValidationLabTest#programmaticValidationFindsViolations`
+  - violations 含 message/propertyPath：`SpringCoreValidationMechanicsLabTest#constraintViolationIncludesMessageAndPropertyPath`
+- Fix：排障先看 propertyPath/message，再决定是改数据、改规则，还是改 groups/触发方式
 
 ## G. 小结与下一章
 

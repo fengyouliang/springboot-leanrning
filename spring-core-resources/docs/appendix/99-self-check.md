@@ -14,7 +14,11 @@
 
 ## C. 机制主线
 
-- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+这一章用“最小实验 + 可断言证据链”复盘三段式分流：
+
+1. 定位：location → Resource（classpath/classpath*）
+2. 存在性：handle vs exists（不要把句柄当存在）
+3. 读取：InputStream/encoding/description（把问题变得可观察）
 
 ## D. 源码与断点
 
@@ -38,7 +42,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：排障只看路径字符串，不看 `Resource#getDescription()`，导致定位到错误的资源
+
+- Symptom：你以为读的是某个文件，实际读到的是 classpath 里另一个同名资源（或 jar 内资源），排查越走越偏
+- Root Cause：location 字符串不等于最终解析到的资源；description 才是“你到底拿到了谁”的证据
+- Verification：`SpringCoreResourcesMechanicsLabTest#resourceDescriptionsHelpWithDebugging`
+- Fix：排障时优先输出 description，并结合 classpath* 的扫描结果做确认（避免“我以为”的陷阱）
 
 ## G. 小结与下一章
 

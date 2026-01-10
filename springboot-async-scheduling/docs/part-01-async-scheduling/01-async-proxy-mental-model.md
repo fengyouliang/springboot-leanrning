@@ -50,7 +50,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：以为写了 `@Async` 就一定异步，忽略了 `@EnableAsync` 是前提
+
+- Symptom：你以为方法已经“切线程”，但实际还是在调用线程里同步执行
+- Root Cause：`@Async` 依赖 Spring 创建代理与拦截器；没有 `@EnableAsync` 就不会建立这套基础设施
+- Verification：
+  - 没有 EnableAsync：`BootAsyncSchedulingLabTest#asyncAnnotationDoesNothingWithoutEnableAsync`
+  - 有 EnableAsync：`BootAsyncSchedulingLabTest#asyncRunsOnExecutorThreadWhenEnableAsyncPresent`
+- Fix：先锁住“代理是否存在 + 线程名是否变化”的证据链，再讨论业务层面的并发语义
 
 ## G. 小结与下一章
 

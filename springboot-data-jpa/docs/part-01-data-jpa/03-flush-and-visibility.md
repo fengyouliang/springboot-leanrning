@@ -61,7 +61,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把 flush 当成 commit，误以为“flush 后其它事务也能看到”
+
+- Symptom：你在一个事务里 flush 后能查到数据，于是以为数据已经“对外可见/已提交”
+- Root Cause：flush 只是把 SQL 发出去并执行在当前事务里；是否对其它事务可见取决于 commit
+- Verification：`BootDataJpaLabTest#flushMakesRowsVisibleToJdbcTemplateWithinSameTransaction`
+- Fix：用“同事务 vs 跨事务”的视角分流：flush 用来对齐“上下文 vs DB”，commit 才决定“对外可见”
 
 ## G. 小结与下一章
 

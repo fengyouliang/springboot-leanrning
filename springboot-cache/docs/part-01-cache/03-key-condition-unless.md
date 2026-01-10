@@ -39,7 +39,16 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把 condition 与 unless 当成一回事，导致“不该缓存的结果被缓存/反之”
+
+- Symptom：你以为设置了 condition/unless 就能避免缓存某些情况，但实际命中行为与预期相反
+- Root Cause：
+  - `condition` 在方法执行前评估（决定“要不要走缓存逻辑”）
+  - `unless` 在方法执行后评估（决定“要不要缓存返回值”）
+- Verification：
+  - condition=false 每次都计算：`BootCacheLabTest#conditionPreventsCachingWhenFalse`
+  - unless=true 不缓存返回值：`BootCacheLabTest#unlessPreventsCachingBasedOnResult`
+- Fix：把“前置过滤”和“结果过滤”分开设计；用测试把分支锁住，别靠直觉
 
 ## G. 小结与下一章
 

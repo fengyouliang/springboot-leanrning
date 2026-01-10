@@ -39,7 +39,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：误以为 `@CachePut` 会“像 Cacheable 一样命中短路”，导致写入逻辑被误解
+
+- Symptom：你以为 CachePut 在命中时不会执行方法，结果发现方法每次都执行（甚至带来额外 DB 调用）
+- Root Cause：`@CachePut` 的语义就是“强制执行方法并更新缓存”，它不是读缓存短路
+- Verification：`BootCacheLabTest#cachePutUpdatesCacheValue`（invocationCount 与缓存值更新为证据）
+- Fix：需要短路就用 `@Cacheable`；需要更新缓存且愿意执行方法就用 `@CachePut`；失效用 `@CacheEvict`
 
 ## G. 小结与下一章
 

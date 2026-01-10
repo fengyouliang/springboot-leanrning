@@ -27,7 +27,7 @@
 ## E. 最小可运行实验（Lab）
 
 - 本章未显式引用 LabTest，先注入模块默认 LabTest 作为“合规兜底入口”（后续可逐章细化）。
-- Lab：`BootSecurityDevProfileLabTest` / `BootSecurityLabTest`
+- Lab：`BootSecurityDevProfileLabTest` / `BootSecurityLabTest` / `BootSecurityMultiFilterChainOrderLabTest`
 - 建议命令：`mvn -pl springboot-security test`（或在 IDE 直接运行上面的测试类）
 
 ### 复现/验证补充说明（来自原文迁移）
@@ -38,7 +38,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：方法级安全“看起来写了注解”，但调用链绕过代理导致不生效
+
+- Symptom：你在 `@PreAuthorize` 等注解上写了规则，但某些调用路径没有触发拦截
+- Root Cause：method security 依赖代理；self-invocation 会绕过代理（与 HTTP filter chain 是两条完全不同的线）
+- Verification：`BootSecurityLabTest#selfInvocationBypassesMethodSecurityAsAPitfall`
+- Fix：把需要拦截的方法调用跨越 bean 边界（让代理参与），并用测试锁住“是否抛 AccessDeniedException”
 
 ## G. 小结与下一章
 
@@ -50,7 +55,7 @@
 
 ### 对应 Lab/Test
 
-- Lab：`BootSecurityDevProfileLabTest` / `BootSecurityLabTest`
+- Lab：`BootSecurityDevProfileLabTest` / `BootSecurityLabTest` / `BootSecurityMultiFilterChainOrderLabTest`
 - Exercise：`BootSecurityExerciseTest`
 
 上一章：[appendix/90-common-pitfalls.md](90-common-pitfalls.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[Docs TOC](../README.md)

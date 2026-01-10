@@ -38,7 +38,16 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：只看“缓存命中感觉变快”，但没有证据链，导致线上行为不可解释
+
+- Symptom：线上出现“偶发慢/偶发打 DB”，但你无法解释是 key/condition/unless/sync/过期哪一条分支导致
+- Root Cause：缓存机制本质是分支系统；没有测试证据链时，你只能靠猜
+- Verification（建议把这些作为排障兜底入口）：
+  - 命中短路证据：`BootCacheLabTest#cacheableCachesResultForSameKey`
+  - 不缓存分支证据：`BootCacheLabTest#conditionPreventsCachingWhenFalse` / `BootCacheLabTest#unlessPreventsCachingBasedOnResult`
+  - 防击穿证据：`BootCacheLabTest#syncTrueAvoidsDuplicateComputationsForSameKey`
+  - 过期证据：`BootCacheLabTest#expiryCanBeTestedDeterministicallyWithManualTicker`
+- Fix：把关键分支写成默认 Lab（像本模块一样），遇到问题先跑断言复现，再改配置/代码
 
 ## G. 小结与下一章
 

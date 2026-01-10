@@ -14,12 +14,55 @@
 
 ## C. 机制主线
 
-- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+事务的“深挖主线”可以浓缩为三句话：
+
+1. **事务边界一定发生在“方法调用链”上**：没有代理参与，就没有事务拦截器
+2. **回滚与否不是“感觉”**：由异常类型 + rollback 规则 + 传播行为共同决定
+3. **排障优先看证据链**：是否真的有事务、是否真的走代理、是否真的 commit/rollback
+
+### 1) 时间线：一次 `@Transactional` 方法调用发生了什么
+
+1. 调用进入 AOP 代理
+2. `TransactionInterceptor` 决定是否开启事务（根据传播行为/是否已有事务）
+3. 执行业务方法
+4. 方法正常返回：提交事务（commit）
+5. 方法抛异常：按 rollback 规则决定回滚（rollback）还是提交
+
+### 2) 关键参与者
+
+- `@Transactional`：声明事务语义（传播、隔离、只读、rollbackFor 等）
+- `TransactionInterceptor`：事务拦截器（代理入口，决定开/提交/回滚）
+- `PlatformTransactionManager`：事务管理器（真正执行 begin/commit/rollback）
+- `TransactionSynchronizationManager`：判断“当前线程是否有事务”的观测点
+- `TransactionTemplate`：编程式事务（把“边界 + 回滚”写成可断言代码）
+
+### 3) 本模块的关键分支（2–5 条，默认可回归）
+
+1. **默认回滚：RuntimeException 会回滚**
+   - 验证：`SpringCoreTxLabTest#rollsBackOnRuntimeException`
+2. **默认不回滚：checked exception 不回滚（除非配置 rollbackFor）**
+   - 验证：`SpringCoreTxLabTest#checkedExceptionsDoNotRollbackByDefault` / `SpringCoreTxLabTest#rollbackForCheckedExceptionsCanBeConfigured`
+3. **传播行为：REQUIRES_NEW 可以独立提交，即使外层回滚**
+   - 验证：`SpringCoreTxLabTest#requiresNewCanCommitEvenIfOuterTransactionRollsBack`
+4. **编程式事务：TransactionTemplate 可显式 rollbackOnly**
+   - 验证：`SpringCoreTxLabTest#transactionTemplateAllowsProgrammaticCommitOrRollback`
+5. **代理边界（坑点）：self-invocation 绕过事务拦截器**
+   - 验证：`SpringCoreTxSelfInvocationPitfallLabTest#selfInvocationBypassesTransactional_onInnerMethod`
 
 ## D. 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
+  
+建议断点（排障最省时间的 4 个点）：
+
+- 代理入口：确认是否真的走到了事务拦截器
+  - `org.springframework.transaction.interceptor.TransactionInterceptor#invoke`
+- 事务活跃判断：在业务方法内确认当前线程是否有事务
+  - `TransactionSynchronizationManager.isActualTransactionActive()`
+- 回滚分流：异常抛出后到底走 commit 还是 rollback
+  - `org.springframework.transaction.support.AbstractPlatformTransactionManager#processCommit`
+  - `org.springframework.transaction.support.AbstractPlatformTransactionManager#processRollback`
 
 ## E. 最小可运行实验（Lab）
 

@@ -55,7 +55,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：以为“声明了注解就会自动校验”，忽略 programmatic 需要显式调用
+
+- Symptom：你在对象字段上加了约束，但某条业务路径没有任何校验行为
+- Root Cause：programmatic validation 的触发点是 `Validator#validate(...)`（不调用就不会发生）
+- Verification：
+  - 显式调用得到 violations：`SpringCoreValidationLabTest#programmaticValidationFindsViolations`
+  - 有效输入返回空 violations：`SpringCoreValidationLabTest#programmaticValidationReturnsNoViolationsForValidInput`
+- Fix：把“触发点”写进代码与测试：要么在边界层显式 validate，要么使用 method validation/框架集成触发
 
 ## G. 小结与下一章
 

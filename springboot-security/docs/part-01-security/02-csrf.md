@@ -59,7 +59,33 @@ CSRF 的核心点不是“你有没有登录”，而是：
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：为“修复 403”而全局关闭 CSRF，反而把安全边界打穿
+
+- Symptom：你在 API 测试/本地调试里遇到 POST 403，于是直接禁用 CSRF，问题“消失”但风险扩大
+- Root Cause：
+  - CSRF 是针对“有状态（cookie/session）”的威胁模型；这类请求默认需要 token
+  - JWT 无状态 API 通常不需要 CSRF（或按路径分流），但这不等于所有链路都该关闭
+- Verification：
+  - Basic 链路：缺 token 会 403：`BootSecurityLabTest#csrfBlocksPostEvenWhenAuthenticated`
+  - 加 token 才通过：`BootSecurityLabTest#csrfTokenAllowsPostWhenAuthenticated`
+  - JWT 链路：POST 不需要 CSRF：`BootSecurityLabTest#jwtPostDoesNotRequireCsrf`
+- Fix：按链路分流（有状态链路保留 CSRF；无状态链路按需关闭），不要“一刀切”
+
+### 坑点 2：我“禁用了 CSRF”，但 POST 还是 403（原因：请求命中了另一条 SecurityFilterChain）
+
+- Symptom：你在配置里写了 `csrf.disable()`，但 POST 仍然返回 `csrf_failed`
+- Root Cause：
+  - CSRF 是否生效，不取决于“你有没有写 disable”，而取决于**请求最终命中哪条 `SecurityFilterChain`**
+  - 一旦命中的是 Basic 链路（默认 CSRF 开启），就会走 `CsrfFilter`
+- Verification（三段证据链闭环）：
+  - Basic 链路缺 token → 403：`BootSecurityLabTest#csrfBlocksPostEvenWhenAuthenticated`
+  - JWT 链路 POST 不需要 CSRF → 200：`BootSecurityLabTest#jwtPostDoesNotRequireCsrf`
+  - 用过滤器列表证明“命中哪条链”：`BootSecurityMultiFilterChainOrderLabTest#jwtPathMatchesJwtChain_andApiPathMatchesBasicChain`
+- Breakpoints：
+  - `org.springframework.security.web.FilterChainProxy#doFilterInternal`（选择 chain）
+  - `org.springframework.security.web.DefaultSecurityFilterChain#matches`（匹配判定）
+  - `org.springframework.security.web.csrf.CsrfFilter#doFilterInternal`（CSRF 拦截点）
+- Fix：让 matcher 覆盖范围互斥、顺序明确（@Order），并用默认 Lab 把“命中链路”固定成回归门禁
 
 ## G. 小结与下一章
 

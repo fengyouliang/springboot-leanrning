@@ -93,7 +93,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：以为 `AopContext.currentProxy()` “随时可用”，结果线上偶发 NPE/IllegalState
+
+- Symptom：你在方法里调用 `AopContext.currentProxy()`，在某些路径上直接抛异常（或拿不到代理）
+- Root Cause：
+  - 没有开启 exposeProxy（没有把 proxy 放进 thread-local）
+  - 或者当前调用不在 AOP 调用链里（根本没进入 advice）
+- Verification：`SpringCoreAopExposeProxyLabTest#exposeProxyAllowsSelfInvocationToTriggerAdvice`
+- Fix：工程上优先把被拦截逻辑拆到另一个 bean，通过注入跨 bean 调用；`AopContext` 只作为理解机制/调试手段谨慎使用
 
 ## G. 小结与下一章
 

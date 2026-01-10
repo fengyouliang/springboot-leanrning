@@ -62,7 +62,14 @@ Persistence Context（持久化上下文）是 JPA/Hibernate 的核心：
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把“一致性视图”误当成“数据库事实”，导致结论被一级缓存误导
+
+- Symptom：你明明改了字段但 SQL 看不到（或你以为查到的就是 DB 最新值），结论混乱
+- Root Cause：persistence context 是“事务内一致性视图”（一级缓存 + 状态管理），不等价于数据库真实状态
+- Verification：
+  - managed 状态可被 contains 观察：`BootDataJpaLabTest#entityIsManagedAfterSaveInSamePersistenceContext`
+  - clear 会让你从“上下文视图”回到“数据库事实”：`BootDataJpaLabTest#entityManagerClearDetachesEntities`
+- Fix：学习阶段强烈建议在关键断言前后配合 `flush()` 与 `clear()`，避免被一级缓存制造的“假象”带偏
 
 ## G. 小结与下一章
 

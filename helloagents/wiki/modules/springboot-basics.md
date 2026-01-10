@@ -8,7 +8,7 @@ Spring Boot 基础：工程结构、配置、启动流程与最常用开发习�
 
 - **Responsibility:** 帮助学习者能跑通项目、理解配置与基础概念，为后续模块打底。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-07
+- **Last Updated:** 2026-01-09
 
 ## Specifications
 
@@ -18,6 +18,16 @@ Spring Boot 基础：工程结构、配置、启动流程与最常用开发习�
 
 #### Scenario: 能跑通并理解最小应用
 - 通过命令行与测试验证模块可运行
+
+### Requirement: 深挖对齐（对标 spring-core-beans）
+**Module:** springboot-basics
+把“启动/配置/Profiles/覆盖优先级”写成可排障主线，并绑定默认 Lab 的可断言入口。
+
+#### Scenario: Guide 主线可作为导航图
+- Guide 已补齐：启动与配置加载、profile 激活与差异、override/优先级与排障入口
+
+#### Scenario: 章节坑点可回归
+- 每章至少 1 个可断言坑点，并绑定默认 `*LabTest#method` 作为证据链
 
 ## Dependencies
 
@@ -40,6 +50,7 @@ Spring Boot 基础：工程结构、配置、启动流程与最常用开发习�
 
 ## Change History
 
+- [202601091802_modules_depth_align_to_beans](../../history/2026-01/202601091802_modules_depth_align_to_beans/) - ✅ 已执行：对标 spring-core-beans 深挖升级（Guide 机制主线 + 每章可断言坑点 + 默认 Lab 关键分支覆盖校验）
 - [202601071034_all_modules_docs_ag_contract](../../history/2026-01/202601071034_all_modules_docs_ag_contract/) - ✅ 已执行：全模块 docs 章节结构整理（A–G 结构 + 对应 Lab/Test 入口块）；后续不再推荐 A–G 作为写作规范/闸门
 - [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过 `scripts/check-docs.sh`
 - [202601041358_springboot-part-structure-sync](../../history/2026-01/202601041358_springboot-part-structure-sync/) - ✅ 已执行：对齐 docs Part 与 src/main/src/test 分包，并修复 README/docs 引用

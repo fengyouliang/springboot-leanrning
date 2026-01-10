@@ -14,6 +14,12 @@
 
 ## C. 机制主线
 
+这一章不是新增概念，而是用“可断言证据”复盘 Actuator 的三段式分流：
+
+1. 端点是否存在（Registered）
+2. 端点是否暴露（Exposed）
+3. 端点是否可访问（Accessible：401/403/404 的分流）
+
 ## 自测题
 1. exposure 的 include/exclude 与端点实际可访问性之间是什么关系？
 2. 如何快速判断一个配置值来自哪里（哪个 PropertySource）？
@@ -37,7 +43,15 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把 404 当成“端点不存在”，忽略了 exposure 分流
+
+- Symptom：你访问 `/actuator/env` 得到 404，于是以为 env endpoint 没有注册/没生效
+- Root Cause：`getResource` 类比：**“有句柄”不等于“可访问”**。对 Actuator 来说，端点是否“存在”与是否“暴露到 HTTP”是两回事
+- Verification：
+  - 默认不暴露：`BootActuatorLabTest#envEndpointIsNotExposedByDefault`
+  - 显式 include 后可访问：`BootActuatorExposureOverrideLabTest#envEndpointCanBeExposedViaProperties`
+  - 根路径 links 只列出“暴露端点”：`BootActuatorLabTest#actuatorRootListsExposedEndpoints` / `BootActuatorExposureOverrideLabTest#actuatorRootIncludesEnvLinkWhenExposed`
+- Fix：先用 `/actuator` 的 `_links` 与 exposure 配置确认“暴露集合”，再谈安全策略（401/403）
 
 ## G. 小结与下一章
 

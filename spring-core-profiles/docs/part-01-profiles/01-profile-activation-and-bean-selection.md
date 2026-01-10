@@ -39,7 +39,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把 default profile 当成 active profile，导致“我以为激活了但其实没有”
+
+- Symptom：你以为某个 profile（如 dev）已经生效，但实际 `Environment#getActiveProfiles()` 为空
+- Root Cause：`spring.profiles.default` 只是兜底；只有 `spring.profiles.active`（或等价来源）才算显式激活
+- Verification：
+  - 默认 profiles 含 default：`SpringCoreProfilesProfilePrecedenceLabTest#defaultProfilesContainDefault_whenNoActiveProfilesConfigured`
+  - active 覆盖 default：`SpringCoreProfilesProfilePrecedenceLabTest#springProfilesActiveOverridesSpringProfilesDefault`
+- Fix：排障先锁住 active/default 的事实（测试里断言 Environment），再看 `@Profile`/negation/条件组合的生效结果
 
 ## G. 小结与下一章
 

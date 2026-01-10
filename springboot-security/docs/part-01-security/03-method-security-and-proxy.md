@@ -18,7 +18,19 @@
 
 对应代码：
 
+- `springboot-security/src/main/java/com/learning/springboot/bootsecurity/part01_security/AdminOnlyService.java`
+- `springboot-security/src/main/java/com/learning/springboot/bootsecurity/part01_security/SelfInvocationPitfallService.java`
+
+对应验证入口（可跑）：
+
+- `BootSecurityLabTest#methodSecurityDeniesAdminOnlyMethodForNonAdmin`
+- `BootSecurityLabTest#methodSecurityAllowsAdminOnlyMethodForAdmin`
+- `BootSecurityLabTest#selfInvocationBypassesMethodSecurityAsAPitfall`
+
 ## 你应该观察到什么
+
+1. 外部调用受保护方法（跨 bean 边界）时，method security 能拦住（抛 `AccessDeniedException`）。
+2. 同一个类内部的 `this.xxx()` 调用会绕过代理：即使目标方法上有 `@PreAuthorize`，也可能“看起来没生效”。
 
 ## 机制解释（Why）
 
@@ -60,14 +72,23 @@ Method Security 的本质仍然是 **代理**：
 
 ## F. 常见坑与边界
 
-- `springboot-security/src/main/java/com/learning/springboot/bootsecurity/part01_security/AdminOnlyService.java`
-- `springboot-security/src/main/java/com/learning/springboot/bootsecurity/part01_security/SelfInvocationPitfallService.java`
+### 坑点 1：self-invocation 绕过代理，导致 `@PreAuthorize` 看起来“没生效”
 
-- 非管理员调用 `AdminOnlyService#adminOnlyAction()` → 抛出 `AccessDeniedException`
-- 但是非管理员调用 `SelfInvocationPitfallService#outerCallsAdminOnly()` 却可能成功：
-  - 因为内部 `this.adminOnly()` 调用绕过了代理（这是经典坑）
+- Symptom：你在方法上写了 `@PreAuthorize`，但某条调用路径没有触发拦截
+- Root Cause：method security 依赖代理；同类内部 `this.xxx()` 属于 self-invocation，会直接调用目标方法，绕过代理
+- Verification：`BootSecurityLabTest#selfInvocationBypassesMethodSecurityAsAPitfall`
+- Breakpoints：
+  - `SelfInvocationPitfallService#outerCallsAdminOnly`（自调用入口）
+  - `SelfInvocationPitfallService#adminOnly`（被绕过的注解方法）
+- Fix：把受保护方法拆到另一个 bean，通过依赖注入跨 bean 调用，确保走代理；并用默认 Lab 把“是否抛 AccessDeniedException”锁成回归门禁
 
-经常共享同一类“自调用不生效”的坑。
+### 坑点 2：roles vs authorities 的前缀差异，导致规则误判（ROLE_ 边界）
+
+- Symptom：你给了 `ADMIN` authority，但 `@PreAuthorize("hasRole('ADMIN')")` 仍然拒绝
+- Root Cause：`hasRole('ADMIN')` 的语义是检查 `ROLE_ADMIN`；只有 `ADMIN` 并不等价于 `ROLE_ADMIN`
+- Verification：`BootSecurityLabTest#methodSecurityDeniesAdminOnlyMethodWhenRolePrefixMissing_asPitfall`
+- Breakpoints：`AdminOnlyService#adminOnlyAction`
+- Fix：统一权限命名（role 语义使用 `ROLE_` 前缀），或把规则改为 `hasAuthority('ADMIN')` 并保证配置/测试一致
 
 ## G. 小结与下一章
 

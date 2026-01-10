@@ -16,6 +16,9 @@
 
 ## 你应该观察到什么
 
+- timeout 不是“线上偶现参数”，应该能在测试里用确定性方式复现
+- retry 不是“救命稻草”，它会放大下游压力，必须有明确边界（哪些错误、最大次数、是否 backoff）
+
 ## D. 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
@@ -49,7 +52,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把重试当成默认策略，导致放大故障（甚至把 4xx 也重试）
+
+- Symptom：下游 5xx 时请求数量暴涨；或对 4xx（逻辑错误）仍然重试，浪费资源
+- Root Cause：重试条件与上限不清晰；没有用测试锁住“重试只发生在该发生的时候”
+- Verification：
+  - timeout 可确定性复现：`BootWebClientRestClientLabTest#restClientReadTimeoutFailsFast` / `BootWebClientWebClientLabTest#webClientResponseTimeoutFailsFast`
+  - 5xx 重试可回归 + 请求次数可断言：`BootWebClientRestClientLabTest#restClientRetriesOn5xxAndEventuallySucceeds` / `BootWebClientWebClientLabTest#webClientRetriesOn5xxAndEventuallySucceeds`
+- Fix：只对“你确认可重试且幂等”的失败重试（通常是网络错误/5xx），并把最大次数与行为写成断言（比如 request count）
 
 ## G. 小结与下一章
 

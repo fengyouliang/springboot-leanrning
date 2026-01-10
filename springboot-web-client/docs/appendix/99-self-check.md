@@ -27,7 +27,7 @@
 ## E. 最小可运行实验（Lab）
 
 - 本章未显式引用 LabTest，先注入模块默认 LabTest 作为“合规兜底入口”（后续可逐章细化）。
-- Lab：`BootWebClientRestClientLabTest` / `BootWebClientWebClientLabTest`
+- Lab：`BootWebClientRestClientLabTest` / `BootWebClientWebClientLabTest` / `BootWebClientWebClientFilterOrderLabTest`
 - 建议命令：`mvn -pl springboot-web-client test`（或在 IDE 直接运行上面的测试类）
 
 ### 复现/验证补充说明（来自原文迁移）
@@ -38,7 +38,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：用真实网络做客户端测试，导致测试不稳定且不可重复
+
+- Symptom：在本地能跑、CI 偶发失败；或者外部服务波动导致你的单元测试“背锅”
+- Root Cause：网络与下游服务本身是非确定性的；测试缺少可控证据链
+- Verification：本模块所有 timeout/retry/error mapping 都基于 MockWebServer 可复现：
+  - `BootWebClientRestClientLabTest#restClientReadTimeoutFailsFast`
+  - `BootWebClientWebClientLabTest#webClientRetriesOn5xxAndEventuallySucceeds`
+- Fix：优先用 MockWebServer 固定下游行为，把“失败模式”做成可回归实验
 
 ## G. 小结与下一章
 
@@ -50,7 +57,7 @@
 
 ### 对应 Lab/Test
 
-- Lab：`BootWebClientRestClientLabTest` / `BootWebClientWebClientLabTest`
+- Lab：`BootWebClientRestClientLabTest` / `BootWebClientWebClientLabTest` / `BootWebClientWebClientFilterOrderLabTest`
 - Exercise：`BootWebClientExerciseTest`
 
 上一章：[appendix/90-common-pitfalls.md](90-common-pitfalls.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[Docs TOC](../README.md)

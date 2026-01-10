@@ -72,7 +72,12 @@ Spring 的 Application Events 解决的是一个非常具体的问题：
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把进程内事件当成“异步消息”，忽略了默认是同步回调链
+
+- Symptom：你以为发布事件不会影响主流程耗时/异常，结果发布方被监听器拖慢甚至被异常打断
+- Root Cause：Spring Application Events 默认同步执行，监听器在发布方调用栈里运行
+- Verification：`SpringCoreEventsLabTest#eventsAreSynchronousByDefault`
+- Fix：先把“同步默认值”当成事实；需要隔离耗时/失败就显式引入异步（@Async 或 async multicaster）并用测试锁住线程模型
 
 ## G. 小结与下一章
 

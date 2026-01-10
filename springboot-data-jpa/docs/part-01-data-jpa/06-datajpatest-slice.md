@@ -58,7 +58,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把 `@DataJpaTest` 当成“真实运行时”，忽略了默认事务与回滚语义
+
+- Symptom：你以为数据会落库/对外可见，但测试结束后一切“消失”；或在测试里做跨事务验证一直不稳定
+- Root Cause：`@DataJpaTest` 默认用事务包裹并在测试结束回滚，这对学机制很友好，但不等价于生产运行时
+- Verification：`BootDataJpaLabTest#dataJpaTestRunsInsideATransaction`
+- Fix：学机制优先 `@DataJpaTest`；需要跨层/跨事务的真实边界验证，再切换到 `@SpringBootTest` 或在专门用例里明确事务策略
 
 ## G. 小结与下一章
 

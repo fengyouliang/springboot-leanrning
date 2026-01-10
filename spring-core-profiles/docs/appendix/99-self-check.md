@@ -14,7 +14,10 @@
 
 ## C. 机制主线
 
-- （本章主线内容暂以契约骨架兜底；建议结合源码与测试用例补齐主线解释。）
+这一章用“最小实验 + 可断言证据链”复盘两条主线：
+
+1. profile 的事实来源与优先级（active/default）
+2. `@Profile`/negation 对 bean 注册的影响（是否存在/选择哪一个实现）
 
 ## D. 源码与断点
 
@@ -37,7 +40,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：只改配置不做断言，导致 profile 行为靠“感觉”而不是事实
+
+- Symptom：你改了 profile 配置，看到的行为时好时坏；不知道是 profile 没生效还是 bean 条件没命中
+- Root Cause：profile 影响 bean 注册属于容器阶段行为；没有断言就很难确认“事实”
+- Verification：
+  - active/default 的事实：`SpringCoreProfilesProfilePrecedenceLabTest#defaultProfilesContainDefault_whenNoActiveProfilesConfigured`
+  - negation 生效边界：`SpringCoreProfilesLabTest#profileNegationActivatesNonDevConfigurationWhenDevIsNotActive`
+- Fix：用 `ApplicationContextRunner` 把“active profiles + bean 是否存在/类型”写成断言，再进行配置调整
 
 ## G. 小结与下一章
 

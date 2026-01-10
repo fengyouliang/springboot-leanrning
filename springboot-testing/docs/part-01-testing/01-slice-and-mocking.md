@@ -39,7 +39,22 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：误以为 `@WebMvcTest` 会加载完整业务 bean，导致“启动失败/测试意义跑偏”
+
+- Symptom：
+  - 你想测试 controller，却发现测试启动失败（常见是缺少 service/repository bean）
+  - 或者你为了解决启动失败引入了过多配置，最终把 slice 测试写成了“又慢又不稳定的全量测试”
+- Root Cause：
+  - `@WebMvcTest` 的目标是**只启动 MVC slice**，默认不会把你的业务依赖（service/repo）全加载进来
+  - slice 测试里如果 controller 依赖 service，你必须显式提供它（通常用 `@MockBean`）
+- Verification（证据链）：
+  - WebMvc slice 的正确姿势：`GreetingControllerWebMvcLabTest`（通过 `@MockBean GreetingService` 固定 controller 契约）
+    - `GreetingControllerWebMvcLabTest#returnsGreetingFromMockedService`
+  - full context 的对照组：`GreetingControllerSpringBootLabTest#returnsGreetingFromRealService`
+  - `@MockBean` 在 full context 中确实会覆盖真实 bean：`BootTestingMockBeanLabTest#mockBeanOverridesRealBeanInFullContext`
+- Fix：
+  - 只测 controller 契约 → 优先 `@WebMvcTest` + `@MockBean`
+  - 要验证真实自动装配/配置/集成边界 → 使用 `@SpringBootTest`（并用更少的 mock）
 
 ## G. 小结与下一章
 

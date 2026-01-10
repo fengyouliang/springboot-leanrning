@@ -42,7 +42,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把 `sync=true` 当成“万能并发方案”，忽略了等待与吞吐边界
+
+- Symptom：并发同 key 时吞吐下降明显；线程大量等待导致延迟上升
+- Root Cause：`sync=true` 会让同 key 的并发请求等待同一个计算结果（避免击穿，但把并发变串行）
+- Verification：`BootCacheLabTest#syncTrueAvoidsDuplicateComputationsForSameKey`（invocations=1 证明“收敛”确实发生）
+- Fix：只对“同 key 且计算昂贵”的场景启用 sync；同时评估等待成本与下游吞吐能力，必要时配合限流/降级
 
 ## G. 小结与下一章
 

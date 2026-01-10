@@ -62,7 +62,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：看到 `@Transactional` 就以为“肯定有事务”，忽略代理边界与 self-invocation
+
+- Symptom：你以为当前方法在事务里，但 `isActualTransactionActive()` 为 false，或异常后数据仍落库
+- Root Cause：`@Transactional` 依赖代理；自调用/绕开 Spring 管理的 bean 会让拦截器不生效
+- Verification：
+  - 事务在方法内确实活跃：`SpringCoreTxLabTest#transactionsAreActiveInsideTransactionalMethods`
+  - self-invocation 绕过事务（坑点）：`SpringCoreTxSelfInvocationPitfallLabTest#selfInvocationBypassesTransactional_onInnerMethod`
+- Fix：排障先锁住两条证据链：是否走代理（AopProxy）+ 方法内事务是否活跃（TransactionSynchronizationManager），再讨论传播/回滚细节
 
 ## G. 小结与下一章
 

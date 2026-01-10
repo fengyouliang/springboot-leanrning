@@ -84,7 +84,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：只背概念不做验证，遇到“不拦截”就只能靠猜
+
+- Symptom：你能复述术语，但在真实项目里某个切面不生效时无法给出证据链
+- Root Cause：AOP 是分支系统（call path / proxy 类型 / pointcut / advisor 顺序），不做实验就很难真正“对齐事实”
+- Verification（建议把这两条作为排障兜底入口）：
+  - this vs target（JDK/CGLIB 差异）：`SpringCoreAopPointcutExpressionsLabTest#this_vs_target_differs_between_JdkProxy_and_CglibProxy`
+  - 单 proxy 多 advisors vs 套娃：`SpringCoreAopMultiProxyStackingLabTest#multiple_advisors_are_applied_within_a_single_proxy_by_default`
+- Fix：遇到问题先跑对应 Lab，把“误判”变成可断言事实，再改 pointcut/配置/调用路径
 
 ## G. 小结与下一章
 

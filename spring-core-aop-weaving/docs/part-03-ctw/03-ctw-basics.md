@@ -16,11 +16,12 @@
 
 CTW 的一句话定义：
 
----
+> 在 **构建期** 使用 ajc 把 advice 织入到 class 字节码里，运行时不需要 `-javaagent`。
 
-因此本模块提供一个关键断言：
+因此本模块提供两个关键断言：
 
-它用于证明：CTW 的结论不是“因为 agent 在”，而是“因为字节码已经变了”。
+- JVM 启动参数里没有 `aspectjweaver.jar`：`AspectjCtwLabTest#ctw_testJvmIsNotStartedWithAspectjJavaAgent`
+- 但 join point 仍会被拦截（说明字节码已被织入）：`AspectjCtwLabTest#ctw_weavingWorksWithoutJavaAgent_forMethodExecutionAndCall`
 
 ---
 
@@ -66,7 +67,14 @@ CTW 的验证点是“构建产物是否已被织入”。
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：IDE 里“单跑某个测试/类”却拿到未织入的字节码，导致误判 CTW 失效
+
+- Symptom：命令行 `mvn test` 一切正常，但你在 IDE 单跑时 advice 不触发
+- Root Cause：CTW 的关键是“构建产物是否被织入”；IDE 的编译/运行配置如果绕过了 maven weaving，可能跑的是未织入 class
+- Verification：
+  - 命令行下 JVM 无 agent 仍生效：`AspectjCtwLabTest#ctw_weavingWorksWithoutJavaAgent_forMethodExecutionAndCall`
+  - 若你在 IDE 单跑看不到效果，优先对比“是否使用了 maven 编译产物”
+- Fix：以 maven 构建产物为准（先跑 `mvn -pl spring-core-aop-weaving test`）；IDE 场景需要确保复用 maven 编译输出或启用相同 weaving 配置
 
 ## G. 小结与下一章
 

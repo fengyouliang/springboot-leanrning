@@ -63,7 +63,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：以为“监听器失败不会影响主流程”，结果异常直接炸回发布方
+
+- Symptom：某个监听器抛异常后，发布事件的主流程也失败，导致你误判“业务逻辑本身坏了”
+- Root Cause：同步事件的监听器在发布方调用栈里执行，异常默认向发布方传播
+- Verification：`SpringCoreEventsMechanicsLabTest#listenerExceptionsPropagateToPublisher_byDefault`
+- Fix：需要“监听器失败不影响主流程”时，选择异步/隔离策略（并明确异常处理与补偿），不要把同步事件当消息队列
 
 ## G. 小结与下一章
 

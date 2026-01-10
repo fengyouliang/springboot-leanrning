@@ -68,7 +68,19 @@ Spring 事件有两个很实用的能力：
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把复杂业务规则塞进 condition（SpEL），导致可读性差且难排障
+
+- Symptom：监听器“偶尔不触发”，你只能猜 condition 到底在什么时候、用什么上下文求值
+- Root Cause：condition 属于轻量过滤机制，复杂规则会让行为与排障成本急剧上升
+- Verification：`SpringCoreEventsLabTest#conditionalEventListenerOnlyRunsWhenConditionMatches`
+- Fix：condition 保持简单（例如基于字段前缀/flag）；复杂规则放到监听器内部或上游业务逻辑，并用测试锁住触发分支
+
+### 坑点 2：payload 事件类型不匹配，导致监听器根本收不到
+
+- Symptom：你 publish 了一个对象，但监听器方法从未被调用
+- Root Cause：payload 匹配依赖“监听器参数类型”与 publish 的对象类型
+- Verification：`SpringCoreEventsLabTest#publishingPlainObjectsAlsoWorks_asPayloadEvents`
+- Fix：先用最小 payload（如 String）验证类型匹配，再逐步升级为专用 event class（推荐 immutable record）
 
 ## G. 小结与下一章
 

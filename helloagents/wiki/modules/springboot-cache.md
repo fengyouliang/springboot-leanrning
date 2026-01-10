@@ -8,7 +8,7 @@
 
 - **Responsibility:** 用最小示例与测试覆盖缓存命中/失效/条件缓存。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-07
+- **Last Updated:** 2026-01-09
 
 ## Specifications
 
@@ -18,6 +18,16 @@
 
 #### Scenario: 缓存命中与失效可验证
 - 通过测试断言方法调用次数/缓存内容
+
+### Requirement: 深挖对齐（对标 spring-core-beans）
+**Module:** springboot-cache
+把“key/condition/unless/缓存失效/sync 防击穿/过期策略”写成可断言主线，并绑定默认 Lab 入口。
+
+#### Scenario: Guide 主线可作为导航图
+- Guide 已补齐：Cacheable 基础、CachePut/Evict、key/condition/unless、sync 防击穿、过期与手动 Ticker
+
+#### Scenario: 章节坑点可回归
+- 每章至少 1 个可断言坑点，并绑定默认 `*LabTest#method` 作为证据链
 
 ## Dependencies
 
@@ -38,6 +48,7 @@
 
 ## Change History
 
+- [202601091802_modules_depth_align_to_beans](../../history/2026-01/202601091802_modules_depth_align_to_beans/) - ✅ 已执行：对标 spring-core-beans 深挖升级（Guide 机制主线 + 每章可断言坑点 + 默认 Lab 关键分支覆盖校验）
 - [202601071034_all_modules_docs_ag_contract](../../history/2026-01/202601071034_all_modules_docs_ag_contract/) - ✅ 已执行：全模块 docs 章节结构整理（A–G 结构 + 对应 Lab/Test 入口块）；后续不再推荐 A–G 作为写作规范/闸门
 - [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过 `scripts/check-docs.sh`
 - [202601041358_springboot-part-structure-sync](../../history/2026-01/202601041358_springboot-part-structure-sync/) - ✅ 已执行：对齐 docs Part 与 src/main/src/test 分包，并修复 README/docs 引用

@@ -61,6 +61,14 @@
 
 ## F. 常见坑与边界
 
+### 坑点 1：`@Async` 写了但没生效（线程没变）
+
+- Symptom：你给 listener 方法加了 `@Async`，但断点/日志显示仍然在发布事件的线程里执行。
+- Root Cause：`@Async` 依赖 Spring 的代理机制；如果没有开启 `@EnableAsync`（或 bean 没被代理、发生自调用），`@Async` 会被忽略。
+- Verification：`SpringCoreEventsMechanicsLabTest#asyncAnnotationIsIgnored_withoutEnableAsync`、`SpringCoreEventsMechanicsLabTest#asyncListenerRunsOnDifferentThread_whenEnableAsyncIsOn`
+- Breakpoints：`AsyncAnnotationBeanPostProcessor#postProcessAfterInitialization`、`AnnotationAsyncExecutionInterceptor#invoke`
+- Fix：开启 `@EnableAsync`（并确保 listener 是容器管理的 bean 且不自调用）；用 Lab/Test 把“线程是否变化”的事实固定下来，避免只靠肉眼看日志。
+
 ## 常见误区
 
 ## G. 小结与下一章

@@ -211,7 +211,16 @@ AutoProxyCreator 主线详见：[07 - AutoProxyCreator 主线](../part-02-autopr
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：把“顺序问题”一股脑归到 `@Order`，忽略了 BPP 顺序与 advisor 顺序是两套系统
+
+- Symptom：你调 `@Order` 发现顺序没变，或看起来变了但实际只是换了“外层/内层 proxy”而不是拦截器链顺序
+- Root Cause：
+  - 容器阶段：BPP 顺序影响“有没有套娃/谁包谁”
+  - 调用阶段：advisor/interceptor 顺序影响 `proceed()` 嵌套关系
+- Verification：
+  - 单 proxy 多 advisors（主流形态）：`SpringCoreAopMultiProxyStackingLabTest#multiple_advisors_are_applied_within_a_single_proxy_by_default`
+  - 多层 proxy（套娃）可被识别：`SpringCoreAopMultiProxyStackingLabTest#nested_proxy_can_wrap_an_existing_proxy_and_is_detectable_via_target_introspection`
+- Fix：先判断你在排查“容器阶段顺序”还是“调用阶段顺序”，再选对观察点（BPP 列表 vs advisors/interceptors）
 
 ## G. 小结与下一章
 

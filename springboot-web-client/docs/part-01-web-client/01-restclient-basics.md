@@ -43,7 +43,12 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+### 坑点 1：只断言响应，不断言请求契约，导致“悄悄把下游调用改坏”
+
+- Symptom：测试只验证返回值，后来有人改了 path/header/query 参数，线上集成才暴雷
+- Root Cause：下游调用的“契约”不仅是响应结构，还包括请求路径、查询参数与 headers
+- Verification：`BootWebClientRestClientLabTest#restClientSendsExpectedPathAndHeaders`
+- Fix：用 MockWebServer 固定下游，并把 path/header/body 写成断言（把契约变成回归门禁）
 
 ## G. 小结与下一章
 

@@ -8,7 +8,7 @@
 
 - **Responsibility:** 用最小示例与测试实验覆盖 `@Valid`、约束注解与校验器配置。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-07
+- **Last Updated:** 2026-01-09
 
 ## Specifications
 
@@ -32,8 +32,13 @@
 #### Scenario: 校验失败表现可被稳定断言
 - 校验异常类型与消息内容可验证
 
+### Requirement: 深挖对齐（对标 spring-core-beans）
+**Module:** spring-core-validation
+把“约束心智模型/编程式校验/方法校验代理/自定义约束/调试入口”写成可断言主线，并补齐章节坑点证据链。
+
 ## Change History
 
+- [202601091802_modules_depth_align_to_beans](../../history/2026-01/202601091802_modules_depth_align_to_beans/) - ✅ 已执行：对标 spring-core-beans 深挖升级（Guide 机制主线 + 每章可断言坑点 + 调试入口统一）
 - [202601071034_all_modules_docs_ag_contract](../../history/2026-01/202601071034_all_modules_docs_ag_contract/) - ✅ 已执行：全模块 docs 章节结构整理（A–G 结构 + 对应 Lab/Test 入口块）；后续不再推荐 A–G 作为写作规范/闸门
 - [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过 `scripts/check-docs.sh`
 - [202601061556_spring_core_modules_teaching_rollout](../../history/2026-01/202601061556_spring_core_modules_teaching_rollout/) - ✅ 已执行：对齐 docs 目录页/Part 编号与章节末尾“对应 Lab/Test”入口块，清理正文 `docs/NN` 缩写引用，并通过断链检查与教学覆盖检查
