@@ -85,7 +85,14 @@ mvn -pl spring-core-beans -Dspringcorebeans.explore=true test
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+1) **误区：为什么 tests 没跑/IDE 里看不到用例？**
+   - Explore 用例默认不启用：它们用 `@EnabledIfSystemProperty(named = "springcorebeans.explore", matches = "true")` 保护。
+   - 需要显式开启：`-Dspringcorebeans.explore=true`（见本章命令）。
+2) **边界：这些用例可能随 Spring 版本变化而失效**
+   - Explore 测试会用反射读取内部字段（例如 `DefaultSingletonBeanRegistry` 的缓存字段），属于“观察型断点材料”，不是稳定 API。
+   - 因此它们默认不参与回归，避免版本升级时误伤主线测试。
+3) **误区：把 Explore 输出当成“生产诊断手段”**
+   - Explore 的目标是帮助你在学习阶段“看见容器内部数据结构变化”，生产排障仍以主线章节（尤其是 [11](../part-02-boot-autoconfig/11-debugging-and-observability.md)）的方法论为主。
 
 ## G. 小结与下一章
 

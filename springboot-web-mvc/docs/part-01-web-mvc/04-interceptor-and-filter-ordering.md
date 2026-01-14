@@ -33,11 +33,25 @@
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
+### 主链路（Call-chain sketch）
+
+把一次 sync 请求粗略分成三段，会更容易定位“顺序问题”：
+
+1. FilterChain（Servlet 容器外层）
+2. DispatcherServlet#doDispatch（进入 MVC）
+3. HandlerExecutionChain（Interceptor 链）→ handler method → 返回值写回
+
+当请求进入 async，链路会变成“两次 dispatch”（下一章详述）：
+
+- 第一次 REQUEST：会进入 `afterConcurrentHandlingStarted`
+- 第二次 ASYNC：才会进入 `postHandle/afterCompletion`
+
 ## E. 最小可运行实验（Lab）
 
 - 本章用“事件序列”把顺序变成可断言证据：
 - Lab：`BootWebMvcTraceLabTest`（Filter vs Interceptor 的相对位置 + async lifecycle 对照）
-- 建议命令：`mvn -pl springboot-web-mvc test`（或在 IDE 直接运行上面的测试类）
+- 建议命令（方法级入口）：
+  - `mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcTraceLabTest#syncTraceRecordsFilterAndInterceptorOrder test`
 
 ### 复现/验证补充说明（来自原文迁移）
 
@@ -50,6 +64,23 @@
 ## Debug 建议
 
 - 写测试优先选 `MockMvc`：它能稳定复现 handler 链路并断言结果（比手工 curl 更可控）。
+
+建议断点（按“顺序时间线”）：
+
+- Filter 层（最外层）：`OncePerRequestFilter#doFilter`
+- MVC 层入口：`DispatcherServlet#doDispatch`
+- Interceptor 链：
+  - `HandlerExecutionChain#applyPreHandle`
+  - `HandlerExecutionChain#applyPostHandle`
+  - `HandlerExecutionChain#triggerAfterCompletion`
+- async 特殊回调：`AsyncHandlerInterceptor#afterConcurrentHandlingStarted`
+
+关键观察点（决定性分支）：
+
+- `request.getDispatcherType()`：
+  - REQUEST：第一次 dispatch
+  - ASYNC：二次 dispatch（asyncDispatch）
+  - ERROR：错误页/错误分发（很多“为什么进不到 controller”的问题在这里暴露）
 
 ## F. 常见坑与边界
 

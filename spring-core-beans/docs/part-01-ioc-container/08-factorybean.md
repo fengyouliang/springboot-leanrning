@@ -59,6 +59,13 @@
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
+  - `factoryBeanByNameReturnsProductAndAmpersandReturnsFactory()`（最小闭环：`"name"` vs `"&name"`）
+- （深入对照）`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansFactoryBeanDeepDiveLabTest.java`
+  - `factoryBeanProductParticipatesInTypeMatching_andIsRetrievedByProductType()`（按类型找的是 product）
+
+你会看到：
+
 - `getBean("sequence", Long.class)` 返回的是 Long（产品），并且每次调用递增
 - `getBean("&sequence")` 返回的是 `SequenceFactoryBean`（工厂本身）
 
@@ -131,6 +138,12 @@
 实验里定义了一个 `SequenceFactoryBean implements FactoryBean<Long>`：
 
 ## 源码锚点（建议从这里下断点）
+
+- `AbstractBeanFactory#doGetBean`：`getBean()` 总入口（会走到 product/factory 分流）
+- `AbstractBeanFactory#getObjectForBeanInstance`：`"name"` vs `"&name"` 的分流与暴露语义（product / factory）
+- `FactoryBeanRegistrySupport#getObjectFromFactoryBean`：从 FactoryBean 拿 product + 处理缓存
+- `AbstractBeanFactory#isTypeMatch`：按类型查找/注入时的关键路径（取决于 `getObjectType()`）
+- `DefaultListableBeanFactory#getBeanNamesForType`：type-based 发现入口（对照 `allowEagerInit` 的边界）
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

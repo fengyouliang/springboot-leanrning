@@ -40,12 +40,29 @@ Spring MVC 的异常可能来自不同阶段：
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
+### 主链路（Call-chain sketch）
+
+以“malformed JSON → 400 → ApiError”为例，一条典型链路是：
+
+1. `DispatcherServlet#doDispatch`
+2. `RequestResponseBodyMethodProcessor#resolveArgument`
+3. `AbstractMessageConverterMethodArgumentResolver#readWithMessageConverters`
+4. Jackson/Converter 抛出 `HttpMessageNotReadableException`
+5. `DispatcherServlet#processHandlerException`
+6. `HandlerExceptionResolverComposite#resolveException`
+7. `ExceptionHandlerExceptionResolver` 命中 `GlobalExceptionHandler#handleMalformedJson`
+
+更完整的 resolver 链解释见：
+- `springboot-web-mvc/docs/part-03-web-mvc-internals/04-exception-resolvers-and-error-flow.md`
+
 ## E. 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`BootWebMvcLabTest`
 - Lab：`BootWebMvcExceptionResolverChainLabTest`（用 resolvedException 固化：binder/validation/converter 三类 400 的根因差异）
-- 建议命令：`mvn -pl springboot-web-mvc test`（或在 IDE 直接运行上面的测试类）
+- 建议命令（方法级入口）：
+  - `mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcLabTest#returnsBadRequestWhenJsonIsMalformed test`
+  - `mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcExceptionResolverChainLabTest#canDebugHttpMessageNotReadableExceptionFromInvalidJsonViaResolvedException test`
 
 ### 复现/验证补充说明（来自原文迁移）
 
@@ -65,6 +82,32 @@ Spring MVC 的异常可能来自不同阶段：
 
 ## Debug 建议
 
+建议把“异常处理”拆成两步定位（先定根因，再看谁处理）：
+
+### 1) 先定根因：异常来自哪一段（binder / validation / converter）
+
+- 推荐入口（resolvedException 固化根因）：
+  - `BootWebMvcExceptionResolverChainLabTest#canDebugHttpMessageNotReadableExceptionFromInvalidJsonViaResolvedException`
+  - `BootWebMvcExceptionResolverChainLabTest#canDebugMethodArgumentNotValidExceptionFromRequestBodyValidationViaResolvedException`
+  - `BootWebMvcExceptionResolverChainLabTest#canDebugBindExceptionFromModelAttributeValidationViaResolvedException`
+- 观察点：
+  - `MvcResult#getResolvedException()` 的实际类型（这是“400 为什么出现”的最快证据）
+
+### 2) 再看谁处理：resolver 链如何命中你的 @ExceptionHandler
+
+- 推荐断点：
+  - `DispatcherServlet#processHandlerException`
+  - `HandlerExceptionResolverComposite#resolveException`
+  - `ExceptionHandlerExceptionResolver#doResolveHandlerMethodException`
+  - `GlobalExceptionHandler#handleValidation` / `handleBindException` / `handleMalformedJson` / `handleTypeMismatch`
+- 决定性分支（最常用的判断）：
+  - advice 是否“适用”（matching）：`basePackages/annotations/assignableTypes`
+  - advice 是否“优先”（ordering）：多个 advice 都能处理时，`@Order` 决定谁先命中
+
+进一步阅读（带可复现证据链）：
+- advice 匹配：`BootWebMvcAdviceMatchingLabTest`（Part 03：05）
+- advice 优先级：`BootWebMvcAdviceOrderLabTest`（Part 03：05）
+
 ## F. 常见坑与边界
 
 把“统一异常处理”做成工程闭环时，最容易翻车的不是写不出 `@ExceptionHandler`，而是 **分支没分清/匹配没看懂/测试没锁住**。
@@ -78,6 +121,13 @@ Spring MVC 的异常可能来自不同阶段：
 - **校验失败**（validation）→ `MethodArgumentNotValidException`（@RequestBody）或 `BindException`（@ModelAttribute）→ `validation_failed`
 
 建议做法：先用测试把三类分开固化（status + message + fieldErrors），再谈“统一错误体”。
+
+补充一个容易忽略的分支：**BindingResult 会改变错误流**。
+
+- 没有 `BindingResult`：校验失败通常直接抛异常（进入 resolver 链）
+- 有 `BindingResult`：controller 可以选择不抛异常，自己手动塑形错误体
+
+本模块给出对照证据链：`BootWebMvcBindingDeepDiveLabTest#bindingResultCanShortCircuitExceptionFlowWhenHandledManually`。
 
 ### 2) @WebMvcTest 里“看不到你的错误体”
 
@@ -100,6 +150,18 @@ Spring MVC 的异常可能来自不同阶段：
 本模块提供了可复现证据链：
 - Lab：`BootWebMvcAdviceMatchingLabTest`（覆盖 selector：basePackages / annotations / assignableTypes，并包含与 @Order 叠加的对照）
 - 延伸阅读：Part 03 - Internals 的 `05-controlleradvice-matching-and-ordering.md`
+
+### 3.5) 404（无 handler）为什么不会进你的 ControllerAdvice
+
+现象：
+- 你访问一个不存在的路由，得到 404，但你的 `@ControllerAdvice/@ExceptionHandler` 没有生效。
+
+关键原因：
+- 404（无 handler）通常发生在 **HandlerMapping 选路阶段**：根本没有命中的 `HandlerMethod`。
+- 在 Spring Boot 下，很多 404 会走到 `/error` 兜底（`BasicErrorController + ErrorAttributes`），返回的是 Boot 默认错误 envelope，而不是你的自定义错误体。
+
+可运行证据链：
+- `BootWebMvcSpringBootLabTest#unknownRouteFallsBackToSpringBootErrorEndpoint`（端到端证明：404 返回 body 里包含 `status/path` 等 Boot 默认字段）
 
 ### 4) 两个 advice 都能处理时，谁生效（@Order）
 

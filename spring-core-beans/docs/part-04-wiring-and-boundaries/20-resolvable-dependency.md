@@ -229,6 +229,11 @@
 
 ## 源码锚点（建议从这里下断点）
 
+- `DefaultListableBeanFactory#registerResolvableDependency`：注册 “type → value” 的 resolvableDependencies
+- `DefaultListableBeanFactory#doResolveDependency`：依赖注入解析主入口（会优先命中 resolvableDependencies）
+- `DefaultListableBeanFactory#findAutowireCandidates`：未命中 resolvableDependencies 后才进入 bean 候选查找
+- `AbstractBeanFactory#doGetBean`：`getBean(type)` 路径（不会命中 resolvableDependencies，这是最关键边界）
+
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResolvableDependencyLabTest.java`

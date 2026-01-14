@@ -81,6 +81,10 @@
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansEarlyReferenceLabTest.java`
+  - `getEarlyBeanReference_canProvideEarlyProxyDuringCircularDependencyResolution()`（核心闭环：early 与 final 都是同一个 proxy）
+  - `injectingConcreteTypeFailsWhenFinalBeanIsJdkProxy_duringCircularDependency()`（边界：按实现类注入可能因 JDK proxy 直接失败）
+
 - `Alpha` 与 `Beta` 用 setter 互相依赖
 - 我们实现一个 `SmartInstantiationAwareBeanPostProcessor`
   - 在 `getEarlyBeanReference` 阶段为 `alpha` 创建 JDK proxy
@@ -106,6 +110,19 @@
 学习阶段建议：
 
 入口：
+
+最小复现入口（方法级）：
+
+- `SpringCoreBeansEarlyReferenceLabTest.getEarlyBeanReference_canProvideEarlyProxyDuringCircularDependencyResolution()`
+- `SpringCoreBeansEarlyReferenceLabTest.injectingConcreteTypeFailsWhenFinalBeanIsJdkProxy_duringCircularDependency()`
+
+推荐断点（闭环版）：
+
+1) `DefaultSingletonBeanRegistry#getSingleton`：三层缓存/early 分支的主入口（看 `earlySingletonReference` 从哪来）
+2) `AbstractAutowireCapableBeanFactory#doCreateBean`：创建主线（对照 early reference 与最终 `exposedObject`）
+3) `AbstractAutowireCapableBeanFactory#getEarlyBeanReference`：early reference 的统一入口（会调用 `SmartInstantiationAwareBeanPostProcessor#getEarlyBeanReference`）
+4) 你在 Lab 里实现的 `SmartInstantiationAwareBeanPostProcessor#getEarlyBeanReference`：观察 early 阶段返回的到底是 raw 还是 proxy
+5) `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`：final 阶段代理通常在这里产生（对照 early 与 final 是否一致）
 
 你应该看到：
 
@@ -191,6 +208,13 @@ Spring 为了避免这种不一致，提供了一个 fail-fast 的保护开关�
 
 ## 6. 一句话自检
 
+- 常问：`getEarlyBeanReference` 解决的到底是什么问题？
+  - 答题要点：不是“能不能拿到引用”，而是“early 暴露的引用是否等于最终暴露形态（proxy/wrapper）”，避免 raw vs wrapped 不一致与绕过代理。
+- 常见追问：三级缓存分别扮演什么角色？为什么 `singletonFactories` 不是直接缓存对象？
+  - 答题要点：`singletonFactories` 缓存的是 `ObjectFactory`，用于按需生成 early reference（可能是 proxy），避免过早决定形态。
+- 常见追问：为什么“按实现类注入”在 JDK proxy 场景会失败？
+  - 答题要点：JDK proxy 只实现接口，不可赋值给实现类；因此注入点应优先按接口，或使用 class-based proxy 策略。
+
 ## D. 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
@@ -240,6 +264,12 @@ Spring 为了避免这种不一致，提供了一个 fail-fast 的保护开关�
 - 要么像本实验一样：**early 与 final 返回同一个 wrapper/proxy**
 
 ## 源码锚点（建议从这里下断点）
+
+- `DefaultSingletonBeanRegistry#getSingleton`：三级缓存取值分支（singletonObjects / earlySingletonObjects / singletonFactories）
+- `DefaultSingletonBeanRegistry#addSingletonFactory`：把 early reference 工厂放进三级缓存的时机
+- `AbstractAutowireCapableBeanFactory#doCreateBean`：bean 创建主流程（在哪一步触发 early exposure）
+- `AbstractAutowireCapableBeanFactory#getEarlyBeanReference`：容器向 BPP 请求 early reference 的入口
+- `SmartInstantiationAwareBeanPostProcessor#getEarlyBeanReference`：早期代理的扩展点（AOP/自定义 wrapper 常用）
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

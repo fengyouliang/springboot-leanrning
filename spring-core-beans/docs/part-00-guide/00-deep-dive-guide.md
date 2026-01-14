@@ -24,7 +24,27 @@
 
 深挖最怕两件事：
 
+- **跑太大（噪音淹没信号）**：直接 `spring-boot:run` 或跑全量测试，断点命中会爆炸，学习效率反而下降  
+  - 对策：优先用本仓库的 `*LabTest` 把问题缩成“最小容器 + 最小现象 + 最小断言”
+- **不分层（不知道自己在看什么对象）**：把“定义层/解析层/实例层”混在一起看，容易在巨大调用栈里迷路  
+  - 对策：先问自己：我是在查 **BeanDefinition**（有没有注册）、还是查 **候选集合**（有哪些候选）、还是查 **最终暴露对象**（为什么是 proxy）？
+
 跑一个测试类：
+
+如果你是第一次进入本模块，建议先快后深：
+
+1) **先快（30 分钟闭环）**：把 3 个最小实验跑通（命令/断点/观察点都给齐）  
+   - 见：[01. 30 分钟快速闭环：先快后深（3 个最小实验入口）](01-quickstart-30min.md)
+2) **再深（选 3 个“入口测试类”当导航锚点）**：每个类都对应一条主线与一个决定性分支  
+   - `SpringCoreBeansLabTest`：从“现象”进（Qualifier/Scope/Lifecycle）  
+     - 决定性分支：`doResolveDependency` 的候选收敛（Qualifier/Primary/name）  
+   - `SpringCoreBeansContainerLabTest`：从“容器主线”进（定义 vs 实例、BFPP/BPP、FactoryBean、循环依赖边界）  
+     - 决定性分支：`refresh` 时间线里 BFPP/BPP 的先后与单例创建时机  
+   - `SpringCoreBeansBeanCreationTraceLabTest`：从“创建过程可视化”进（哪个阶段替换成 proxy）  
+     - 决定性分支：`applyBeanPostProcessorsAfterInitialization` 里 `bean` → `result` 的第一次替换
+
+配合断点地图一起用（把断点从“散点”收敛成“按阶段可复用清单”）：
+- [02. 断点地图：容器主线可复用断点/观察点清单](02-breakpoint-map.md)
 
 常用条件示例（以 `doCreateBean` 等方法里常见的 `beanName` 为例）：
 
@@ -33,6 +53,16 @@
 - `beanName.startsWith("org.springframework.")`（反向过滤：排除 Spring 自己的）
 
 ### 0.3 先跑一遍“First Pass”（不新增章节文件版）
+
+如果你只想快速建立“阶段感”，可以按下面顺序做一次 First Pass（不追求背源码，只追求抓住抓手）：
+
+1) 跑通快启 3 个实验（见 01 章），确保你能用断点证明“候选收敛 / prototype 注入陷阱 / proxy 替换”
+2) 在 `AbstractApplicationContext#refresh` 打一个断点，只看 4 个关键节点：  
+   - `invokeBeanFactoryPostProcessors`（定义层稳定下来）  
+   - `registerBeanPostProcessors`（实例层增强点进入容器）  
+   - `preInstantiateSingletons`（非 lazy 单例开始批量创建）  
+   - `finishRefresh`（容器就绪）
+3) 选一个你最关心的现象（注入歧义/生命周期/代理），把它缩成一个方法级 `-Dtest=Class#method` 入口，再去读对应章节
 
 ---
 
@@ -104,6 +134,12 @@
 很多“看起来像魔法”的现象，其实不是藏在 `doCreateBean(...)` 里，而是藏在下面三件事里：
 
 对应章节：
+
+- [11. 调试与自检：先分层再下断点](../part-02-boot-autoconfig/11-debugging-and-observability.md)
+- [12. 容器启动与基础设施：注解为何生效](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
+- [14. Post-Processor 顺序：PriorityOrdered/Ordered 分段算法](../part-03-container-internals/14-post-processor-ordering.md)
+- [35. MergedBeanDefinition：最终生效配方](../part-04-wiring-and-boundaries/35-merged-bean-definition.md)
+- [16. early reference 与循环依赖：三层缓存与时机](../part-03-container-internals/16-early-reference-and-circular.md)
 
 ---
 
@@ -246,6 +282,12 @@
 ## 5. 读完本章你应该获得什么
 
 如果本章有效，你应该能做到：
+
+- 能把“Bean 三层模型”落到 **4 个固定断点入口**：`refresh` / `doCreateBean` / `doResolveDependency` / `getMergedBeanDefinition`
+- 能把任何“现象描述”翻译成“分层排障问题”：定义层（有没有注册/条件是否满足）→ 解析层（候选集合与收敛）→ 实例层（生命周期/代理替换）
+- 能在断点里用固定观察点拿证据，而不是靠日志碰运气（`mbd` / `descriptor` / `matchingBeans` / 三层缓存 / 依赖图）
+- 能用 `*LabTest` 把问题缩到最小复现（方法级入口），并给出下一步该读的章节/该下的断点
+- 遇到“为什么是 proxy/为什么注解不生效/为什么循环依赖救不回来”这类问题时，至少知道从哪一章与哪个入口开始
 
 ## D. 源码与断点
 

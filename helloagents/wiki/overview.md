@@ -38,6 +38,7 @@
 
 ## 3. 快速链接
 
+- [学习路线图（主线 / 机制线）](learning-path.md)
 - [项目技术约定](../project.md)
 - [架构说明](arch.md)
 - [API 说明](api.md)

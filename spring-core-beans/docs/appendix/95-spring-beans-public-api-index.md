@@ -1,27 +1,20 @@
-# 95 spring beans public api index
-
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
-
-- 本章主题：**95 spring beans public api index**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
-
-## B. 核心结论
-
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
-
-## C. 机制主线
-
 <!--
 ⚠️ GENERATED FILE - 请勿手工编辑。
 - Generator: scripts/generate-spring-beans-public-api-index.py
 - Source: /home/feng/.m2/repository/org/springframework/spring-beans/6.2.15/spring-beans-6.2.15-sources.jar
-- Generated at: 2026-01-06 13:58:36
+- Generated at: 2026-01-14 16:42:38
 -->
 
 # 95. spring-beans Public API 索引（Spring Framework 6.2.15）
+
+本索引用于把 `spring-beans` 的 public 类型做成“可检索/可审计”的入口，并为每个类型给出：
+- 机制域（Domain）
+- 主入口章节（Chapter）
+- 主入口 Lab（Lab）
+
+重要说明：
+- 这里的 **Chapter/Lab 是“主入口”**：并不意味着该类型只有一个知识点；它只是把你带到“主线/边界/断点观察点”的起点。
+- 如果你想再生本文件：运行 `python3 scripts/generate-spring-beans-public-api-index.py`。
 
 ---
 ## 包索引（按 package 分组）
@@ -43,68 +36,6 @@
 
 ## org.springframework.beans
 <a id="orgspringframeworkbeans"></a>
-
-## org.springframework.beans.factory
-<a id="orgspringframeworkbeansfactory"></a>
-
-## org.springframework.beans.factory.annotation
-<a id="orgspringframeworkbeansfactoryannotation"></a>
-
-## org.springframework.beans.factory.aot
-<a id="orgspringframeworkbeansfactoryaot"></a>
-
-## org.springframework.beans.factory.config
-<a id="orgspringframeworkbeansfactoryconfig"></a>
-
-## org.springframework.beans.factory.groovy
-<a id="orgspringframeworkbeansfactorygroovy"></a>
-
-## org.springframework.beans.factory.parsing
-<a id="orgspringframeworkbeansfactoryparsing"></a>
-
-## org.springframework.beans.factory.serviceloader
-<a id="orgspringframeworkbeansfactoryserviceloader"></a>
-
-## org.springframework.beans.factory.support
-<a id="orgspringframeworkbeansfactorysupport"></a>
-
-## org.springframework.beans.factory.wiring
-<a id="orgspringframeworkbeansfactorywiring"></a>
-
-## org.springframework.beans.factory.xml
-<a id="orgspringframeworkbeansfactoryxml"></a>
-
-## org.springframework.beans.propertyeditors
-<a id="orgspringframeworkbeanspropertyeditors"></a>
-
-## org.springframework.beans.support
-<a id="orgspringframeworkbeanssupport"></a>
-
----
-
-## 如何用它（建议）
-
-## D. 源码与断点
-
-- 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
-- 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
-
-## E. 最小可运行实验（Lab）
-
-- 本章已在正文中引用以下 LabTest（建议优先跑它们）：
-- Lab：`SpringCoreBeansAotFactoriesLabTest` / `SpringCoreBeansAotRuntimeHintsLabTest` / `SpringCoreBeansAutowireCandidateSelectionLabTest`
-- 建议命令：`mvn -pl spring-core-beans test`（或在 IDE 直接运行上面的测试类）
-
-### 复现/验证补充说明（来自原文迁移）
-
-本索引用于把 `spring-beans` 的 public 类型做成“可检索/可审计”的入口，并为每个类型给出：
-- 机制域（Domain）
-- 主入口章节（Chapter）
-- 主入口 Lab（Lab）
-
-重要说明：
-- 这里的 **Chapter/Lab 是“主入口”**：并不意味着该类型只有一个知识点；它只是把你带到“主线/边界/断点观察点”的起点。
-- 如果你想再生本文件：运行 `python3 scripts/generate-spring-beans-public-api-index.py`。
 
 | Type | Kind | Domain | Chapter | Lab | Coverage |
 | --- | --- | --- | --- | --- | --- |
@@ -156,6 +87,9 @@
 | `org.springframework.beans.TypeConverterSupport` | `class` | Beans 核心（BeanWrapper/PropertyValues/异常模型等） | [36-type-conversion-and-beanwrapper.md](../part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md) | [`SpringCoreBeansTypeConversionLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansTypeConversionLabTest.java) | ✅ core |
 | `org.springframework.beans.TypeMismatchException` | `class` | Beans 核心（BeanWrapper/PropertyValues/异常模型等） | [36-type-conversion-and-beanwrapper.md](../part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md) | [`SpringCoreBeansTypeConversionLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansTypeConversionLabTest.java) | ✅ core |
 
+## org.springframework.beans.factory
+<a id="orgspringframeworkbeansfactory"></a>
+
 | Type | Kind | Domain | Chapter | Lab | Coverage |
 | --- | --- | --- | --- | --- | --- |
 | `org.springframework.beans.factory.Aware` | `interface` | BeanFactory API（最小容器入口） | [39-beanfactory-api-deep-dive.md](../part-04-wiring-and-boundaries/39-beanfactory-api-deep-dive.md) | [`SpringCoreBeansBeanFactoryApiLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanFactoryApiLabTest.java) | ✅ core |
@@ -191,6 +125,9 @@
 | `org.springframework.beans.factory.SmartInitializingSingleton` | `interface` | BeanFactory API（最小容器入口） | [39-beanfactory-api-deep-dive.md](../part-04-wiring-and-boundaries/39-beanfactory-api-deep-dive.md) | [`SpringCoreBeansBeanFactoryApiLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanFactoryApiLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.UnsatisfiedDependencyException` | `class` | BeanFactory API（最小容器入口） | [39-beanfactory-api-deep-dive.md](../part-04-wiring-and-boundaries/39-beanfactory-api-deep-dive.md) | [`SpringCoreBeansBeanFactoryApiLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanFactoryApiLabTest.java) | ✅ core |
 
+## org.springframework.beans.factory.annotation
+<a id="orgspringframeworkbeansfactoryannotation"></a>
+
 | Type | Kind | Domain | Chapter | Lab | Coverage |
 | --- | --- | --- | --- | --- | --- |
 | `org.springframework.beans.factory.annotation.AnnotatedBeanDefinition` | `interface` | 注解注入（@Autowired/@Qualifier/@Value 等） | [03-dependency-injection-resolution.md](../part-01-ioc-container/03-dependency-injection-resolution.md) | [`SpringCoreBeansAutowireCandidateSelectionLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java) | ✅ core |
@@ -210,6 +147,9 @@
 | `org.springframework.beans.factory.annotation.Qualifier` | `annotation` | 注解注入（@Autowired/@Qualifier/@Value 等） | [03-dependency-injection-resolution.md](../part-01-ioc-container/03-dependency-injection-resolution.md) | [`SpringCoreBeansAutowireCandidateSelectionLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver` | `class` | 注解注入（@Autowired/@Qualifier/@Value 等） | [03-dependency-injection-resolution.md](../part-01-ioc-container/03-dependency-injection-resolution.md) | [`SpringCoreBeansAutowireCandidateSelectionLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.annotation.Value` | `annotation` | 注解注入（@Autowired/@Qualifier/@Value 等） | [03-dependency-injection-resolution.md](../part-01-ioc-container/03-dependency-injection-resolution.md) | [`SpringCoreBeansAutowireCandidateSelectionLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java) | ✅ core |
+
+## org.springframework.beans.factory.aot
+<a id="orgspringframeworkbeansfactoryaot"></a>
 
 | Type | Kind | Domain | Chapter | Lab | Coverage |
 | --- | --- | --- | --- | --- | --- |
@@ -245,6 +185,9 @@
 | `org.springframework.beans.factory.aot.InstanceSupplierCodeGenerator` | `class` | AOT（spring-beans） | [40-aot-and-native-overview.md](../part-05-aot-and-real-world/40-aot-and-native-overview.md) | [`SpringCoreBeansAotFactoriesLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAotFactoriesLabTest.java)<br/>[`SpringCoreBeansAotRuntimeHintsLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAotRuntimeHintsLabTest.java) | ✅ core |
 
 > 备注：AOT 包的 API 面很大：本项目以“可断点理解主线”为目标，建议先从 aot.factories/AotServices 入手，再逐步深入代码生成链路。
+
+## org.springframework.beans.factory.config
+<a id="orgspringframeworkbeansfactoryconfig"></a>
 
 | Type | Kind | Domain | Chapter | Lab | Coverage |
 | --- | --- | --- | --- | --- | --- |
@@ -297,11 +240,17 @@
 | `org.springframework.beans.factory.config.YamlProcessor` | `class` | 配置模型与扩展点（BFPP/BPP/Scope/FactoryBean 等） | [06-post-processors.md](../part-01-ioc-container/06-post-processors.md) | [`SpringCoreBeansRegistryPostProcessorLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansRegistryPostProcessorLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.config.YamlPropertiesFactoryBean` | `class` | 配置模型与扩展点（BFPP/BPP/Scope/FactoryBean 等） | [06-post-processors.md](../part-01-ioc-container/06-post-processors.md) | [`SpringCoreBeansRegistryPostProcessorLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansRegistryPostProcessorLabTest.java) | ✅ core |
 
+## org.springframework.beans.factory.groovy
+<a id="orgspringframeworkbeansfactorygroovy"></a>
+
 | Type | Kind | Domain | Chapter | Lab | Coverage |
 | --- | --- | --- | --- | --- | --- |
 | `org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader` | `class` | BeanDefinitionReader（Groovy） | [47-beandefinitionreader-other-inputs-properties-groovy.md](../part-05-aot-and-real-world/47-beandefinitionreader-other-inputs-properties-groovy.md) | [`SpringCoreBeansGroovyBeanDefinitionReaderLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansGroovyBeanDefinitionReaderLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.groovy.GroovyBeanDefinitionWrapper` | `unknown` | BeanDefinitionReader（Groovy） | [47-beandefinitionreader-other-inputs-properties-groovy.md](../part-05-aot-and-real-world/47-beandefinitionreader-other-inputs-properties-groovy.md) | [`SpringCoreBeansGroovyBeanDefinitionReaderLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansGroovyBeanDefinitionReaderLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.groovy.GroovyDynamicElementReader` | `unknown` | BeanDefinitionReader（Groovy） | [47-beandefinitionreader-other-inputs-properties-groovy.md](../part-05-aot-and-real-world/47-beandefinitionreader-other-inputs-properties-groovy.md) | [`SpringCoreBeansGroovyBeanDefinitionReaderLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansGroovyBeanDefinitionReaderLabTest.java) | ✅ core |
+
+## org.springframework.beans.factory.parsing
+<a id="orgspringframeworkbeansfactoryparsing"></a>
 
 | Type | Kind | Domain | Chapter | Lab | Coverage |
 | --- | --- | --- | --- | --- | --- |
@@ -329,12 +278,18 @@
 | `org.springframework.beans.factory.parsing.ReaderEventListener` | `interface` | XML parsing / namespace 扩展 | [46-xml-namespace-extension.md](../part-05-aot-and-real-world/46-xml-namespace-extension.md) | [`SpringCoreBeansXmlNamespaceExtensionLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansXmlNamespaceExtensionLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.parsing.SourceExtractor` | `interface` | XML parsing / namespace 扩展 | [46-xml-namespace-extension.md](../part-05-aot-and-real-world/46-xml-namespace-extension.md) | [`SpringCoreBeansXmlNamespaceExtensionLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansXmlNamespaceExtensionLabTest.java) | ✅ core |
 
+## org.springframework.beans.factory.serviceloader
+<a id="orgspringframeworkbeansfactoryserviceloader"></a>
+
 | Type | Kind | Domain | Chapter | Lab | Coverage |
 | --- | --- | --- | --- | --- | --- |
 | `org.springframework.beans.factory.serviceloader.AbstractServiceLoaderBasedFactoryBean` | `class` | 内置 FactoryBean（ServiceLoader*） | [49-built-in-factorybeans-gallery.md](../part-05-aot-and-real-world/49-built-in-factorybeans-gallery.md) | [`SpringCoreBeansServiceLoaderFactoryBeansLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansServiceLoaderFactoryBeansLabTest.java)<br/>[`SpringCoreBeansBuiltInFactoryBeansLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansBuiltInFactoryBeansLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.serviceloader.ServiceFactoryBean` | `class` | 内置 FactoryBean（ServiceLoader*） | [49-built-in-factorybeans-gallery.md](../part-05-aot-and-real-world/49-built-in-factorybeans-gallery.md) | [`SpringCoreBeansServiceLoaderFactoryBeansLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansServiceLoaderFactoryBeansLabTest.java)<br/>[`SpringCoreBeansBuiltInFactoryBeansLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansBuiltInFactoryBeansLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.serviceloader.ServiceListFactoryBean` | `class` | 内置 FactoryBean（ServiceLoader*） | [49-built-in-factorybeans-gallery.md](../part-05-aot-and-real-world/49-built-in-factorybeans-gallery.md) | [`SpringCoreBeansServiceLoaderFactoryBeansLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansServiceLoaderFactoryBeansLabTest.java)<br/>[`SpringCoreBeansBuiltInFactoryBeansLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansBuiltInFactoryBeansLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.serviceloader.ServiceLoaderFactoryBean` | `class` | 内置 FactoryBean（ServiceLoader*） | [49-built-in-factorybeans-gallery.md](../part-05-aot-and-real-world/49-built-in-factorybeans-gallery.md) | [`SpringCoreBeansServiceLoaderFactoryBeansLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansServiceLoaderFactoryBeansLabTest.java)<br/>[`SpringCoreBeansBuiltInFactoryBeansLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansBuiltInFactoryBeansLabTest.java) | ✅ core |
+
+## org.springframework.beans.factory.support
+<a id="orgspringframeworkbeansfactorysupport"></a>
 
 | Type | Kind | Domain | Chapter | Lab | Coverage |
 | --- | --- | --- | --- | --- | --- |
@@ -391,12 +346,18 @@
 | `org.springframework.beans.factory.support.SimpleInstantiationStrategy` | `class` | 容器内部实现（support） | [12-container-bootstrap-and-infrastructure.md](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md) | [`SpringCoreBeansBeanCreationTraceLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansBeanCreationTraceLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.support.StaticListableBeanFactory` | `class` | 容器内部实现（support） | [12-container-bootstrap-and-infrastructure.md](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md) | [`SpringCoreBeansBeanCreationTraceLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansBeanCreationTraceLabTest.java) | ✅ core |
 
+## org.springframework.beans.factory.wiring
+<a id="orgspringframeworkbeansfactorywiring"></a>
+
 | Type | Kind | Domain | Chapter | Lab | Coverage |
 | --- | --- | --- | --- | --- | --- |
 | `org.springframework.beans.factory.wiring.BeanConfigurerSupport` | `class` | 容器外对象装配（BeanConfigurerSupport） | [43-autowirecapablebeanfactory-external-objects.md](../part-05-aot-and-real-world/43-autowirecapablebeanfactory-external-objects.md) | [`SpringCoreBeansAutowireCapableBeanFactoryLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAutowireCapableBeanFactoryLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.wiring.BeanWiringInfo` | `class` | 容器外对象装配（BeanConfigurerSupport） | [43-autowirecapablebeanfactory-external-objects.md](../part-05-aot-and-real-world/43-autowirecapablebeanfactory-external-objects.md) | [`SpringCoreBeansAutowireCapableBeanFactoryLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAutowireCapableBeanFactoryLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.wiring.BeanWiringInfoResolver` | `interface` | 容器外对象装配（BeanConfigurerSupport） | [43-autowirecapablebeanfactory-external-objects.md](../part-05-aot-and-real-world/43-autowirecapablebeanfactory-external-objects.md) | [`SpringCoreBeansAutowireCapableBeanFactoryLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAutowireCapableBeanFactoryLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.wiring.ClassNameBeanWiringInfoResolver` | `class` | 容器外对象装配（BeanConfigurerSupport） | [43-autowirecapablebeanfactory-external-objects.md](../part-05-aot-and-real-world/43-autowirecapablebeanfactory-external-objects.md) | [`SpringCoreBeansAutowireCapableBeanFactoryLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAutowireCapableBeanFactoryLabTest.java) | ✅ core |
+
+## org.springframework.beans.factory.xml
+<a id="orgspringframeworkbeansfactoryxml"></a>
 
 | Type | Kind | Domain | Chapter | Lab | Coverage |
 | --- | --- | --- | --- | --- | --- |
@@ -426,6 +387,9 @@
 | `org.springframework.beans.factory.xml.XmlBeanDefinitionReader` | `class` | XML → BeanDefinitionReader | [42-xml-bean-definition-reader.md](../part-05-aot-and-real-world/42-xml-bean-definition-reader.md) | [`SpringCoreBeansXmlBeanDefinitionReaderLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansXmlBeanDefinitionReaderLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.xml.XmlBeanDefinitionStoreException` | `class` | XML → BeanDefinitionReader | [42-xml-bean-definition-reader.md](../part-05-aot-and-real-world/42-xml-bean-definition-reader.md) | [`SpringCoreBeansXmlBeanDefinitionReaderLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansXmlBeanDefinitionReaderLabTest.java) | ✅ core |
 | `org.springframework.beans.factory.xml.XmlReaderContext` | `class` | XML → BeanDefinitionReader | [42-xml-bean-definition-reader.md](../part-05-aot-and-real-world/42-xml-bean-definition-reader.md) | [`SpringCoreBeansXmlBeanDefinitionReaderLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansXmlBeanDefinitionReaderLabTest.java) | ✅ core |
+
+## org.springframework.beans.propertyeditors
+<a id="orgspringframeworkbeanspropertyeditors"></a>
 
 | Type | Kind | Domain | Chapter | Lab | Coverage |
 | --- | --- | --- | --- | --- | --- |
@@ -458,6 +422,9 @@
 | `org.springframework.beans.propertyeditors.UUIDEditor` | `class` | PropertyEditor（legacy 但重要） | [50-property-editor-and-value-resolution.md](../part-05-aot-and-real-world/50-property-editor-and-value-resolution.md) | [`SpringCoreBeansPropertyEditorLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansPropertyEditorLabTest.java) | ✅ core |
 | `org.springframework.beans.propertyeditors.ZoneIdEditor` | `class` | PropertyEditor（legacy 但重要） | [50-property-editor-and-value-resolution.md](../part-05-aot-and-real-world/50-property-editor-and-value-resolution.md) | [`SpringCoreBeansPropertyEditorLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansPropertyEditorLabTest.java) | ✅ core |
 
+## org.springframework.beans.support
+<a id="orgspringframeworkbeanssupport"></a>
+
 | Type | Kind | Domain | Chapter | Lab | Coverage |
 | --- | --- | --- | --- | --- | --- |
 | `org.springframework.beans.support.ArgumentConvertingMethodInvoker` | `class` | Beans 支撑（偏低层） | [36-type-conversion-and-beanwrapper.md](../part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md) | [`SpringCoreBeansBeansSupportUtilitiesLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeansSupportUtilitiesLabTest.java)<br/>[`SpringCoreBeansTypeConversionLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansTypeConversionLabTest.java) | ✅ core |
@@ -467,28 +434,18 @@
 | `org.springframework.beans.support.ResourceEditorRegistrar` | `class` | Beans 支撑（偏低层） | [36-type-conversion-and-beanwrapper.md](../part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md) | [`SpringCoreBeansBeansSupportUtilitiesLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeansSupportUtilitiesLabTest.java)<br/>[`SpringCoreBeansTypeConversionLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansTypeConversionLabTest.java) | ✅ core |
 | `org.springframework.beans.support.SortDefinition` | `interface` | Beans 支撑（偏低层） | [36-type-conversion-and-beanwrapper.md](../part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md) | [`SpringCoreBeansBeansSupportUtilitiesLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeansSupportUtilitiesLabTest.java)<br/>[`SpringCoreBeansTypeConversionLabTest.java`](../../src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansTypeConversionLabTest.java) | ✅ core |
 
+---
+
+## 如何用它（建议）
+
 - 你遇到某个类/接口名时：先在本索引里搜 `FQCN`，找到“主入口章节”。
 - 进入章节后：按章节的“断点入口/观察点”跑一遍对应 Lab，让概念落到可证明的主线上。
 - 想做源码深挖：从 Lab 的断点入口顺着调用链往下走（比从 IDE 全局搜索更快）。
 
-## F. 常见坑与边界
+## 坑点与排障（把索引变成“可用工具”）
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
-
-## G. 小结与下一章
-
-- 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
-
-<!-- AG-CONTRACT:END -->
-
-<!-- BOOKIFY:START -->
-
-### 对应 Lab/Test
-
-- Lab：`SpringCoreBeansAotFactoriesLabTest` / `SpringCoreBeansAotRuntimeHintsLabTest` / `SpringCoreBeansAutowireCandidateSelectionLabTest` / `SpringCoreBeansTypeConversionLabTest` / `SpringCoreBeansBeanFactoryApiLabTest` / `SpringCoreBeansRegistryPostProcessorLabTest` / `SpringCoreBeansGroovyBeanDefinitionReaderLabTest` / `SpringCoreBeansXmlNamespaceExtensionLabTest` / `SpringCoreBeansServiceLoaderFactoryBeansLabTest` / `SpringCoreBeansBuiltInFactoryBeansLabTest` / `SpringCoreBeansBeanCreationTraceLabTest` / `SpringCoreBeansAutowireCapableBeanFactoryLabTest` / `SpringCoreBeansXmlBeanDefinitionReaderLabTest` / `SpringCoreBeansPropertyEditorLabTest` / `SpringCoreBeansBeansSupportUtilitiesLabTest`
-- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansTypeConversionLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanFactoryApiLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAotFactoriesLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAotRuntimeHintsLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansRegistryPostProcessorLabTest.java`
-- （另有 9 个 test file 路径引用，略）
-
-上一章：[94. 生产排障清单（异常分型 → 入口 → 观察点 → 修复策略）](94-production-troubleshooting-checklist.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[96. spring-beans Public API Gap 清单（按包/机制域分批深化）](96-spring-beans-public-api-gap.md)
-
-<!-- BOOKIFY:END -->
+- **索引不是学习路线**：Index/GAP 的价值是“定位”，不是“背诵清单”。推荐先按 `docs/README.md` 的 Start Here 跑最小 Lab，再回索引做反查定位。
+- **BeanFactory vs ApplicationContext 差异**：很多“注解不生效/生命周期不触发”的现象，根因是没有安装 `AnnotationConfigProcessors`（仅 `BeanFactory` 不会自动做这件事）。
+- **FactoryBean 的双重身份**：`getBean("foo")` 拿到的是“产品对象”，`getBean("&foo")` 才是 `FactoryBean` 本身；排查类型不匹配/注入歧义时先确认你拿到的到底是谁。
+- **代理导致的类型错觉**：JDK Proxy 只实现接口，无法赋值给具体类；当 BPP 提前暴露早期引用/创建代理时，“按具体类注入”可能失败，优先按接口注入或切换到 class-based proxy。
+- **版本差异与定位方式**：不要依赖行号；用“入口测试方法 + 关键接口名 + `rg` 关键词”定位更稳（Spring 小版本内部实现经常移动）。

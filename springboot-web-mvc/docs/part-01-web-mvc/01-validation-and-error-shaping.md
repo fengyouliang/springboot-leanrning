@@ -33,16 +33,50 @@
 - 看到 400：先看响应体的 `fieldErrors`，定位是哪一个字段失败，再回到 DTO 的注解。
 - 校验没触发：确认 controller 入参是否带 `@Valid`；如果只写了约束注解但没写 `@Valid`，通常不会触发。
 
+## 方法级校验（Method Validation）在 Controller 边界
+
+除了“对象校验”（`@Valid` 校验 DTO），Web MVC 还可能在 controller 方法参数上触发 **方法级校验**：
+
+- 典型写法：controller 上 `@Validated`，参数上写 `@Min/@NotBlank/...`
+- 失败时常见异常（随 Spring 版本不同）：`HandlerMethodValidationException` 或 `ConstraintViolationException`
+- 本模块把该分支也塑形成统一错误体：`ApiError(message = "method_validation_failed")`
+
+可运行证据链（推荐先跑再断点）：
+
+- endpoint：`GET /api/advanced/binding/age-validated?age=-1`
+- Lab：`BootWebMvcBindingDeepDiveLabTest#returnsMethodValidationFailedWhenRequestParamViolatesConstraint`
+
 ## D. 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
+### 主链路（Call-chain sketch）
+
+以 `@WebMvcTest + MockMvc` 为例，一条“@RequestBody + @Valid 失败 → 统一错误体”的主链路可以粗略理解为：
+
+1. `MockMvc` 发起请求（测试入口）
+2. `DispatcherServlet#doDispatch`（主入口，见 Part 03：DispatcherServlet call-chain）
+3. `RequestMappingHandlerMapping#getHandlerInternal`（选路：找到 handler method）
+4. `RequestMappingHandlerAdapter#handleInternal`（调用 handler）
+5. `HandlerMethodArgumentResolverComposite#resolveArgument`（解析参数）
+6. `RequestResponseBodyMethodProcessor#resolveArgument`（解析 `@RequestBody`）
+7. `AbstractMessageConverterMethodArgumentResolver#readWithMessageConverters`（JSON → DTO）
+8. `SpringValidatorAdapter#validate`（触发 Bean Validation）
+9. 校验失败抛出 `MethodArgumentNotValidException`
+10. `DispatcherServlet#processHandlerException` → `ExceptionHandlerExceptionResolver` 命中 `GlobalExceptionHandler`
+
+对应的机制内核解释见：
+- `springboot-web-mvc/docs/part-03-web-mvc-internals/01-dispatcherservlet-call-chain.md`
+- `springboot-web-mvc/docs/part-03-web-mvc-internals/02-argument-resolver-and-binder.md`
+- `springboot-web-mvc/docs/part-03-web-mvc-internals/04-exception-resolvers-and-error-flow.md`
+
 ## E. 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`BootWebMvcLabTest` / `BootWebMvcSpringBootLabTest`
-- 建议命令：`mvn -pl springboot-web-mvc test`（或在 IDE 直接运行上面的测试类）
+- 建议命令（方法级入口）：
+  - `mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcLabTest#returnsValidationErrorWhenRequestIsInvalid test`
 
 ### 复现/验证补充说明（来自原文迁移）
 
@@ -57,6 +91,37 @@
   - `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcSpringBootLabTest.java`
 
 ## Debug 建议
+
+把本章当作 3 个“可验证的分支”来调试，会更快：
+
+1) **校验是否触发（@Valid 分支）**
+- 入口测试：`BootWebMvcLabTest#returnsValidationErrorWhenRequestIsInvalid`
+- 建议命令：`mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcLabTest#returnsValidationErrorWhenRequestIsInvalid test`
+- 对照用例（故意省略 `@Valid`，证明“写了注解但没触发”）：`BootWebMvcLabTest#createUserSucceedsWhenControllerOmitsValidAnnotation`
+- 断点建议：
+  - `RequestResponseBodyMethodProcessor#resolveArgument`
+  - `SpringValidatorAdapter#validate`
+- 观察点：
+  - DTO 上是否有约束注解（`CreateUserRequest`）
+  - controller 入参是否带 `@Valid`
+- 决定性分支：
+  - **没有 `@Valid`**：约束注解不会自动生效（这是最常见的“我写了注解但没校验”的原因）
+
+2) **异常如何被塑形成 ApiError（错误体分支）**
+- 断点建议：
+  - `ExceptionHandlerExceptionResolver#doResolveHandlerMethodException`
+  - `GlobalExceptionHandler#handleValidation`
+- 观察点：
+  - `ex.getBindingResult().getFieldErrors()`（字段错误列表）
+  - 最终响应体的 `message/fieldErrors`
+
+3) **同样是 400：到底是校验失败还是 JSON 解析失败（根因分支）**
+- 建议配套跑：`BootWebMvcExceptionResolverChainLabTest`（用 `resolvedException` 固定根因）
+
+进一步阅读（只做必要连接，不扩散篇幅）：
+
+- Validation 模块（Bean Validation 机制本身）：`helloagents/wiki/modules/spring-core-validation.md`
+- Beans 模块（类型转换/值解析等底层支撑）：`helloagents/wiki/modules/spring-core-beans.md`
 
 ## F. 常见坑与边界
 

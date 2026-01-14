@@ -133,6 +133,11 @@ Lab 里我们显式设置：
 
 ## 源码锚点（建议从这里下断点）
 
+- `PropertySourcesPlaceholderConfigurer#postProcessBeanFactory`：占位符解析的 BFPP 入口（定义层改写）
+- `PlaceholderConfigurerSupport#doProcessProperties`：遍历并替换 `${...}` 的主流程
+- `AbstractBeanFactory#resolveEmbeddedValue`：运行期解析 embedded value 的入口（与定义层改写对照）
+- `AbstractBeanFactory#resolveBeanClass` / `BeanDefinitionVisitor`：占位符替换发生在“定义层”的典型路径
+
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansValuePlaceholderResolutionLabTest.java`

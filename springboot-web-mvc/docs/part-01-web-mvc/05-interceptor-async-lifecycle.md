@@ -38,6 +38,12 @@
 - `org.springframework.web.servlet.HandlerExecutionChain#triggerAfterCompletion`
 - `org.springframework.web.servlet.AsyncHandlerInterceptor#afterConcurrentHandlingStarted`
 
+关键观察点（决定性分支）：
+
+- `request.getDispatcherType()`：第一次通常是 REQUEST，二次 asyncDispatch 是 ASYNC
+- 是否进入 `afterConcurrentHandlingStarted`：它是“第一次 async dispatch”最典型的证据
+- handler 方法是否二次执行：通常不会（第二次 dispatch 主要是把 async 结果写回）
+
 ## E. 最小可运行实验（Lab）
 
 本章使用“事件序列”把 lifecycle 变成可断言结果：
@@ -46,6 +52,12 @@
 - 对应端点：
   - sync：`GET /api/advanced/trace/sync`
   - async：`GET /api/advanced/trace/async`
+
+建议命令（方法级入口）：
+
+```bash
+mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcTraceLabTest#asyncTraceRecordsAfterConcurrentHandlingStartedAndAsyncDispatchCallbacks test
+```
 
 你在测试里会看到两类证据：
 
@@ -79,4 +91,3 @@
 上一章：[part-01-web-mvc/04-interceptor-and-filter-ordering.md](04-interceptor-and-filter-ordering.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-02-view-mvc/01-thymeleaf-and-view-resolver.md](../part-02-view-mvc/01-thymeleaf-and-view-resolver.md)
 
 <!-- BOOKIFY:END -->
-

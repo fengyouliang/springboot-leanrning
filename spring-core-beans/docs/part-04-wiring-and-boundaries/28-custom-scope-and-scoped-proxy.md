@@ -31,7 +31,7 @@ Spring 的 scope 机制是可扩展的：你可以注册自定义 scope。
 
 对应测试：
 
-对应测试：
+- `SpringCoreBeansCustomScopeLabTest#threadScope_createsOneInstancePerThread_whenAccessedDirectly`
 
 原因与你在 prototype 注入 singleton 看到的现象一致：
 
@@ -43,12 +43,14 @@ Spring 的 scope 机制是可扩展的：你可以注册自定义 scope。
 
 对应测试：
 
+ - `SpringCoreBeansCustomScopeLabTest#objectProvider_honorsThreadScope_whenUsedInsideSingleton`
 你注入的是 provider（容器句柄），每次调用时再去容器按当前 thread 解析目标对象。
 
 ## 4. 解法 2：scoped proxy（更“无感”，但引入代理语义）
 
 对应测试：
 
+ - `SpringCoreBeansCustomScopeLabTest#scopedProxy_honorsThreadScope_whenInjectedIntoSingleton`
 本质：
 
 - singleton 注入到的是一个 proxy
@@ -70,7 +72,15 @@ Spring 的 scope 机制是可扩展的：你可以注册自定义 scope。
 
 ## 排障分流：这是定义层问题还是实例层问题？
 
+1) **“同一个 thread 里每次 getBean 都是新对象”** → 多半是 **定义层/注册问题**：确认 `registerScope("thread", ...)` 是否执行（看 `AbstractBeanFactory#registerScope`）。
+2) **“不同 thread 里拿到的是同一个对象”** → 多半是 **scope 实现问题**：看 `SimpleThreadScope#get` 是否真的按 thread 隔离缓存。
+3) **“注入到 singleton 后看起来像单例（冻结）”** → **实例层语义**：注入只发生一次；用 `ObjectProvider` 或 scoped proxy 把解析推迟到“调用时”。
+
 ## 6. 一句话自检
+
+1) 自定义 scope 的语义由谁决定？（提示：scope 的 `get`/缓存策略）
+2) 为什么 thread scope 注入到 singleton 会“冻结”？你能给出两种解法并说明代价吗？
+3) scoped proxy 的本质是什么？它为什么会提高 debug 成本？
 
 ## D. 源码与断点
 
@@ -108,6 +118,12 @@ Spring 的 scope 机制是可扩展的：你可以注册自定义 scope。
   - 你看到的对象类型是 proxy，不是目标类；需要学会区分。
 
 ## 源码锚点（建议从这里下断点）
+
+- `AbstractBeanFactory#doGetBean`：scope 分流入口（singleton/prototype/custom scope 都会在这里分叉）
+- `Scope#get`：自定义 scope 的核心回调（从这里决定“怎么拿到对象”）
+- `DefaultListableBeanFactory#registerScope`：注册自定义 scope 的入口
+- `ScopedProxyFactoryBean#getObject`：scoped proxy 的取值入口（代理如何在每次调用时解析真实目标）
+- `ScopedProxyUtils#createScopedProxy`：创建 scoped proxy 定义的辅助入口
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

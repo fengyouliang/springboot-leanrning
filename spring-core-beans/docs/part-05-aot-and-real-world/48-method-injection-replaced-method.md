@@ -32,9 +32,15 @@
 
 ---
 
+- 测试：`SpringCoreBeansReplacedMethodLabTest#replacedMethod_overridesTargetMethodViaCglibSubclassing_andIsVisibleInBeanDefinitionMethodOverrides`
+- XML：`spring-core-beans/src/test/resources/part05_aot_and_real_world/xml/replaced-method.xml`
+
 ## 1. 是什么：它解决什么问题？不解决什么问题？
 
 它解决的问题：
+
+- 让“某个方法的实现”变成 **配置驱动/可替换**（而不是写死在 class 里）
+- 让容器在实例化阶段生成一个“方法可被替换”的对象（适用于历史配置/框架扩展点）
 
 它不解决的问题：
 
@@ -85,8 +91,6 @@
 
 ---
 
----
-
 ## D. 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
@@ -117,11 +121,24 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansReplacedMethodLabTest test
 
 最小结构（本仓库已提供可运行版本）：
 
+1) 一个目标 bean（包含要被替换的方法）
+2) 一个 `MethodReplacer` bean（提供替换实现）
+3) `<replaced-method name="..." replacer="..."/>`（把 method override 元数据写进 BeanDefinition）
+
 你运行 Lab 后应该能断言：
+
+- 目标方法的返回值来自 replacer（而不是原始实现）
+- 目标对象的 runtime class 为 enhanced class（证明子类化发生）
+- BeanDefinition 的 `methodOverrides` 非空（证明“定义层元数据”驱动了实例化策略分支）
 
 ## 4. 怎么实现的：关键类/关键方法/关键分支 + 断点入口
 
 ### 4.2 推荐断点（从“为什么会走到这里”到“替换发生点”）
+
+1) `AbstractAutowireCapableBeanFactory#createBeanInstance`：实例化入口（选择 instantiation strategy）
+2) `AbstractAutowireCapableBeanFactory#instantiateWithMethodInjection`：method injection 分支入口
+3) `CglibSubclassingInstantiationStrategy#instantiateWithMethodInjection`：CGLIB 子类化实现点（“为什么必须是子类”）
+4) `MethodReplacer#reimplement`：替换逻辑真正执行点（最终证据）
 
 ## F. 常见坑与边界
 

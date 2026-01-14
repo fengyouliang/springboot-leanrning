@@ -33,6 +33,10 @@
 
 入口测试：
 
+- `SpringCoreBeansBuiltInFactoryBeansLabTest#builtInFactoryBeans_methodInvoking_and_serviceLocator_and_factoryDereference`（& 前缀 + product/factory + 缓存语义）
+- `SpringCoreBeansServiceLoaderFactoryBeansLabTest#serviceListFactoryBean_loadsProviders_fromMetaInfServices`（SPI providers → List）
+- `SpringCoreBeansServiceLoaderFactoryBeansLabTest#serviceLoaderFactoryBean_exposesRawServiceLoader`（SPI loader → ServiceLoader）
+
 1) `getBean("uuidSingleton")` 多次返回同一个 `UUID`（product 被缓存）  
 2) `getBean("uuidPrototype")` 多次返回不同 `UUID`（product 不缓存）  
 3) `getBean("&uuidPrototype")` 返回的是 `MethodInvokingFactoryBean` 本体  
@@ -157,8 +161,6 @@
 
 ---
 
----
-
 ## D. 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
@@ -190,13 +192,23 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansBuiltInFactoryBeansLabTest,Sprin
 
 ## 4. 怎么实现的：关键类/方法 + 断点入口 + 观察点
 
-推荐断点：
+推荐断点（按你要回答的问题分组）：
 
-推荐断点：
-
-推荐断点：
-
-推荐断点：
+1) **`&beanName` / product vs factory 分支**
+   - `AbstractBeanFactory#doGetBean`
+   - `AbstractBeanFactory#getObjectForBeanInstance`
+   - `BeanFactoryUtils#isFactoryDereference`
+2) **FactoryBean product 缓存语义**
+   - `FactoryBeanRegistrySupport#getObjectFromFactoryBean`
+   - 观察：`factory.isSingleton()` / `factoryBeanObjectCache`
+3) **MethodInvokingFactoryBean**
+   - `MethodInvokingFactoryBean#afterPropertiesSet`
+   - `MethodInvokingFactoryBean#getObject`
+4) **ServiceLocatorFactoryBean**
+   - `ServiceLocatorFactoryBean#afterPropertiesSet`
+   - `ServiceLocatorFactoryBean$ServiceLocatorInvocationHandler#invoke`
+5) **ServiceLoader*FactoryBean（SPI）**
+   - `ServiceListFactoryBean#getObject` / `ServiceLoaderFactoryBean#getObject`（视具体类型略有差异）
 
 1) **误区：`getBean("x")` 就是拿到名为 x 的 bean 本体**
    - 对 FactoryBean 来说，`getBean("x")` 默认拿到的是 product，不是 factory。

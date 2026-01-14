@@ -51,6 +51,9 @@
 
 入口：
 
+- 入口测试（方法级）：`SpringCoreBeansSmartLifecycleLabTest#smartLifecycleStartsInPhaseOrder_andStopsInReverseOrder`
+- 推荐跑法：`mvn -pl spring-core-beans -Dtest=SpringCoreBeansSmartLifecycleLabTest#smartLifecycleStartsInPhaseOrder_andStopsInReverseOrder test`
+
 ## 排障分流：这是定义层问题还是实例层问题？
 
 - “SmartLifecycle 没自动 start” → **实例层（生命周期触发条件）**：`isAutoStartup()` 是否为 true？context 是否 refresh 完成？（看 `finishRefresh`）
@@ -59,6 +62,10 @@
 - “把它当业务逻辑入口导致复杂副作用” → **设计风险**：它更适合作为基础设施 start/stop 钩子（本章第 3 节）
 
 ## 4. 一句话自检
+
+1) SmartLifecycle 的 start/stop 触发点分别落在 refresh/close 的哪个阶段？（提示：LifecycleProcessor）
+2) 为什么 start 按 phase 升序，而 stop 按 phase 反序？（提示：依赖关系与安全停机）
+3) `stop(Runnable)` 为什么必须调用 callback？如果不调用，会出现什么现象？
 
 ## D. 源码与断点
 
@@ -89,6 +96,11 @@
 实验里我们注册了两个 lifecycle：
 
 ## 源码锚点（建议从这里下断点）
+
+- `AbstractApplicationContext#finishRefresh`：refresh 末尾阶段（触发生命周期处理器）
+- `DefaultLifecycleProcessor#onRefresh`：容器刷新完成后的生命周期启动入口
+- `DefaultLifecycleProcessor#startBeans`：按 phase 分组并启动的主算法
+- `SmartLifecycle#getPhase` / `isAutoStartup` / `start`：phase 与自动启动语义的关键接口
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

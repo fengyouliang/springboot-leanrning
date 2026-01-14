@@ -60,6 +60,10 @@ Spring 里最常见的 comparator 是 `AnnotationAwareOrderComparator`，它是 
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPostProcessorOrderingLabTest.java`
+  - `beanFactoryPostProcessors_areInvokedInPriorityOrderedThenOrderedThenUnorderedOrder()`（分段：PriorityOrdered → Ordered → others）
+  - `beanFactoryPostProcessors_withDifferentOrderValues_areSortedAscendingWithinOrderedGroup()`（组内：order 值越小越靠前）
+
 它只断言我们自己注册的三个 BFPP 的相对顺序：
 
 - `bfpp:priority` → `bfpp:ordered` → `bfpp:unordered`
@@ -128,6 +132,11 @@ invokeBeanFactoryPostProcessors(beanFactory, externalBfpps):
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPostProcessorOrderingLabTest.java`
+  - `beanPostProcessors_areAppliedInPriorityOrderedThenOrderedThenUnorderedOrder()`（分段：PriorityOrdered → Ordered → others）
+  - `beanPostProcessors_withDifferentOrderValues_areSortedAscendingWithinOrderedGroup()`（组内：`getOrder()` 升序）
+  - `beanPostProcessors_annotatedWithOrderButNotOrdered_areNotSorted_andFollowRegistrationOrder()`（误解：`@Order` 不会把你“变成 Ordered”）
+
 同样只断言我们自己注册的三个 BPP 的相对顺序。
 
 学习重点：
@@ -161,6 +170,17 @@ invokeBeanFactoryPostProcessors(beanFactory, externalBfpps):
 - `DefaultListableBeanFactory#addBeanPostProcessor`：BPP 最终进入 BeanFactory 的地方（注册顺序会影响调用顺序）
 
 入口：
+
+- 最小复现入口（方法级）：
+  - `SpringCoreBeansPostProcessorOrderingLabTest.beanFactoryPostProcessors_areInvokedInPriorityOrderedThenOrderedThenUnorderedOrder()`
+  - `SpringCoreBeansPostProcessorOrderingLabTest.beanPostProcessors_areAppliedInPriorityOrderedThenOrderedThenUnorderedOrder()`
+  - （误区对照）`SpringCoreBeansPostProcessorOrderingLabTest.beanPostProcessors_annotatedWithOrderButNotOrdered_areNotSorted_andFollowRegistrationOrder()`
+- 推荐断点（闭环版）：
+  1) `PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`（定义层：BFPP/BDRPP 的分段执行与排序）
+  2) `PostProcessorRegistrationDelegate#sortPostProcessors`（排序入口：看使用哪个 comparator）
+  3) `PostProcessorRegistrationDelegate#registerBeanPostProcessors`（实例层：BPP 的分段注册与最终顺序）
+  4) `DefaultListableBeanFactory#addBeanPostProcessor`（BPP 进入 `beanFactory.getBeanPostProcessors()` 的最终写入点）
+  5) `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInitialization`（对照：BPP 的“注册顺序”如何变成“执行顺序”）
 
 ## 排障分流：这是定义层问题还是实例层问题？
 
@@ -205,6 +225,13 @@ invokeBeanFactoryPostProcessors(beanFactory, externalBfpps):
 
 ## 5. 一句话自检
 
+- 常问：`PriorityOrdered/Ordered/@Order` 三者谁更“强”？为什么？
+  - 答题要点：分段规则按接口（PriorityOrdered/Ordered/others）决定；组内才按 order 值排序；`Ordered#getOrder()` 通常强于注解；`@Order` 是否生效取决于 comparator。
+- 常见追问：为什么我写了 `@Order`，但 post-processor 顺序没变？
+  - 答题要点：`@Order` 不是“接口”，不会把你放进 Ordered 段；并且如果容器没使用 `AnnotationAwareOrderComparator`，也可能不会读注解。
+- 常见追问：为什么手工 `addBeanPostProcessor(...)` 的顺序看起来“不听 Ordered”？
+  - 答题要点：手工注册绕过 `PostProcessorRegistrationDelegate#registerBeanPostProcessors` 的排序流程；最终顺序就是注册顺序（见 [25](../part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md)）。
+
 ## D. 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
@@ -234,6 +261,11 @@ invokeBeanFactoryPostProcessors(beanFactory, externalBfpps):
 - `SpringCoreBeansPostProcessorOrderingLabTest.beanPostProcessors_withDifferentOrderValues_areSortedAscendingWithinOrderedGroup()`
 
 ## 源码锚点（建议从这里下断点）
+
+- `PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`：BFPP/BDRPP 的分组 + 排序 + 多轮扫描算法
+- `PostProcessorRegistrationDelegate#registerBeanPostProcessors`：BPP 的排序与注册时机（影响后续所有 bean 的创建）
+- `AnnotationAwareOrderComparator#sort`：排序器入口（`PriorityOrdered` / `Ordered` / `@Order` 的差异在这里体现）
+- `DefaultListableBeanFactory#addBeanPostProcessor`：手工注册 BPP 的路径（绕过排序，顺序只看注册先后）
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

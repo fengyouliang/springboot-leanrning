@@ -40,6 +40,9 @@
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
+  - `singletonLifecycleCallbacks_happenInAStableOrderAroundInitialization()`（初始化顺序：aware → BPP before → @PostConstruct → afterPropertiesSet/initMethod → BPP after）
+
 - constructor
 - BeanNameAware / BeanFactoryAware
 - BeanPostProcessor.beforeInit
@@ -58,6 +61,9 @@
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
+  - `prototypeBeans_areNotDestroyedByContainerByDefault()`（证据：close context 时 prototype 不会触发 destroy 回调）
+
 prototype 的语义是：
 
 - 容器帮你创建并注入
@@ -69,6 +75,19 @@ prototype 的语义是：
 - 清理资源需要调用方自己管理（或引入额外机制）
 
 入口：
+
+最小复现入口（方法级）：
+
+- `SpringCoreBeansLifecycleCallbackOrderLabTest.singletonLifecycleCallbacks_happenInAStableOrderAroundInitialization()`
+- `SpringCoreBeansLifecycleCallbackOrderLabTest.prototypeBeans_areNotDestroyedByContainerByDefault()`
+
+推荐断点（闭环版）：
+
+1) `AbstractAutowireCapableBeanFactory#doCreateBean`：创建主线（串起实例化/注入/初始化）
+2) `AbstractAutowireCapableBeanFactory#populateBean`：注入发生点（验证：注入早于 init callbacks）
+3) `AbstractAutowireCapableBeanFactory#initializeBean`：初始化串联点（aware → before-init → init callbacks → after-init）
+4) `InitDestroyAnnotationBeanPostProcessor#postProcessBeforeInitialization`：`@PostConstruct` 触发点
+5) `DisposableBeanAdapter#destroy`：销毁链路统一入口（close context 时命中）
 
 你应该看到：
 
@@ -83,6 +102,13 @@ prototype 的语义是：
 - “我以为 destroy 回调一定会执行” → **实例层 + scope 语义问题**：prototype 的销毁不由容器托管（本章第 2 节）
 
 ## 4. 一句话自检
+
+- 常问：初始化阶段的回调顺序是什么？`@PostConstruct` 在 BPP 的哪个切面里？
+  - 答题要点：constructor → populate（注入）→ aware → BPP before-init → `@PostConstruct` → `afterPropertiesSet` → initMethod → BPP after-init。
+- 常见追问：为什么 prototype 默认不会触发 `@PreDestroy`？
+  - 答题要点：prototype 只负责创建与注入，生命周期末端默认不由容器统一回收；close context 时只会销毁 singleton（除非自定义 scope/显式销毁）。
+- 常见追问：如何用断点证明“BPP after-init 一定发生在 init callbacks 之后”？
+  - 答题要点：以 `initializeBean` 为入口，看它内部顺序：before-init BPP → invokeInitMethods → after-init BPP。
 
 ## 面试常问（生命周期回调顺序）
 
@@ -122,6 +148,12 @@ prototype 的语义是：
 - `SpringCoreBeansLifecycleCallbackOrderLabTest.prototypeBeans_areNotDestroyedByContainerByDefault()`
 
 ## 源码锚点（建议从这里下断点）
+
+- `AbstractAutowireCapableBeanFactory#doCreateBean` / `populateBean` / `initializeBean`（创建全链路）
+- `InitDestroyAnnotationBeanPostProcessor#postProcessBeforeInitialization`（`@PostConstruct` 触发点）
+- `AbstractAutowireCapableBeanFactory#invokeInitMethods`（`afterPropertiesSet` / initMethod）
+- `DisposableBeanAdapter#destroy`（销毁全链路）
+- `AbstractApplicationContext#doClose`（close context 触发销毁）
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

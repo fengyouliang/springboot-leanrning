@@ -43,6 +43,17 @@ class BootWebMvcLabTest {
     }
 
     @Test
+    void createUserSucceedsWhenControllerOmitsValidAnnotation() throws Exception {
+        mockMvc.perform(post("/api/users/no-valid")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"\",\"email\":\"not-an-email\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.name").value(""))
+                .andExpect(jsonPath("$.email").value("not-an-email"));
+    }
+
+    @Test
     void pingEndpointReturnsPong() throws Exception {
         mockMvc.perform(get("/api/ping"))
                 .andExpect(status().isOk())

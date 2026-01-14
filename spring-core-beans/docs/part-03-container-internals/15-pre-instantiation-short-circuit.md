@@ -24,6 +24,9 @@
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPreInstantiationLabTest.java`
+  - `withoutBeforeInstantiationShortCircuit_refreshFailsAndConstructorWasCalled()`（证据：构造器被调用一次，context refresh 失败）
+
 你会看到：
 
 - `FailingService` 构造器被调用
@@ -34,6 +37,9 @@
 ## 2. 现象：短路后，构造器不再执行
 
 对应测试：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPreInstantiationLabTest.java`
+  - `postProcessBeforeInstantiation_canShortCircuitDefaultInstantiationPath()`（证据：构造器调用次数为 0，拿到的是 proxy）
 
 我们注册了一个 `InstantiationAwareBeanPostProcessor`：
 
@@ -55,6 +61,18 @@
 
 入口：
 
+最小复现入口（方法级）：
+
+- `SpringCoreBeansPreInstantiationLabTest.withoutBeforeInstantiationShortCircuit_refreshFailsAndConstructorWasCalled()`
+- `SpringCoreBeansPreInstantiationLabTest.postProcessBeforeInstantiation_canShortCircuitDefaultInstantiationPath()`
+
+推荐断点（闭环版）：
+
+1) `AbstractAutowireCapableBeanFactory#resolveBeforeInstantiation`：短路入口（是否走到这里决定“构造器会不会执行”）
+2) `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInstantiation`：观察哪个 `InstantiationAwareBeanPostProcessor` 返回了替身
+3) 你在 Lab 里实现的 `InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation`：观察返回对象（surrogate/proxy）
+4) `AbstractAutowireCapableBeanFactory#doCreateBean`：对照两条路径（短路成功时目标 bean 不会走完整创建主线）
+
 ## 排障分流：这是定义层问题还是实例层问题？
 
 - “我写了 before-instantiation 的 BPP，但构造器还是执行了” → **实例层（时机/注册方式）**：BPP 是否在 refresh 前注册？是否真的被当作 BPP 注册进 BeanFactory？（对照 [25](../part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md)）
@@ -63,6 +81,13 @@
 - “我以为这是 AOP/事务专属机制” → **实例层通用机制**：代理/替身的出现不止发生在 AOP（见 [31](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)）
 
 ## 5. 一句话自检
+
+- 常问：`postProcessBeforeInstantiation` 能做什么？为什么它看起来像“魔法”？
+  - 答题要点：它允许在实例化前直接返回替身/proxy，从而短路默认实例化与后续创建流程。
+- 常见追问：怎么证明某个 bean 命中了“实例化前短路”？
+  - 答题要点：在 `resolveBeforeInstantiation` 加条件断点（beanName），观察 `applyBeanPostProcessorsBeforeInstantiation` 是否返回非 null。
+- 常见追问：为什么说它是高危扩展点？
+  - 答题要点：短路意味着你可能绕过注入/初始化回调的直觉，导致生命周期行为变得反直觉，排障成本上升。
 
 ## 面试常问（实例化前短路的风险）
 
@@ -95,6 +120,12 @@
 - `SpringCoreBeansPreInstantiationLabTest.postProcessBeforeInstantiation_canShortCircuitDefaultInstantiationPath()`
 
 ## 源码锚点（建议从这里下断点）
+
+- `AbstractAutowireCapableBeanFactory#createBean` / `doCreateBean`（创建主线）
+- `AbstractAutowireCapableBeanFactory#resolveBeforeInstantiation`（短路入口）
+- `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInstantiation`（遍历 IABPP 的关键循环）
+- `InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation`（用户/框架扩展点）
+- （对照）`AbstractAutowireCapableBeanFactory#createBeanInstance`（默认实例化策略入口：构造器/工厂方法等）
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

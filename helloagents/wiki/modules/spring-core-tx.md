@@ -8,7 +8,15 @@
 
 - **Responsibility:** 用最小业务场景与测试实验理解事务传播/回滚，并能定位常见坑。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-09
+- **Last Updated:** 2026-01-14
+
+## Start Here（路线图 / 第一个可运行入口）
+
+- 路线图：`helloagents/wiki/learning-path.md`
+- Docs Index：`spring-core-tx/docs/README.md`
+- 第一个可运行入口（3 分钟开跑）：
+  - `mvn -q -pl spring-core-tx -Dtest=SpringCoreTxLabTest#transactionsAreActiveInsideTransactionalMethods test`
+  - 对应测试类：`spring-core-tx/src/test/java/com/learning/springboot/springcoretx/part01_transaction_basics/SpringCoreTxLabTest.java`
 
 ## Specifications
 

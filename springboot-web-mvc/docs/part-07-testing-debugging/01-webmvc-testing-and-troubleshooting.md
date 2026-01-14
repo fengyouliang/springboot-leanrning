@@ -33,6 +33,20 @@
 - 404/选路问题：`RequestMappingHandlerMapping#getHandlerInternal`
 - 401/403（Security/CSRF）：`DelegatingFilterProxy#doFilter`、`FilterChainProxy#doFilterInternal`、`CsrfFilter#doFilterInternal`、`ExceptionTranslationFilter`
 
+### Debug 预设建议（最常用 3 个断点 + 3 个观察字段）
+
+如果你不确定从哪开始，下这 3 个断点通常就能定位 80% 的 Web MVC 问题：
+
+1. `DispatcherServlet#doDispatch`（总入口：证明“是否进入 MVC”）
+2. `HandlerMethodArgumentResolverComposite#resolveArgument`（入参阶段：缺参/类型不匹配/校验入口）
+3. `HandlerExceptionResolverComposite#resolveException`（异常翻译：谁把异常变成状态码/错误体）
+
+搭配这 3 个观察字段（Watch List）：
+
+- `request.getRequestURI()` / `request.getMethod()`（你到底在请求什么）
+- `MvcResult#getHandler()`（命中了哪个 handler）
+- `MvcResult#getResolvedException()`（分支的“铁证”）
+
 ## E. 最小可运行实验（Lab）
 
 - Lab：`BootWebMvcTestingDebuggingLabTest`

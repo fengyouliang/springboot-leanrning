@@ -12,6 +12,17 @@
 - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
 - 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
 
+### 先跑哪个 Lab（3 分钟开跑）
+
+先跑通一个最小入口，保证环境与依赖没问题：
+
+```bash
+mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcLabTest#pingEndpointReturnsPong test
+```
+
+然后把断点放在“分支发生处”（而不是满屏日志）：
+- 断点地图（Part 01 Debugger Pack）：`part-00-guide/02-breakpoint-map.md`
+
 ## C. 机制主线
 
 本模块的“深挖主线”不是背注解，而是能把一次请求分解成阶段，并能解释每个阶段的关键分支：

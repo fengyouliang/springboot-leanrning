@@ -141,6 +141,12 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansAutowireCandidateSelectionLab
 
 ## 源码锚点（建议从这里下断点）
 
+- `AutowiredAnnotationBeanPostProcessor#postProcessProperties`：注入发生点（从注入点进入依赖解析）
+- `DefaultListableBeanFactory#doResolveDependency`：依赖解析总入口（候选收集与收敛发生在这里）
+- `DefaultListableBeanFactory#findAutowireCandidates`：按类型收集候选集合（第一阶段）
+- `DefaultListableBeanFactory#determineAutowireCandidate`：候选收敛（@Primary/@Priority/by-name/@Qualifier 的关键分支）
+- `DependencyDescriptor`（观察对象）：注入点的抽象（字段/参数/泛型/注解信息都在这里）
+
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java`

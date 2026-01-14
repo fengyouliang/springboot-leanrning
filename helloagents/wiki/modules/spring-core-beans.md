@@ -8,9 +8,15 @@
 
 - **Responsibility:** 提供 Bean 机制的系统文档与可运行 Labs/Exercises，用于建立源码级心智模型与排障能力。
 - **Docs Reading:** 推荐从 `spring-core-beans/docs/README.md` 开始（书本目录 + Part 划分）；主线可按 Part 顺读，每章顶部提供“上一章｜目录｜下一章”导航，降低章节切换成本。
+- **Start Here（30 分钟快启）:** 先跑 3 个最小实验建立容器主线直觉，再进入深潜：`spring-core-beans/docs/part-00-guide/01-quickstart-30min.md`。
+- **断点地图（可复用清单）:** `spring-core-beans/docs/part-00-guide/02-breakpoint-map.md`
+- **Learning Path（路线图）:** `helloagents/wiki/learning-path.md`（主线：Beans → AOP → Tx → Web MVC）
+- **第一个可运行入口（3 分钟开跑）:**
+  - `mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansLabTest#usesQualifierToResolveMultipleBeans test`
+  - 对应测试类：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`
 - **Highlights:** 在补齐类型转换/泛型匹配章节与 Labs 闭环的基础上，进一步统一 docs 的“上一章｜目录｜下一章”导航与“复现入口（可运行）”块；新增 JSR-330 `@Inject`/`Provider<T>` 对照 Lab，并增强 testsupport dumper 让排障输出更结构化；补齐 3 类易翻车边界机制 Labs（编程式注册差异 / allowRawInjectionDespiteWrapping / prototype 销毁语义），并将入口落位到 docs/04、docs/05、docs/16、docs/25；新增 Part 05（AOT/RuntimeHints/XML/容器外对象/SpEL/自定义 Qualifier）与对应 Labs，并新增面试复述模板与生产排障清单用于体系化复盘；同时为 Exercises 补齐对应 Solution（默认参与回归），并在 docs/README 收敛“章节↔Lab↔Exercise↔Solution”对照表与运行建议，补强 ImportSelector 等新手高频卡点的“源码主线/断点/观察点”；进一步补齐 Spring Framework `spring-beans` 体系的 5 组“真实世界常见但容易缺失”的机制闭环（docs 46–50：XML namespace 扩展 / Properties+Groovy Reader / replaced-method 方法注入 / 内置 FactoryBean / PropertyEditor+值解析），并新增对应 Labs（默认参与回归）；补齐 Spring Framework `BeanFactory API` 与 `Environment Abstraction` 两类常用但容易“只会用不会解释”的主题：新增 docs/38–39 与对应可断言 Labs（默认参与回归）；新增 spring-beans Public API 索引（docs Appendix 95/96）用于“按类型检索/可审计”，并补齐 aot.factories/AotServices 与 ServiceLoader*FactoryBean 的闭环，新增 Explore/Debug 用例（docs Appendix 97，显式开关启用，不影响默认回归）；并补齐 `org.springframework.beans.support`（ArgumentConvertingMethodInvoker/ResourceEditorRegistrar/PropertyComparator/PagedListHolder/SortDefinition）闭环，新增可运行 Lab，并将 Appendix 96 Gap 归零。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-09
+- **Last Updated:** 2026-01-14
 
 ## Source Layout（与 docs Part 对齐）
 
@@ -137,3 +143,4 @@
 - [202601061038_spring_core_beans_spring_beans_api_full_coverage](../../history/2026-01/202601061038_spring_core_beans_spring_beans_api_full_coverage/) - ✅ 已执行：新增 spring-beans Public API 索引（95/96）+ AOT/ServiceLoader* 补齐 + Explore/Debug 用例（97）
 - [202601061359_spring_core_beans_beans_support_utils](../../history/2026-01/202601061359_spring_core_beans_beans_support_utils/) - ✅ 已执行：补齐 `org.springframework.beans.support` support 工具类闭环（ArgumentConvertingMethodInvoker/ResourceEditorRegistrar/PropertyComparator/PagedListHolder/SortDefinition）并新增可运行 Lab，Appendix 96 Gap 归零
 - [20260106_docs-crossref-fix](../../../spring-core-beans/docs/part-00-guide/00-deep-dive-guide.md) - ✅ 已执行：将 `docs/01`、`docs/06/12/14/31/16/15` 这类缩写引用替换为真实章节链接，避免误解为路径
+- [202601131039_teaching-experience-webmvc-beans](../../history/2026-01/202601131039_teaching-experience-webmvc-beans/) - ✅ 已执行：spring-core-beans：新增 30 分钟快启 + docs 知识点补齐（Start Here/断点观察点/自检/索引坑点）

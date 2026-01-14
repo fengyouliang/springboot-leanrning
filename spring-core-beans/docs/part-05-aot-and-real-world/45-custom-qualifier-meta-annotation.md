@@ -40,14 +40,16 @@
 
 对照阅读：
 
----
+- [03. 依赖注入解析：候选收集→候选收敛→最终注入](../part-01-ioc-container/03-dependency-injection-resolution.md)
+- [33. 候选选择与优先级：@Primary/@Priority/@Order 的边界](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
 
 - 两个同类型候选（两个实现）
 - 通过自定义 Qualifier 把候选收敛到 1 个
 
 入口测试：
 
----
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansCustomQualifierLabTest.java`
+  - `customQualifierMetaAnnotation_canNarrowDownCandidates_forSingleInjection()`（meta-annotation 命中收敛）
 
 - `DefaultListableBeanFactory#findAutowireCandidates`（候选集合）
 - `QualifierAnnotationAutowireCandidateResolver#isAutowireCandidate`（Qualifier 匹配过滤）
@@ -62,11 +64,11 @@
 
 ---
 
----
-
 你应该能回答：
 
-- XML 生态的扩展机制：自定义 namespace / `spring.handlers` / `spring.schemas`
+- 自定义 Qualifier（meta-annotation）如何参与候选收敛？它影响的是“候选收集”还是“候选收敛”阶段？
+- 当候选有多个实现时，你如何用 2 个断点证明“哪些候选被过滤/为什么被过滤”？
+- 为什么说它能把“字符串 Qualifier”提升为“带业务语义的类型约束”？（好处与边界是什么）
 
 ---
 

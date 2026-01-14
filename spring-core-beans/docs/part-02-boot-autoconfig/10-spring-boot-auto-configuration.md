@@ -217,6 +217,17 @@ Boot 会从依赖的 jar 包里读取“自动配置类清单”，然后把这�
 
 推荐断点（从现象到闭环）：
 
+- `ApplicationContextRunner#run`：先把调试范围缩到“这一轮最小 context”（降噪）
+- 自动配置导入入口：`AutoConfigurationImportSelector#selectImports`（找到“这批 auto-config 是怎么进来的”）
+- 条件评估主线：`ConditionEvaluator#shouldSkip`（任何 `@Conditional*` 都会汇入这里）
+- Bean 条件细节：`OnBeanCondition#getMatchOutcome`（`@ConditionalOnMissingBean/@ConditionalOnBean` 的核心分支）
+- 定义注册：`DefaultListableBeanFactory#registerBeanDefinition`（观察“同名/同类型定义”何时进入 registry）
+- 定义层时机（关键闭环）：`PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`
+  - 结合你自己的 registrar：`BeanDefinitionRegistryPostProcessor#postProcessBeanDefinitionRegistry`
+  - 用它证明：**early registrar 能在条件评估前把 override 定义放进去；late registrar 则会绕过 back-off**
+- 最终炸点（当重复候选遇到单注入点）：`DefaultListableBeanFactory#doResolveDependency`
+  - 继续走到：`findAutowireCandidates` → `determineAutowireCandidate`（Primary/Qualifier/name 的收敛分支）
+
 复现入口（可断言）：
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansAutoConfigurationOverrideMatrixLabTest.java`
 

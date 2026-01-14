@@ -245,6 +245,11 @@
 
 ## 源码锚点（建议从这里下断点）
 
+- `AbstractBeanFactory#doGetBean`：处理 `dependsOn` 的触发点（会先 getBean(dep) 再创建当前 bean）
+- `AbstractBeanFactory#getDependsOn` / `RootBeanDefinition#getDependsOn`：依赖声明来源（定义层元数据）
+- `DefaultSingletonBeanRegistry#registerDependentBean`：记录依赖关系（dependentBeanMap / dependenciesForBeanMap）
+- `DefaultSingletonBeanRegistry#getDependentBeans`：排障时反查“谁依赖我”
+
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansDependsOnLabTest.java`

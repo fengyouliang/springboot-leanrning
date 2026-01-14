@@ -27,6 +27,9 @@
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanDefinitionOverridingLabTest.java`
+  - `whenBeanDefinitionOverridingIsAllowed_lastDefinitionWins()`（证据：同名注册两次，最后一个生效）
+
 你会看到：
 
 - 同名 `duplicate` 注册两次
@@ -35,6 +38,9 @@
 ## 2. allowBeanDefinitionOverriding=false：同名注册 fail-fast
 
 对应测试：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanDefinitionOverridingLabTest.java`
+  - `whenBeanDefinitionOverridingIsDisallowed_registeringSameBeanNameFailsFast()`（证据：第二次注册直接抛异常）
 
 你会看到：
 
@@ -60,6 +66,13 @@
 ## 排障分流：这是定义层问题还是实例层问题？
 
 ## 5. 一句话自检
+
+- 常问：BeanDefinition overriding 解决的是什么问题？
+  - 答题要点：解决“同名 BeanDefinition 冲突”的定义层问题；开关决定是 last-wins 还是 fail-fast。
+- 常见追问：overriding 和“按类型注入歧义（NoUnique）”是一回事吗？
+  - 答题要点：不是；overriding 是 name-based 定义冲突；注入歧义是 type-based 候选收敛问题。
+- 常见追问：你如何用断点证明“冲突发生在注册阶段，而不是实例化阶段”？
+  - 答题要点：在 `registerBeanDefinition` 处观察分支；fail-fast 场景甚至不需要 refresh 就会抛 `BeanDefinitionOverrideException`。
 
 ## 面试常问（overriding 与注入歧义不是一回事）
 
@@ -100,6 +113,11 @@
 - 如果禁止覆盖：你会在启动期得到明确错误（更安全、更可控）
 
 ## 源码锚点（建议从这里下断点）
+
+- `DefaultListableBeanFactory#registerBeanDefinition`：注册入口（同名冲突与覆盖策略的分支发生处）
+- `DefaultListableBeanFactory#isBeanDefinitionOverridable`：是否允许覆盖的判定入口
+- `DefaultListableBeanFactory#setAllowBeanDefinitionOverriding`：全局开关来源（Spring Boot 属性会影响这里）
+- `DefaultListableBeanFactory#removeBeanDefinition`：覆盖/替换时对旧定义的处理路径
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

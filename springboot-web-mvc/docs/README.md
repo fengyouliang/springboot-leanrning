@@ -5,6 +5,7 @@
 ## Start Here
 - 导读：[part-00-guide/00-deep-dive-guide.md](part-00-guide/00-deep-dive-guide.md)
 - 知识地图：[part-00-guide/01-knowledge-map.md](part-00-guide/01-knowledge-map.md)
+- 断点地图（Part 01 Debugger Pack）：[part-00-guide/02-breakpoint-map.md](part-00-guide/02-breakpoint-map.md)
 
 ## Part 01 - Web MVC（主线机制）
 - 01 校验与错误塑形：[part-01-web-mvc/01-validation-and-error-shaping.md](part-01-web-mvc/01-validation-and-error-shaping.md)
@@ -55,6 +56,16 @@
 - 自测题：[appendix/99-self-check.md](appendix/99-self-check.md)
 
 ## Labs & Exercises（最小可复现入口）
+
+### 推荐运行命令（精确到测试类/方法）
+
+> 目标：让你不需要自己猜 surefire 的 `-Dtest=...` 写法。
+
+- 跑一个方法（推荐，最快闭环）：
+  - `mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcLabTest#pingEndpointReturnsPong test`
+- 跑一个类（适合对照多个用例）：
+  - `mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcBindingDeepDiveLabTest test`
+
 - Labs（端到端主线）：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcLabTest.java`
 - Labs（更贴近真实 Boot 配置）：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcSpringBootLabTest.java`
 - Labs（绑定/校验深入）：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcBindingDeepDiveLabTest.java`

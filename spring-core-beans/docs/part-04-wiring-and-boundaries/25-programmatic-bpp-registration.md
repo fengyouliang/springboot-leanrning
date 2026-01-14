@@ -24,6 +24,8 @@
 
 对应测试：
 
+- `SpringCoreBeansProgrammaticBeanPostProcessorLabTest#programmaticallyAddedBpp_runsBeforeBeanDefinedBpp_evenIfBeanDefinedIsPriorityOrdered`
+
 我们做了两件事：
 
 1) 在 refresh 之前用 `addBeanPostProcessor` 手工注册一个 BPP
@@ -38,6 +40,8 @@
 - **手工注册的 BPP 优先级非常高**
 
 对应测试：
+
+- `SpringCoreBeansProgrammaticBeanPostProcessorLabTest#programmaticBppExecutionOrder_isRegistrationOrder_notOrderedInterface`
 
 即使你实现了 `PriorityOrdered` 并返回更高优先级：
 
@@ -106,6 +110,12 @@ addBeanPostProcessor(bpp):
 - 这是强力扩展点，滥用会让系统难以推理。
 
 入口：
+
+- 入口测试（方法级，建议先跑通再下断点）：
+  - `SpringCoreBeansProgrammaticBeanPostProcessorLabTest#programmaticallyAddedBpp_runsBeforeBeanDefinedBpp_evenIfBeanDefinedIsPriorityOrdered`
+  - `SpringCoreBeansProgrammaticBeanPostProcessorLabTest#programmaticBppExecutionOrder_isRegistrationOrder_notOrderedInterface`
+- 对照用例（时机问题：过早实例化导致“跳过后续 BPP”）：
+  - `SpringCoreBeansRegistryPostProcessorLabTest#getBeanDuringPostProcessing_instantiatesTooEarly_andSkipsLaterBeanPostProcessors`
 
 ## 排障分流：这是定义层问题还是实例层问题？
 
@@ -204,6 +214,10 @@ addBeanPostProcessor(bpp):
 
 ## 7. 一句话自检
 
+1) `addBeanPostProcessor` 注册的 BPP 为什么不会按 `Ordered/PriorityOrdered` 排序？（提示：它绕过了 `registerBeanPostProcessors` 的排序输入）
+2) 你怎么用 `beanFactory.getBeanPostProcessors()` 这一个观察点，判断“顺序问题”还是“时机问题”？
+3) 如果某个 bean 没被代理/没被增强，你会如何判断它是否“在 BPP 注册之前就被创建了”？
+
 ## D. 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
@@ -236,6 +250,11 @@ addBeanPostProcessor(bpp):
   - 结果：early bean 不是 eligible for getting processed by all BPPs（后续 BPP 不会补上）
 
 ## 源码锚点（建议从这里下断点）
+
+- `DefaultListableBeanFactory#addBeanPostProcessor`：手工注册入口（直接改 list，不会触发排序）
+- `AbstractBeanFactory#getBeanPostProcessors`：观察当前 BPP 链（顺序就是语义）
+- `PostProcessorRegistrationDelegate#registerBeanPostProcessors`：容器自动发现 BPP 的注册入口（会排序）
+- `AbstractAutowireCapableBeanFactory#initializeBean`：BPP before/after-init 的介入点（代理/增强常发生在 after-init）
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

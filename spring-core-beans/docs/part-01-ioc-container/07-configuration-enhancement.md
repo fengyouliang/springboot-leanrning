@@ -53,6 +53,11 @@
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
+  - `configurationProxyBeanMethodsTruePreservesSingletonSemanticsForBeanMethodCalls()`（proxy=true：互调会走容器）
+  - `configurationProxyBeanMethodsFalseAllowsDirectMethodCallToCreateExtraInstance()`（proxy=false：互调是普通 Java 调用）
+  - `liteConfiguration_componentWithBeanMethods_doesNotEnhance_beanMethodInterCallsCreateExtraInstance()`（Lite 模式：`@Component + @Bean` 不会增强）
+
 你会看到：
 
 - proxy=true：`configB()` 内调用 `configA()`，拿到的是容器里的同一个 `ConfigA`
@@ -84,6 +89,15 @@ ConfigB configB(ConfigA a) {
   - `ConfigurationClassEnhancer.BeanMethodInterceptor#intercept`（内部类名可能随版本略有变化）
 
 ### 4.1 推荐观察点（watch list）
+
+- 配置类 bean 的运行时 class：
+  - proxy=true：类名通常包含 `$$SpringCGLIB$$`（说明发生了 CGLIB 增强）
+  - proxy=false / Lite：通常就是原始类（没有增强）
+- `@Bean` 方法互调发生时：
+  - 看调用栈是否进入 `ConfigurationClassEnhancer.BeanMethodInterceptor#intercept`
+  - 看 `bean` / `beanName`：最终返回的是“容器里的单例”还是“方法体 new 出来的对象”
+- （对照）容器里同名 bean 的获取路径：
+  - `AbstractBeanFactory#doGetBean`：证明“从容器拿到的那个对象”与“方法互调返回的对象”是否一致
 
 ## 5. 你应该能回答的 2 个问题
 
@@ -140,7 +154,17 @@ ConfigB configB(ConfigA a) {
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+- **坑 1：`proxyBeanMethods=false` + `@Bean` 方法互调**  
+  - 现象：容器里 bean 依然是单例，但你在配置类内部互调会 new 出“额外对象”  
+  - 证据链：`SpringCoreBeansContainerLabTest.configurationProxyBeanMethodsFalseAllowsDirectMethodCallToCreateExtraInstance()`
+  - 修复：避免互调；改成“方法参数注入”（让依赖解析回到容器）
+- **坑 2：Lite 模式（`@Component + @Bean`）没有增强**  
+  - 现象：你以为“写了 @Bean 就等于 @Configuration”，结果互调语义与 proxy=false 一样（不会拦截）  
+  - 证据链：`SpringCoreBeansContainerLabTest.liteConfiguration_componentWithBeanMethods_doesNotEnhance_beanMethodInterCallsCreateExtraInstance()`
+  - 修复：把配置类显式改成 `@Configuration`（并明确 `proxyBeanMethods`）；或者同样避免互调
+- **坑 3：误把它当成“scope 语义变化”**  
+  - 澄清：bean 还是单例；变的是“你在配置类里写的 Java 调用有没有被容器拦截并重定向”
+  - 经验法则：只要你看到“配置类内部互调 @Bean 方法”，就默认它是风险点，优先改成“参数注入”
 
 ## G. 小结与下一章
 

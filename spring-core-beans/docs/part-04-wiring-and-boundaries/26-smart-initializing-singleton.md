@@ -52,6 +52,9 @@ Spring 提供了一个非常明确的回调：
 
 入口：
 
+- 入口测试（方法级）：`SpringCoreBeansSmartInitializingSingletonLabTest#afterSingletonsInstantiated_runsAfterNonLazySingletons_andBeforeLazyBeans`
+- 推荐跑法：`mvn -pl spring-core-beans -Dtest=SpringCoreBeansSmartInitializingSingletonLabTest#afterSingletonsInstantiated_runsAfterNonLazySingletons_andBeforeLazyBeans test`
+
 ## 排障分流：这是定义层问题还是实例层问题？
 
 - “回调没触发” → **实例层（生命周期时机）**：该 bean 是否是 singleton？context 是否真的 refresh？
@@ -60,6 +63,10 @@ Spring 提供了一个非常明确的回调：
 - “我以为它等价于 ApplicationRunner” → **生命周期粒度差异**：它更贴近 BeanFactory 的创建阶段（本章第 2 节 + `preInstantiateSingletons`）
 
 ## 4. 一句话自检
+
+1) `SmartInitializingSingleton#afterSingletonsInstantiated` 触发于 refresh 的哪个阶段？为什么它早于 lazy bean 的创建？
+2) 为什么它不等价于 `ApplicationRunner`？（提示：它挂在 BeanFactory 的 preInstantiateSingletons 尾部）
+3) 在回调里调用 `getBean(lazy)` 会带来什么后果？如何判断你是否“提前把 lazy 全部创建了”？
 
 ## D. 源码与断点
 
@@ -90,6 +97,11 @@ Spring 提供了一个非常明确的回调：
 实验里：
 
 ## 源码锚点（建议从这里下断点）
+
+- `DefaultListableBeanFactory#preInstantiateSingletons`：单例预实例化入口（SmartInitializingSingleton 回调发生在这段之后）
+- `SmartInitializingSingleton#afterSingletonsInstantiated`：容器“基本就绪”的回调点（所有非 lazy 单例创建完成后）
+- `AbstractApplicationContext#finishBeanFactoryInitialization`：refresh 主线里触发 preInstantiateSingletons 的阶段
+- `DefaultSingletonBeanRegistry#getSingleton`：回调里再取 bean 的语义与边界（是否会触发额外创建）
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

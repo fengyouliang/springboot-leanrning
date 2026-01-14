@@ -68,6 +68,25 @@ Converter/Formatter 属于第二条路径：它让 Spring MVC 知道怎么把字
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
+### 主链路（Call-chain sketch）
+
+本章最重要的不是背类名，而是把“两个通道”区分清楚：
+
+1) body 通道（`@RequestBody`）：
+- `DispatcherServlet#doDispatch`
+- `RequestResponseBodyMethodProcessor#resolveArgument`
+- `AbstractMessageConverterMethodArgumentResolver#readWithMessageConverters`
+- 校验失败：`MethodArgumentNotValidException`
+
+2) binder 通道（`@ModelAttribute/@RequestParam`）：
+- `HandlerMethodArgumentResolverComposite#resolveArgument`
+- `ServletModelAttributeMethodProcessor#resolveArgument`
+- `WebDataBinder#bind` → `DataBinder#validate`
+- 校验失败：`BindException`（无 BindingResult 时）
+
+机制内核解释见：
+- `springboot-web-mvc/docs/part-03-web-mvc-internals/02-argument-resolver-and-binder.md`
+
 推荐断点（按路径）：
 
 - body 路径（`@RequestBody`）：
@@ -85,7 +104,9 @@ Converter/Formatter 属于第二条路径：它让 Spring MVC 知道怎么把字
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`BootWebMvcLabTest`
 - Lab：`BootWebMvcBindingDeepDiveLabTest`
-- 建议命令：`mvn -pl springboot-web-mvc test`（或在 IDE 直接运行上面的测试类）
+- 建议命令（方法级入口）：
+  - `mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcBindingDeepDiveLabTest#returnsTypeMismatchWhenRequestParamCannotConvert test`
+  - `mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcBindingDeepDiveLabTest#returnsValidationFailedWhenModelAttributeIsInvalid test`
 
 ### 复现/验证补充说明（来自原文迁移）
 
@@ -107,6 +128,19 @@ Converter/Formatter 属于第二条路径：它让 Spring MVC 知道怎么把字
 
 - 绑定失败时先确认“走的是哪条路径”（body 还是 binder），不要在错误的地方加断点。
 - 建议优先用测试把分支固化出来：400 并不等于校验失败，也可能是解析失败或类型不匹配。
+
+建议从本模块的“对照用例”入手（同一测试类内对比更直观）：
+
+- type mismatch（String → int 失败）：`BootWebMvcBindingDeepDiveLabTest#returnsTypeMismatchWhenRequestParamCannotConvert`
+- 方法级校验（`@Validated` + 参数约束）：`BootWebMvcBindingDeepDiveLabTest#returnsMethodValidationFailedWhenRequestParamViolatesConstraint`
+- BindingResult 改变错误流（不抛异常，controller 手动塑形）：`BootWebMvcBindingDeepDiveLabTest#bindingResultCanShortCircuitExceptionFlowWhenHandledManually`
+
+配合断点地图一起用更省时间：`springboot-web-mvc/docs/part-00-guide/02-breakpoint-map.md`
+
+进一步阅读（只做必要连接）：
+
+- 校验机制（Bean Validation）：`helloagents/wiki/modules/spring-core-validation.md`
+- 类型转换（容器视角，ConversionService/TypeConverter/BeanWrapper）：`spring-core-beans/docs/part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md`
 
 ## F. 常见坑与边界
 

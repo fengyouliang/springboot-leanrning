@@ -20,6 +20,9 @@
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansLazyLabTest.java`
+  - `lazyInitBean_isNotInstantiatedDuringRefresh_butCreatedOnFirstGetBean()`（证据：refresh 后构造器未调用，首次 getBean 才创建）
+
 当 bean 定义是 lazy-init：
 
 - refresh 阶段不会创建它
@@ -28,6 +31,9 @@
 ## 2. 关键反直觉点：lazy-init 也挡不住“被别人依赖”
 
 对应测试：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansLazyLabTest.java`
+  - `lazyInitDoesNotHelpIfAConsumerEagerlyDependsOnTheBean()`（证据：consumer 非 lazy 会强制创建依赖）
 
 如果 A（非 lazy）依赖 B（lazy-init）：
 
@@ -43,6 +49,9 @@
 ## 3. `@Lazy` 放在注入点：注入一个 proxy，而不是直接注入目标对象
 
 对应测试：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansLazyLabTest.java`
+  - `lazyInjectionPoint_canDeferCreationOfLazyBeanUntilFirstUse()`（证据：注入的是 proxy，首次调用才触发目标 bean 创建）
 
 当你把 `@Lazy` 放在依赖注入点：
 
@@ -68,6 +77,13 @@
 - “看到的是 proxy 类型而不是目标类” → **实例层（代理语义）**：这是注入点 `@Lazy` 的本质（对照 [31](31-proxying-phase-bpp-wraps-bean.md)）
 
 ## 5. 一句话自检
+
+- 常问：`lazy-init` 与注入点 `@Lazy` 有什么本质差别？
+  - 答题要点：`lazy-init` 是定义层“延迟创建策略”；注入点 `@Lazy` 是“注入延迟解析 proxy”，把解析推迟到首次使用。
+- 常见追问：为什么 lazy-init 仍可能在 refresh 时被创建？
+  - 答题要点：被 eager 依赖/被提前触发（例如非 lazy 单例依赖它）时仍会创建；排障要找“是谁触发了依赖解析”。
+- 常见追问：如何用断点证明“提前创建”是由依赖解析触发，而不是 lazy 失效？
+  - 答题要点：在 `doResolveDependency` / `doGetBean` 加条件断点（beanName），观察创建链路的触发源。
 
 ## 面试常问（`@Lazy` 的两种语义）
 
@@ -109,6 +125,12 @@
 本实验还配合把目标 bean 标成 lazy-init，从而确保：
 
 ## 源码锚点（建议从这里下断点）
+
+- `DefaultListableBeanFactory#preInstantiateSingletons`：refresh 阶段批量创建非 lazy 单例（lazy-init bean 会被跳过）
+- `AbstractBeanFactory#doGetBean`：首次按 name/type 取 bean 时触发创建（lazy-init 的典型入口）
+- `DefaultListableBeanFactory#doResolveDependency`：解释“lazy bean 仍可能因为被依赖而提前创建”的触发点
+- `ContextAnnotationAutowireCandidateResolver#getLazyResolutionProxyIfNecessary`：注入点 `@Lazy` 变成 proxy 的关键入口
+- `AbstractAutowireCapableBeanFactory#initializeBean`：对照代理/增强发生在生命周期的哪一段
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

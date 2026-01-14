@@ -40,7 +40,8 @@
 
 入口测试：
 
----
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansSpelValueLabTest.java`
+  - `valueWithSpel_canReferenceBeanAndResultIsConvertedToTargetType()`（覆盖：引用 bean + 进入类型转换）
 
 1) `AutowiredAnnotationBeanPostProcessor#postProcessProperties`（识别 `@Value` 的入口）
 2) `AbstractBeanFactory#resolveEmbeddedValue`（`${...}` / `#{...}` 的字符串解析入口）
@@ -59,11 +60,11 @@
 
 ---
 
----
-
 你应该能回答：
 
-- 自定义 Qualifier（meta-annotation）如何参与候选收敛
+- `${...}` 与 `#{...}` 的职责边界是什么？（占位符解析 vs 表达式求值）
+- 当 `@Value("#{...}")` 注入失败/值不符合预期时，你如何把问题拆成“解析 vs 计算 vs 转换”三段定位？
+- SpEL 引用 `@beanName` 的前提是什么？（注入点在哪个阶段解析、能访问哪些 bean）
 
 ---
 

@@ -138,6 +138,11 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
 
 ## 源码锚点（建议从这里下断点）
 
+- `CommonAnnotationBeanPostProcessor#postProcessProperties`：`@Resource` 注入介入点（发生在属性填充阶段）
+- `CommonAnnotationBeanPostProcessor#autowireResource`：name-first 的分流入口（先按 name，再按 type）
+- `DefaultListableBeanFactory#doResolveDependency`：对照 `@Autowired` 的依赖解析主线（type-first）
+- `SimpleAliasRegistry#canonicalName`：当 `@Resource(name=...)` 遇到 alias 时的归一化辅助
+
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResourceInjectionLabTest.java`

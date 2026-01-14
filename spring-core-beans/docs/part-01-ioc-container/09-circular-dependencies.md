@@ -165,6 +165,17 @@ record CycleB(CycleA cycleA) {}
 
 建议直接从这些测试方法开始（每个都对应一个经典结论）：
 
+- constructor cycle（fail-fast）：
+  - `SpringCoreBeansContainerLabTest#circularDependencyWithConstructorsFailsFast`
+  - `SpringCoreBeansCircularDependencyBoundaryLabTest#constructorCycleFailsFast`
+- setter cycle（可能成功：early singleton exposure）：
+  - `SpringCoreBeansContainerLabTest#circularDependencyWithSettersMaySucceedViaEarlySingletonExposure`
+- constructor cycle 的两种“打断环”手段（理解边界与代价）：
+  - `SpringCoreBeansCircularDependencyBoundaryLabTest#constructorCycleCanBeBrokenViaLazyInjectionPointProxy`（@Lazy 注入点代理）
+  - `SpringCoreBeansCircularDependencyBoundaryLabTest#constructorCycleCanBeBrokenViaObjectProvider`（ObjectProvider 延迟获取）
+- early proxy（代理介入 early reference 的关键分支）：
+  - `SpringCoreBeansEarlyReferenceLabTest#getEarlyBeanReference_canProvideEarlyProxyDuringCircularDependencyResolution`
+
 ## Boot vs Framework：你必须知道的“默认策略差异”
 
 - 纯 Spring Framework 的 `DefaultListableBeanFactory` 默认允许 circular references（因此 setter 场景经常“能救”）
@@ -215,6 +226,10 @@ record CycleB(CycleA cycleA) {}
 如果你想把“为什么 setter 有时能救、constructor 基本救不了”彻底打穿，建议至少跑一次三层缓存断点闭环：
 
 你在断点里看到的三层缓存通常对应这三类语义（字段名不必背，但建议能识别）：
+
+- `singletonObjects`：完全初始化完成的单例（最终成品）
+- `earlySingletonObjects`：early reference（半成品/可能是 proxy）
+- `singletonFactories`：ObjectFactory（用来延迟生成 early reference）
 
 精简伪代码（足够对照断点理解）：
 

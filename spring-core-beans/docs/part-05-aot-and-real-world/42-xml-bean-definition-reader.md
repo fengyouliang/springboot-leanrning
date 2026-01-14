@@ -47,7 +47,9 @@ XML 这条链路的核心是：
 
 入口测试：
 
----
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansXmlBeanDefinitionReaderLabTest.java`
+  - `xmlBeanDefinitionReader_loadsBeanDefinitions_andBeanDefinitionContainsConstructorArgValues()`（正常 XML：definition 可观察）
+  - `invalidXml_throwsBeanDefinitionStoreException_asDefinitionPhaseErrorSignal()`（非法 XML：定义层失败信号）
 
 把 XML 问题迅速收敛到 3 个层次（入口 → 解析 → 入库）：
 
@@ -68,14 +70,11 @@ XML 这条链路的核心是：
 
 ---
 
----
-
 这一章你应该带走的能力是：
 
 - 能把 XML 输入归一到 BeanDefinition 视角
 - 能用 `BeanDefinitionStoreException` 快速判断“定义层失败”
-
-- 容器外对象（不是 Spring 创建的）怎么做注入与生命周期托管？
+- 能在 debugger 里用 2–3 个入口断点把问题收敛到：读资源 → 解析 Document → registerBeanDefinition
 
 ---
 
@@ -106,6 +105,12 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansXmlBeanDefinitionReaderLabTest t
 
 建议观察点（下断点时优先盯这些变量）：
 
+- `resource` / `resourceDescription`：到底读的是哪一个 XML（路径/类路径资源/文件资源）
+- `document` / `root`：XML 是否被正确解析成 Document（命名空间/元素结构是否符合预期）
+- `beanName` / `beanClassName`：解析出来的定义是什么（是否指向了你期望的类型）
+- `BeanDefinition` 关键信息：constructor args / property values / scope / lazy 等元数据是否符合预期
+- 异常类型与 cause：是“解析失败”（document 层）还是“注册失败”（registry 层）
+
 1) **误区：XML 问题只能靠“看 XML”解决**
    - 更有效：先分型（定义层 vs 实例层），再锁定断点入口。
 2) **误区：XML = 过时，不用学**
@@ -115,11 +120,21 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansXmlBeanDefinitionReaderLabTest t
 
 ## 4. 常见误区
 
-下一章进入真实项目更常见的另一个坑：
+1) **误区：把 XML 问题当成“业务逻辑问题”**
+   - XML 读不进来时，容器甚至还没开始创建你的业务 bean；优先用“定义层入口断点”确认读/解析/注册发生在何处失败。
+2) **误区：看到 `BeanDefinitionStoreException` 就直接全局搜字符串**
+   - 更快的方式：从 `XmlBeanDefinitionReader#loadBeanDefinitions` 进，先确认 resource 与 schema/namespace，再定位到具体 element 的 parse。
+3) **误区：以为 XML 只会影响“创建对象”**
+   - XML 的核心价值是让你把“输入形态”统一回 BeanDefinition：你看的其实是“定义元数据”，不是实例本身。
 
 ## G. 小结与下一章
 
 ## 5. 小结与下一章预告
+
+- XML 是一种输入形式，它最终会被归一为 BeanDefinition 并注册到 BeanFactory
+- XML 相关异常排障优先做“定义层 vs 实例层”分型；定义层失败的典型信号是 `BeanDefinitionStoreException`
+
+下一章我们补齐另一个真实工程经常遇到的边界：**容器外对象**（不是 Spring 创建的）如何获得注入、初始化与销毁能力（AutowireCapableBeanFactory）。
 
 <!-- AG-CONTRACT:END -->
 

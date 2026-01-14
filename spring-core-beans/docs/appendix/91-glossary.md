@@ -37,6 +37,19 @@
 
 ## 注入与候选
 
+- **DependencyDescriptor**：注入点的“描述符”（需要什么类型/是否 required/是否带泛型/有哪些注解/名称等）。  
+  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)
+- **候选（candidates）**：按类型匹配得到的候选集合；单依赖需要进一步收敛为唯一胜者，否则失败（NoUnique）。  
+  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)、[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
+- **`@Qualifier` / AutowireCandidateResolver**：缩小候选集合（精确选择）；包含 meta-annotation 的 Qualifier 也在此阶段参与过滤。  
+  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)、[`45`](../part-05-aot-and-real-world/45-custom-qualifier-meta-annotation.md)
+- **`@Primary` / `@Priority`**：候选收敛的默认胜者/优先级线索（注意：并不等价于集合排序）。  
+  章节：[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
+- **`@Order` / Ordered**：主要影响集合注入/链路顺序，不等价于“单依赖选谁”。  
+  章节：[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)、[`14`](../part-03-container-internals/14-post-processor-ordering.md)
+- **ObjectProvider**：把“获取依赖”延迟到使用时（常用于 prototype 注入 singleton、可选依赖等）。  
+  章节：[`04`](../part-01-ioc-container/04-scope-and-prototype.md)
+
 ---
 
 ## 生命周期与扩展点
@@ -80,6 +93,17 @@
 
 ## AOT 与真实世界补齐
 
+- **AOT（Ahead-of-Time）**：把原本运行期才能完成的工作（分析/生成/裁剪元信息）前移到构建期执行，以换取更快启动与更强可预知性。  
+  章节：[`40`](../part-05-aot-and-real-world/40-aot-and-native-overview.md)
+- **RuntimeHints / RuntimeHintsRegistrar**：AOT/Native 下的“构建期契约”数据结构与注册入口，用于声明反射/代理/资源等运行期需求。  
+  章节：[`41`](../part-05-aot-and-real-world/41-runtimehints-basics.md)
+- **XmlBeanDefinitionReader / BeanDefinitionReader**：把输入源（XML/properties/groovy 等）解析为 BeanDefinition 并注册到 BeanFactory 的 reader 家族（定义层输入）。  
+  章节：[`42`](../part-05-aot-and-real-world/42-xml-bean-definition-reader.md)、[`47`](../part-05-aot-and-real-world/47-beandefinitionreader-other-inputs-properties-groovy.md)
+- **AutowireCapableBeanFactory**：对容器外对象提供“注入/初始化/销毁”的能力入口（把部分容器管道应用到非托管对象上）。  
+  章节：[`43`](../part-05-aot-and-real-world/43-autowirecapablebeanfactory-external-objects.md)
+- **SpEL（Spring Expression Language）**：用于 `@Value("#{...}")` 等场景的表达式语言（表达式求值后仍会进入类型转换）。  
+  章节：[`44`](../part-05-aot-and-real-world/44-spel-and-value-expression.md)
+
 ---
 
 ## D. 源码与断点
@@ -105,22 +129,8 @@
 1) 读文档/看断点时遇到名词能快速定位“它到底是什么、在哪个阶段出现、影响什么”
 2) 把同一类名词放在一起对比，避免“记得名字但不知道边界”
 
-> 使用建议：遇到不熟的名词先来这里查 10 秒，再回到对应章节跑 Lab。
-
-- **AOT（Ahead-of-Time）**：把原本运行期才能完成的工作（分析/生成/裁剪元信息）前移到构建期执行，以换取更快启动与更强可预知性。  
-  章节：[`40`](../part-05-aot-and-real-world/40-aot-and-native-overview.md)
-- **RuntimeHints**：AOT/Native 下的“构建期契约”数据结构，用于声明反射/代理/资源等运行期需求。  
-  章节：[`41`](../part-05-aot-and-real-world/41-runtimehints-basics.md)
-- **RuntimeHintsRegistrar**：hints 的注册入口（面向模块/能力的契约声明点）。  
-  章节：[`41`](../part-05-aot-and-real-world/41-runtimehints-basics.md)
-- **XmlBeanDefinitionReader**：把 XML 配置读成 BeanDefinition 并注册到 BeanFactory 的 reader；定义层错误分型的关键入口。  
-  章节：[`42`](../part-05-aot-and-real-world/42-xml-bean-definition-reader.md)
-- **AutowireCapableBeanFactory**：对容器外对象提供“注入/初始化/销毁”的能力入口，用于把部分容器管道应用到非托管对象上。  
-  章节：[`43`](../part-05-aot-and-real-world/43-autowirecapablebeanfactory-external-objects.md)
-- **SpEL（Spring Expression Language）**：Spring 的表达式语言，用于 `@Value("#{...}")` 等场景进行计算/引用 bean/调用方法。  
-  章节：[`44`](../part-05-aot-and-real-world/44-spel-and-value-expression.md)
-- **自定义 Qualifier（meta-annotation）**：通过注解做 `@Qualifier` 的元注解，把“候选收敛规则”提升为有业务语义的限定符（避免散落字符串）。  
-  章节：[`45`](../part-05-aot-and-real-world/45-custom-qualifier-meta-annotation.md)
+> 使用建议：遇到不熟的名词先来这里查 10 秒，再回到对应章节跑 Lab。  
+> Part 05（AOT/XML/SpEL/容器外对象）相关术语请优先看上方“**AOT 与真实世界补齐**”小节。
 
 ## F. 常见坑与边界
 

@@ -66,3 +66,47 @@
 - **如何验证（Verification）：** 跑哪个 Lab/Test？断言看什么？
 - **推荐断点（Breakpoints）：** 该从哪里下断点能最快看到关键分支？
 - **修复建议（Fix）：** 学习用最小修复是什么？工程上推荐做法是什么？
+
+---
+
+## 文档章节契约模板（Chapter Contract）
+
+> 目标：让每章都能做到“可导航 + 可验证 + 可断点 + 可排障”，避免出现只有标题没有落地内容的空块。
+
+建议每个 `docs/**.md` 章节至少包含以下信息（可按 A–G 结构组织，也可按更适合的方式组织，但契约点要齐）：
+
+1. **本章输出（What you get）**
+   - 读完本章你应该能回答的 2–3 个问题（可复述）
+2. **关键分支（Decisive Branch）**
+   - 至少 1 个“如果/否则”的分支判断（例如：是否命中某个 resolver / 是否被代理 / 是否进入 async 二次 dispatch）
+3. **验证入口（Verification Entry）**
+   - 至少 1 个方法级可运行入口：`mvn -pl <module> -Dtest=Class#method test`
+   - 说明“你应该看到什么”（断言/输出/可观察信号）
+4. **断点与观察点（Debugger Pack）**
+   - Entrypoints（2+）：关键入口方法（例如 `DispatcherServlet#doDispatch` / `AbstractApplicationContext#refresh`）
+   - Watch List（3+）：建议观察字段/数据结构（例如 `resolvedException` / `singletonObjects`）
+5. **常见坑与边界（Pitfalls & Boundaries）**
+   - 至少 2 条“现象 → 根因 → 如何验证”的排障分流
+6. **一句话自检（Self-check）**
+   - 至少 3 个自检问题（概念/边界/排障），并尽量绑定到可跑入口
+7. **章节末尾入口块（Bookify）**
+   - `### 对应 Lab/Test`（测试类路径）
+   - `上一章｜目录｜下一章`（稳定导航）
+
+---
+
+## 跨模块链接与索引规范（避免漂移）
+
+> 目标：读者能在 1–2 次跳转内从“现象/问题”到达“对应章节 + 可跑入口”，同时避免链接在维护中不断漂移。
+
+1. **相对链接优先**
+   - 文档内部与知识库一律使用 Markdown 相对链接（仓库内可解析）。
+2. **索引集中、入口收敛**
+   - 模块入口以 `helloagents/wiki/modules/<module>.md` 为“知识库侧索引”。
+   - 模块内部入口以 `<module>/docs/README.md` 为“模块侧索引（书本目录）”。
+   - 全局主线入口以 `helloagents/wiki/learning-path.md` 为“路线图索引”。
+3. **避免 `docs/NN` 缩写引用**
+   - 章节引用必须写成真实相对路径链接，避免读者误解与断链。
+4. **跨模块引用只做必要连接**
+   - 原则：只连接主线相关的“下一跳”，不要在正文里发散到大量外链。
+   - 例：Web MVC 的 `@Valid` 章只需要链接到 Validation/Beans 的关键章节/模块页即可。

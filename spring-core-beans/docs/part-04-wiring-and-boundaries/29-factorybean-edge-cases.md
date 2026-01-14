@@ -94,6 +94,10 @@
 
 ## 4. 一句话自检
 
+- 你能解释：为什么 `getBeanNamesForType(..., allowEagerInit=false)` 可能“按类型发现不到 FactoryBean 的 product”？入口：`SpringCoreBeansFactoryBeanEdgeCasesLabTest#factoryBeanWithNullObjectType_isNotDiscoverableByTypeWithoutEagerInit_butCanStillBeRetrievedByName`
+- 你能解释：为什么 `getBean("sequence")` 拿到的是 product，但 `getBean("&sequence")` 拿到的是 FactoryBean 本体？入口：`SpringCoreBeansContainerLabTest#factoryBeanByNameReturnsProductAndAmpersandReturnsFactory`
+- 你能解释：`FactoryBean#isSingleton()` 会如何影响 product 的缓存语义？入口：`SpringCoreBeansFactoryBeanDeepDiveLabTest#singletonFactoryBeanProduct_isCached_byTheContainer` / `SpringCoreBeansFactoryBeanDeepDiveLabTest#nonSingletonFactoryBeanProduct_isNotCached_byTheContainer`
+
 ## D. 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
@@ -125,6 +129,12 @@
 同一个测试里也验证了：
 
 ## 源码锚点（建议从这里下断点）
+
+- `AbstractBeanFactory#isTypeMatch`：FactoryBean 的 type matching 入口（`getObjectType()` 是否为 null 是关键分支）
+- `DefaultListableBeanFactory#getBeanNamesForType`：按类型发现入口（对照 `allowEagerInit=false` 的边界）
+- `FactoryBeanRegistrySupport#getObjectFromFactoryBean`：product 创建与缓存（以及缓存未命中的路径）
+- `AbstractBeanFactory#getObjectForBeanInstance`：`&name` / product 分流（排障时确认“你拿到的是谁”）
+- `ResolvableType` 相关路径（IDE 跳转定位）：泛型推断/代理导致的类型信息丢失常见在这里暴露
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

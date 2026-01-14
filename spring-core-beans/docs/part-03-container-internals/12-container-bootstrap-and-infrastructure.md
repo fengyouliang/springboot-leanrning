@@ -26,6 +26,9 @@
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansBootstrapInternalsLabTest.java`
+  - `withoutAnnotationConfigProcessors_autowiredAndPostConstructAreNotApplied()`（证据：字段为 null、`@PostConstruct` 没跑）
+
 ### 1.2 注册 annotation processors 后，注解才会被处理
 
 当你调用：
@@ -39,6 +42,9 @@
 - `ConfigurationClassPostProcessor`：解析 `@Configuration` / `@Bean` / `@Import` 等
 
 对应测试：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansBootstrapInternalsLabTest.java`
+  - `registerAnnotationConfigProcessors_enablesAutowiredAndPostConstruct()`（证据：字段被注入、`@PostConstruct` 被触发）
 
 ### 1.3 源码解析：为什么 `AnnotationConfigApplicationContext` “默认就有注解能力”？
 
@@ -94,6 +100,9 @@ AnnotatedBeanDefinitionReader(registry):
 
 对应测试（同一个 config class，两种容器启动方式得到不同结果）：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansBootstrapInternalsLabTest.java`
+  - `configurationClassIsNotParsedWithoutConfigurationClassPostProcessor()`（证据：不装 processors 时 `@Bean` 方法不会变成 BeanDefinition）
+
 - **误解 1：注解是语言特性**
   - 注解只是元数据；让它“生效”的是容器启动阶段注册的处理器。
 
@@ -112,6 +121,26 @@ AnnotatedBeanDefinitionReader(registry):
 入口：
 
 你应该看到：
+
+- 定义层：`registerAnnotationConfigProcessors` 把 internal processors 作为 BeanDefinition 放进 registry
+- refresh 前半段：`invokeBeanFactoryPostProcessors` 里 `ConfigurationClassPostProcessor` 才真正解析 `@Configuration/@Bean`
+- refresh 中段：`registerBeanPostProcessors` 把 `AutowiredAnnotationBeanPostProcessor/CommonAnnotationBeanPostProcessor` 加入 BeanFactory 的 BPP 列表
+- 创建链路：`@Autowired` 在 `postProcessProperties` 命中；`@PostConstruct` 在 before-init 的 BPP 链路命中
+
+推荐断点（按“定义层 → 实例层”的顺序）：
+
+1) `AnnotationConfigUtils#registerAnnotationConfigProcessors`（定义层：处理器 BeanDefinition 进入 registry）
+2) `PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`（定义层：BDRPP/BFPP 执行时机）
+3) `ConfigurationClassPostProcessor#postProcessBeanDefinitionRegistry`（`@Bean/@Import` 解析点）
+4) `PostProcessorRegistrationDelegate#registerBeanPostProcessors`（实例层：BPP 进入 BeanFactory 列表）
+5) `AutowiredAnnotationBeanPostProcessor#postProcessProperties`（`@Autowired/@Value` 注入发生点）
+6) `InitDestroyAnnotationBeanPostProcessor#postProcessBeforeInitialization`（`@PostConstruct` 触发点）
+
+最小复现入口（方法级）：
+
+- `SpringCoreBeansBootstrapInternalsLabTest.withoutAnnotationConfigProcessors_autowiredAndPostConstructAreNotApplied()`
+- `SpringCoreBeansBootstrapInternalsLabTest.registerAnnotationConfigProcessors_enablesAutowiredAndPostConstruct()`
+- `SpringCoreBeansBootstrapInternalsLabTest.configurationClassIsNotParsedWithoutConfigurationClassPostProcessor()`
 
 ## 排障分流：这是定义层问题还是实例层问题？
 
@@ -173,6 +202,13 @@ AnnotatedBeanDefinitionReader(registry):
 
 ## 4. 一句话自检
 
+- 常问：为什么 `GenericApplicationContext` 里 `@Autowired/@PostConstruct` 默认不生效？
+  - 答题要点：因为 annotation processors（BPP/BFPP）没有注册进容器；注解只是元数据，不是语言魔法。
+- 常见追问：你如何用断点证明“处理器已经注册但尚未生效”？
+  - 答题要点：`registerAnnotationConfigProcessors` 只注册 BeanDefinition（定义层）；必须经过 `invokeBeanFactoryPostProcessors` 与 `registerBeanPostProcessors` 才会进入创建链路（实例层）。
+- 常见追问：遇到“字段为 null / `@PostConstruct` 没跑”，第一步该查什么？
+  - 答题要点：先查 `beanFactory.getBeanPostProcessors()` 是否包含 `AutowiredAnnotationBeanPostProcessor/CommonAnnotationBeanPostProcessor`；没有就先补基础设施，而不是先怀疑业务逻辑。
+
 ## 面试常问（容器启动与注解为何生效）
 
 2) 为什么 `@Autowired` / `@PostConstruct` / `@Bean` 能工作？如果没有 annotation processors 会怎样？
@@ -209,6 +245,12 @@ AnnotatedBeanDefinitionReader(registry):
 - `SpringCoreBeansBootstrapInternalsLabTest.configurationClassIsNotParsedWithoutConfigurationClassPostProcessor()`
 
 ## 源码锚点（建议从这里下断点）
+
+- `AbstractApplicationContext#refresh`：容器启动主入口（定位阶段感）
+- `AnnotationConfigUtils#registerAnnotationConfigProcessors`：基础设施 processors 的注册入口（为什么注解能工作）
+- `ConfigurationClassPostProcessor#postProcessBeanDefinitionRegistry`：`@Configuration/@Bean/@Import` 解析成 BeanDefinition 的核心入口
+- `AutowiredAnnotationBeanPostProcessor#postProcessProperties`：`@Autowired/@Value/@Inject` 等注入发生点（populateBean 阶段）
+- `InitDestroyAnnotationBeanPostProcessor#postProcessBeforeInitialization`：`@PostConstruct` 触发点（initializeBean 阶段）
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

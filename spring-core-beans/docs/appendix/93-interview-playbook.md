@@ -25,6 +25,10 @@
 
 对应入口：
 
+- 建议先跑：`docs/part-00-guide/01-quickstart-30min.md`（3 个最小闭环，把“可复述”变成“可证明”）
+- definition vs instance（定义层 vs 实例层）：`SpringCoreBeansContainerLabTest#beanDefinitionIsNotTheBeanInstance`
+- final exposed object（最终暴露对象可能被替换）：`SpringCoreBeansBeanCreationTraceLabTest#beanCreationTrace_recordsPhases_andExposesProxyReplacement`
+
 ---
 
 ## 1) 依赖解析（DI）：候选收集 → 候选收敛 → 最终注入
@@ -124,6 +128,19 @@
 
 ### 推荐断点（够用版）
 
+推荐断点（按“候选收集 → 候选收敛 → 最终注入”顺序）：
+
+1) `DefaultListableBeanFactory#doResolveDependency`（依赖解析总入口）
+2) `DefaultListableBeanFactory#findAutowireCandidates`（候选集合：Map<beanName, candidate>）
+3) `DefaultListableBeanFactory#determineAutowireCandidate`（候选收敛：最终 winner）
+4) `QualifierAnnotationAutowireCandidateResolver#isAutowireCandidate`（Qualifier/meta-annotation 过滤）
+
+固定观察点（watch list）：
+
+- `descriptor`（注入点抽象：类型/required/注解/名称）
+- `matchingBeans` / `candidates`（候选集合）
+- `autowiredBeanName` / `candidateName`（最终命中者）
+
 ### 对应 Lab（可证明）
 
 - `SpringCoreBeansRegistryPostProcessorLabTest`
@@ -132,6 +149,17 @@
 
 ### 推荐断点
 
+推荐断点（把“改定义 vs 改实例”落到 refresh 主线）：
+
+1) `PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`（BDRPP/BFPP 执行：定义层）
+2) `PostProcessorRegistrationDelegate#registerBeanPostProcessors`（BPP 注册：实例层拦截链）
+3) `AbstractBeanFactory#addBeanPostProcessor`（最终进入 bpp list 的时机与顺序）
+
+固定观察点（watch list）：
+
+- `postProcessorNames`（候选集合）
+- `beanFactory.getBeanPostProcessors()`（最终执行顺序）
+
 ### 对应 Lab（可证明）
 
 - `SpringCoreBeansLifecycleCallbackOrderLabTest`
@@ -139,12 +167,27 @@
 
 ### 推荐断点
 
+推荐断点（把回调顺序跑成“断点证据链”）：
+
+1) `AbstractAutowireCapableBeanFactory#doCreateBean`（创建主线）
+2) `AbstractAutowireCapableBeanFactory#populateBean`（注入发生点）
+3) `AbstractAutowireCapableBeanFactory#initializeBean`（Aware + init callbacks 串联点）
+4) `CommonAnnotationBeanPostProcessor#postProcessBeforeInitialization`（`@PostConstruct` 触发点之一）
+5) `DisposableBeanAdapter#destroy`（销毁回调入口）
+
 ### 对应 Lab（可证明）
 
 - `SpringCoreBeansContainerLabTest`
 - `SpringCoreBeansEarlyReferenceLabTest`
 
 ### 推荐断点
+
+推荐断点（把“constructor 无解 / setter 可救”落到三层缓存语义）：
+
+1) `DefaultSingletonBeanRegistry#getSingleton`（三层缓存命中路径）
+2) `DefaultSingletonBeanRegistry#addSingletonFactory`（early exposure：注册 ObjectFactory）
+3) `AbstractAutowireCapableBeanFactory#doCreateBean`（创建窗口期：什么时候允许 early reference）
+4) `AbstractAutowireCapableBeanFactory#getEarlyBeanReference`（early reference 是否变成 proxy 的分支）
 
 ### 对应 Lab（可证明）
 
@@ -154,6 +197,13 @@
 - `SpringCoreBeansAutoConfigurationOverrideMatrixLabTest`
 
 ### 推荐断点
+
+推荐断点（把“为什么有/为什么没有/为什么没退让”落到条件评估时机）：
+
+1) `AutoConfigurationImportSelector#selectImports`（自动配置导入入口之一）
+2) `ConditionEvaluator#shouldSkip`（条件评估总入口）
+3) `OnBeanCondition#getMatchOutcome`（`@ConditionalOnBean/@ConditionalOnMissingBean` 等匹配）
+4) `ConditionEvaluationReport#get`（把条件报告当成数据结构查询，而不是日志）
 
 - AOT/Native 的关键是把“运行期反射/代理/资源需求”前移为“构建期契约”  
 - Spring 用 RuntimeHints 表达这种契约：reflection/proxy/resource 等  
@@ -167,6 +217,13 @@
 
 ### 推荐断点
 
+真实世界补齐（XML / 容器外对象 / SpEL / 自定义 Qualifier）常用断点：
+
+- XML（定义层输入）：`XmlBeanDefinitionReader#loadBeanDefinitions`、`DefaultListableBeanFactory#registerBeanDefinition`
+- 容器外对象：`AutowireCapableBeanFactory#autowireBean`、`AutowireCapableBeanFactory#initializeBean`、`AutowireCapableBeanFactory#destroyBean`
+- SpEL / `@Value("#{...}")`：`StandardBeanExpressionResolver#evaluate`、`AbstractBeanFactory#resolveEmbeddedValue`
+- 自定义 Qualifier：`QualifierAnnotationAutowireCandidateResolver#isAutowireCandidate`
+
 - XML → BeanDefinitionReader：`docs/part-05-aot-and-real-world/42-xml-bean-definition-reader.md` + `SpringCoreBeansXmlBeanDefinitionReaderLabTest`
 - 容器外对象注入：`docs/part-05-aot-and-real-world/43-autowirecapablebeanfactory-external-objects.md` + `SpringCoreBeansAutowireCapableBeanFactoryLabTest`
 - SpEL：`docs/part-05-aot-and-real-world/44-spel-and-value-expression.md` + `SpringCoreBeansSpelValueLabTest`
@@ -174,7 +231,14 @@
 
 ## F. 常见坑与边界
 
-- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
+1) **误区：`@Order` 能解决单依赖歧义**
+   - `@Order` 主要影响集合注入/链路顺序；单依赖收敛主要看 `@Qualifier/@Primary/name` 等规则（见 `03/33`）。
+2) **误区：`@PostConstruct` 是“Java 自带回调”**
+   - `@PostConstruct` 依赖 BPP（例如 CommonAnnotationBeanPostProcessor）；BPP 没注册/没执行时它不会发生（见 `12/17`）。
+3) **误区：循环依赖就是“三级缓存技巧”**
+   - 三级缓存承载的是 early reference 的时机与语义；代理介入时 early reference 可能变成 proxy（见 `09/16`）。
+4) **误区：条件装配是看“最终容器状态”**
+   - 条件评估发生在注册阶段（refresh 前半段）；back-off 要求“覆盖 bean 在评估时可见”（见 `10/11`）。
 
 ## G. 小结与下一章
 

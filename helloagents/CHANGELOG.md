@@ -5,6 +5,8 @@
 ## [Unreleased]
 
 ### Added
+- `helloagents`：新增学习路线图 `helloagents/wiki/learning-path.md`，并在 `helloagents/wiki/overview.md` 与四模块页（Beans/AOP/Tx/Web MVC）增加 Start Here/路线图入口，收敛新读者的“先跑什么/再读什么”路径。
+- `spring-core-beans`：新增 30 分钟快启章节（Start Here），并系统补齐/强化 docs（容器主线、BPP 顺序、FactoryBean、循环依赖、AOT/真实世界等）与可运行证据链；同时更新 `scripts/generate-spring-beans-public-api-index.py` 并重新生成 Appendix 95/96（补齐“坑点与排障”）。
 - `spring-core-events`：新增异步 multicaster 默认 Lab `SpringCoreEventsAsyncMulticasterLabTest`，用于可断言验证自定义 `ApplicationEventMulticaster` + `TaskExecutor` 的异步分发主线。
 - `springboot-data-jpa`：新增用于 N+1/EntityGraph 验证的示例实体与仓库（`LibraryAuthor/LibraryBook`），并增强 `BootDataJpaLabTest` 覆盖 `getReferenceById` 懒代理与 N+1/EntityGraph 边界的可断言证据链。
 - `scripts`：新增教学化覆盖度自检脚本 `scripts/check-teaching-coverage.py`（面向所有包含 `docs/README.md` 的模块：`spring-core-*` + `springboot-*`），并提供聚合闸门脚本 `scripts/check-docs.sh`（断链检查 + 教学覆盖），用于验收“每章至少 1 个可跑入口 + 每模块至少 N 个 LabTest”。

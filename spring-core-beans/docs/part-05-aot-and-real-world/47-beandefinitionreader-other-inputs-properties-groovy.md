@@ -31,6 +31,13 @@
 
 ---
 
+- Properties：
+  - 测试：`SpringCoreBeansPropertiesBeanDefinitionReaderLabTest#propertiesBeanDefinitionReader_registersBeanDefinitions_fromPropertiesFile`
+  - 资源：`spring-core-beans/src/test/resources/part05_aot_and_real_world/reader/beans.properties`
+- Groovy：
+  - 测试：`SpringCoreBeansGroovyBeanDefinitionReaderLabTest#groovyBeanDefinitionReader_registersBeanDefinitions_fromGroovyScript`
+  - 资源：`spring-core-beans/src/test/resources/part05_aot_and_real_world/reader/beans.groovy`
+
 ## 1. 是什么：为什么要有 BeanDefinitionReader 家族？
 
 从 beans 体系角度看，Spring 的强大来自“输入多样但输出统一”：
@@ -80,6 +87,9 @@ BeanDefinitionReader 的价值在于：
 依赖说明：
 
 ---
+
+- `GroovyBeanDefinitionReader` 属于 Spring Beans 体系，但执行 groovy 脚本需要 Groovy 运行库。
+- 本仓库已在 `spring-core-beans/pom.xml` 以 test scope 引入 `org.apache.groovy:groovy`，因此这章的 Lab 在测试环境可直接运行。
 
 ## 3. 原理：Reader 把“输入”落到定义层主线的哪个位置？
 
@@ -147,9 +157,16 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansGroovyBeanDefinitionReaderLabTes
 
 建议断点（两条 reader 共通的收敛点）：
 
+1) `AbstractBeanDefinitionReader#loadBeanDefinitions`：reader 家族统一入口（输入源 → BeanDefinition）
+2) `DefaultListableBeanFactory#registerBeanDefinition`：定义入库统一入口（registry 层）
+
 Properties reader 的典型断点：
 
+- `PropertiesBeanDefinitionReader#loadBeanDefinitions`：properties 输入解析入口
+
 Groovy reader 的典型断点：
+
+- `GroovyBeanDefinitionReader#loadBeanDefinitions`：groovy script 解析入口
 
 ## F. 常见坑与边界
 

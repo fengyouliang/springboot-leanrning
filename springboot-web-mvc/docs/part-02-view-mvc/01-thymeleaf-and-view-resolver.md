@@ -53,7 +53,8 @@
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`BootWebMvcViewLabTest` / `BootWebMvcViewSpringBootLabTest`
-- 建议命令：`mvn -pl springboot-web-mvc test`（或在 IDE 直接运行上面的测试类）
+- 建议命令（方法级入口）：
+  - `mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcViewLabTest#rendersPingPage test`
 
 ### 复现/验证补充说明（来自原文迁移）
 
@@ -67,7 +68,53 @@
 
 ## F. 常见坑与边界
 
-## 常见坑
+### 1) 把 view name 当成 response body（最常见）
+
+症状：
+- 你访问 `/pages/ping`，看到的不是 HTML，而是一个纯字符串（例如 `pages/ping`）。
+
+根因：
+- `@Controller` 的方法返回 `String` 时，默认语义是 **view name**；
+- 但如果方法/类上出现 `@ResponseBody`（或你误用了 `@RestController`），返回值会被当作 **response body** 写回去。
+
+怎么验证：
+- 在 `DispatcherServlet#doDispatch` 后，跟进 `HandlerMethodReturnValueHandlerComposite#handleReturnValue`，看命中的是 view 相关 handler 还是 message converter 相关 handler。
+
+### 2) 模板找不到（TemplateInputException / 视图解析失败）
+
+症状：
+- 500，日志里出现 “template not found / cannot resolve template”。
+
+根因：
+- Thymeleaf 默认从 `classpath:/templates/` 下找模板；路径或文件名不一致会失败。
+
+怎么验证：
+- 断点：`org.thymeleaf.spring6.view.ThymeleafViewResolver#resolveViewName`
+- 观察：最终选中的 viewName、模板资源路径。
+
+### 3) 静态资源 404（CSS/JS 不生效）
+
+症状：
+- 页面能渲染，但 CSS/JS 404。
+
+根因：
+- Spring Boot 静态资源默认目录是 `classpath:/static/` 等约定目录；或者页面里引用路径写错（相对路径/前缀）。
+
+怎么验证：
+- 用浏览器 Network/或 MockMvc 对静态资源路径发起 GET；
+- 或断点：`ResourceHttpRequestHandler#handleRequest`（资源是否命中）。
+
+### 4) redirect/forward 语义没分清（PRG 链路会用到）
+
+症状：
+- 表单提交后刷新页面重复提交、URL 不变化、或者跳转逻辑不符合预期。
+
+根因：
+- `redirect:` 会返回 302 并让浏览器发起新请求；`forward:` 仍在服务端内部转发。
+
+怎么验证：
+- 在 controller 返回值处观察返回的 viewName 是否带 `redirect:` 前缀；
+- 对照下一章的 PRG 闭环章节与对应 Lab。
 
 ## G. 小结与下一章
 

@@ -38,6 +38,10 @@
 
 在 Spring 里，这三层能力对外的入口就是：
 
+- `AutowireCapableBeanFactory#autowireBean`：尽力完成依赖注入（populate）
+- `AutowireCapableBeanFactory#initializeBean`：触发初始化链路（Aware / BPP / init callbacks）
+- `AutowireCapableBeanFactory#destroyBean`：触发销毁回调（@PreDestroy 等）
+
 一个非常容易踩的点是：`initializeBean(...)` **可能返回一个“被 BPP 包装/替换后的对象”**（例如代理）。  
 因此在“容器外对象”场景里，如果你想要 AOP/代理语义，必须使用 `initializeBean` 的返回值，而不是继续拿原始对象用。
 
@@ -49,22 +53,25 @@
 
 入口测试：
 
----
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAutowireCapableBeanFactoryLabTest.java`
+  - `autowireThenInitialize_canApplyInjectionAndPostConstruct_forExternalObject()`（注入 vs @PostConstruct 的边界）
+  - `destroyBean_canTriggerPreDestroy_forExternalObject_afterInitialization()`（显式销毁回调）
 
 你只需要记住两个入口就能覆盖大多数排障（注入 vs 初始化）：
 
+- `AutowireCapableBeanFactory#autowireBean`：只做注入，不等价于“完整生命周期”
+- `AutowireCapableBeanFactory#initializeBean`：把对象送进初始化链路（BPP/@PostConstruct 等从这里开始）
+
 当你想对照“容器外对象”与“容器管理 bean”的差异时，再回到：
 
----
-
----
+- `AbstractAutowireCapableBeanFactory#populateBean`（容器内：注入发生点）
+- `AbstractAutowireCapableBeanFactory#initializeBean`（容器内：初始化串联点）
 
 这一章你应该能回答：
 
 - autowireBean / initializeBean / destroyBean 分别解决什么问题？
 - 为什么 `@PostConstruct` 不会在 autowireBean 之后自动发生？
-
-- SpEL 与 `@Value("#{...}")` 的表达式解析链路
+- 为什么说 `initializeBean` 的返回值才是“最终可用对象”？（BPP 可能返回 proxy/wrapper）
 
 ---
 
@@ -97,6 +104,11 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansAutowireCapableBeanFactoryLabTes
 
 当你要进一步解释“到底是谁在做注入/谁在触发 @PostConstruct”时，常用加深断点：
 
+1) `AutowiredAnnotationBeanPostProcessor#postProcessProperties`：`@Autowired/@Value` 等注入入口（证明注入不等价于 init）
+2) `AbstractAutowireCapableBeanFactory#initializeBean`：初始化串联点（Aware + init callbacks + BPP）
+3) `InitDestroyAnnotationBeanPostProcessor#postProcessBeforeInitialization`：`@PostConstruct` 触发点之一（也解释为什么必须 initialize）
+4) `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`：BPP 可能在这里返回 proxy（解释“final object != raw object”）
+
 ## F. 常见坑与边界
 
 - [25. 手工添加 BeanPostProcessor：顺序与 Ordered 的陷阱](../part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md)
@@ -124,7 +136,7 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansAutowireCapableBeanFactoryLabTes
 
 ## 5. 小结与下一章预告
 
-下一章我们补齐另一个真实项目高频点：
+下一章我们补齐另一个真实项目高频点：`@Value("#{...}")`（SpEL）—— 值注入链路如何拆成“解析 vs 计算 vs 转换”三段。
 
 <!-- AG-CONTRACT:END -->
 

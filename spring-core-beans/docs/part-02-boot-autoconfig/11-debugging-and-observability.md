@@ -20,11 +20,30 @@
 
 当你说“调 Spring 容器”，本质上是在回答 5 类问题。把它们固定下来，你就不会再靠日志/猜测“碰运气”。
 
+- **定义是否存在？（BeanDefinition）**：回答“到底有没有注册/谁注册的/定义元数据是什么（scope/lazy/dependsOn）”
+  - 最直接入口：`BeanFactory#getBeanDefinition(beanName)`
+  - 最小复现：`SpringCoreBeansContainerLabTest.beanDefinitionIsNotTheBeanInstance()` / `SpringCoreBeansBeanDefinitionOriginLabTest.beanDefinitionMetadata_canAnswerWhoRegisteredThisBean_andWhereItCameFrom()`
+- **最终创建配方是什么？（MergedBeanDefinition / RootBeanDefinition）**：回答“为什么最终看到的是 Root？parent 合并后有哪些属性/回调生效？”
+  - 最直接入口：`AbstractBeanFactory#getMergedLocalBeanDefinition(beanName)`
+  - 最小复现：`SpringCoreBeansMergedBeanDefinitionLabTest.mergedBeanDefinition_combinesParentAndChildMetadata_andTriggersMergedDefinitionPostProcessor()`
+- **候选到底有哪些？（candidates）**：回答“按类型到底找到了谁？为什么候选是这些？”
+  - 最直接入口：`DefaultListableBeanFactory#findAutowireCandidates(...)` / `DefaultListableBeanFactory#getBeanNamesForType(...)`
+  - 最小复现：`SpringCoreBeansAutowireCandidateSelectionLabTest`（以及本章第 13.2 的 playbook）
+- **最终注入的是谁？（最终依赖边）**：回答“为什么注入的是它？容器记录了哪条依赖边？”
+  - 最直接入口：`DefaultListableBeanFactory#doResolveDependency(...)`、`DefaultSingletonBeanRegistry#registerDependentBean(...)`
+  - 最小复现：`SpringCoreBeansBeanGraphDebugLabTest.dumpBeanGraph_candidatesAndRecordedDependencies_helpTroubleshootWhyItsInjected()`（看 candidates vs recorded dependencies）
+- **为什么拿到的是 proxy？（最终暴露对象）**：回答“是谁把对象换成了 proxy/wrapper？换壳发生在哪一段？”
+  - 最直接入口：`AbstractAutowireCapableBeanFactory#initializeBean(...)`、`AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization(...)`
+  - 最小复现：`SpringCoreBeansBeanCreationTraceLabTest.beanCreationTrace_recordsPhases_andExposesProxyReplacement()` / `SpringCoreBeansProxyingPhaseLabTest.beanPostProcessorCanReturnAProxyAsTheFinalExposedBean_andSelfInvocationStillBypassesTheProxy()`
+
 ## 1. 最简单也最有效：查容器里到底有哪些 Bean
 
 - `applicationContext.getBeansOfType(TextFormatter.class)`
 
 对应测试：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`
+  - `containerCanProvideAllFormatterBeansByType()`（你应该看到 `upperFormatter/lowerFormatter` 都在容器里）
 
 - 先确认“容器里有没有你以为的 bean”
 - 再确认“候选有几个”
@@ -43,7 +62,17 @@
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
+  - `beanDefinitionIsNotTheBeanInstance()`（你应该看到：definition 存在，但 instance 可能尚未创建；definition != instance）
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part02_boot_autoconfig/SpringCoreBeansBeanDefinitionOriginLabTest.java`
+  - `beanDefinitionMetadata_canAnswerWhoRegisteredThisBean_andWhereItCameFrom()`（你应该看到：factoryBeanName/factoryMethodName/source 等元数据能回答“谁注册的/从哪来的”）
+
 本仓库里你已经反复用过两类“最小容器”：
+
+- **纯容器（噪音最少，最适合看 DefaultListableBeanFactory 行为）**：`AnnotationConfigApplicationContext` / `GenericApplicationContext`
+  - 代表用例：`SpringCoreBeansContainerLabTest`、`SpringCoreBeansBootstrapInternalsLabTest`
+- **Boot 自动装配最小复现（最适合查条件报告/排序/backoff）**：`ApplicationContextRunner`
+  - 代表用例：`SpringCoreBeansAutoConfigurationLabTest`、`SpringCoreBeansConditionEvaluationReportLabTest`
 
 ## 4. 固定观察点：候选集合 vs 最终注入（以及容器记录的依赖边）
 
@@ -94,6 +123,12 @@
 
 如果这些输出与你的理解不一致，优先回到：
 
+- `BEANS:textFormatters=...` → 本章第 1 节（先确认“候选集合到底有哪些”）
+- `BEANS:formattingService.injectedFormatter=...` → [03](../part-01-ioc-container/03-dependency-injection-resolution.md)、[33](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)（候选收敛为何选中它）
+- `BEANS:prototype.*` → [04](../part-01-ioc-container/04-scope-and-prototype.md)（prototype 注入陷阱 vs ObjectProvider/@Lookup）
+- `BEANS:lifecycle.*` → [05](../part-01-ioc-container/05-lifecycle-and-callbacks.md)、[17](../part-03-container-internals/17-lifecycle-callback-order.md)（生命周期回调顺序与证据链）
+- `BEANS:beanDefinitionCount=...` / “看不到你以为注册的 bean” → 本章第 2 节（先确认定义层是否存在，再决定往注册/条件/顺序走）
+
 ## 10. 代理定位闭环：为什么它是 proxy？
 
 对 B 路线读者而言，“为什么是 proxy”最有效的做法不是背概念，而是用一套固定闭环把它查出来：
@@ -108,6 +143,11 @@
 最常见的“换壳点”在初始化链路末尾：
 
 推荐固定观察点（watch/evaluate）：
+
+- `beanName`（条件断点：只看你的目标 bean）
+- `bean`（原对象） vs `result`（BPP 链路返回的最终对象）：`result != bean` 就是“发生了替换”的铁证
+- `result.getClass()`：用于判定 JDK proxy / CGLIB（配合 10.1 的判定工具）
+- `beanFactory.getBeanPostProcessors()`：BPP 执行链（顺序就是“谁先包/谁后包”的常见原因）
 
 ### 10.3 最后锁定：到底是哪一个 `BeanPostProcessor` 把它换掉的？
 
@@ -322,6 +362,12 @@ mvn -pl spring-core-beans spring-boot:run
 
 推荐断点（按顺序）：
 
+1) `AnnotationConfigUtils#registerAnnotationConfigProcessors`：观察“注解能力基础设施”如何被注册为 BeanDefinition
+2) `PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors`：观察 `ConfigurationClassPostProcessor` 等定义层处理器何时运行
+3) `PostProcessorRegistrationDelegate#registerBeanPostProcessors`：观察 `AutowiredAnnotationBeanPostProcessor/CommonAnnotationBeanPostProcessor` 何时进入 BeanFactory
+4) `AutowiredAnnotationBeanPostProcessor#postProcessProperties`：观察 `@Autowired/@Value` 注入发生点
+5) `CommonAnnotationBeanPostProcessor#postProcessBeforeInitialization`：观察 `@PostConstruct` 的触发点
+
 复现入口：
 
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansInjectionAmbiguityLabTest.java`
@@ -333,12 +379,24 @@ mvn -pl spring-core-beans spring-boot:run
 
 推荐断点（闭环版）：
 
+1) `DefaultListableBeanFactory#doResolveDependency`：依赖解析总入口（先看 descriptor 想要的类型/是否 required）
+2) `DefaultListableBeanFactory#findAutowireCandidates`：候选收集（看 `Map<String, Object> matchingBeans`）
+3) `DefaultListableBeanFactory#determineAutowireCandidate`：候选收敛总入口（最终 winner 在这里确定）
+4) `DefaultListableBeanFactory#determinePrimaryCandidate`：`@Primary` 分支（为什么它赢）
+5) `QualifierAnnotationAutowireCandidateResolver#isAutowireCandidate`：`@Qualifier` 的过滤与匹配（为什么其它候选被剔除）
+
 复现入口：
 
 - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
   - `singletonLifecycleCallbacks_happenInAStableOrderAroundInitialization()`
 
 推荐断点（闭环版）：
+
+1) `AbstractAutowireCapableBeanFactory#doCreateBean`：bean 创建主线（哪些阶段会触发回调/后处理）
+2) `AbstractAutowireCapableBeanFactory#initializeBean`：initialize 串联点（Aware + init callbacks）
+3) `AbstractAutowireCapableBeanFactory#invokeAwareMethods`：Aware 发生点（证明它早于 init callbacks）
+4) `CommonAnnotationBeanPostProcessor#postProcessBeforeInitialization`：`@PostConstruct` 的触发点
+5) `AbstractAutowireCapableBeanFactory#invokeInitMethods`：`afterPropertiesSet` / initMethod 的触发点
 
 复现入口：
 
@@ -348,6 +406,11 @@ mvn -pl spring-core-beans spring-boot:run
   - `beanPostProcessorCanReturnAProxyAsTheFinalExposedBean_andSelfInvocationStillBypassesTheProxy()`
 
 推荐断点（闭环版）：
+
+1) `AbstractAutowireCapableBeanFactory#initializeBean`：从这里进入“最终暴露对象”的产生链路
+2) `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`：在循环里观察 `bean` → `result` 的第一次替换
+3) 你自己的 `BeanPostProcessor#postProcessAfterInitialization`（如果跑 `SpringCoreBeansProxyingPhaseLabTest`，就在它的 post-processor 上加断点）
+4) （可选）`AbstractAutoProxyCreator#postProcessAfterInitialization`：如果你将来定位 AOP/Tx 代理，常从这里命中
 
 ## 面试常问（排障方法论：先分层再下断点）
 

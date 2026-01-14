@@ -19,6 +19,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 class SpringCoreBeansContainerLabTest {
 
@@ -62,6 +63,16 @@ class SpringCoreBeansContainerLabTest {
     @Test
     void configurationProxyBeanMethodsFalseAllowsDirectMethodCallToCreateExtraInstance() {
         try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(NonProxiedConfig.class)) {
+            ConfigA aFromContainer = context.getBean(ConfigA.class);
+            ConfigB b = context.getBean(ConfigB.class);
+
+            assertThat(b.a()).isNotSameAs(aFromContainer);
+        }
+    }
+
+    @Test
+    void liteConfiguration_componentWithBeanMethods_doesNotEnhance_beanMethodInterCallsCreateExtraInstance() {
+        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(LiteConfig.class)) {
             ConfigA aFromContainer = context.getBean(ConfigA.class);
             ConfigB b = context.getBean(ConfigB.class);
 
@@ -176,6 +187,19 @@ class SpringCoreBeansContainerLabTest {
 
     @Configuration(proxyBeanMethods = false)
     static class NonProxiedConfig {
+        @Bean
+        ConfigA configA() {
+            return new ConfigA();
+        }
+
+        @Bean
+        ConfigB configB() {
+            return new ConfigB(configA());
+        }
+    }
+
+    @Component
+    static class LiteConfig {
         @Bean
         ConfigA configA() {
             return new ConfigA();

@@ -411,6 +411,16 @@ def _render_gap_md(
 
     lines: list[str] = [header]
 
+    lines.append("## 可运行入口（建议先跑再看 Gap）\n\n")
+    lines.append(
+        "本章是“缺口清单”，推荐先跑一个能让你进入 Spring Beans 主线的 Lab，再回来按需查 Gap：\n\n"
+    )
+    lines.append("- `SpringCoreBeansContainerLabTest`\n")
+    lines.append("- `SpringCoreBeansBeanCreationTraceLabTest`\n")
+    lines.append("- `SpringCoreBeansRegistryPostProcessorLabTest`\n")
+    lines.append("- `SpringCoreBeansTypeConversionLabTest`\n")
+    lines.append("\n---\n")
+
     lines.append("## 概览\n\n")
     lines.append(f"- 总 public 顶层类型（按 sources.jar 统计）：**{len(public_types)}**\n")
     lines.append(f"- 未映射（unmapped）：**{len(unmapped)}**\n")
@@ -458,6 +468,39 @@ def _write_text(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
+_PITFALL_PLACEHOLDER = "- （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）"
+
+
+def _patch_generated_appendix(markdown: str, *, kind: str) -> str:
+    """
+    对生成的 Markdown 做轻量修补，使 Appendix 真正“可用”。
+
+    说明：Appendix 95/96 声明为生成文件；这里通过生成器侧修补，避免出现“待补齐/空标题”等占位内容，
+    同时保持“生成器为唯一事实来源（SSOT）”。
+    """
+
+    pitfalls = """## 坑点与排障（把索引变成“可用工具”）
+
+- **索引不是学习路线**：Index/GAP 的价值是“定位”，不是“背诵清单”。推荐先按 `docs/README.md` 的 Start Here 跑最小 Lab，再回索引做反查定位。
+- **BeanFactory vs ApplicationContext 差异**：很多“注解不生效/生命周期不触发”的现象，根因是没有安装 `AnnotationConfigProcessors`（仅 `BeanFactory` 不会自动做这件事）。
+- **FactoryBean 的双重身份**：`getBean("foo")` 拿到的是“产品对象”，`getBean("&foo")` 才是 `FactoryBean` 本身；排查类型不匹配/注入歧义时先确认你拿到的到底是谁。
+- **代理导致的类型错觉**：JDK Proxy 只实现接口，无法赋值给具体类；当 BPP 提前暴露早期引用/创建代理时，“按具体类注入”可能失败，优先按接口注入或切换到 class-based proxy。
+- **版本差异与定位方式**：不要依赖行号；用“入口测试方法 + 关键接口名 + `rg` 关键词”定位更稳（Spring 小版本内部实现经常移动）。
+
+"""
+
+    if _PITFALL_PLACEHOLDER in markdown:
+        markdown = markdown.replace(_PITFALL_PLACEHOLDER, pitfalls.rstrip())
+        return markdown
+
+    # If the file doesn't contain the placeholder, still ensure there is a pitfalls section.
+    if "## 坑点与排障" not in markdown:
+        markdown = markdown.rstrip() + "\n\n" + pitfalls.rstrip() + "\n"
+        return markdown
+
+    return markdown
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         description="生成 spring-beans Public API 索引与 gap 清单（写入 spring-core-beans/docs/appendix）。"
@@ -491,6 +534,8 @@ def main(argv: list[str]) -> int:
     index_md = _render_index_md(public_types=public_types, version=args.version, sources_jar=sources_jar, out_path=out_index)
     gap_md = _render_gap_md(public_types=public_types, version=args.version, sources_jar=sources_jar, out_index=out_index)
 
+    index_md = _patch_generated_appendix(index_md, kind="index")
+    gap_md = _patch_generated_appendix(gap_md, kind="gap")
     _write_text(out_index, index_md)
     _write_text(out_gap, gap_md)
 

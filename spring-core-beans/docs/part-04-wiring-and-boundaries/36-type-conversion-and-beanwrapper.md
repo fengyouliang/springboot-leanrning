@@ -222,6 +222,13 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansTypeConversionLabTest test
 
 ## 源码锚点（建议从这里下断点）
 
+- `AbstractAutowireCapableBeanFactory#populateBean` / `applyPropertyValues`：属性填充阶段入口（发生类型转换）
+- `BeanWrapperImpl#setPropertyValue`：写属性入口（会触发 convertIfNecessary）
+- `AbstractNestablePropertyAccessor#convertIfNecessary`：属性访问层的通用转换入口
+- `TypeConverterDelegate#convertIfNecessary`：PropertyEditor/ConversionService/TypeDescriptor 的组合分支
+- `GenericConversionService#convert`：Converter/Formatter 体系的核心入口
+- `PropertyEditorRegistrySupport#findCustomEditor`：PropertyEditor 命中与优先级（与 ConversionService 边界对照）
+
 ## F. 常见坑与边界
 
 ## 5. 常见坑与边界

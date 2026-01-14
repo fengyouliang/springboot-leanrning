@@ -30,6 +30,9 @@
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
+  - `beanFactoryPostProcessorCanModifyBeanDefinitionBeforeInstantiation()`（定义层：先改配方，再实例化）
+
 - 先注册 `ExampleBean` 的定义
 - BFPP 在实例化前把 `value` 属性写进定义里
 - 最终创建的实例读到了被修改的值
@@ -55,6 +58,9 @@
 - 用代理包装 bean（AOP 的基础）
 
 对应测试：
+
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
+  - `beanPostProcessorCanModifyBeanInstanceAfterInitialization()`（实例层：初始化后可改对象/甚至替换对象）
 
 - 工厂方法先创建一个 `ExampleBean`
 - BPP 在初始化后把它的 `value` 改成新值

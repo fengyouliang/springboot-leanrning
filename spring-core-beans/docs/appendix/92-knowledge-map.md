@@ -24,39 +24,105 @@
 
 ### 2.1 注入失败（NoSuch / NoUnique / UnsatisfiedDependency）
 
+- 主入口章节：`03`（依赖解析主线） / `33`（候选收敛边界） / `11`（异常分型与断点入口）
+- 主入口 Lab（方法级）：`SpringCoreBeansInjectionAmbiguityLabTest#singleInjectionFailsFast_whenMultipleCandidatesExist_andNoPrimaryOrQualifierIsPresent`
+- 推荐断点：`DefaultListableBeanFactory#doResolveDependency`、`DefaultListableBeanFactory#findAutowireCandidates`
+
 ### 2.2 prototype 注入 singleton 后“像单例”
+
+- 主入口章节：`04`（scope/prototype 注入陷阱与解法）
+- 主入口 Lab（方法级）：`SpringCoreBeansLabTest#demonstratesPrototypeScopeBehavior`
+- 推荐断点：`AbstractBeanFactory#doGetBean`（对照 direct vs provider 的调用路径差异）
 
 ### 2.3 `@Value` 不严格/值变成 `"${...}"`
 
+- 主入口章节：`34`（embedded value resolver：non-strict vs strict）
+- 主入口 Lab（方法级）：`SpringCoreBeansValuePlaceholderResolutionLabTest#defaultEmbeddedValueResolver_resolvesExistingProperty_butLeavesMissingPlaceholderUnresolved`
+- 推荐断点：`AbstractBeanFactory#resolveEmbeddedValue`、`PropertySourcesPlaceholderConfigurer#postProcessBeanFactory`
+
 ### 2.4 代理导致行为“不符合直觉”（self-invocation、最终对象不是原始实例）
+
+- 主入口章节：`31`（BPP 替换/包装发生点） / `11`（如何锁定是哪一个 BPP 换壳）
+- 主入口 Lab（方法级）：`SpringCoreBeansProxyingPhaseLabTest#beanPostProcessorCanReturnAProxyAsTheFinalExposedBean_andSelfInvocationStillBypassesTheProxy`
+- 推荐断点：`AbstractAutowireCapableBeanFactory#initializeBean`、`AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`
 
 ### 2.5 循环依赖：为什么 setter 能救、constructor 无解？
 
+- 主入口章节：`09`（循环依赖概览） / `16`（early reference 的关键分支）
+- 主入口 Lab（方法级）：`SpringCoreBeansContainerLabTest#circularDependencyWithSettersMaySucceedViaEarlySingletonExposure`
+- 推荐断点：`DefaultSingletonBeanRegistry#getSingleton`、`DefaultSingletonBeanRegistry#addSingletonFactory`
+
 ### 2.6 “顺序”导致结果不同（post-processors、链路、排序误用）
+
+- 主入口章节：`14`（PriorityOrdered/Ordered 的分段与排序）
+- 主入口 Lab（方法级）：`SpringCoreBeansPostProcessorOrderingLabTest#beanPostProcessors_areAppliedInPriorityOrderedThenOrderedThenUnorderedOrder`
+- 推荐断点：`PostProcessorRegistrationDelegate#registerBeanPostProcessors`（排序与注册链路）
 
 ### 2.7 泛型匹配“看起来有，但按泛型找不到”
 
+- 主入口章节：`37`（ResolvableType 泛型匹配边界）
+- 主入口 Lab（方法级）：`SpringCoreBeansGenericTypeMatchingPitfallsLabTest#genericTypeMatching_canFailWhenCandidateLosesGenericInformation_likeJdkProxySingleton`
+- 推荐断点：`ResolvableType#forClass`（理解泛型信息从哪来/在哪丢）
+
 ### 2.8 类型转换：字符串为何能注入到 int/自定义类型？
+
+- 主入口章节：`36`（BeanWrapper/ConversionService）
+- 主入口 Lab（方法级）：`SpringCoreBeansTypeConversionLabTest#stringPropertyValue_canBeConvertedToIntDuringPopulateBean`
+- 推荐断点：`BeanWrapperImpl#setPropertyValue`、`TypeConverter#convertIfNecessary`
 
 ### 2.9 AOT/Native：RuntimeHints（构建期契约）
 
+- 主入口章节：`41`（RuntimeHints 入门）
+- 主入口 Lab（方法级）：`SpringCoreBeansAotRuntimeHintsLabTest#runtimeHintsRegistrar_canRegisterReflectionHints_forAType`
+- 推荐断点：`RuntimeHintsRegistrar#registerHints`
+
 ### 2.10 定义层失败：BeanDefinitionStoreException（XML/资源/解析）
+
+- 主入口章节：`42`（XML → BeanDefinitionReader） / `11`（异常分型与断点入口）
+- 主入口 Lab（方法级）：`SpringCoreBeansExceptionNavigationLabTest#beanDefinitionStoreException_invalidXml`
+- 推荐断点：`XmlBeanDefinitionReader#loadBeanDefinitions`、`DefaultListableBeanFactory#registerBeanDefinition`
 
 ### 2.12 SpEL：`@Value("#{...}")` 的表达式解析链路
 
+- 主入口章节：`44`（SpEL 与值注入链路）
+- 主入口 Lab（方法级）：`SpringCoreBeansSpelValueLabTest#valueWithSpel_canReferenceBeanAndResultIsConvertedToTargetType`
+- 推荐断点：`StandardBeanExpressionResolver#evaluate`、`AbstractBeanFactory#resolveEmbeddedValue`
+
 ### 2.13 自定义 Qualifier（meta-annotation）与候选收敛
+
+- 主入口章节：`45`（自定义 Qualifier） / `03`（DI 主线）
+- 主入口 Lab（方法级）：`SpringCoreBeansCustomQualifierLabTest#customQualifierMetaAnnotation_canNarrowDownCandidates_forSingleInjection`
+- 推荐断点：`QualifierAnnotationAutowireCandidateResolver#isAutowireCandidate`
 
 ### 2.14 XML 自定义 namespace：`<tx:...>` 这类元素怎么注册 BeanDefinition？
 
+- 主入口章节：`46`（XML namespace 扩展）
+- 主入口 Lab（方法级）：`SpringCoreBeansXmlNamespaceExtensionLabTest#customNamespaceHandler_isDiscoveredViaSpringHandlers_andCanRegisterBeanDefinitions`
+- 推荐断点：`NamespaceHandlerResolver#resolve`（handler 发现）、`BeanDefinitionParserDelegate`（element parse）
+
 ### 2.15 product vs factory：为什么 `getBean("x")` 不是你以为的那个对象？
 
+- 主入口章节：`08`（FactoryBean 基础语义） / `49`（内置 FactoryBean 图鉴）
+- 主入口 Lab（方法级）：`SpringCoreBeansBuiltInFactoryBeansLabTest#builtInFactoryBeans_methodInvoking_and_serviceLocator_and_factoryDereference`
+- 推荐断点：`AbstractBeanFactory#getObjectForBeanInstance`（& 前缀分支）
+
 ### 2.16 值解析与类型转换：引用/集合/字符串到底在哪一步“变成对象”？
+
+- 主入口章节：`50`（BeanDefinitionValueResolver/PropertyEditor） / `36`（类型转换）
+- 主入口 Lab（方法级）：`SpringCoreBeansBeanDefinitionValueResolutionLabTest#beanDefinitionValueResolver_canResolve_typedString_reference_and_managedCollections`
+- 推荐断点：`BeanDefinitionValueResolver#resolveValueIfNecessary`
 
 ---
 
 ## 3) 一页纸：核心概念到章节的映射
 
 ---
+
+- **定义层（BeanDefinition）**：`01`（心智模型）→ `02`（注册）→ `35`（merged）
+- **实例层（create/populate/initialize）**：`03`（依赖解析）→ `05`/`17`（生命周期）→ `31`（代理/替换）
+- **扩展点与顺序**：`06`（BFPP/BPP）→ `13`（BDRPP）→ `14`（排序）
+- **排障入口**：`11`（从异常到断点入口）→ `94`（生产排障清单）→ `99`（自测题）
+- **真实世界补齐（AOT/XML/SpEL/Reader/FactoryBean）**：`40–50`
 
 ## D. 源码与断点
 

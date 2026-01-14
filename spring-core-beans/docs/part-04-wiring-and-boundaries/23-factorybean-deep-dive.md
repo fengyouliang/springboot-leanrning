@@ -28,6 +28,11 @@
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
+  - `factoryBeanByNameReturnsProductAndAmpersandReturnsFactory()`（最小闭环：`"name"` vs `"&name"`）
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansFactoryBeanDeepDiveLabTest.java`
+  - `factoryBeanProductParticipatesInTypeMatching_andIsRetrievedByProductType()`（同名：默认暴露 product）
+
 ## 2. product 也参与“按类型查找”
 
 这件事之所以容易让人困惑，是因为你脑子里常有两个“bean”：
@@ -71,6 +76,10 @@
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansFactoryBeanDeepDiveLabTest.java`
+  - `singletonFactoryBeanProduct_isCached_byTheContainer()`（证据：多次 getBean(productType) 返回 same reference）
+  - `nonSingletonFactoryBeanProduct_isNotCached_byTheContainer()`（证据：每次 getBean(productType) 都会新建 product）
+
 你应该观察到：
 
 - 当 `isSingleton() == true`：多次 `getBean(Value.class)` 返回同一个 product 实例
@@ -89,6 +98,22 @@
 
 入口：
 
+最小复现入口（方法级）：
+
+- `SpringCoreBeansContainerLabTest.factoryBeanByNameReturnsProductAndAmpersandReturnsFactory()`
+- `SpringCoreBeansFactoryBeanDeepDiveLabTest.factoryBeanProductParticipatesInTypeMatching_andIsRetrievedByProductType()`
+- `SpringCoreBeansFactoryBeanDeepDiveLabTest.singletonFactoryBeanProduct_isCached_byTheContainer()`
+- `SpringCoreBeansFactoryBeanDeepDiveLabTest.nonSingletonFactoryBeanProduct_isNotCached_byTheContainer()`
+
+推荐断点（闭环版）：
+
+1) `AbstractBeanFactory#doGetBean`：`getBean(...)` 总入口
+2) `AbstractBeanFactory#getObjectForBeanInstance`：处理 product vs factory 的核心分流（含 `&` 前缀）
+3) `BeanFactoryUtils#isFactoryDereference`：判断是否 `&name`
+4) `FactoryBeanRegistrySupport#getObjectFromFactoryBean`：调用 `getObject()` 并决定是否缓存 product
+5) `FactoryBeanRegistrySupport#getCachedObjectForFactoryBean`：缓存命中点（对照 `isSingleton()` true/false）
+6) （类型匹配链路）`AbstractBeanFactory#isTypeMatch` / `DefaultListableBeanFactory#getBeanNamesForType`
+
 ## 排障分流：这是定义层问题还是实例层问题？
 
 - “我 `getBean("name")` 拿到的不是工厂而是产品” → **实例层（FactoryBean 语义）**：这是 Spring 的特殊规则；要拿工厂请用 `&name`（本章第 1 节）
@@ -97,6 +122,13 @@
 - “以为 factory 的 scope 就等于 product 的 scope” → **实例层概念澄清**：`isSingleton()` 控制的是 product 缓存，不是 factory 自己的 scope（本章第 3 节）
 
 ## 5. 一句话自检
+
+- 常问：`&beanName` 到底拿到什么？为什么？
+  - 答题要点：默认 `getBean("name")` 返回 product；`&name` 是 FactoryBean dereference，返回 factory 自身；分流发生在 `getObjectForBeanInstance`。
+- 常见追问：`FactoryBean#isSingleton()` 控制的是“什么是否单例”？
+  - 答题要点：控制的是 **product 是否缓存**（同一个 product 实例是否复用），不是 factory 自己是否单例。
+- 常见追问：`getObjectType()` 为什么重要？它会影响什么？
+  - 答题要点：影响按类型查找/条件装配/候选收集；返回 `null` 或不稳定会导致“按类型发现失效/偶现缺 bean”等问题（见 [29](29-factorybean-edge-cases.md)）。
 
 ## D. 源码与断点
 
@@ -132,6 +164,12 @@
 - `SpringCoreBeansFactoryBeanDeepDiveLabTest.nonSingletonFactoryBeanProduct_isNotCached_byTheContainer()`
 
 ## 源码锚点（建议从这里下断点）
+
+- `AbstractBeanFactory#doGetBean`：`getBean()` 总入口（会走到 factory/product 分流）
+- `AbstractBeanFactory#getObjectForBeanInstance`：`&name` 分流与 “对外暴露 product” 的规则
+- `FactoryBeanRegistrySupport#getObjectFromFactoryBean`：从 FactoryBean 取 product + 处理缓存（singletonFactoryBeanObjectCache）
+- `AbstractBeanFactory#isTypeMatch`：type matching 关键路径（高度依赖 `getObjectType/isSingleton`）
+- `DefaultListableBeanFactory#getBeanNamesForType`：type-based 发现入口（对照 `allowEagerInit=false` 的边界）
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

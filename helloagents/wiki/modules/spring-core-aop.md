@@ -8,7 +8,15 @@
 
 - **Responsibility:** 提供 AOP 的最小可运行示例与测试实验，帮助理解代理行为与切面生效边界。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-09
+- **Last Updated:** 2026-01-14
+
+## Start Here（路线图 / 第一个可运行入口）
+
+- 路线图：`helloagents/wiki/learning-path.md`
+- Docs Index：`spring-core-aop/docs/README.md`
+- 第一个可运行入口（3 分钟开跑）：
+  - `mvn -q -pl spring-core-aop -Dtest=SpringCoreAopLabTest#adviceIsAppliedToTracedMethod test`
+  - 对应测试类：`spring-core-aop/src/test/java/com/learning/springboot/springcoreaop/part01_proxy_fundamentals/SpringCoreAopLabTest.java`
 
 ## Specifications
 

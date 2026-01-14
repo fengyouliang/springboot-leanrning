@@ -73,6 +73,14 @@
 
 适用场景：
 
+- 你希望“每次方法调用都获取一个新的 prototype”，但不想在业务代码里显式依赖 `ObjectProvider`
+- 你希望调用点保持简单（`consumer.next()`），由容器在运行时完成“按需取 bean”
+
+常见边界（必知）：
+
+- 依赖运行时子类化：final 类/方法无法被覆盖（因此无法被 `@Lookup` 替换）
+- 调试成本更高：调用栈会进入容器与增强逻辑，建议配合本章的断点建议与对照用例
+
 ## 6. 解决方案 3：scoped proxy（谨慎使用）
 
 你可以把某个 scope 的 bean 包装成代理，然后把代理注入到 singleton：
@@ -143,6 +151,10 @@
   - `mvn -pl spring-core-beans -Dtest=SpringCoreBeansLabTest test`
 
 运行测试你会看到：
+
+- `directPrototypeConsumer.currentId()` 连续两次返回 **相同** id（因为 prototype 只在注入时向容器要过一次）
+- `providerPrototypeConsumer.newId()` 连续两次返回 **不同** id（因为 provider 在每次调用时向容器要一个新的 prototype）
+- prototype 销毁语义：默认 `context.close()` 不会触发 prototype 的 `@PreDestroy`（需要显式 destroy）
 
 对应验证：
 

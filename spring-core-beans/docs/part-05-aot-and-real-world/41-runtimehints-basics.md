@@ -25,11 +25,14 @@
 
 你可以把 RuntimeHints 理解为：
 
-Spring 的 hints 典型包括：
+**Spring 在 AOT/Native 场景里“提前声明你需要哪些运行期能力”的契约数据结构。**
+
+Spring 的 hints 典型包括（先记住分类，不需要背 API）：
 
 - Reflection hints：哪些类/构造器/方法/字段需要可反射访问
 - Proxy hints：哪些接口/类需要生成代理
 - Resource hints：哪些 classpath 资源需要被打包
+- （常见延伸）Serialization hints / JNI hints 等：取决于你启用的子系统与运行时需求
 
 ---
 
@@ -39,7 +42,11 @@ Spring 的 hints 典型包括：
 
 - `RuntimeHintsRegistrar`
 
-它表达了一个非常工程化的契约：
+它表达了一个非常工程化、可审计的契约：
+
+> “我负责把某个模块/某个能力运行所需的 hints 注册进去。”
+
+你不需要先会 native image，也能用 JVM 单测把这个契约跑通：
 
 ---
 
@@ -48,20 +55,19 @@ Spring 的 hints 典型包括：
 
 入口测试：
 
----
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAotRuntimeHintsLabTest.java`
+  - `runtimeHints_areEmptyByDefault_untilExplicitlyRegistered()`（对照：默认不命中）
+  - `runtimeHintsRegistrar_canRegisterReflectionHints_forAType()`（注册后命中）
 
 - `RuntimeHintsRegistrar#registerHints`：观察你往 `RuntimeHints` 里写了什么
-
----
 
 ---
 
 你应该能回答：
 
 - 为什么 RuntimeHints 是 AOT/Native 的核心契约？
-- 你如何用一个 JVM 单测证明 hints “有/没有”？
-
-- XML → BeanDefinitionReader → BeanDefinition 元信息/错误分型
+- 你如何用一个 JVM 单测证明 hints “有/没有”（并能定位是“没注册”还是“注册粒度不对”）？
+- 当 hints “注册了但仍不生效”时，你会先看哪一个入口方法（提示：`RuntimeHintsRegistrar#registerHints`）
 
 ---
 
@@ -112,9 +118,25 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansAotRuntimeHintsLabTest test
 
 ## 5. 常见误区（面试/排障高频）
 
+1) **误区：RuntimeHints 是“运行时开关/日志开关”**
+   - 更准确：它是 **构建期契约输入**，决定 native image 里哪些元信息会被保留/生成。
+2) **误区：hints 失效只能靠猜**
+   - 本模块的 `SpringCoreBeansAotRuntimeHintsLabTest` 已经把“默认不命中 → 注册后命中”做成对照断言。
+   - 排查顺序建议：先确认 `RuntimeHintsRegistrar#registerHints` 是否执行 → 再确认注册的 `TypeReference/MemberCategory` 是否覆盖你的真实访问方式。
+3) **误区：只要注册一个 Type 就够**
+   - 真正关键是“访问粒度”：构造器/方法/字段的 MemberCategory 是否足够。
+   - 例如你只注册了“public constructors”，但运行期实际上需要反射调用方法/访问字段时，仍然会失败。
+
 ## G. 小结与下一章
 
 ## 6. 小结
+
+你已经跑通了最小闭环（学习 AOT/Native 的正确起点）：
+
+- RuntimeHints 默认为空（不注册就不命中）
+- 通过 RuntimeHintsRegistrar 注册后，hints 可被 JVM 单测断言验证
+
+下一章我们切到“定义层输入”的真实世界：XML → BeanDefinitionReader → BeanDefinition（以及失败时的异常分型）。
 
 <!-- AG-CONTRACT:END -->
 

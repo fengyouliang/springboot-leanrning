@@ -23,6 +23,9 @@
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansContextHierarchyLabTest.java`
+  - `childContext_canSeeParentBeans_butParentCannotSeeChildBeans()`（同一个测试同时覆盖：可见性 + name-based override）
+
 你应该观察到：
 
 - child 可以 `getBean(ParentOnlyBean.class)`（它其实来自 parent）
@@ -61,6 +64,13 @@
 
 ## 4. 一句话自检
 
+- 常问：parent/child 的可见性规则是什么？
+  - 答题要点：child 能向上查 parent；parent 完全不知道 child。
+- 常见追问：override 是“按类型”还是“按名字”？它会影响 parent 吗？
+  - 答题要点：override 是 name-based（child 的同名 beanName 覆盖 child 自己的查找结果）；不会反向影响 parent。
+- 常见追问：为什么 parent/child 都有同类型 bean 时，按类型注入更容易出现歧义？
+  - 答题要点：按类型会把 ancestors 一起纳入候选集（常见用 `BeanFactoryUtils#beanOfTypeIncludingAncestors`），需要 `@Qualifier/@Primary` 收敛。
+
 ## D. 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
@@ -90,6 +100,11 @@
 - `SpringCoreBeansContextHierarchyLabTest.childContext_canSeeParentBeans_butParentCannotSeeChildBeans()`
 
 ## 源码锚点（建议从这里下断点）
+
+- `AbstractApplicationContext#getParent`：父子上下文关系（Context 层）
+- `AbstractBeanFactory#doGetBean`：本地找不到时的 parent fallback（BeanFactory 层）
+- `AbstractBeanFactory#containsBean` / `containsLocalBean`：排障“到底在哪个 context 里”的常用入口
+- `DefaultListableBeanFactory#setParentBeanFactory`：父工厂挂接点（Context refresh 时建立）
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

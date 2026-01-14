@@ -20,4 +20,10 @@ public class UserController {
         long id = idSequence.incrementAndGet();
         return new UserResponse(id, request.getName(), request.getEmail());
     }
+
+    @PostMapping("/no-valid")
+    public UserResponse createUserWithoutValid(@RequestBody CreateUserRequest request) {
+        long id = idSequence.incrementAndGet();
+        return new UserResponse(id, request.getName(), request.getEmail());
+    }
 }

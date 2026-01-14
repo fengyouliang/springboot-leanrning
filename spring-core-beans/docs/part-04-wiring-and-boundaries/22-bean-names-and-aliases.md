@@ -22,6 +22,9 @@
 
 对应测试：
 
+- `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanNameAliasLabTest.java`
+  - `aliasResolvesToSameSingletonInstanceAsCanonicalName()`（证据：两个名字拿到 same reference）
+
 1) 注册 `primaryName`
 2) `registerAlias("primaryName", "aliasName")`
 
@@ -57,6 +60,13 @@
 
 ## 4. 一句话自检
 
+- 常问：alias 是“复制一个 bean”吗？它到底是什么？
+  - 答题要点：alias 只是 name → canonicalName 的映射，不会创建第二个 BeanDefinition/第二个实例。
+- 常见追问：容器查找时 alias 在哪一步被解析成 canonicalName？
+  - 答题要点：`canonicalName` / `transformedBeanName` 会把 alias（以及 `&` 等前缀）规范化到最终名称，再进入 `doGetBean`。
+- 常见追问：alias 能解决“按类型注入歧义”吗？
+  - 答题要点：不能；alias 不改变类型候选集，只是名字入口；歧义仍需 `@Qualifier/@Primary` 收敛。
+
 ## D. 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
@@ -88,6 +98,12 @@
 实验里我们：
 
 ## 源码锚点（建议从这里下断点）
+
+- `BeanDefinitionReaderUtils#generateBeanName`：生成 beanName 的默认规则（注册阶段）
+- `DefaultListableBeanFactory#registerBeanDefinition`：注册同名定义的入口（也是覆盖/冲突的入口）
+- `SimpleAliasRegistry#registerAlias`：alias 注册入口
+- `SimpleAliasRegistry#canonicalName`：alias 归一化（alias → 最终 beanName）
+- `DefaultListableBeanFactory#transformedBeanName`：`&name` 等前缀规则归一化（FactoryBean 相关）
 
 ## 断点闭环（用本仓库 Lab/Test 跑一遍）
 

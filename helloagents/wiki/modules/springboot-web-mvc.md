@@ -11,7 +11,16 @@
 
 - **Responsibility:** 提供可运行 Web 示例与测试（MockMvc 等），帮助理解请求处理链路。
 - **Status:** 🚧In Development
-- **Last Updated:** 2026-01-09
+- **Last Updated:** 2026-01-14
+
+## Start Here（路线图 / 断点地图 / 第一个可运行入口）
+
+- 路线图：`helloagents/wiki/learning-path.md`
+- Docs Start Here：`springboot-web-mvc/docs/README.md`
+- 断点地图（Part 01 Debugger Pack）：`springboot-web-mvc/docs/part-00-guide/02-breakpoint-map.md`
+- 第一个可运行入口（3 分钟开跑）：
+  - `mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcLabTest#pingEndpointReturnsPong test`
+  - 对应测试类：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcLabTest.java`
 
 ## Specifications
 

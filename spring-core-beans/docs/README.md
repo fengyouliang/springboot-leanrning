@@ -14,6 +14,25 @@
 
 ---
 
+## Start Here（3 分钟开跑 / 30 分钟闭环）
+
+如果你是第一次打开本模块，推荐按下面顺序：
+
+1) **30 分钟快启（强烈推荐）**：先跑 3 个最小实验入口，建立“断点与证据”的肌肉记忆  
+   - [01. 30 分钟快速闭环：先快后深（3 个最小实验入口）](part-00-guide/01-quickstart-30min.md)
+2) **深挖路线（按章节读）**：再回到 Part 01 从 01→09 顺读  
+   - [00. 深挖指南：把“Bean 三层模型”落到源码与断点](part-00-guide/00-deep-dive-guide.md)
+3) **断点地图（可复用清单）**：把高频断点与观察点收敛到一页纸  
+   - [02. 断点地图：容器主线可复用断点/观察点清单](part-00-guide/02-breakpoint-map.md)
+
+### 30 分钟快启实验对照表（实验 → 你要看清的点 → 推荐断点）
+
+| 实验 | 你要看清的点（知识点） | 入口测试（方法级） | 推荐断点（最短闭环） |
+| --- | --- | --- | --- |
+| 1 | 多候选如何收敛到一个（`@Qualifier`） | `mvn -pl spring-core-beans -Dtest=SpringCoreBeansLabTest#usesQualifierToResolveMultipleBeans test` | `doResolveDependency` → `findAutowireCandidates` → `determineAutowireCandidate` |
+| 2 | prototype 注入陷阱（direct vs provider） | `mvn -pl spring-core-beans -Dtest=SpringCoreBeansLabTest#demonstratesPrototypeScopeBehavior test` | `doResolveDependency` / `doGetBean`（对照两条调用路径） |
+| 3 | 为什么变成 proxy（BPP 替换发生点） | `mvn -pl spring-core-beans -Dtest=SpringCoreBeansBeanCreationTraceLabTest#beanCreationTrace_recordsPhases_andExposesProxyReplacement test` | `initializeBean` → `applyBeanPostProcessorsAfterInitialization` |
+
 ## 如何阅读（推荐主线）
 
 如果你只想“像读书一样一路读下去”，按下面顺序即可：
@@ -117,6 +136,7 @@
 ### Part 00：导读与深挖路线
 
 - [00. 深挖指南：把“Bean 三层模型”落到源码与断点](part-00-guide/00-deep-dive-guide.md)
+- [01. 30 分钟快速闭环：先快后深（3 个最小实验入口）](part-00-guide/01-quickstart-30min.md)
 
 ### Part 01：IoC Container 主线（从概念到可定位问题）
 

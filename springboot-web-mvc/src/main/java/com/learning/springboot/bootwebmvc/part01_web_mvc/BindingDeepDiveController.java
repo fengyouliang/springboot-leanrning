@@ -7,9 +7,10 @@ import java.util.Map;
 import jakarta.validation.Valid;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@Validated
 @RequestMapping("/api/advanced/binding")
 public class BindingDeepDiveController {
 
@@ -38,6 +38,28 @@ public class BindingDeepDiveController {
                 "name", form.getName(),
                 "email", form.getEmail()
         );
+    }
+
+    @PostMapping(
+            value = "/form-manual",
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> submitFormManual(@Valid BindingForm form, BindingResult bindingResult) {
+        if (!bindingResult.hasErrors()) {
+            return ResponseEntity.ok(
+                    Map.of(
+                            "name", form.getName(),
+                            "email", form.getEmail()
+                    )
+            );
+        }
+
+        Map<String, String> fieldErrors = new java.util.LinkedHashMap<>();
+        for (FieldError error : bindingResult.getFieldErrors()) {
+            fieldErrors.put(error.getField(), error.getDefaultMessage());
+        }
+        return ResponseEntity.badRequest().body(new ApiError("validation_failed_manual", fieldErrors));
     }
 
     @PostMapping(
