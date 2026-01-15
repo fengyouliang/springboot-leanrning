@@ -1,18 +1,22 @@
 # 00. 深挖指南：把“Bean 三层模型”落到源码与断点
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**00. 深挖指南：把“Bean 三层模型”落到源码与断点**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreBeansAutowireCandidateSelectionLabTest` / `SpringCoreBeansBeanCreationTraceLabTest` / `SpringCoreBeansBeanGraphDebugLabTest` / `SpringCoreBeansLabTest` / `SpringCoreBeansContainerLabTest` / `SpringCoreBeansBootstrapInternalsLabTest` / `SpringCoreBeansInjectionAmbiguityLabTest` / `SpringCoreBeansLifecycleCallbackOrderLabTest` / `SpringCoreBeansRegistryPostProcessorLabTest` / `SpringCoreBeansPostProcessorOrderingLabTest` / `SpringCoreBeansEarlyReferenceLabTest` / `SpringCoreBeansExceptionNavigationLabTest` / `SpringCoreBeansMergedBeanDefinitionLabTest` / `SpringCoreBeansResolvableDependencyLabTest`
+    - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansMergedBeanDefinitionLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResolvableDependencyLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansBeanGraphDebugLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
+
+## 机制主线
 
 如果你觉得 [01. Bean 心智模型](../part-01-ioc-container/01-bean-mental-model.md) 这类“概念章”看完仍然不过瘾，通常不是因为它讲错了，而是因为你已经进入下一阶段：
 
@@ -289,12 +293,12 @@
 - 能用 `*LabTest` 把问题缩到最小复现（方法级入口），并给出下一步该读的章节/该下的断点
 - 遇到“为什么是 proxy/为什么注解不生效/为什么循环依赖救不回来”这类问题时，至少知道从哪一章与哪个入口开始
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreBeansAutowireCandidateSelectionLabTest` / `SpringCoreBeansBeanCreationTraceLabTest` / `SpringCoreBeansBeanGraphDebugLabTest`
@@ -478,12 +482,12 @@ mvn -pl spring-core-beans -Dtest=<TestClass>#<testMethod> test
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
 推荐断点：`AbstractApplicationContext#refresh`、`AbstractAutowireCapableBeanFactory#doCreateBean`、`DefaultListableBeanFactory#doResolveDependency`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 注意：依赖图是 **beanName 级别** 的记录。  
 如果你的依赖来自 ResolvableDependency，它不是 beanName，因此不会像普通 bean 一样出现在依赖图里。
 
-## G. 小结与下一章
+## 小结与下一章
 
 实例层的骨架几乎都在 `AbstractAutowireCapableBeanFactory` 一条链路上：
 
@@ -494,8 +498,6 @@ mvn -pl spring-core-beans -Dtest=<TestClass>#<testMethod> test
 - `AbstractBeanFactory#getMergedLocalBeanDefinition`（合并入口/缓存入口）
 - `AbstractAutowireCapableBeanFactory#applyMergedBeanDefinitionPostProcessors`（merged-definition hook 的触发点）
 - `MergedBeanDefinitionPostProcessor#postProcessMergedBeanDefinition`（谁在“提前准备/缓存”元数据）
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

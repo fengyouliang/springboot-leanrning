@@ -1,29 +1,24 @@
-# Spring Core Events 文档索引
+# Spring Events：目录
 
-> 目标：用“概念 → 主线机制 → 源码关键点 → 最小可复现”把 Spring 事件系统串起来。
+> 建议先把事件模型与同步执行跑通，再进入异步与事务事件；事件问题的根因几乎都在“时序与边界”上。
 
----
+## 从这里开始（建议顺序）
 
-## Part 00｜阅读指南
-- [00-deep-dive-guide](part-00-guide/00-deep-dive-guide.md)
+1. [主线时间线](part-00-guide/03-mainline-timeline.md)
+2. [深挖导读](part-00-guide/00-deep-dive-guide.md)
 
-## Part 01｜事件基础（Event Basics）
-- [01-event-mental-model](part-01-event-basics/01-event-mental-model.md)
-- [02-multiple-listeners-and-order](part-01-event-basics/02-multiple-listeners-and-order.md)
-- [03-condition-and-payload](part-01-event-basics/03-condition-and-payload.md)
-- [04-sync-and-exceptions](part-01-event-basics/04-sync-and-exceptions.md)
+## 顺读主线
 
-## Part 02｜异步与事务（Async & Transactional）
-- [05-async-listener](part-02-async-and-transactional/05-async-listener.md)
-- [06-async-multicaster](part-02-async-and-transactional/06-async-multicaster.md)
-- [07-transactional-event-listener](part-02-async-and-transactional/07-transactional-event-listener.md)
+- [事件心智模型](part-01-event-basics/01-event-mental-model.md)
+- [多监听器与顺序](part-01-event-basics/02-multiple-listeners-and-order.md)
+- [条件与 payload](part-01-event-basics/03-condition-and-payload.md)
+- [同步与异常](part-01-event-basics/04-sync-and-exceptions.md)
+- [异步监听](part-02-async-and-transactional/05-async-listener.md)
+- [异步 multicaster](part-02-async-and-transactional/06-async-multicaster.md)
+- [事务事件](part-02-async-and-transactional/07-transactional-event-listener.md)
 
-## Appendix｜附录
-- [90-common-pitfalls](appendix/90-common-pitfalls.md)
-- [99-self-check](appendix/99-self-check.md)
+## 排坑与自检
 
----
-
-## 如何验证（建议）
-- 运行本模块测试：`mvn -pl spring-core-events test`
+- [常见坑](appendix/90-common-pitfalls.md)
+- [自检](appendix/99-self-check.md)
 

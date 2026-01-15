@@ -1,18 +1,22 @@
 # 30. 注入阶段：field injection vs constructor injection（以及 `postProcessProperties`）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**30. 注入阶段：field injection vs constructor injection（以及 `postProcessProperties`）**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreBeansInjectionPhaseLabTest`
+    - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansInjectionPhaseLabTest.java`
+
+## 机制主线
 
 这一章解决两个“非常折磨人但非常核心”的问题：
 
@@ -77,12 +81,12 @@
 
 ## 排障分流：这是定义层问题还是实例层问题？
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreBeansInjectionPhaseLabTest`
@@ -141,7 +145,7 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansInjectionPhaseLabTest test
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansInjectionPhaseLabTest.java`
 推荐断点：`AutowiredAnnotationBeanPostProcessor#postProcessProperties`、`AbstractAutowireCapableBeanFactory#populateBean`、`DefaultListableBeanFactory#doResolveDependency`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 > 注意：**多个 BPP 的顺序会影响你在 `postProcessProperties(...)` 里看到的 bean 状态**。  
 > 你需要把重点放在“注入发生在属性填充阶段”这个结论上，而不是纠结某一个 BPP 是先还是后（顺序规则见第 14/25 章）。
@@ -150,15 +154,13 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansInjectionPhaseLabTest test
 
 本章本质是在讲：**容器通过 BPP 让注解“生效”**。这条线能直接解释 AOP/事务为何会出现“入口必须走代理”的坑：
 
-## G. 小结与下一章
+## 小结与下一章
 
 1) `FieldInjectedTarget` 构造器：观察此时 `@Autowired` 字段必然还是 `null`
 2) `AutowiredAnnotationBeanPostProcessor#postProcessProperties`：观察容器在属性填充阶段为字段赋值
 3) `FieldInjectedTarget#init(@PostConstruct)`：观察 init 阶段依赖已可用
 4) `AutowiredAnnotationBeanPostProcessor#determineCandidateConstructors`：观察 constructor injection 为什么能在构造器内拿到依赖（先选构造器再解析参数）
 5) `AbstractAutowireCapableBeanFactory#autowireConstructor`：观察构造器参数依赖的解析与实例化路径
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

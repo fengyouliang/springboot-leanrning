@@ -1,18 +1,22 @@
 # 47. BeanDefinitionReader：除了注解与 XML，还有 Properties / Groovy
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**47. BeanDefinitionReader：除了注解与 XML，还有 Properties / Groovy**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreBeansGroovyBeanDefinitionReaderLabTest` / `SpringCoreBeansPropertiesBeanDefinitionReaderLabTest`
+    - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansPropertiesBeanDefinitionReaderLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansGroovyBeanDefinitionReaderLabTest.java`
+
+## 机制主线
 
 这一章解决一个“源码视角必须掌握，但现代项目里容易被忽略”的问题：
 
@@ -122,12 +126,12 @@ BeanDefinitionReader 的价值在于：
 
 ---
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreBeansGroovyBeanDefinitionReaderLabTest` / `SpringCoreBeansPropertiesBeanDefinitionReaderLabTest`
@@ -168,7 +172,7 @@ Groovy reader 的典型断点：
 
 - `GroovyBeanDefinitionReader#loadBeanDefinitions`：groovy script 解析入口
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 ## 5. 常见误区
 
@@ -177,11 +181,9 @@ Groovy reader 的典型断点：
 2) **误区：我写的是 Groovy/Properties，所以不属于 beans 体系**
    - 恰恰相反：这些机制说明 beans 体系的抽象能力（输入可扩展，输出统一）。
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

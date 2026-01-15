@@ -1,19 +1,18 @@
-# springboot-testing 文档
+# Spring Boot Testing：目录
 
-本模块聚焦 Spring Boot 测试体系：`@SpringBootTest`、`@WebMvcTest` 等 slice、`@MockBean` 的替换语义，以及“如何用最小成本稳定复现问题”。
+> 建议先把“测试切片选择”这件事做对，再把 mocking 与边界控制好，让机制理解可以被重复验证。
 
-## Start Here
-- 导读：[part-00-guide/00-deep-dive-guide.md](part-00-guide/00-deep-dive-guide.md)
+## 从这里开始（建议顺序）
 
-## Part 01 - Testing（主线机制）
-- 01 Slice 与 Mock：[part-01-testing/01-slice-and-mocking.md](part-01-testing/01-slice-and-mocking.md)
+1. [主线时间线](part-00-guide/03-mainline-timeline.md)
+2. [深挖导读](part-00-guide/00-deep-dive-guide.md)
 
-## Appendix
-- 常见坑：[appendix/90-common-pitfalls.md](appendix/90-common-pitfalls.md)
-- 自测题：[appendix/99-self-check.md](appendix/99-self-check.md)
+## 顺读主线
 
-## Labs & Exercises（最小可复现入口）
-- WebMvc slice：`springboot-testing/src/test/java/com/learning/springboot/boottesting/part01_testing/GreetingControllerWebMvcLabTest.java`
-- Full Boot：`springboot-testing/src/test/java/com/learning/springboot/boottesting/part01_testing/GreetingControllerSpringBootLabTest.java`
-- `@MockBean` 语义：`springboot-testing/src/test/java/com/learning/springboot/boottesting/part01_testing/BootTestingMockBeanLabTest.java`
-- Exercises：`springboot-testing/src/test/java/com/learning/springboot/boottesting/part00_guide/BootTestingExerciseTest.java`
+- [slice 与 mocking](part-01-testing/01-slice-and-mocking.md)
+
+## 排坑与自检
+
+- [常见坑](appendix/90-common-pitfalls.md)
+- [自检](appendix/99-self-check.md)
+

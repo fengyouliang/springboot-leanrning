@@ -1,18 +1,22 @@
 # 31. 代理/替换阶段：`BeanPostProcessor` 如何把 Bean “换成 Proxy”
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**31. 代理/替换阶段：`BeanPostProcessor` 如何把 Bean “换成 Proxy”**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreBeansBeanCreationTraceLabTest` / `SpringCoreBeansEarlyReferenceLabTest` / `SpringCoreBeansProxyingPhaseLabTest`
+    - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProxyingPhaseLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansEarlyReferenceLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansBeanCreationTraceLabTest.java`
+
+## 机制主线
 
 这一章把 AOP/事务里最常见、最折磨人的现象，拉回到容器机制本身：
 
@@ -136,12 +140,12 @@ JDK 代理的本质是：
 
 **反例 2：我按实现类 `getBean(Impl.class)`，突然拿不到了。**
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreBeansBeanCreationTraceLabTest` / `SpringCoreBeansEarlyReferenceLabTest` / `SpringCoreBeansProxyingPhaseLabTest`
@@ -250,7 +254,7 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansProxyingPhaseLabTest test
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProxyingPhaseLabTest.java`
 推荐断点：`AbstractAutowireCapableBeanFactory#initializeBean`、`AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`、`DefaultListableBeanFactory#doResolveDependency`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 ### 面试常问：容器最终暴露对象与类型系统陷阱（JDK vs CGLIB）
 
@@ -270,7 +274,7 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansProxyingPhaseLabTest test
 - 自调用陷阱（AOP 版本）：`spring-core-aop/docs/part-01-proxy-fundamentals/03-self-invocation.md`
 - 事务也是代理（Tx 版本）：`spring-core-tx/docs/part-01-transaction-basics/02-transactional-proxy.md`
 
-## G. 小结与下一章
+## 小结与下一章
 
 - `AbstractAutowireCapableBeanFactory#doCreateBean(...)`
   - `populateBean(...)`（注入发生在这里，注入点解析走 `doResolveDependency`）
@@ -280,8 +284,6 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansProxyingPhaseLabTest test
     - `applyBeanPostProcessorsAfterInitialization(...)`
       - `BeanPostProcessor#postProcessAfterInitialization`  
         - **这里是“把原始对象替换成 proxy/wrapper”的最常见发生点**
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

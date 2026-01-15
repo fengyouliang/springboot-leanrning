@@ -1,19 +1,22 @@
 # 02：断点地图（Part 01 Debugger Pack）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章目标：把 Web MVC Part 01 的关键机制，收敛成一份“可复制粘贴到 IDE 断点列表”的断点地图。
 - 使用方式：先跑一次“最小入口”，再按本页的断点清单逐段观察（不要一上来就全局搜日志）。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- Web MVC 排障的第一原则：**先确认分支发生在哪一段（Filter / mapping / argument / binder / converter / resolver），再决定去哪下断点**。
-- 400/404/405/406/415 这类“看起来像 controller 的问题”，大量其实发生在 controller 之前/之后。
-- 最省时间的证据链：**测试断言 → resolvedException（异常类型）→ 断点（分支发生点）→ 观察字段（关键数据结构）**。
+    - Web MVC 排障的第一原则：**先确认分支发生在哪一段（Filter / mapping / argument / binder / converter / resolver），再决定去哪下断点**。
+    - 400/404/405/406/415 这类“看起来像 controller 的问题”，大量其实发生在 controller 之前/之后。
+    - 最省时间的证据链：**测试断言 → resolvedException（异常类型）→ 断点（分支发生点）→ 观察字段（关键数据结构）**。
 
-## C. 机制主线（按请求阶段分段）
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootWebMvcLabTest`
+
+## 机制主线（按请求阶段分段）
 
 > 本页以“阶段”为主索引；每个阶段给出：入口断点、观察点、决定性分支（Decisive Branch）。
 
@@ -130,7 +133,7 @@
 - 决定性分支：
   - `@ControllerAdvice` 是否适用（matching + order）
 
-## D. 源码与断点（建议从 Lab 反推）
+## 源码与断点（建议从 Lab 反推）
 
 本页不是“所有断点的百科”，而是 Part 01 的最小集合；更完整的调用链解释见：
 
@@ -139,7 +142,7 @@
 - converter：`part-03-web-mvc-internals/03-message-converters-and-return-values.md`
 - resolvers：`part-03-web-mvc-internals/04-exception-resolvers-and-error-flow.md`
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 建议先跑这些入口再下断点：
 
@@ -148,17 +151,15 @@
 - binder 深挖（InitBinder/suppressedFields）：`BootWebMvcBindingDeepDiveLabTest`
 - Filter/Interceptor 顺序与 async：`BootWebMvcTraceLabTest`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 - 一上来就怀疑 controller：建议先证明“是否进入了 DispatcherServlet（doDispatch）”。
 - 只看状态码不看异常：建议用 `MvcResult#getResolvedException()` 固定异常类型。
 - async 忽略二次 dispatch：建议用 trace Lab 的事件序列辅助定位。
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本页作为 Part 01 的“断点索引页”，建议与 Part 01 各章的 Debug 建议配合使用。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

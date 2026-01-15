@@ -1,21 +1,24 @@
 # 02. 断点地图（容器主线：可复用断点/观察点清单）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章目标：把 `spring-core-beans` 的“高频断点与观察点”收敛成一页纸，避免散落在多章。
 - 使用方式：先跑一个方法级 Lab，然后按本页断点清单逐段观察“定义层 → 实例层 → 代理层”的变化。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 容器排障的第一原则：**先证明“发生在 refresh 的哪一段”**（定义注册 / PP 执行 / 单例创建 / 初始化 / 代理替换）。
-- 你想看清的通常不是“某个注解怎么用”，而是：
-  1. **数据结构在哪里被写入**（registry / beanDefinitionMap / singletonObjects）
-  2. **哪个分支决定了后续行为**（排序 / 短路 / early reference / candidate 收敛）
-  3. **你拿到的对象到底是谁**（raw instance vs proxy）
+    - 容器排障的第一原则：**先证明“发生在 refresh 的哪一段”**（定义注册 / PP 执行 / 单例创建 / 初始化 / 代理替换）。
+    - 你想看清的通常不是“某个注解怎么用”，而是：
+      1. **数据结构在哪里被写入**（registry / beanDefinitionMap / singletonObjects）
+      2. **哪个分支决定了后续行为**（排序 / 短路 / early reference / candidate 收敛）
+      3. **你拿到的对象到底是谁**（raw instance vs proxy）
 
-## C. 机制主线（按 refresh 时间线组织）
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreBeansLabTest`
+
+## 机制主线（按 refresh 时间线组织）
 
 ### C1. refresh 总入口（把阶段看清）
 
@@ -90,14 +93,14 @@
 - 决定性分支：
   - `postProcessAfterInitialization` 是否返回代理（这通常决定“你最终拿到的对象是谁”）
 
-## D. 源码与断点（建议从 Lab 反推）
+## 源码与断点（建议从 Lab 反推）
 
 更完整的“入口测试 → 断点链路”建议，优先看：
 
 - 30 分钟快启：`part-00-guide/01-quickstart-30min.md`
 - 深挖指南：`part-00-guide/00-deep-dive-guide.md`
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 建议先跑这些入口再下断点：
 
@@ -106,17 +109,15 @@
 - 代理替换发生点：`SpringCoreBeansBeanCreationTraceLabTest#beanCreationTrace_recordsPhases_andExposesProxyReplacement`
 - 循环依赖/early reference：`SpringCoreBeansEarlyReferenceLabTest`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 - 只盯某个注解：建议先把“发生在 refresh 的哪一段”确定下来（C1-C7）。
 - 把 proxy 当成原始对象：建议在 `applyBeanPostProcessorsAfterInitialization` 处观察 `wrappedBean` 替换点。
 - 循环依赖只看三层缓存：建议结合“代理介入”与“raw 注入/早期引用”的边界用例一起看。
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本页作为断点索引页，建议与各章的“源码锚点/入口测试/排障分流”配合使用。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

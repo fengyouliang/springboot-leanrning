@@ -1,18 +1,21 @@
 # 92. 知识点地图（Concept → Chapter → Lab）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**92. 知识点地图（Concept → Chapter → Lab）**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreBeansAotFactoriesLabTest` / `SpringCoreBeansAotRuntimeHintsLabTest` / `SpringCoreBeansAutowireCandidateSelectionLabTest` / `SpringCoreBeansInjectionAmbiguityLabTest` / `SpringCoreBeansExceptionNavigationLabTest` / `SpringCoreBeansLabTest` / `SpringCoreBeansValuePlaceholderResolutionLabTest` / `SpringCoreBeansProxyingPhaseLabTest` / `SpringCoreBeansPreInstantiationLabTest` / `SpringCoreBeansEarlyReferenceLabTest` / `SpringCoreBeansContainerLabTest` / `SpringCoreBeansPostProcessorOrderingLabTest` / `SpringCoreBeansGenericTypeMatchingPitfallsLabTest` / `SpringCoreBeansTypeConversionLabTest` / `SpringCoreBeansXmlBeanDefinitionReaderLabTest` / `SpringCoreBeansAutowireCapableBeanFactoryLabTest` / `SpringCoreBeansSpelValueLabTest` / `SpringCoreBeansCustomQualifierLabTest` / `SpringCoreBeansXmlNamespaceExtensionLabTest` / `SpringCoreBeansBuiltInFactoryBeansLabTest` / `SpringCoreBeansServiceLoaderFactoryBeansLabTest` / `SpringCoreBeansPropertyEditorLabTest` / `SpringCoreBeansBeanDefinitionValueResolutionLabTest` / `SpringCoreBeansEnvironmentPropertySourceLabTest` / `SpringCoreBeansBeanFactoryApiLabTest` / `SpringCoreBeansBootstrapInternalsLabTest`
+
+## 机制主线
 
 这份“知识点地图”用于两类阅读方式：
 
@@ -124,12 +127,12 @@
 - **排障入口**：`11`（从异常到断点入口）→ `94`（生产排障清单）→ `99`（自测题）
 - **真实世界补齐（AOT/XML/SpEL/Reader/FactoryBean）**：`40–50`
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreBeansAotFactoriesLabTest` / `SpringCoreBeansAotRuntimeHintsLabTest` / `SpringCoreBeansAutowireCandidateSelectionLabTest`
@@ -252,7 +255,7 @@
 
 > 这张映射用于“复述式学习”：你能把概念准确指向章节与断点入口，就意味着你真的掌握了它的边界。
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 ### 2.18 “注解为什么不生效”：BeanFactory API 的边界与手动 bootstrap
 
@@ -277,11 +280,9 @@
 - Environment/PropertySource（优先级/@PropertySource/placeholder）→ `38`、`34`
 - BeanFactory API（plain vs context / 手动 bootstrap 边界）→ `39`、`12`
 
-## G. 小结与下一章
+## 小结与下一章
 
 ### 2.11 容器外对象注入与生命周期托管（AutowireCapableBeanFactory）
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

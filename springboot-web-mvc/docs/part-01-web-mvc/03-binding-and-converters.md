@@ -1,18 +1,22 @@
 # 03：请求绑定（Binding）与 Converter/Formatter
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**03：请求绑定（Binding）与 Converter/Formatter**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootWebMvcLabTest`
+    - Test file：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcLabTest.java` / `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcBindingDeepDiveLabTest.java` / `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part00_guide/BootWebMvcExerciseTest.java`
+
+## 机制主线
 
 本章聚焦“请求如何变成 Java 入参”，以及当你希望引入自定义类型（例如 `UserId`）时应该怎么做。
 
@@ -63,7 +67,7 @@ Converter/Formatter 属于第二条路径：它让 Spring MVC 知道怎么把字
 - endpoint：`POST /api/advanced/binding/mass-assignment-debug`
 - 证据链：`BootWebMvcBindingDeepDiveLabTest#exposesSuppressedFieldsAsEvidenceWhenBindingBlockedFields`
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
@@ -99,7 +103,7 @@ Converter/Formatter 属于第二条路径：它让 Spring MVC 知道怎么把字
 - 统一异常塑形：
   - `ExceptionHandlerExceptionResolver`
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`BootWebMvcLabTest`
@@ -142,17 +146,15 @@ Converter/Formatter 属于第二条路径：它让 Spring MVC 知道怎么把字
 - 校验机制（Bean Validation）：`helloagents/wiki/modules/spring-core-validation.md`
 - 类型转换（容器视角，ConversionService/TypeConverter/BeanWrapper）：`spring-core-beans/docs/part-04-wiring-and-boundaries/36-type-conversion-and-beanwrapper.md`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 - DTO 上写了约束注解，但 controller 入参没加 `@Valid`：校验不会触发。
 - `@ModelAttribute` 的校验失败常见是 `BindException`，不要只处理 `MethodArgumentNotValidException`。
 - 400 不是一个原因：建议把 **解析失败 / 类型不匹配 / 校验失败** 三类错误响应区分开（至少 message 不同）。
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

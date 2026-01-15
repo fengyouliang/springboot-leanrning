@@ -1,19 +1,22 @@
 # 01：知识地图（Web MVC Deep Dive Map）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**01：知识地图（Web MVC Deep Dive Map）**
 - 目标：把本模块的“知识点”收敛成一张可导航的地图：**主轴（调用链）+ 关键分支（状态码/异常）+ 证据链（可跑 Lab/Test）**。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 你要记住的不只是“有哪些注解”，而是**一次请求在 MVC 里经历的阶段**，以及每个阶段“为什么会分叉”（例如 404/406/415/400）。
-- 学习路径建议：**先跑 Lab 看到现象 → 再看 `resolvedException`/handler 证据 → 再打断点看调用链**。
-- 推荐搭配：断点地图（Part 01 Debugger Pack）`part-00-guide/02-breakpoint-map.md`（把断点从“散点”收敛成“按阶段可复用清单”）。
+    - 你要记住的不只是“有哪些注解”，而是**一次请求在 MVC 里经历的阶段**，以及每个阶段“为什么会分叉”（例如 404/406/415/400）。
+    - 学习路径建议：**先跑 Lab 看到现象 → 再看 `resolvedException`/handler 证据 → 再打断点看调用链**。
+    - 推荐搭配：断点地图（Part 01 Debugger Pack）`part-00-guide/02-breakpoint-map.md`（把断点从“散点”收敛成“按阶段可复用清单”）。
 
-## C. 机制主线（从请求到响应）
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootWebMvcLabTest` / `BootWebMvcSpringBootLabTest`
+
+## 机制主线（从请求到响应）
 
 > 下面按“主轴顺序”列出关键阶段 + 对应章节入口（建议按顺序阅读）。
 
@@ -64,7 +67,7 @@
     - Interceptor 计时 vs 指标（`http.server.requests`）
     - `resolvedException`/handler/断点清单：把排障变成流程
 
-## D. 源码与断点（建议从测试反推）
+## 源码与断点（建议从测试反推）
 
 常用断点入口（按主轴顺序）：
 - `org.springframework.web.filter.DelegatingFilterProxy#doFilter`（有 Security 时）
@@ -79,7 +82,7 @@
 - `org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodProcessor#writeWithMessageConverters`（写）
 - `org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver#doResolveHandlerMethodException`
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 建议按“先主线，再分叉”的顺序跑：
 
@@ -105,15 +108,13 @@
 - Lab：`BootWebMvcSecurityLabTest`
 - Lab：`BootWebMvcObservabilityLabTest`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 - 建议配合阅读：`appendix/90-common-pitfalls.md`（把“坑”变成可复现 + 可定位）
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本章完成后：先跑一次主线 Lab（E），再进入 Part 01 从“校验与错误塑形”开始建立第一个闭环。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

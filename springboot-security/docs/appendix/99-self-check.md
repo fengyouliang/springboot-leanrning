@@ -1,30 +1,33 @@
 # 99 - Self Check（springboot-security）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**99 - Self Check（springboot-security）**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootSecurityDevProfileLabTest` / `BootSecurityLabTest` / `BootSecurityMultiFilterChainOrderLabTest`
+
+## 机制主线
 
 ## 自测题
 1. Filter Chain 的顺序为什么很重要？“同一个请求”会经过哪些 filter？
 2. 为什么方法级安全需要代理？自调用会导致什么问题？
 3. JWT 无状态方案下，认证信息如何在请求间传递？
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章未显式引用 LabTest，先注入模块默认 LabTest 作为“合规兜底入口”（后续可逐章细化）。
 - Lab：`BootSecurityDevProfileLabTest` / `BootSecurityLabTest` / `BootSecurityMultiFilterChainOrderLabTest`
@@ -36,7 +39,7 @@
 
 - `BootSecurityExerciseTest`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 ### 坑点 1：方法级安全“看起来写了注解”，但调用链绕过代理导致不生效
 
@@ -45,11 +48,9 @@
 - Verification：`BootSecurityLabTest#selfInvocationBypassesMethodSecurityAsAPitfall`
 - Fix：把需要拦截的方法调用跨越 bean 边界（让代理参与），并用测试锁住“是否抛 AccessDeniedException”
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

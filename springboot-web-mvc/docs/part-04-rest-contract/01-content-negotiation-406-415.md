@@ -1,19 +1,22 @@
 # 01：Content Negotiation（406/415：Accept/Content-Type/produces/consumes）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**01：Content Negotiation（406/415：Accept/Content-Type/produces/consumes）**
 - 目标：让 406/415 变成“可预期、可复现、可排障”的问题，而不是靠猜。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 415：客户端发来的 `Content-Type` 不被服务端接受（`consumes` 或 converter 不匹配）
-- 406：客户端的 `Accept` 要求服务端无法满足（`produces` 或 converter 不匹配）
-- 解决问题的第一步不是改业务代码，而是把 **请求头与方法映射约束** 对齐。
+    - 415：客户端发来的 `Content-Type` 不被服务端接受（`consumes` 或 converter 不匹配）
+    - 406：客户端的 `Accept` 要求服务端无法满足（`produces` 或 converter 不匹配）
+    - 解决问题的第一步不是改业务代码，而是把 **请求头与方法映射约束** 对齐。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootWebMvcContractJacksonLabTest`
+
+## 机制主线
 
 - 本章用 `BootWebMvcContractJacksonLabTest` 固定两条证据链：
   - `/echo` 用错误 `Content-Type` → 415
@@ -21,7 +24,7 @@
 - 若你在排障时想“把猜测变成证据”，建议再配合 `BootWebMvcTestingDebuggingLabTest`：
   - 直接拿到 `resolvedException`，确认到底是 406 还是 415 的分支入口。
 
-## D. 源码与断点
+## 源码与断点
 
 建议断点：
 - `RequestMappingHandlerMapping#handleMatch`
@@ -39,20 +42,18 @@
    - 406（write 失败）：能否找到“能写出 Accept 的格式”的 converter？
 3. **用证据锁住分支**：MockMvc 的 `resolvedException`（见 `BootWebMvcTestingDebuggingLabTest`）是最快的“分支定位器”。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - Lab：`BootWebMvcContractJacksonLabTest`
 - Lab：`BootWebMvcTestingDebuggingLabTest`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 - 你在 Postman/curl 里不小心带了 `Accept: */*` 或 `Content-Type` 缺失/错误，会让你误以为“后端逻辑坏了”，但实际上是契约不匹配。
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 下一章进入 Jackson 可控：如何“只对某类请求严格”，避免全局影响。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

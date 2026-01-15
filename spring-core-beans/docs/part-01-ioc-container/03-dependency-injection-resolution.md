@@ -1,18 +1,22 @@
 # 03. 依赖注入解析：类型/名称/@Qualifier/@Primary
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**03. 依赖注入解析：类型/名称/@Qualifier/@Primary**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreBeansAutowireCandidateSelectionLabTest` / `SpringCoreBeansBeanGraphDebugLabTest` / `SpringCoreBeansGenericTypeMatchingPitfallsLabTest` / `SpringCoreBeansOptionalInjectionLabTest` / `SpringCoreBeansJsr330InjectionLabTest` / `SpringCoreBeansLabTest`
+    - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansOptionalInjectionLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansJsr330InjectionLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansBeanGraphDebugLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansAutowireCandidateSelectionLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/appendix/SpringCoreBeansGenericTypeMatchingPitfallsLabTest.java`
+
+## 机制主线
 
 这一章回答：**当你写下 `private final X x;`，Spring 到底是怎么找到并注入那个 `X` 的？**
 
@@ -262,12 +266,12 @@ static class SingleWorkerConsumer {
 - 集合注入会走 `resolveMultipleBeans(...)` 分支 → 然后按 order 排序
 - 单依赖注入会走 `findAutowireCandidates(...)` → `determineAutowireCandidate(...)` 分支 → 不会因为 `@Order` 变成唯一候选
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreBeansAutowireCandidateSelectionLabTest` / `SpringCoreBeansBeanGraphDebugLabTest` / `SpringCoreBeansGenericTypeMatchingPitfallsLabTest`
@@ -425,18 +429,16 @@ resolveDependency(descriptor):
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansBeanGraphDebugLabTest.java`
 推荐断点：`DefaultListableBeanFactory#doResolveDependency`、`DefaultListableBeanFactory#determineAutowireCandidate`、`AutowiredAnnotationBeanPostProcessor#postProcessProperties`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 - type matching 不是只看“实现类/接口”，还会考虑泛型、`FactoryBean` 的 product 类型、是否允许 eager init 等因素（见 [23. FactoryBean 深潜：product vs factory、类型匹配、以及 isSingleton 缓存语义](../part-04-wiring-and-boundaries/23-factorybean-deep-dive.md)、[29. FactoryBean 边界：getObjectType 返回 null 会让“按类型发现”失效](../part-04-wiring-and-boundaries/29-factorybean-edge-cases.md)）。
 - 收集到的候选通常是一个 `Map<String, Object>`：key 是 beanName，value 可能是实例，也可能是类型/占位（取决于是否 eager resolve）。
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 单依赖：返回一个 bean（或一个代理对象，见 [31. 代理/替换阶段：`BeanPostProcessor` 如何把 Bean “换成 Proxy”](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)）
 - 可选依赖：可能返回 `null`、`Optional.empty()`，或者 `ObjectProvider`（延迟到你真正调用 `getObject()` 才解析）
 - 集合依赖：返回“所有匹配候选”的集合，并且会排序（`@Order`/`Ordered`），见下一章的集合注入部分
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

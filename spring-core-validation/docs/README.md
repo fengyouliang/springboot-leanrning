@@ -1,26 +1,28 @@
-# Spring Core Validation 文档索引
+# Spring Validation：目录
 
-> 目标：把约束（Constraint）、校验入口（Validator）、方法校验代理（Method Validation）与常见坑串起来，并能用最小测试验证。
+> 建议先把“约束模型 → 触发 → 违规结果”的主线跑通，再进入方法校验与代理边界；很多问题需要与 AOP/Web MVC 一起看。
 
----
+## 从这里开始（建议顺序）
 
-## Part 00｜阅读指南
-- [00-deep-dive-guide](part-00-guide/00-deep-dive-guide.md)
+1. [主线时间线](part-00-guide/03-mainline-timeline.md)
+2. [深挖导读](part-00-guide/00-deep-dive-guide.md)
 
-## Part 01｜Validation 核心机制
-- [01-constraint-mental-model](part-01-validation-core/01-constraint-mental-model.md)
-- [02-programmatic-validator](part-01-validation-core/02-programmatic-validator.md)
-- [03-method-validation-proxy](part-01-validation-core/03-method-validation-proxy.md)
-- [04-groups](part-01-validation-core/04-groups.md)
-- [05-custom-constraint](part-01-validation-core/05-custom-constraint.md)
-- [06-debugging](part-01-validation-core/06-debugging.md)
+## 顺读主线
 
-## Appendix｜附录
-- [90-common-pitfalls](appendix/90-common-pitfalls.md)
-- [99-self-check](appendix/99-self-check.md)
+- [约束心智模型](part-01-validation-core/01-constraint-mental-model.md)
+- [Programmatic Validator](part-01-validation-core/02-programmatic-validator.md)
+- [方法校验与代理](part-01-validation-core/03-method-validation-proxy.md)
+- [Groups](part-01-validation-core/04-groups.md)
+- [自定义约束](part-01-validation-core/05-custom-constraint.md)
+- [调试](part-01-validation-core/06-debugging.md)
 
----
+## 关联模块（按需串联）
 
-## 如何验证（建议）
-- 运行本模块测试：`mvn -pl spring-core-validation test`
+- 代理边界与自调用：`spring-core-aop`
+- Web 入参/错误映射：`springboot-web-mvc`
+
+## 排坑与自检
+
+- [常见坑](appendix/90-common-pitfalls.md)
+- [自检](appendix/99-self-check.md)
 

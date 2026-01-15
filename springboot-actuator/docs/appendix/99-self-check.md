@@ -1,18 +1,21 @@
 # 99 - Self Check（springboot-actuator）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**99 - Self Check（springboot-actuator）**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootActuatorExposureOverrideLabTest` / `BootActuatorLabTest`
+
+## 机制主线
 
 这一章不是新增概念，而是用“可断言证据”复盘 Actuator 的三段式分流：
 
@@ -24,12 +27,12 @@
 1. exposure 的 include/exclude 与端点实际可访问性之间是什么关系？
 2. 如何快速判断一个配置值来自哪里（哪个 PropertySource）？
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章未显式引用 LabTest，先注入模块默认 LabTest 作为“合规兜底入口”（后续可逐章细化）。
 - Lab：`BootActuatorExposureOverrideLabTest` / `BootActuatorLabTest`
@@ -41,7 +44,7 @@
 
 - `BootActuatorExerciseTest`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 ### 坑点 1：把 404 当成“端点不存在”，忽略了 exposure 分流
 
@@ -53,11 +56,9 @@
   - 根路径 links 只列出“暴露端点”：`BootActuatorLabTest#actuatorRootListsExposedEndpoints` / `BootActuatorExposureOverrideLabTest#actuatorRootIncludesEnvLinkWhenExposed`
 - Fix：先用 `/actuator` 的 `_links` 与 exposure 配置确认“暴露集合”，再谈安全策略（401/403）
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

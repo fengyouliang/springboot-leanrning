@@ -1,18 +1,22 @@
 # 43. 容器外对象注入：AutowireCapableBeanFactory
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**43. 容器外对象注入：AutowireCapableBeanFactory**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreBeansAutowireCapableBeanFactoryLabTest`
+    - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAutowireCapableBeanFactoryLabTest.java`
+
+## 机制主线
 
 真实项目里你一定会遇到这种场景：
 
@@ -75,12 +79,12 @@
 
 ---
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreBeansAutowireCapableBeanFactoryLabTest`
@@ -109,7 +113,7 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansAutowireCapableBeanFactoryLabTes
 3) `InitDestroyAnnotationBeanPostProcessor#postProcessBeforeInitialization`：`@PostConstruct` 触发点之一（也解释为什么必须 initialize）
 4) `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`：BPP 可能在这里返回 proxy（解释“final object != raw object”）
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 - [25. 手工添加 BeanPostProcessor：顺序与 Ordered 的陷阱](../part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md)
 - [05. 初始化、销毁与回调](../part-01-ioc-container/05-lifecycle-and-callbacks.md)
@@ -121,7 +125,7 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansAutowireCapableBeanFactoryLabTes
 2) **误区：容器外对象一定不能用 @PostConstruct**
    - 可以，但你要显式调用 initialize 链路（否则 BPP 不会触发）。
 
-## G. 小结与下一章
+## 小结与下一章
 
 - `AutowireCapableBeanFactory#autowireBean`（偏“只做注入”）
 - `AutowireCapableBeanFactory#initializeBean`（触发初始化链路）
@@ -137,8 +141,6 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansAutowireCapableBeanFactoryLabTes
 ## 5. 小结与下一章预告
 
 下一章我们补齐另一个真实项目高频点：`@Value("#{...}")`（SpEL）—— 值注入链路如何拆成“解析 vs 计算 vs 转换”三段。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

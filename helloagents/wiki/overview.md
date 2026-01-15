@@ -47,8 +47,15 @@
 
 ## 4. 文档站点（MkDocs）
 
-> 目标：把各模块的 `docs/` 聚合成一个可搜索、可侧边栏导航的静态站点（更像“技术专栏合集”的阅读体验）。
+> 目标：把各模块的 `docs/` 聚合成一个可搜索的静态站点，并把跨模块的主线整理成**一本可顺读的书**（Book-only 导航）。
 
+- 阅读入口（Book-only）：`docs-site/content/book/`
+  - 书的目录与阅读说明：`docs-site/content/book/index.md`
+  - 主线章节树：`docs-site/content/book/00-start-here.md` → `18-business-case.md`
+  - 教学体验工具页：Labs 索引 / Debugger Pack / Exercises & Solutions / 迁移规则
+- 模块 docs 仍保留：各模块 `docs/` 依然是机制细节与证据链的素材库；通过书内链接、站内搜索或 `modules/index.md` 访问。
+- 侧边栏目录生成：`scripts/docs-site-sync.py` 自动注入“主线之书”的章节树到 `docs-site/.generated/mkdocs.yml`（基础模板：`docs-site/mkdocs.yml`）。
+- Labs 索引生成：`python3 scripts/generate-book-labs-index.py`（输出：`docs-site/content/book/labs-index.md`）。
 - 同步站点输入目录（SSOT → `docs-site/.generated/docs`）：`python3 scripts/docs-site-sync.py`
 - 本地预览：`bash scripts/docs-site-serve.sh`
 - 严格构建（建议用于 CI）：`bash scripts/docs-site-build.sh`

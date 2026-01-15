@@ -1,24 +1,27 @@
 # 05：条件请求（Last-Modified / If-Modified-Since / ETag / ShallowEtagHeaderFilter）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**05：条件请求（Last-Modified / If-Modified-Since / ETag / ShallowEtagHeaderFilter）**
 - 目标：把“为什么我明明点了刷新却拿到 304”讲清楚：条件请求不是 bug，而是 HTTP 协议的正常分支；并用测试把静态资源与 API 的两条路径固定下来。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 304 的本质：**资源未变化** → 允许服务端不返回 body（节省带宽与时间），但仍然是一次成功的交互。
-- 两条常见路径：
-  1. **Last-Modified / If-Modified-Since**：常用于静态资源（基于修改时间）
-  2. **ETag / If-None-Match**：常用于内容型资源（基于内容指纹），也可以通过 Filter 自动计算
-- 本模块提供三种对照，帮助你“工程落地时知道选哪种”：
-  - 静态资源：`Last-Modified → If-Modified-Since → 304`
-  - API 显式 ETag：controller 自己计算并返回 `ETag`，自己判断是否 304
-  - Filter 计算 ETag：controller 只返回 body，`ShallowEtagHeaderFilter` 负责 ETag/304
+    - 304 的本质：**资源未变化** → 允许服务端不返回 body（节省带宽与时间），但仍然是一次成功的交互。
+    - 两条常见路径：
+      1. **Last-Modified / If-Modified-Since**：常用于静态资源（基于修改时间）
+      2. **ETag / If-None-Match**：常用于内容型资源（基于内容指纹），也可以通过 Filter 自动计算
+    - 本模块提供三种对照，帮助你“工程落地时知道选哪种”：
+      - 静态资源：`Last-Modified → If-Modified-Since → 304`
+      - API 显式 ETag：controller 自己计算并返回 `ETag`，自己判断是否 304
+      - Filter 计算 ETag：controller 只返回 body，`ShallowEtagHeaderFilter` 负责 ETag/304
 
-## C. 机制主线（对照三条路径）
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootWebMvcRealWorldHttpLabTest`
+
+## 机制主线（对照三条路径）
 
 ### 1) 静态资源：Last-Modified 路径
 
@@ -47,21 +50,21 @@ Filter 会在响应写回时：
 - 它会缓存响应体，因此不适合大流量/大 body/流式响应场景
 - 更适合教学与小响应体 API 的对照理解
 
-## D. 源码与断点
+## 源码与断点
 
 建议断点：
 - 静态资源：`org.springframework.web.servlet.resource.ResourceHttpRequestHandler#handleRequest`
 - 条件判断：`org.springframework.web.context.request.ServletWebRequest#checkNotModified`
 - ETag Filter：`org.springframework.web.filter.ShallowEtagHeaderFilter#doFilterInternal`（或其内部更新 ETag 的分支）
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - Lab：`BootWebMvcRealWorldHttpLabTest`
   - `staticResourceSupportsIfModifiedSince304`
   - `apiEtagSupportsConditionalGet304`
   - `shallowEtagHeaderFilterSupportsConditionalGet304`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 - **坑 1：把 304 当成错误**
   - 304 是正常的成功分支；排障要看的是“为什么命中”而不是“为什么不是 200”。
@@ -73,11 +76,9 @@ Filter 会在响应写回时：
 - **坑 3：流式/大响应体上使用 Shallow ETag**
   - 这类响应更适合用协议/缓存头做策略，而不是强行缓存 body 计算 ETag。
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本章完成后：进入 Async & SSE，理解“为什么某些响应不是同步完成的”（而条件请求是同步完成但返回 304）。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

@@ -58,6 +58,9 @@
 | 202601141547 | finish-unfinished-tasks | Enhancement | ✅Completed | [202601141547_finish-unfinished-tasks](2026-01/202601141547_finish-unfinished-tasks/) |
 | 202601151209 | docs-site-mkdocs | Enhancement | ✅Completed | [202601151209_docs-site-mkdocs](2026-01/202601151209_docs-site-mkdocs/) |
 | 202601151259 | docs-site-github-pages | Enhancement | ✅Completed | [202601151259_docs-site-github-pages](2026-01/202601151259_docs-site-github-pages/) |
+| 202601151647 | docs-book-rewrite-all-modules | Refactor | ✅Completed | [202601151647_docs-book-rewrite-all-modules](2026-01/202601151647_docs-book-rewrite-all-modules/) |
+| 202601151703 | docs-book-rewrite-stage2 | Refactor | ✅Completed | [202601151703_docs-book-rewrite-stage2](2026-01/202601151703_docs-book-rewrite-stage2/) |
+| 202601152248 | docs-book-stage3-all-modules | Enhancement | ✅Completed | [202601152248_docs-book-stage3-all-modules](2026-01/202601152248_docs-book-stage3-all-modules/) |
 
 ---
 
@@ -115,3 +118,6 @@
 - [202601141547_finish-unfinished-tasks](2026-01/202601141547_finish-unfinished-tasks/) - 收敛新读者学习入口（learning-path）+ Web MVC Part 01 Debugger Pack + Beans 断点地图/空块补齐；通过 docs 闸门与全仓回归
 - [202601151209_docs-site-mkdocs](2026-01/202601151209_docs-site-mkdocs/) - docs-site：MkDocs 文档站点落地（聚合各模块 docs + helloagents/wiki，提供侧边栏导航与搜索）
 - [202601151259_docs-site-github-pages](2026-01/202601151259_docs-site-github-pages/) - docs-site：新增 GitHub Pages workflow（构建 + 发布）
+- [202601151647_docs-book-rewrite-all-modules](2026-01/202601151647_docs-book-rewrite-all-modules/) - 全模块 docs：书籍化第一层迁移（去 A–G 契约式骨架：章首要点 summary + 实验入口提示框 + 保留 BOOKIFY 尾部导航）
+- [202601151703_docs-book-rewrite-stage2](2026-01/202601151703_docs-book-rewrite-stage2/) - 全模块 docs：书籍化 Stage 2（新增主线时间线 + 目录页重排 + 试点合并/redirect）
+- [202601152248_docs-book-stage3-all-modules](2026-01/202601152248_docs-book-stage3-all-modules/) - docs-site：全站书籍化 Stage 3（Book-only 导航 + 主线之书章节树 + 教学体验索引页）

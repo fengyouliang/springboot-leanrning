@@ -1,21 +1,24 @@
 # 01：Security FilterChain 与 Web MVC（401/403/CSRF 在哪发生）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**01：Security FilterChain 与 Web MVC（401/403/CSRF 在哪发生）**
 - 目标：把“加了 Spring Security 之后怎么就 401/403 了”变成可解释、可复现、可排障的调用链问题。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- Spring Security 的主要入口是 **Servlet Filter 链**（FilterChainProxy），它发生在 **DispatcherServlet 之前**。
-- 401/403 往往不是 controller 的问题：
-  - **401**：未认证（Authentication 不存在/失败）
-  - **403**：已认证但不允许（权限不足）或 **CSRF 缺失**（常见于 POST/PUT/DELETE）
-- 工程落地建议：把“教学安全端点”与“既有教学主线端点”隔离，避免影响现有 Labs（本模块采用只保护 `/api/advanced/secure/**` 的策略）。
+    - Spring Security 的主要入口是 **Servlet Filter 链**（FilterChainProxy），它发生在 **DispatcherServlet 之前**。
+    - 401/403 往往不是 controller 的问题：
+      - **401**：未认证（Authentication 不存在/失败）
+      - **403**：已认证但不允许（权限不足）或 **CSRF 缺失**（常见于 POST/PUT/DELETE）
+    - 工程落地建议：把“教学安全端点”与“既有教学主线端点”隔离，避免影响现有 Labs（本模块采用只保护 `/api/advanced/secure/**` 的策略）。
 
-## C. 机制主线（请求从哪进、在哪拦）
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootWebMvcSecurityLabTest`
+
+## 机制主线（请求从哪进、在哪拦）
 
 请求进入顺序（从外到内）：
 
@@ -51,7 +54,7 @@
   - 401/403：断言 `handler/resolvedException` 为 `null`
   - 400（binder/validation/converter）：断言 `resolvedException` 是具体异常类型（例如 `BindException`/`MethodArgumentNotValidException`/`HttpMessageNotReadableException`）
 
-## D. 源码与断点
+## 源码与断点
 
 推荐断点（按常见问题）：
 
@@ -67,7 +70,7 @@
 - 403（CSRF）：
   - `org.springframework.security.web.csrf.CsrfFilter#doFilterInternal`
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - Lab：`BootWebMvcSecurityLabTest`
   - （边界证据链增强）`BootWebMvcSecurityVsMvcExceptionBoundaryLabTest`
@@ -79,16 +82,14 @@
 - `SecurityConfig`：`springboot-web-mvc/src/main/java/com/learning/springboot/bootwebmvc/part08_security_observability/SecurityConfig.java`
 - `SecureDemoController`：`springboot-web-mvc/src/main/java/com/learning/springboot/bootwebmvc/part08_security_observability/SecureDemoController.java`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 - **引入 security 依赖后，slice 测试（@WebMvcTest）默认也会受到安全过滤器影响**：要么显式导入你的 `SecurityFilterChain`（本模块示例），要么在特定测试里关闭 filters（不推荐默认关闭）。
 - **CSRF 的“误伤”**：如果你没有刻意控制 CSRF，原本正常的 POST 会突然 403。真实工程里通常对纯 API 关闭 CSRF，但教学场景可以保留一小段端点用于演示分支。
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 下一章进入 Observability：用 Interceptor 与 Actuator 指标把“请求耗时/请求量”变成可观察事实。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

@@ -25,8 +25,8 @@ CONTENT_ROOT = SITE_ROOT / "content"
 GENERATED_ROOT = SITE_ROOT / ".generated" / "docs"
 GENERATED_MKDOCS_YML = SITE_ROOT / ".generated" / "mkdocs.yml"
 BASE_MKDOCS_YML = SITE_ROOT / "mkdocs.yml"
-AUTO_NAV_BEGIN = "# BEGIN AUTO MODULE NAV"
-AUTO_NAV_END = "# END AUTO MODULE NAV"
+AUTO_NAV_BEGIN = "# BEGIN AUTO BOOK NAV"
+AUTO_NAV_END = "# END AUTO BOOK NAV"
 
 
 def discover_modules(repo_root: Path) -> list[str]:
@@ -252,9 +252,11 @@ def build_module_nav_entries(module: str) -> list[str]:
 
 def generate_mkdocs_config(modules: list[str]) -> None:
     """
-    生成 docs-site/.generated/mkdocs.yml：在基础 mkdocs.yml 上注入“模块详细目录”。
+    生成 docs-site/.generated/mkdocs.yml：在基础 mkdocs.yml 上注入“书（Book-only）目录”。
 
-    这样做的原因：模块章节很多（200+），手写 nav 难维护；以同步脚本生成目录更稳定。
+    设计目标：
+    1) 侧边栏仅展示“主线之书”章节树；
+    2) 各模块 docs 仍会同步到站点 docs_dir（作为素材库/搜索命中/书内引用目标），但不再生成到 nav。
     """
     if not BASE_MKDOCS_YML.exists():
         return
@@ -285,38 +287,46 @@ def generate_mkdocs_config(modules: list[str]) -> None:
             break
 
     if begin_idx == -1 or end_idx == -1 or end_idx <= begin_idx:
-        print("[WARN] 未在 docs-site/mkdocs.yml 中找到 AUTO MODULE NAV 标记，跳过生成 mkdocs 配置。", file=sys.stderr)
+        print("[WARN] 未在 docs-site/mkdocs.yml 中找到 AUTO BOOK NAV 标记，跳过生成 mkdocs 配置。", file=sys.stderr)
         return
 
-    preferred_order = [
-        "springboot-basics",
-        "spring-core-beans",
-        "spring-core-aop",
-        "spring-core-tx",
-        "springboot-web-mvc",
+    auto_lines: list[str] = []
+    mainline_chapters = [
+        ("第 0 章：Start Here（如何运行与阅读）", "book/00-start-here.md"),
+        ("第 1 章：Boot 启动与配置主线", "book/01-boot-basics-mainline.md"),
+        ("第 2 章：IoC 容器主线（Beans）", "book/02-ioc-container-mainline.md"),
+        ("第 3 章：AOP/代理主线", "book/03-aop-proxy-mainline.md"),
+        ("第 4 章：织入主线（LTW/CTW）", "book/04-aop-weaving-mainline.md"),
+        ("第 5 章：事务主线（Tx）", "book/05-tx-mainline.md"),
+        ("第 6 章：Web MVC 请求主线", "book/06-webmvc-mainline.md"),
+        ("第 7 章：Security 主线", "book/07-security-mainline.md"),
+        ("第 8 章：Data JPA 主线", "book/08-data-jpa-mainline.md"),
+        ("第 9 章：Cache 主线", "book/09-cache-mainline.md"),
+        ("第 10 章：Async/Scheduling 主线", "book/10-async-scheduling-mainline.md"),
+        ("第 11 章：Events 主线", "book/11-events-mainline.md"),
+        ("第 12 章：Resources 主线", "book/12-resources-mainline.md"),
+        ("第 13 章：Profiles 主线", "book/13-profiles-mainline.md"),
+        ("第 14 章：Validation 主线", "book/14-validation-mainline.md"),
+        ("第 15 章：Actuator/Observability 主线", "book/15-actuator-observability-mainline.md"),
+        ("第 16 章：Web Client 主线", "book/16-web-client-mainline.md"),
+        ("第 17 章：Testing 主线", "book/17-testing-mainline.md"),
+        ("第 18 章：Business Case 收束", "book/18-business-case.md"),
     ]
 
-    ordered: list[str] = []
-    for m in preferred_order:
-        if m in modules:
-            ordered.append(m)
-    for m in modules:
-        if m not in ordered:
-            ordered.append(m)
+    for title, path in mainline_chapters:
+        auto_lines.append(f"      - {yaml_quote(title)}: {path}")
 
-    auto_lines: list[str] = []
-    auto_lines.append(f'      - {yaml_quote("推荐顺序（主线）")}:')
-    for m in preferred_order:
-        if m in modules:
-            auto_lines.append(f'          - {yaml_quote(m)}: {m}/docs/README.md')
-
-    auto_lines.append(f'      - {yaml_quote("全部模块（快速入口）")}:')
-    for m in ordered:
-        auto_lines.append(f'          - {yaml_quote(m)}: {m}/docs/README.md')
-
-    auto_lines.append(f'      - {yaml_quote("全部模块（详细目录）")}:')
-    for m in ordered:
-        auto_lines.extend(build_module_nav_entries(m))
+    auto_lines.append(f'      - {yaml_quote("附录")}:')
+    appendix_pages = [
+        ("Labs 索引（可跑入口）", "book/labs-index.md"),
+        ("Debugger Pack（断点/观察点/关键分支）", "book/debugger-pack.md"),
+        ("Exercises & Solutions（练习与答案）", "book/exercises-and-solutions.md"),
+        ("迁移规则（合并/拆章/redirect/断链）", "book/migration-rules.md"),
+        ("写作指南（如何写得更像书）", "book-style.md"),
+        ("模块文档总览（素材库入口）", "modules/index.md"),
+    ]
+    for title, path in appendix_pages:
+        auto_lines.append(f"          - {yaml_quote(title)}: {path}")
 
     GENERATED_MKDOCS_YML.parent.mkdir(parents=True, exist_ok=True)
     out_lines = template_lines[:begin_idx] + auto_lines + template_lines[end_idx + 1 :]

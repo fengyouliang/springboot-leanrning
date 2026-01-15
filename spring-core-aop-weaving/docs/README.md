@@ -1,29 +1,21 @@
-# Spring Core AOP Weaving 文档索引
+# AOP Weaving（织入：LTW/CTW）：目录
 
-> 目标：把 **AspectJ weaving（LTW/CTW）** 的心智模型、能力边界与可复现实验（Labs/Exercises）串成“像书本一样”的结构。
+> 织入是“代理之外的另一条路”：建议先搞清代理 vs 织入的边界，再决定 LTW/CTW，最后用 join point 维度把落点和风险控制住。
 
----
+## 从这里开始（建议顺序）
 
-## Part 00｜阅读指南
-- [00-deep-dive-guide](part-00-guide/00-deep-dive-guide.md)
+1. [主线时间线](part-00-guide/03-mainline-timeline.md)
+2. [深挖导读](part-00-guide/00-deep-dive-guide.md)
 
-## Part 01｜心智模型（Proxy vs Weaving）
-- [01-proxy-vs-weaving](part-01-mental-model/01-proxy-vs-weaving.md)
+## 顺读主线
 
-## Part 02｜LTW：Load-Time Weaving（-javaagent）
-- [02-ltw-basics](part-02-ltw/02-ltw-basics.md)
+- [代理 vs 织入](part-01-mental-model/01-proxy-vs-weaving.md)
+- [LTW 基础](part-02-ltw/02-ltw-basics.md)
+- [CTW 基础](part-03-ctw/03-ctw-basics.md)
+- [Join Point 菜谱](part-04-join-points/04-join-point-cookbook.md)
 
-## Part 03｜CTW：Compile-Time Weaving（编译期织入）
-- [03-ctw-basics](part-03-ctw/03-ctw-basics.md)
+## 排坑与自检
 
-## Part 04｜Join Point & Pointcut Cookbook
-- [04-join-point-cookbook](part-04-join-points/04-join-point-cookbook.md)
+- [常见坑](appendix/90-common-pitfalls.md)
+- [自检](appendix/99-self-check.md)
 
-## Appendix｜附录
-- [90-common-pitfalls](appendix/90-common-pitfalls.md)
-- [99-self-check](appendix/99-self-check.md)
-
----
-
-## 如何验证（建议）
-- 运行本模块测试：`mvn -pl spring-core-aop-weaving test`

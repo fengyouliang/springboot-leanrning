@@ -1,20 +1,32 @@
-# 文档站首页
+# Spring Boot Learning：主线之书
 
-这个站点把仓库内各模块的 `docs/` 聚合成一个可搜索、可侧边栏导航的静态站点。
+这个站点把仓库里的多模块 `docs/` 聚合成一个可搜索的静态站点，并且把“跨模块主线”整理成一套 **Book-only** 的书籍目录。
 
-## Start Here
+---
 
-如果你是第一次打开本仓库，建议从这两个入口开始：
+## Start Here（推荐入口）
 
-- 学习路线图：`helloagents/wiki/learning-path.md`
-- Beans（IoC 容器）：`spring-core-beans/docs/README.md`
+- 书的目录与阅读方法：[主线之书 · 目录](book/index.md)
+- 直接开始跑与读：[第 0 章：Start Here](book/00-start-here.md)
 
-## 阅读方式（专栏合集风格）
+---
 
-- 把每一篇当成“独立文章”读：先看现象/问题，再顺着机制解释往下走。
-- 把站点当成“书的目录与索引”：侧边栏与搜索负责定位，正文负责讲清楚。
+## 先跑起来（最小闭环）
 
-## 模块导航
+```bash
+mvn -q test
+```
 
-见：`modules/index.md`
+只跑单模块（更快）：
 
+```bash
+mvn -q -pl <module> test
+```
+
+---
+
+## 模块 docs（素材库/索引）
+
+侧边栏不再展示“模块 → 章节”的全量目录；模块 docs 仍然存在，并可通过书内链接与搜索访问。
+
+- 模块入口总览：[modules/index.md](modules/index.md)

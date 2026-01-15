@@ -1,18 +1,21 @@
 # 07. AOP 的容器主线：AutoProxyCreator 作为 BPP（Advisor / Advice / Pointcut 三层模型）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**07. AOP 的容器主线：AutoProxyCreator 作为 BPP（Advisor / Advice / Pointcut 三层模型）**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreAopAutoProxyCreatorInternalsLabTest`
+
+## 机制主线
 
 你会看到三件事如何串起来：
 
@@ -148,12 +151,12 @@ AutoProxyCreator 之所以“强”，不是因为它“会代理”，而是因
 
 多代理叠加与顺序的完整解释见：[09 - 多代理叠加与顺序](../part-03-proxy-stacking/09-multi-proxy-stacking.md)。
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreAopAutoProxyCreatorInternalsLabTest`
@@ -189,7 +192,7 @@ mvn -pl spring-core-aop -Dtest=SpringCoreAopAutoProxyCreatorInternalsLabTest tes
 
 你应该能在断点里回答：
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 这也是你在真实项目里遇到循环依赖/代理边界时必须具备的“容器视角解释能力”。
 
@@ -197,7 +200,7 @@ mvn -pl spring-core-aop -Dtest=SpringCoreAopAutoProxyCreatorInternalsLabTest tes
 - 没命中 pointcut（匹配问题）
 - 被跳过/被排除/不满足可代理条件（边界问题）
 
-## G. 小结与下一章
+## 小结与下一章
 
 - `AbstractApplicationContext#refresh`
   - `PostProcessorRegistrationDelegate#registerBeanPostProcessors`
@@ -207,8 +210,6 @@ mvn -pl spring-core-aop -Dtest=SpringCoreAopAutoProxyCreatorInternalsLabTest tes
       - `initializeBean`
         - `applyBeanPostProcessorsAfterInitialization`
           - `AbstractAutoProxyCreator#postProcessAfterInitialization`
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

@@ -1,22 +1,25 @@
 # 04：ExceptionResolvers（异常从哪来、又被谁“翻译”成状态码）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**04：ExceptionResolvers（异常从哪来、又被谁“翻译”成状态码）**
 - 目标：把“为什么是 400/404/405/406/415/500”这类问题，从经验判断升级为：**能指出异常发生在哪一段（mapping / binder / converter / controller），以及是谁把它翻译成 HTTP 响应**。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 你看到的状态码，很多时候不是 controller 决定的，而是 `HandlerExceptionResolver` 链路把异常映射出来的结果。
-- 三个你最常遇到的 resolver（按“理解优先级”）：
-  1. **`ExceptionHandlerExceptionResolver`**：你的 `@ControllerAdvice/@ExceptionHandler` 生效的地方
-  2. **`ResponseStatusExceptionResolver`**：`@ResponseStatus` / `ResponseStatusException` 等语义化异常的映射
-  3. **`DefaultHandlerExceptionResolver`**：Spring MVC 内置异常（405/415/406/400 等）的默认翻译器
-- 排障黄金路线：**先用测试把现象固化 → 再用 `resolvedException` 确定异常类型 → 再定位它来自链路的哪一段 → 最后用断点看 resolver 选择分支**。
+    - 你看到的状态码，很多时候不是 controller 决定的，而是 `HandlerExceptionResolver` 链路把异常映射出来的结果。
+    - 三个你最常遇到的 resolver（按“理解优先级”）：
+      1. **`ExceptionHandlerExceptionResolver`**：你的 `@ControllerAdvice/@ExceptionHandler` 生效的地方
+      2. **`ResponseStatusExceptionResolver`**：`@ResponseStatus` / `ResponseStatusException` 等语义化异常的映射
+      3. **`DefaultHandlerExceptionResolver`**：Spring MVC 内置异常（405/415/406/400 等）的默认翻译器
+    - 排障黄金路线：**先用测试把现象固化 → 再用 `resolvedException` 确定异常类型 → 再定位它来自链路的哪一段 → 最后用断点看 resolver 选择分支**。
 
-## C. 机制主线（DispatcherServlet 的异常处理段落）
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootWebMvcTestingDebuggingLabTest`
+
+## 机制主线（DispatcherServlet 的异常处理段落）
 
 你可以把异常处理理解成 DispatcherServlet 主链路的一个固定“尾部阶段”：
 
@@ -53,7 +56,7 @@
   - 排障建议：先证明“是否进入了 DispatcherServlet”（`handler/resolvedException` 证据链）再谈 resolver
   - 参考：Security 与 MVC 相对位置（含边界 Lab）：[part-08-security-observability/01-security-filterchain-and-mvc.md](../part-08-security-observability/01-security-filterchain-and-mvc.md)
 
-## D. 源码与断点（把“谁翻译的”看清）
+## 源码与断点（把“谁翻译的”看清）
 
 建议断点（从外到内）：
 - `org.springframework.web.servlet.DispatcherServlet#doDispatch`
@@ -63,7 +66,7 @@
 - `org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver#doResolveException`
 - `org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver#doResolveException`
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 建议按“先能定位，再谈优化契约”的顺序跑：
 
@@ -73,7 +76,7 @@
 - ProblemDetail 对照：`BootWebMvcProblemDetailLabTest`
 - Security（401/403/CSRF）分支：`BootWebMvcSecurityLabTest` / `BootWebMvcSecurityVsMvcExceptionBoundaryLabTest`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 - **坑 1：把 400 全当成校验失败**
   - 400 可能来自：JSON 解析失败 / type mismatch / validation failed
@@ -85,11 +88,9 @@
 - **坑 3：把 401/403 当成 MVC 的异常处理**
   - 很多安全分支发生在 FilterChain 中：优先从 FilterChainProxy/ExceptionTranslationFilter 入手
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本章完成后：进入 Part 04，把 406/415 与 Jackson 严格模式结合起来，建立“契约可控”的工程化闭环。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

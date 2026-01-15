@@ -1,29 +1,32 @@
 # 00 - Deep Dive Guide（springboot-web-mvc）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**00 - Deep Dive Guide（springboot-web-mvc）**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-### 先跑哪个 Lab（3 分钟开跑）
+    ### 先跑哪个 Lab（3 分钟开跑）
 
-先跑通一个最小入口，保证环境与依赖没问题：
+    先跑通一个最小入口，保证环境与依赖没问题：
 
-```bash
-mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcLabTest#pingEndpointReturnsPong test
-```
+    ```bash
+    mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcLabTest#pingEndpointReturnsPong test
+    ```
 
-然后把断点放在“分支发生处”（而不是满屏日志）：
-- 断点地图（Part 01 Debugger Pack）：`part-00-guide/02-breakpoint-map.md`
+    然后把断点放在“分支发生处”（而不是满屏日志）：
+    - 断点地图（Part 01 Debugger Pack）：`part-00-guide/02-breakpoint-map.md`
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootWebMvcLabTest` / `BootWebMvcSpringBootLabTest`
+
+## 机制主线
 
 本模块的“深挖主线”不是背注解，而是能把一次请求分解成阶段，并能解释每个阶段的关键分支：
 
@@ -93,12 +96,12 @@ mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcLabTest#pingEndpointReturnsPong t
 - `BootWebMvcSecurityLabTest` / `BootWebMvcObservabilityLabTest`
 - `BootWebMvcErrorViewLabTest` / `BootWebMvcViewLabTest`
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`BootWebMvcLabTest` / `BootWebMvcSpringBootLabTest`
@@ -130,7 +133,7 @@ mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcLabTest#pingEndpointReturnsPong t
 - `BootWebMvcTestingDebuggingLabTest`
 - `BootWebMvcExerciseTest`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 建议直接把坑点当作“清单”执行（先复现、再断点、最后修复）：
 
@@ -168,11 +171,9 @@ mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcLabTest#pingEndpointReturnsPong t
 24. [90-common-pitfalls](../appendix/90-common-pitfalls.md)
 25. [99-self-check](../appendix/99-self-check.md)
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

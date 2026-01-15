@@ -1,18 +1,22 @@
 # 15. 实例化前短路：postProcessBeforeInstantiation 能让构造器根本不执行
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**15. 实例化前短路：postProcessBeforeInstantiation 能让构造器根本不执行**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreBeansPreInstantiationLabTest`
+    - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPreInstantiationLabTest.java`
+
+## 机制主线
 
 这一章讲一个“非常像魔法”的容器机制：
 
@@ -91,12 +95,12 @@
 
 ## 面试常问（实例化前短路的风险）
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreBeansPreInstantiationLabTest`
@@ -149,7 +153,7 @@
 - 常见追问：怎么证明某个 bean 命中了短路？断点怎么下？
   - 答题要点：以 `resolveBeforeInstantiation` 为入口，沿着 `applyBeanPostProcessorsBeforeInstantiation` 找到具体哪个 `InstantiationAwareBeanPostProcessor` 返回了替身。
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 ## 4. 常见坑
 
@@ -162,15 +166,13 @@
 - **坑 3：学习可以用，工程里要非常谨慎**
   - 它属于极强的扩展点：一旦用错，系统会变得难以推理。
 
-## G. 小结与下一章
+## 小结与下一章
 
 - `DefaultListableBeanFactory#preInstantiateSingletons`：非 lazy 单例通常在 refresh 期间从这里开始批量创建（本章现象的触发点）
 - `AbstractAutowireCapableBeanFactory#createBean`：创建入口（会先尝试“实例化前短路”）
 - `AbstractAutowireCapableBeanFactory#resolveBeforeInstantiation`：调用 `postProcessBeforeInstantiation` 的关键钩子
 - `InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation`：短路扩展点（在“还没走默认实例化”前直接返回对象）
 - `AbstractAutowireCapableBeanFactory#doCreateBean`：默认创建主流程（短路成功时通常不会走到这里）
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

@@ -1,18 +1,21 @@
 # 00. 深挖指南：把 weaving 的“结论 → 实验 → 排障路径”跑通
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**00. 深挖指南：把 weaving 的“结论 → 实验 → 排障路径”跑通**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`AspectjCtwLabTest` / `AspectjLtwLabTest`
+
+## 机制主线
 
 本模块要解决的第一个问题是“分流”：
 
@@ -70,7 +73,7 @@
 5. **高级 pointcut：constructor/field/withincode/cflow 都可断言**
    - 验证：`AspectjLtwLabTest#ltw_constructorCallAndExecution_canBeIntercepted` / `AspectjLtwLabTest#ltw_withincode_limitsJoinPointByCallerMethodBody`
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
@@ -85,7 +88,7 @@
 - `aop.xml` 是否被加载：
   - 确认 `spring-core-aop-weaving/src/test/resources/META-INF/aop.xml` 在 test classpath（否则 include 范围再对也不会织）
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`AspectjCtwLabTest` / `AspectjLtwLabTest`
@@ -119,15 +122,13 @@ LTW 是否生效，最常见的判断点不是“有没有写 @Aspect”，而�
 - 确认织入范围是否正确（只织入目标包/目标类）
 - 确认运行时 classpath 上使用的是“织入后的 class”（而不是未织入版本）
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 - （本章坑点待补齐：建议先跑一次 E，再回看断言失败场景与边界条件。）
 
-## G. 小结与下一章
+## 小结与下一章
 
 下一章：[`01-proxy-vs-weaving`](../part-01-mental-model/01-proxy-vs-weaving.md)
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

@@ -1,21 +1,18 @@
-# Spring Core Profiles 文档索引
+# Spring Profiles：目录
 
-> 目标：把 Profile 的“激活 → 条件匹配 → Bean 选择”讲清楚，并能用最小测试复现。
+> Profile 决定“哪些 Bean 会进容器”：遇到环境不一致、条件不生效、Bean 缺失等问题，建议优先从这里核对。
 
----
+## 从这里开始（建议顺序）
 
-## Part 00｜阅读指南
-- [00-deep-dive-guide](part-00-guide/00-deep-dive-guide.md)
+1. [主线时间线](part-00-guide/03-mainline-timeline.md)
+2. [深挖导读](part-00-guide/00-deep-dive-guide.md)
 
-## Part 01｜Profiles 基础（Activation & Selection）
-- [01-profile-activation-and-bean-selection](part-01-profiles/01-profile-activation-and-bean-selection.md)
+## 顺读主线
 
-## Appendix｜附录
-- [90-common-pitfalls](appendix/90-common-pitfalls.md)
-- [99-self-check](appendix/99-self-check.md)
+- [Profile 激活与 Bean 选择](part-01-profiles/01-profile-activation-and-bean-selection.md)
 
----
+## 排坑与自检
 
-## 如何验证（建议）
-- 运行本模块测试：`mvn -pl spring-core-profiles test`
+- [常见坑](appendix/90-common-pitfalls.md)
+- [自检](appendix/99-self-check.md)
 

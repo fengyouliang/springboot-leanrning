@@ -1,18 +1,21 @@
 # 00 - Deep Dive Guide（springboot-basics）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**00 - Deep Dive Guide（springboot-basics）**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootBasicsDefaultLabTest` / `BootBasicsDevLabTest` / `BootBasicsOverrideLabTest`
+
+## 机制主线
 
 本模块的目标不是背配置项，而是把“**配置从哪来**、**谁覆盖谁**、**Profile 到底影响了什么**”变成可断言的结论。
 
@@ -73,7 +76,7 @@ Profile 很容易被误解为“只影响配置文件”。实际上它至少影
 3. **测试注入覆盖：测试级 properties 的优先级更高**
    - 验证：`BootBasicsOverrideLabTest#testPropertiesOverrideApplicationProperties` / `BootBasicsOverrideLabTest#beansSeeOverriddenProperties`
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
@@ -84,7 +87,7 @@ Profile 很容易被误解为“只影响配置文件”。实际上它至少影
 - 最终取值：`org.springframework.core.env.PropertySourcesPropertyResolver#getProperty`
 - 绑定入口（可选深挖）：`org.springframework.boot.context.properties.bind.Binder#bind`
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`BootBasicsDefaultLabTest` / `BootBasicsDevLabTest` / `BootBasicsOverrideLabTest`
@@ -105,7 +108,7 @@ Profile 很容易被误解为“只影响配置文件”。实际上它至少影
 - `BootBasicsOverrideLabTest`
 - `BootBasicsExerciseTest`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 ### 坑点 1：配置覆盖了，但 Bean 没切换（或反过来）
 
@@ -121,11 +124,9 @@ Profile 很容易被误解为“只影响配置文件”。实际上它至少影
 3. [90-common-pitfalls](../appendix/90-common-pitfalls.md)
 4. [99-self-check](../appendix/99-self-check.md)
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

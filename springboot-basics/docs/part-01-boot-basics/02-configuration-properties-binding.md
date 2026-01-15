@@ -1,18 +1,22 @@
 # 02：`@ConfigurationProperties` 绑定与类型转换
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**02：`@ConfigurationProperties` 绑定与类型转换**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootBasicsDefaultLabTest` / `BootBasicsOverrideLabTest`
+    - Test file：`springboot-basics/src/test/java/com/learning/springboot/bootbasics/part01_boot_basics/BootBasicsDefaultLabTest.java` / `springboot-basics/src/test/java/com/learning/springboot/bootbasics/part01_boot_basics/BootBasicsOverrideLabTest.java` / `springboot-basics/src/test/java/com/learning/springboot/bootbasics/part00_guide/BootBasicsExerciseTest.java`
+
+## 机制主线
 
 本章聚焦 `@ConfigurationProperties`：它如何把 `application.properties` 的键值绑定到 Java 对象，以及常见失败模式。
 
@@ -28,12 +32,12 @@
 - 只改了 `application.properties` 但没生效：可能是 profile 覆盖/测试覆盖导致你看的不是那份配置。
 - 断言依赖完整异常全文：不同版本异常文本可能略变，建议断言关键片段即可（比如“绑定失败/类型转换失败”）。
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`BootBasicsDefaultLabTest` / `BootBasicsOverrideLabTest`
@@ -63,15 +67,13 @@
 - 类型错误：
   - 先写一个“必然失败”的实验，用测试断言固定错误信息关键片段（Exercise 引导你做）
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 ## 常见坑
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

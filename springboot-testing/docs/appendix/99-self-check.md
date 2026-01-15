@@ -1,18 +1,21 @@
 # 99 - Self Check（springboot-testing）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**99 - Self Check（springboot-testing）**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootTestingMockBeanLabTest` / `GreetingControllerSpringBootLabTest`
+
+## 机制主线
 
 这一章用“对照 + 断言”复盘三件事：
 
@@ -20,12 +23,12 @@
 2. **mock 的替换边界**：`@MockBean` 是“替换 Spring 容器里的 bean”，不是 Mockito 的普通字段 mock
 3. **排障分流**：启动失败/bean 缺失/行为不一致时，先确认测试类型与上下文范围
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章未显式引用 LabTest，先注入模块默认 LabTest 作为“合规兜底入口”（后续可逐章细化）。
 - Lab：`BootTestingMockBeanLabTest` / `GreetingControllerSpringBootLabTest`
@@ -41,7 +44,7 @@
 
 - `BootTestingExerciseTest`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 ### 坑点 1：把 `@Mock` 当成 `@MockBean`，导致“mock 了但并未生效”
 
@@ -54,11 +57,9 @@
   - slice（WebMvcTest）里用 `@MockBean` 兜底 controller 依赖：`GreetingControllerWebMvcLabTest#returnsGreetingFromMockedService`
 - Fix：需要影响 Spring 注入链就用 `@MockBean`；需要测试真实集成边界就减少 mock 并用 `@SpringBootTest`
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

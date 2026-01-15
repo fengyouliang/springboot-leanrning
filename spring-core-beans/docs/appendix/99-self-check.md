@@ -13,7 +13,7 @@
 - 再去对应章节/实验里验证
 - 最后再启用 Exercises 把理解落实成可运行的结论
 
-## A. 心智模型（对应 01/06）
+## 心智模型（对应 01/06）
 
 - 你能不能用一句话区分：`BeanDefinition`（定义元数据） vs bean instance（运行时对象）？
 - BFPP/BPP/BDRPP 分别“改的是定义还是实例”？它们在哪个阶段发生？
@@ -23,20 +23,26 @@
 2) BFPP 与 BPP 的差别是什么？它们分别作用在“定义层”还是“实例层”？
 3) 为什么说“自动装配本质上也是在注册 BeanDefinition”？
 
-## B. 注册入口（对应 02/10）
+!!! summary "本章要点"
 
-- 你能列出 4 条常见注册入口，并说明它们“注册的是谁/发生在什么时候”吗？
-  - `@ComponentScan`
-  - `@Configuration + @Bean`
-  - `@Import`（含 `ImportSelector`）
-  - `ImportBeanDefinitionRegistrar`
-- Spring Boot 自动装配对“Bean 注册”的本质影响是什么？（提示：它更像“按条件批量 @Import”）
+    - 你能列出 4 条常见注册入口，并说明它们“注册的是谁/发生在什么时候”吗？
+      - `@ComponentScan`
+      - `@Configuration + @Bean`
+      - `@Import`（含 `ImportSelector`）
+      - `ImportBeanDefinitionRegistrar`
+    - Spring Boot 自动装配对“Bean 注册”的本质影响是什么？（提示：它更像“按条件批量 @Import”）
 
-4) `@ComponentScan`、`@Bean`、`@Import` 这三种入口分别解决什么问题？
-5) `ImportSelector` 与 `ImportBeanDefinitionRegistrar` 的角色差异是什么？
-6) 你如何解释 Spring Boot 自动装配“从哪里拿到要导入的配置类列表”？
+    4) `@ComponentScan`、`@Bean`、`@Import` 这三种入口分别解决什么问题？
+    5) `ImportSelector` 与 `ImportBeanDefinitionRegistrar` 的角色差异是什么？
+    6) 你如何解释 Spring Boot 自动装配“从哪里拿到要导入的配置类列表”？
 
-## C. 依赖注入（对应 03）
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreBeansLabTest` / `SpringCoreBeansContainerLabTest` / `SpringCoreBeansBootstrapInternalsLabTest` / `SpringCoreBeansInjectionAmbiguityLabTest` / `SpringCoreBeansAutowireCandidateSelectionLabTest` / `SpringCoreBeansLifecycleCallbackOrderLabTest` / `SpringCoreBeansRegistryPostProcessorLabTest` / `SpringCoreBeansPostProcessorOrderingLabTest` / `SpringCoreBeansEarlyReferenceLabTest` / `SpringCoreBeansExceptionNavigationLabTest` / `SpringCoreBeansBeanGraphDebugLabTest`
+    - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansExerciseTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`
+
+## 依赖注入（对应 03）
 
 - 当一个接口有两个实现时，`@Autowired` 单注入会发生什么？你会优先用 `@Qualifier` 还是 `@Primary`，为什么？
 - `@Order` 能不能解决单注入歧义？它主要解决什么问题？
@@ -47,7 +53,7 @@
 8) `ObjectProvider` 解决的是什么问题？它为什么有助于 prototype 注入？
 9) 遇到 `NoUniqueBeanDefinitionException` 时，你的排查顺序是什么？
 
-## D. Scope 与生命周期（对应 04/05）
+## Scope 与生命周期（对应 04/05）
 
 - `singleton` 与 `prototype` 的真实语义分别是什么？它们的“创建时机/销毁时机”有什么根本区别？
 - prototype 注入 singleton 后为什么“看起来像单例”？你能给出 2 种正确的解决方式吗？
@@ -57,7 +63,7 @@
 11) `@PostConstruct` 在 bean 创建流程的哪个阶段触发？
 12) 为什么 prototype 的 `@PreDestroy` 常常不会触发？
 
-## E. 机制题（对应 07/08/09）
+## 机制题（对应 07/08/09）
 
 - 为什么 `@Configuration(proxyBeanMethods=false)` 下，配置类内部 `@Bean` 方法互调可能 new 出额外对象？最推荐的写法是什么？
 - `FactoryBean` 的两条硬规则是什么？（提示：`name` vs `&name`）
@@ -102,7 +108,7 @@
 28) alias 会不会影响候选选择？它主要影响哪些匹配路径（按名匹配、qualifier 匹配）？
 29) 什么时候应该避免 relying on by-name fallback？你会如何把依赖关系改写得更明确？
 
-## F. 动手题（建议直接做 Exercises）
+## 动手题（建议直接做 Exercises）
 
 这些题都已经在本模块的 Exercises 里给出（默认 `@Disabled`）：
 
@@ -116,7 +122,7 @@
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`
 推荐断点：`DefaultListableBeanFactory#doResolveDependency`、`AbstractAutowireCapableBeanFactory#doCreateBean`、`AbstractAutowireCapableBeanFactory#initializeBean`
 
-## G. First Pass（10 个最小闭环入口，按 Lab 自测）
+## First Pass（10 个最小闭环入口，按 Lab 自测）
 
 如果你不想一次性把整套章节都读完，想先把“主线 + 常见坑点”跑通一遍，可以按下面 10 个入口做自测：每个入口只要求你写 1–2 句结论（定义层/实例层/时机/顺序/断点入口）。
 

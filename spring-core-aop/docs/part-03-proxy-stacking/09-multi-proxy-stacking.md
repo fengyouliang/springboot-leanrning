@@ -1,18 +1,21 @@
 # 09. 多切面/多代理叠加与顺序：AOP/Tx/Cache/Security 代理链如何叠、如何看
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**09. 多切面/多代理叠加与顺序：AOP/Tx/Cache/Security 代理链如何叠、如何看**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreAopMultiProxyStackingLabTest` / `SpringCoreAopRealWorldStackingLabTest`
+
+## 机制主线
 
 真实项目里你几乎一定会遇到“叠加”：
 
@@ -168,12 +171,12 @@ AutoProxyCreator 主线详见：[07 - AutoProxyCreator 主线](../part-02-autopr
 
 如果你能把这 5 步跑通，基本就能独立定位真实项目里 AOP/Tx/Cache/Security “不生效”与“顺序怪”的大多数原因。
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreAopMultiProxyStackingLabTest` / `SpringCoreAopRealWorldStackingLabTest`
@@ -209,7 +212,7 @@ AutoProxyCreator 主线详见：[07 - AutoProxyCreator 主线](../part-02-autopr
 
 建议断点配合：
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 ### 坑点 1：把“顺序问题”一股脑归到 `@Order`，忽略了 BPP 顺序与 advisor 顺序是两套系统
 
@@ -222,12 +225,10 @@ AutoProxyCreator 主线详见：[07 - AutoProxyCreator 主线](../part-02-autopr
   - 多层 proxy（套娃）可被识别：`SpringCoreAopMultiProxyStackingLabTest#nested_proxy_can_wrap_an_existing_proxy_and_is_detectable_via_target_introspection`
 - Fix：先判断你在排查“容器阶段顺序”还是“调用阶段顺序”，再选对观察点（BPP 列表 vs advisors/interceptors）
 
-## G. 小结与下一章
+## 小结与下一章
 
 - `PostProcessorRegistrationDelegate#registerBeanPostProcessors`（决定 BPP 注册顺序）
 - `AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`（按列表顺序依次应用 BPP）
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

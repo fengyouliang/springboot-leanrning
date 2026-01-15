@@ -1,18 +1,21 @@
 # 10 real world stacking playbook
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**10 real world stacking playbook**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreAopAutoProxyCreatorInternalsLabTest` / `SpringCoreAopMultiProxyStackingLabTest` / `SpringCoreAopPointcutExpressionsLabTest` / `SpringCoreAopRealWorldStackingLabTest` / `SpringCoreAopProceedNestingLabTest`
+
+## 机制主线
 
 上一章（[09. multi-proxy-stacking](09-multi-proxy-stacking.md)）我们用“模拟 Tx/Cache/Security 的 Advisors”把两种叠加形态讲清楚了：
 
@@ -143,12 +146,12 @@
 
 ## 7. 下一步推荐
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreAopAutoProxyCreatorInternalsLabTest` / `SpringCoreAopMultiProxyStackingLabTest` / `SpringCoreAopPointcutExpressionsLabTest`
@@ -245,17 +248,15 @@ mvn -pl spring-core-aop -Dmaven.surefire.debug -Dtest=SpringCoreAopRealWorldStac
 - 想把“容器视角（AutoProxyCreator/BPP）”拉通：读 [07. autoproxy-creator-mainline](../part-02-autoproxy-and-pointcuts/07-autoproxy-creator-mainline.md) + 跑 `SpringCoreAopAutoProxyCreatorInternalsLabTest`
 - 想把“pointcut 误判”系统补齐：读 [08. pointcut-expression-system](../part-02-autoproxy-and-pointcuts/08-pointcut-expression-system.md) + 跑 `SpringCoreAopPointcutExpressionsLabTest`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 1) **入口没走 proxy（call path 问题）**：自调用/`new` 出来的对象/绕过 Spring 管理  
 2) **这次调用没命中（pointcut/matcher 问题）**：表达式误判、方法不可代理、可见性限制  
 3) **顺序/短路改变了语义（ordering/short-circuit 问题）**：缓存命中直接返回、鉴权提前抛错、事务边界位置不同
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

@@ -1,19 +1,18 @@
-# springboot-business-case 文档
+# Business Case（综合案例）：目录
 
-本模块是“业务化案例”：在一个小型业务闭环里串起 Web MVC + Validation + Events + AOP(Tracing) +（可选）事务等基础设施。
+> 这是“把模块串成系统”的入口：建议边跑边读，用端到端流程把理解固定下来。
 
-> 约束：本模块的 `src/main/java` 采用领域分层（`api/app/domain/events/tracing`），**不强行改为 Part 分包**；本次仅对 docs 与 tests 做 Part 化，确保“书本结构 + 可复现实验入口”成立。
+## 从这里开始（建议顺序）
 
-## Start Here
-- 导读：[part-00-guide/00-deep-dive-guide.md](part-00-guide/00-deep-dive-guide.md)
+1. [主线时间线](part-00-guide/03-mainline-timeline.md)
+2. [深挖导读](part-00-guide/00-deep-dive-guide.md)
 
-## Part 01 - Business Case（主线）
-- 01 架构与主流程：[part-01-business-case/01-architecture-and-flow.md](part-01-business-case/01-architecture-and-flow.md)
+## 顺读主线
 
-## Appendix
-- 常见坑：[appendix/90-common-pitfalls.md](appendix/90-common-pitfalls.md)
-- 自测题：[appendix/99-self-check.md](appendix/99-self-check.md)
+- [架构与端到端流转](part-01-business-case/01-architecture-and-flow.md)
 
-## Labs & Exercises（最小可复现入口）
-- Labs：`springboot-business-case/src/test/java/com/learning/springboot/bootbusinesscase/part01_business_case/BootBusinessCaseLabTest.java`
-- Exercises：`springboot-business-case/src/test/java/com/learning/springboot/bootbusinesscase/part00_guide/BootBusinessCaseExerciseTest.java`
+## 排坑与自检
+
+- [常见坑](appendix/90-common-pitfalls.md)
+- [自检](appendix/99-self-check.md)
+

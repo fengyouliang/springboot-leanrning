@@ -1,28 +1,31 @@
 # 05：ControllerAdvice 的匹配与优先级（为什么 advice 生效/不生效）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**05：ControllerAdvice 的匹配与优先级（为什么 advice 生效/不生效）**
 - 目标：把 `@ControllerAdvice/@RestControllerAdvice` 的两个核心问题拆开讲清楚：
   1. **匹配（applicable）**：这个 advice 到底作用于哪些 controller？
   2. **优先级（order）**：当多个 advice 都能处理同一异常时，最终是谁生效？
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- `@ControllerAdvice` 的行为不是“看请求路径”，而是**看 handler/controller 的类型是否匹配**（通过 selector：`basePackages` / `annotations` / `assignableTypes` 等）。
-- selector 组合有一个容易踩坑的点：**同一个 advice 上配置多个 selector 时，匹配语义是“并集（OR）”**——任一条件命中就算 applicable，而不是“交集（AND）”。
-- 当异常发生时，选择顺序可以概括为：
-  1. **先找 controller 自己的 `@ExceptionHandler`**
-  2. 再找 **可适用（applicable）的 ControllerAdvice 列表**
-  3. 在可适用的列表中，**按 `@Order` 排序后依次尝试匹配异常类型**（先匹配到的生效）
-- 真实工程里 “advice 不生效” 的常见原因并不是你 handler 写错了，而是：
-  - advice 根本没被加载进上下文（slice 测试尤为常见）
-  - selector 没匹配到 controller（包范围/注解/可赋值类型）
-  - 你处理的异常类型不对（异常发生在 converter/binder 阶段）
+    - `@ControllerAdvice` 的行为不是“看请求路径”，而是**看 handler/controller 的类型是否匹配**（通过 selector：`basePackages` / `annotations` / `assignableTypes` 等）。
+    - selector 组合有一个容易踩坑的点：**同一个 advice 上配置多个 selector 时，匹配语义是“并集（OR）”**——任一条件命中就算 applicable，而不是“交集（AND）”。
+    - 当异常发生时，选择顺序可以概括为：
+      1. **先找 controller 自己的 `@ExceptionHandler`**
+      2. 再找 **可适用（applicable）的 ControllerAdvice 列表**
+      3. 在可适用的列表中，**按 `@Order` 排序后依次尝试匹配异常类型**（先匹配到的生效）
+    - 真实工程里 “advice 不生效” 的常见原因并不是你 handler 写错了，而是：
+      - advice 根本没被加载进上下文（slice 测试尤为常见）
+      - selector 没匹配到 controller（包范围/注解/可赋值类型）
+      - 你处理的异常类型不对（异常发生在 converter/binder 阶段）
 
-## C. 机制主线（调用链 + 关键分支）
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootWebMvcAdviceMatchingLabTest`
+
+## 机制主线（调用链 + 关键分支）
 
 把它理解成 **两步过滤 + 一步排序**：
 
@@ -49,7 +52,7 @@
 
 > 你需要在脑子里把 “匹配集合” 与 “排序决策” 分开：先进入集合，再在集合内部比顺序。
 
-## D. 源码与断点（建议从 Lab 反推）
+## 源码与断点（建议从 Lab 反推）
 
 建议断点（按“选择逻辑”优先）：
 
@@ -63,7 +66,7 @@
 - 最终命中的 `@ExceptionHandler` 来自哪个类（controller 本地 vs 哪个 advice）
 - 当前 controller 的实际类型（是否被代理、包名是否符合 selector）
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 本模块提供两条互补证据链：
 
@@ -73,7 +76,7 @@
 - Lab：`BootWebMvcAdviceOrderLabTest`
   - 固定：当两个 advice 都能处理同一异常时，高优先级（更小 @Order）生效
 
-## F. 常见坑与边界（工程落地视角）
+## 常见坑与边界（工程落地视角）
 
 - **坑 1：以为 selector 看路径**
   - selector 的判断基于 controller 类型，而不是 request path；所以“路径对了但 advice 没生效”更可能是包范围/注解/类型不匹配。
@@ -89,11 +92,9 @@
   - 406/415、解析失败、类型不匹配等并不会进入你“以为会到的”异常类型。
   - 建议：先用 `resolvedException` 固定异常类型，再决定由哪个 advice 处理。
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本章完成后：进入 Part 04，把 406/415 与 Jackson/契约控制结合起来，形成“可观测 + 可回归”的工程闭环。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

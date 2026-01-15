@@ -1,5 +1,5 @@
 site_name: Spring Boot Learning（文档站）
-site_description: 多模块教学文档聚合站（专栏合集风格）
+site_description: 全站书籍化主线（Book-only）+ 模块 docs 作为素材库/索引
 site_dir: .site
 docs_dir: .generated/docs
 
@@ -27,14 +27,8 @@ markdown_extensions:
   - pymdownx.highlight
 
 nav:
-  - 首页: index.md
-  - 知识库:
-      - 总览: helloagents/wiki/overview.md
-      - 学习路线图: helloagents/wiki/learning-path.md
-      - 架构说明: helloagents/wiki/arch.md
-      - API 说明: helloagents/wiki/api.md
-      - 数据模型说明: helloagents/wiki/data.md
-  - 模块文档:
-      - 模块总览: modules/index.md
-      # BEGIN AUTO MODULE NAV
-      # END AUTO MODULE NAV
+  - 封面: index.md
+  - 主线之书:
+      - 目录与阅读方法: book/index.md
+      # BEGIN AUTO BOOK NAV
+      # END AUTO BOOK NAV

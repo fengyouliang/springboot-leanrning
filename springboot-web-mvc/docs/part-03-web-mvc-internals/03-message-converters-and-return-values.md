@@ -1,24 +1,27 @@
 # 03：HttpMessageConverter 与返回值处理（序列化发生在哪里）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**03：HttpMessageConverter 与返回值处理（序列化发生在哪里）**
 - 目标：讲清 `@ResponseBody`/`@RequestBody` 与 `HttpMessageConverter` 的关系，以及 406/415 属于链路的哪一段失败。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- `HttpMessageConverter` 是“HTTP body ↔ Java 对象”的关键桥梁；它同时影响入站（read）与出站（write）。
-- 406/415 通常不是你的业务逻辑问题，而是 **媒体类型与 converter 匹配失败**：`Accept`/`Content-Type`/`produces`/`consumes` 不一致。
+    - `HttpMessageConverter` 是“HTTP body ↔ Java 对象”的关键桥梁；它同时影响入站（read）与出站（write）。
+    - 406/415 通常不是你的业务逻辑问题，而是 **媒体类型与 converter 匹配失败**：`Accept`/`Content-Type`/`produces`/`consumes` 不一致。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootWebMvcContractJacksonLabTest`
+
+## 机制主线
 
 - 把证据链连接到 Part 04：用 `BootWebMvcContractJacksonLabTest` 固定 406/415 的可复现用例，再回到断点看 converter 选择分支。
 - 本模块还提供了一个“排障视角”的 Lab：`BootWebMvcTestingDebuggingLabTest`（用 `resolvedException` 固定分支入口）。
 - 本章新增一条“可观测证据链”：用 `ResponseBodyAdvice` 把 `selectedConverterType/selectedContentType` 写入响应头，直接回答“到底选了哪个 converter”。
 
-## D. 源码与断点
+## 源码与断点
 
 建议断点：
 - `AbstractMessageConverterMethodProcessor#writeWithMessageConverters`
@@ -61,7 +64,7 @@
 2. handler mapping 约束（produces/consumes）
 3. resolvedException（异常类型就是分支位置）
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - Lab：`BootWebMvcContractJacksonLabTest`
 - Lab：`BootWebMvcTestingDebuggingLabTest`
@@ -80,15 +83,13 @@ Spring MVC 在 `ResponseBodyAdvice#beforeBodyWrite(...)` 提供了两个非常�
 - endpoints：String/JSON/bytes/strict media type 四种返回值对照
 - Lab：`BootWebMvcMessageConverterTraceLabTest` 固定断言（不用猜、可回归）
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 - 你“只想对某个自定义 media type 严格校验”，不要全局改默认 ObjectMapper；更安全的做法是 **新增一个只支持该 media type 的 converter**。
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 下一章进入 Part 04：专门用 406/415 与 Jackson 严格模式，把“契约可控”做成工程闭环。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

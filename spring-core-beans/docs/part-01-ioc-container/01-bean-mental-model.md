@@ -1,18 +1,22 @@
-# 01. Bean 心智模型：BeanDefinition vs Bean 实例
+# 01. Bean 心智模型与注册入口：从 BeanDefinition 到 Bean 实例
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**01. Bean 心智模型：BeanDefinition vs Bean 实例**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreBeansBeanCreationTraceLabTest` / `SpringCoreBeansBeanFactoryVsApplicationContextLabTest` / `SpringCoreBeansBootstrapInternalsLabTest` / `SpringCoreBeansContainerLabTest` / `SpringCoreBeansProxyingPhaseLabTest`
+    - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProxyingPhaseLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansBeanFactoryVsApplicationContextLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansBootstrapInternalsLabTest.java`
+
+## 机制主线
 
 ## 1. 你要建立的 3 层心智模型
 
@@ -168,12 +172,12 @@ try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicatio
 - 它会在 after-initialization 阶段返回一个 JDK proxy（只实现接口）
 - 因此 `context.getBean(WorkService.class)` 成功，但按具体类取可能失败（典型“最终暴露对象 != 原始实例”）
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreBeansBeanCreationTraceLabTest` / `SpringCoreBeansBeanFactoryVsApplicationContextLabTest` / `SpringCoreBeansBootstrapInternalsLabTest`
@@ -227,7 +231,7 @@ try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicatio
 
 来自 `spring-core-beans/src/test/java/.../SpringCoreBeansBeanCreationTraceLabTest.java`：
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 这一章的目标是先把“Bean 到底是什么”这件事说清楚：**Bean 不是对象本身，而是“容器管理对象的一整套机制”**。如果你脑子里只有“Bean = 被 `@Component` 标注的类”，后面一定会在 Scope、生命周期、代理、自动装配上不断踩坑。
 
@@ -240,26 +244,104 @@ try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicatio
 3) [15. 实例化前短路](../part-03-container-internals/15-pre-instantiation-short-circuit.md)（为什么有时“还没 new”就拿到对象了）
 4) [16. early reference 与循环依赖](../part-03-container-internals/16-early-reference-and-circular.md)（循环依赖到底怎么救）
 
-## G. 小结与下一章
+## BeanDefinition 从哪里来：注册入口（合并自原第 02 章）
 
-下一章开始我们会从“BeanDefinition 从哪里来”讲起：扫描、`@Bean`、`@Import`、registrar，以及它们和 Spring Boot 自动装配的关系。
+这一节回答一个真实排障问题：当你在容器里看到一个 Bean（或看到一个 BeanDefinition），你如何反推它是从哪条入口“进容器”的？
 
-- **定义层主角**：`DefaultListableBeanFactory`（保存与管理 `BeanDefinition`）
-- **实例层主角**：`AbstractAutowireCapableBeanFactory`（`doCreateBean → populateBean → initializeBean`）
-- **扩展点介入**：BDRPP/BFPP/BPP（分别在“多早、改定义还是改实例”上不同）
-- **循环依赖相关**：`DefaultSingletonBeanRegistry`（单例缓存与 early reference）
+核心要点只有一句话：**注册阶段产物是 BeanDefinition；创建阶段产物是 Bean 实例。**  
+你要先把“定义层/实例层”分开，后面的扫描、`@Bean`、`@Import`、自动装配才会变得可解释。
 
-**实例层主线基本都收敛在：`AbstractAutowireCapableBeanFactory#doCreateBean`。**
+!!! summary "你要抓住的主线（定义入库）"
 
-<!-- AG-CONTRACT:END -->
+    - 最终落点：`BeanDefinitionRegistry#registerBeanDefinition`（定义入库）
+    - 最关键的“注解注册入口”：`ConfigurationClassPostProcessor`（解析 `@Configuration/@Bean/@Import`）
+    - 最关键的“扫描入口”：`ClassPathBeanDefinitionScanner`（扫描 stereotype 形成定义）
+
+### 1) 最常见入口：组件扫描（`@ComponentScan` / stereotype）
+
+当你说“我加了 `@Component`，它就进容器了”，本质是：
+
+- `@ComponentScan`（显式或隐式）决定**扫描哪些 package**
+- stereotype（`@Component/@Service/@Repository/@Controller`）决定**哪些类会被当成候选**
+- include/exclude filters 让“扫描”从黑盒变成可控工具（在大型工程里尤其关键）
+
+建议断点（定义入库方向）：
+
+- `ClassPathBeanDefinitionScanner#doScan`
+- `DefaultListableBeanFactory#registerBeanDefinition`
+
+### 2) 另一条大路：`@Configuration` + `@Bean`
+
+理解 `@Bean` 的关键不是“它会 new 一个对象”，而是：
+
+- `@Bean` 方法会先被解析成**定义**（BeanDefinition），进入 registry
+- 真正调用 `@Bean` 工厂方法，发生在后续的**实例创建阶段**（由容器驱动）
+
+如果你把 `@Bean` 当成“立刻执行的工厂方法”，就很难解释顺序、条件装配与代理增强。
+
+### 3) `@Import`：把“注册入口”组合起来
+
+`@Import` 是把多个注册入口“拼装成框架能力”的关键工具，常见三类用法：
+
+- 直接 import 配置类：最直观，等价于“把另一份 `@Configuration` 加入解析队列”
+- import `ImportSelector`：用代码决定导入哪些配置（可被环境属性/类路径条件驱动）
+- import `ImportBeanDefinitionRegistrar`：直接编程式注册 BeanDefinition（强大，但也最容易滥用）
+
+建议先把它放回“定义入库主线”理解：**它们的目标都是让新的 BeanDefinition 出现在 registry 里。**
+
+### 4) registrar vs post-processor：到底谁更“底层”？
+
+在真实工程里，很多“框架魔法”都能用 registrar 做出来，但建议你先问自己两句：
+
+1. 你真的需要“注册定义”吗？还是只是需要“改定义/改实例”？
+2. 是否已经有更合适的扩展点（BDRPP/BFPP/BPP）？
+
+一个粗略但实用的对照：
+
+- registrar：更早、更偏“定义入库”
+- BFPP：改 BeanDefinition（通常在创建实例之前）
+- BPP：包裹/替换实例（例如代理）
+
+### 5) Spring Boot 自动装配：本质上是“批量 @Import”（但更复杂）
+
+你可以先把自动装配理解成：**把一批条件化的配置类导入**，最终仍然落到“定义入库”。
+
+- 读法建议：这里先形成直觉 → 再去 Part 02 深挖
+- 对应章节：`../part-02-boot-autoconfig/10-spring-boot-auto-configuration.md`
+
+### 6) 如何验证（建议先跑）
+
+本模块已经提供了可运行的实验（Labs），把 `@Import` / `ImportSelector` / `ImportBeanDefinitionRegistrar` 做成“能跑、能断言、能观察输出”的证据链：
+
+- 对应测试：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportLabTest.java`
+- Exercise（默认 `@Disabled`）：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportExerciseTest.java`
+- Solution（默认参与回归）：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansImportExerciseSolutionTest.java`
+
+运行方式：
+
+```bash
+mvn -pl spring-core-beans test
+```
+
+建议断点（把“注册入口”变成可观察证据）：
+
+- `ConfigurationClassPostProcessor#processConfigBeanDefinitions`
+- `ClassPathBeanDefinitionScanner#doScan`
+- `DefaultListableBeanFactory#registerBeanDefinition`
+
+## 小结与下一章
+
+- 本章已经把“Bean 是什么（心智模型）”与“BeanDefinition 从哪里来（注册入口）”合并成一条连续主线。
+- 下一章开始进入创建阶段：依赖注入解析（你会开始频繁遇到 `resolveDependency`、候选集、`@Qualifier/@Primary`）。
 
 <!-- BOOKIFY:START -->
 
 ### 对应 Lab/Test
 
-- Lab：`SpringCoreBeansBeanCreationTraceLabTest` / `SpringCoreBeansBeanFactoryVsApplicationContextLabTest` / `SpringCoreBeansBootstrapInternalsLabTest` / `SpringCoreBeansContainerLabTest` / `SpringCoreBeansProxyingPhaseLabTest`
-- Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProxyingPhaseLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansBeanFactoryVsApplicationContextLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansBootstrapInternalsLabTest.java`
+- Lab：`SpringCoreBeansContainerLabTest` / `SpringCoreBeansBeanCreationTraceLabTest` / `SpringCoreBeansBeanFactoryVsApplicationContextLabTest` / `SpringCoreBeansBootstrapInternalsLabTest` / `SpringCoreBeansProxyingPhaseLabTest` / `SpringCoreBeansComponentScanLabTest` / `SpringCoreBeansImportLabTest`
+- Exercise：`SpringCoreBeansImportExerciseTest`
+- Solution：`SpringCoreBeansImportExerciseSolutionTest`
 
-上一章：[00. 深挖指南：把“Bean 三层模型”落到源码与断点](../part-00-guide/00-deep-dive-guide.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[02. Bean 注册入口：扫描、@Bean、@Import、registrar](02-bean-registration.md)
+上一章：[00. 深挖指南：把“Bean 三层模型”落到源码与断点](../part-00-guide/00-deep-dive-guide.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[03. 依赖注入解析：类型/名称/@Qualifier/@Primary](03-dependency-injection-resolution.md)
 
 <!-- BOOKIFY:END -->

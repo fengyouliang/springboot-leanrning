@@ -1,18 +1,22 @@
 # 25. 手工添加 BeanPostProcessor：顺序与 Ordered 的陷阱
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**25. 手工添加 BeanPostProcessor：顺序与 Ordered 的陷阱**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreBeansProgrammaticBeanPostProcessorLabTest` / `SpringCoreBeansProgrammaticRegistrationLabTest` / `SpringCoreBeansRegistryPostProcessorLabTest`
+    - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProgrammaticBeanPostProcessorLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProgrammaticRegistrationLabTest.java`
+
+## 机制主线
 
 很多学习资料会只讲“把 BPP 声明成 bean，让容器自动发现”。
 
@@ -218,12 +222,12 @@ addBeanPostProcessor(bpp):
 2) 你怎么用 `beanFactory.getBeanPostProcessors()` 这一个观察点，判断“顺序问题”还是“时机问题”？
 3) 如果某个 bean 没被代理/没被增强，你会如何判断它是否“在 BPP 注册之前就被创建了”？
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreBeansProgrammaticBeanPostProcessorLabTest` / `SpringCoreBeansProgrammaticRegistrationLabTest` / `SpringCoreBeansRegistryPostProcessorLabTest`
@@ -292,7 +296,7 @@ addBeanPostProcessor(bpp):
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProgrammaticBeanPostProcessorLabTest.java`
 推荐断点：`AbstractBeanFactory#addBeanPostProcessor`、`PostProcessorRegistrationDelegate#registerBeanPostProcessors`、`AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 ## 2. 更隐蔽的坑：手工注册的 BPP 不会按 Ordered 排序
 
@@ -306,7 +310,7 @@ addBeanPostProcessor(bpp):
   - 结果：容器只是把你提供的对象放进 singleton cache，以后 `getBean` 直接返回它
   - 注意：不会 retroactive 触发注入/初始化/BPP；也不会替你“补上代理/包装”
 
-## G. 小结与下一章
+## 小结与下一章
 
 - `ConfigurableListableBeanFactory#addBeanPostProcessor`：手工注册 BPP 的入口（绕过容器的自动发现与排序）
 - `PostProcessorRegistrationDelegate#registerBeanPostProcessors`：容器自动发现并排序 BPP 的入口（与手工注册形成对照）
@@ -335,8 +339,6 @@ addBeanPostProcessor(bpp):
 - 实例层注册入口：`DefaultSingletonBeanRegistry#registerSingleton`
 - 定义层创建主线：`AbstractAutowireCapableBeanFactory#doCreateBean`
 - 初始化主线（BPP/init callbacks）：`AbstractAutowireCapableBeanFactory#initializeBean`
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

@@ -1,18 +1,21 @@
 # 00. 深挖指南：把“代理是怎么来的、advice 链怎么跑”落到源码与断点
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**00. 深挖指南：把“代理是怎么来的、advice 链怎么跑”落到源码与断点**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreAopAutoProxyCreatorInternalsLabTest` / `SpringCoreAopLabTest` / `SpringCoreAopMultiProxyStackingLabTest` / `SpringCoreAopProxyMechanicsLabTest` / `SpringCoreAopProceedNestingLabTest` / `SpringCoreAopPointcutExpressionsLabTest` / `SpringCoreAopRealWorldStackingLabTest`
+
+## 机制主线
 
 这章的目标很明确：**把 AOP 从“我会写 @Aspect”升级为“我能在源码里看见它、并能定位问题”**。
 
@@ -143,12 +146,12 @@
 
 ## 5. 读完本章你应该获得什么
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreAopAutoProxyCreatorInternalsLabTest` / `SpringCoreAopLabTest` / `SpringCoreAopMultiProxyStackingLabTest`
@@ -243,7 +246,7 @@ Spring AOP 相关断点会被非常频繁地命中（尤其是 BPP 与匹配逻�
 - 你能把“不拦截”的问题分流成：call path / 匹配 / 代理限制 三大类
 - 你能进一步识别：单 proxy 多 advisors vs 多层 proxy（套娃），并知道该去哪组断点验证
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 1. **代理是怎么产生的？（容器阶段）**
    - AOP 不是“改你写的类”，而是在创建 bean 时由 `BeanPostProcessor` 把它包装成 proxy。
@@ -254,7 +257,7 @@ Spring AOP 相关断点会被非常频繁地命中（尤其是 BPP 与匹配逻�
    - pointcut 是否命中
    - 代理类型与语言限制（JDK/CGLIB、final/private/self-invocation）
 
-## G. 小结与下一章
+## 小结与下一章
 
 - `AbstractApplicationContext#refresh`（启动主线）
   - 注册并排序 BPP：`PostProcessorRegistrationDelegate#registerBeanPostProcessors`
@@ -262,8 +265,6 @@ Spring AOP 相关断点会被非常频繁地命中（尤其是 BPP 与匹配逻�
     - 初始化：`AbstractAutowireCapableBeanFactory#initializeBean`
       - BPP after-init：`BeanPostProcessor#postProcessAfterInitialization`
         - AOP 关键入口：`AbstractAutoProxyCreator#postProcessAfterInitialization`
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

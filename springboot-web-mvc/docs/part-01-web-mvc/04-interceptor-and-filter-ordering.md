@@ -1,18 +1,22 @@
 # 04：Interceptor 与 Filter：入口在哪里、顺序怎么理解
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**04：Interceptor 与 Filter：入口在哪里、顺序怎么理解**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootWebMvcErrorViewLabTest` / `BootWebMvcLabTest`
+    - Test file：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part00_guide/BootWebMvcExerciseTest.java`
+
+## 机制主线
 
 本章的目标不是把 Filter/Interceptor 全部讲完，而是建立一个“入口与顺序”的最小心智模型：你知道它们分别在链路的哪里、什么时候该用哪个。
 
@@ -28,7 +32,7 @@
 
 如果你是“想对 /api/** 生效”，并且增强逻辑与 handler 相关（比如给 response 增 header、记录耗时），Interceptor 往往更直观。
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
@@ -46,7 +50,7 @@
 - 第一次 REQUEST：会进入 `afterConcurrentHandlingStarted`
 - 第二次 ASYNC：才会进入 `postHandle/afterCompletion`
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章用“事件序列”把顺序变成可断言证据：
 - Lab：`BootWebMvcTraceLabTest`（Filter vs Interceptor 的相对位置 + async lifecycle 对照）
@@ -82,17 +86,15 @@
   - ASYNC：二次 dispatch（asyncDispatch）
   - ERROR：错误页/错误分发（很多“为什么进不到 controller”的问题在这里暴露）
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 - 把“顺序问题”当成“业务问题”：很多 401/403/302/304/406 并不在 controller 内发生，先确认你处于 Filter 还是 Interceptor 还是 MessageConverter 阶段。
 - 只用 Interceptor 解决跨域/认证：CORS 与认证通常发生在 Filter（尤其是 Security FilterChain）层，Interceptor 更适合做“靠近 handler 的增强”（计时/审计/统一 header）。
 - async 场景回调缺失：异步请求第一次 dispatch 可能不触发 `postHandle/afterCompletion`，要结合 `afterConcurrentHandlingStarted` 与二次 dispatch 理解（详见下一章）。
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 本章完成后：请对照上一章/下一章导航继续阅读，形成模块内连续主线。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

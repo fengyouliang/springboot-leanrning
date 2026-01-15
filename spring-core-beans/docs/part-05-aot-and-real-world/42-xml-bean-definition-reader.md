@@ -1,18 +1,22 @@
 # 42. XML → BeanDefinitionReader：定义层解析与错误分型
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**42. XML → BeanDefinitionReader：定义层解析与错误分型**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreBeansXmlBeanDefinitionReaderLabTest`
+    - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansXmlBeanDefinitionReaderLabTest.java`
+
+## 机制主线
 
 这一章解决一个“你不一定天天写，但你一定会遇到”的问题：
 
@@ -78,12 +82,12 @@ XML 这条链路的核心是：
 
 ---
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreBeansXmlBeanDefinitionReaderLabTest`
@@ -116,7 +120,7 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansXmlBeanDefinitionReaderLabTest t
 2) **误区：XML = 过时，不用学**
    - 在真实项目里，遗留配置/三方组件/某些 starter 仍可能引入 XML 资源；排障时你必须认识链路。
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 ## 4. 常见误区
 
@@ -127,7 +131,7 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansXmlBeanDefinitionReaderLabTest t
 3) **误区：以为 XML 只会影响“创建对象”**
    - XML 的核心价值是让你把“输入形态”统一回 BeanDefinition：你看的其实是“定义元数据”，不是实例本身。
 
-## G. 小结与下一章
+## 小结与下一章
 
 ## 5. 小结与下一章预告
 
@@ -135,8 +139,6 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansXmlBeanDefinitionReaderLabTest t
 - XML 相关异常排障优先做“定义层 vs 实例层”分型；定义层失败的典型信号是 `BeanDefinitionStoreException`
 
 下一章我们补齐另一个真实工程经常遇到的边界：**容器外对象**（不是 Spring 创建的）如何获得注入、初始化与销毁能力（AutowireCapableBeanFactory）。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

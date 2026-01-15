@@ -1,19 +1,22 @@
 # 04：ProblemDetail vs 自定义错误体（ApiError：契约的两种路线）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**04：ProblemDetail vs 自定义错误体（ApiError：契约的两种路线）**
 - 目标：让你能在真实工程里做选择：什么时候坚持自定义错误契约（ApiError），什么时候拥抱框架语义（ProblemDetail）。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- **ApiError（自定义契约）**：适合“强约束统一契约”，前后端协作成本低，但需要你持续维护语义与兼容性。
-- **ProblemDetail（框架语义）**：更接近标准化错误载体（RFC 7807 风格），语义清晰、可扩展，但需要团队对字段含义达成共识。
-- 关键不是“选哪个更高级”，而是：**你想把稳定性放在“字段形状”还是“语义表达”上**。
+    - **ApiError（自定义契约）**：适合“强约束统一契约”，前后端协作成本低，但需要你持续维护语义与兼容性。
+    - **ProblemDetail（框架语义）**：更接近标准化错误载体（RFC 7807 风格），语义清晰、可扩展，但需要团队对字段含义达成共识。
+    - 关键不是“选哪个更高级”，而是：**你想把稳定性放在“字段形状”还是“语义表达”上**。
 
-## C. 机制主线（两条路线怎么落地）
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`BootWebMvcContractJacksonLabTest`
+
+## 机制主线（两条路线怎么落地）
 
 ### 路线 1：ApiError（统一错误契约）
 
@@ -35,26 +38,24 @@
 - `ProblemDetailDemoController`：显式返回 + 抛异常两种方式
 - `ProblemDetailDemoExceptionHandler`：用 `@ExceptionHandler` 把异常映射成 ProblemDetail
 
-## D. 源码与断点
+## 源码与断点
 
 - ApiError 路线：优先看 `ExceptionHandlerExceptionResolver` 如何选择 `@ExceptionHandler`
 - ProblemDetail 路线：同样从 `ExceptionHandlerExceptionResolver` 入手，但返回体是 `ProblemDetail`
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - Lab：`BootWebMvcContractJacksonLabTest`（ApiError 路线的契约与分支）
 - Lab：`BootWebMvcProblemDetailLabTest`（ProblemDetail 路线的对照）
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 - 如果你在同一模块里同时存在两套错误体，一定要写清楚“各自负责哪些端点/哪些场景”，否则调用方会被迫做大量兼容分支。
 - `Content-Type` 建议显式使用 `application/problem+json`（ProblemDetail）以避免误解为普通 JSON。
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 下一章进入真实 HTTP 场景：从浏览器视角理解 CORS、上传下载、缓存等“线上最常见”的分支。
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

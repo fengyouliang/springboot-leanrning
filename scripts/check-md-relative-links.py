@@ -103,7 +103,20 @@ def check_one_file(repo_root: Path, md_file: Path) -> list[tuple[int, str, Path]
 
             target: Path
             if dest.startswith("/"):
-                target = repo_root / dest.lstrip("/")
+                # 站点级“Book-only”页面位于 docs-site/content/book，
+                # 但站内链接更自然的是 /book/<page>/ 或 /book/<page>.md
+                if dest == "/book" or dest == "/book/":
+                    target = repo_root / "docs-site" / "content" / "book" / "index.md"
+                elif dest.startswith("/book/") and dest.endswith("/"):
+                    slug = dest.removeprefix("/book/").rstrip("/")
+                    if not slug:
+                        target = repo_root / "docs-site" / "content" / "book" / "index.md"
+                    else:
+                        target = repo_root / "docs-site" / "content" / "book" / f"{slug}.md"
+                elif dest.startswith("/book/"):
+                    target = repo_root / "docs-site" / "content" / dest.lstrip("/")
+                else:
+                    target = repo_root / dest.lstrip("/")
             else:
                 target = md_file.parent / dest
 

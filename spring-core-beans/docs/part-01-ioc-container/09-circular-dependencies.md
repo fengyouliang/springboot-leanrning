@@ -1,18 +1,22 @@
 # 09. 循环依赖：现象、原因与规避（constructor vs setter）
 
-<!-- AG-CONTRACT:START -->
-
-## A. 本章定位
+## 导读
 
 - 本章主题：**09. 循环依赖：现象、原因与规避（constructor vs setter）**
-- 阅读方式建议：先看 B 的结论，再按 C→D 跟主线，最后用 E 跑通闭环。
+- 阅读方式建议：先看“本章要点”，再沿主线阅读；需要时穿插源码/断点，最后跑通实验闭环。
 
-## B. 核心结论
+!!! summary "本章要点"
 
-- 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
-- 如果只看一眼：请先跑一次 E 的最小实验，再回到 C 对照主线。
+    - 读完本章，你应该能用 2–3 句话复述“它解决什么问题 / 关键约束是什么 / 常见坑在哪里”。
+    - 如果只看一眼：请先跑一次本章的最小实验，再回到主线对照阅读。
 
-## C. 机制主线
+
+!!! example "本章配套实验（先跑再读）"
+
+    - Lab：`SpringCoreBeansContainerLabTest` / `SpringCoreBeansEarlyReferenceLabTest` / `SpringCoreBeansCircularDependencyBoundaryLabTest`
+    - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansEarlyReferenceLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
+
+## 机制主线
 
 循环依赖是 Spring 学习路上绕不开的一关。它既是“容器能力的体现”，也是“架构设计的警报”。
 
@@ -191,12 +195,12 @@ record CycleB(CycleA cycleA) {}
 2) “setter 循环为什么有时能成功？early exposure 是什么？”
 3) “为什么循环依赖在架构上通常是坏味道？”
 
-## D. 源码与断点
+## 源码与断点
 
 - 建议优先从“E 中的测试用例断言”反推调用链，再定位到关键类/方法设置断点。
 - 若本章包含 Spring 内部机制，请以“入口方法 → 关键分支 → 数据结构变化”三段式观察。
 
-## E. 最小可运行实验（Lab）
+## 最小可运行实验（Lab）
 
 - 本章已在正文中引用以下 LabTest（建议优先跑它们）：
 - Lab：`SpringCoreBeansContainerLabTest` / `SpringCoreBeansEarlyReferenceLabTest` / `SpringCoreBeansCircularDependencyBoundaryLabTest`
@@ -252,7 +256,7 @@ record CycleB(CycleA cycleA) {}
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part01_ioc_container/SpringCoreBeansContainerLabTest.java`
 推荐断点：`DefaultSingletonBeanRegistry#getSingleton`、`DefaultSingletonBeanRegistry#addSingletonFactory`、`AbstractAutowireCapableBeanFactory#doCreateBean`
 
-## F. 常见坑与边界
+## 常见坑与边界
 
 - **坑 1：误以为“Spring 能解决所有循环依赖”**
   - 事实：Spring 只能在非常特定的窗口期（singleton + early exposure）里“救活某些环”，constructor 环通常 fail-fast。
@@ -268,7 +272,7 @@ record CycleB(CycleA cycleA) {}
   - 代价是：依赖关系从“构造器签名”退化为“运行时分支”，需要更强的自检与测试覆盖来兜底。
   - 对照：`SpringCoreBeansCircularDependencyBoundaryLabTest#constructorCycleCanBeBrokenViaObjectProvider`
 
-## G. 小结与下一章
+## 小结与下一章
 
 - 取单例总入口：`DefaultSingletonBeanRegistry#getSingleton`
   - 重点观察：是否命中 `singletonObjects` / `earlySingletonObjects` / `singletonFactories`
@@ -278,8 +282,6 @@ record CycleB(CycleA cycleA) {}
   - 重点观察：setter 注入为什么可能在“对象未完全初始化”时先拿到一个引用
 
 对应到实例创建主线（`AbstractAutowireCapableBeanFactory#doCreateBean`），early exposure 的窗口期大致是：
-
-<!-- AG-CONTRACT:END -->
 
 <!-- BOOKIFY:START -->
 

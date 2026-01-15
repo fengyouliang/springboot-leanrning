@@ -6,6 +6,9 @@
 
 ### Added
 - `docs-site`：新增 MkDocs 文档站点骨架（`docs-site/mkdocs.yml` + `scripts/docs-site-sync.py` + serve/build 脚本），将各模块 `docs/` 与 `helloagents/wiki` 聚合为可搜索、可侧边栏导航的静态站点；生成目录与 build 输出已加入 `.gitignore`。
+- `docs-site`：新增“写作指南”页面 `docs-site/content/book-style.md`，用于统一书籍化重排原则（主线时间线先行、提示框作为插入段、redirect 保留旧入口）。
+- `docs-site`：新增“主线之书（Book-only）”目录骨架（`docs-site/content/book/`），覆盖 18 模块的跨模块时间线章节树，并新增工具页（Labs 索引 / Debugger Pack / Exercises & Solutions / 迁移规则）。
+- `scripts`：新增 Labs 索引生成脚本 `scripts/generate-book-labs-index.py`（扫描各模块 `src/test/java/*LabTest.java` 生成 `docs-site/content/book/labs-index.md`）。
 - GitHub Pages：新增自动构建与发布 workflow（`.github/workflows/docs-site-pages.yml`），在 `push main/master` 时构建并发布 `docs-site/.site/`。
 - `helloagents`：新增学习路线图 `helloagents/wiki/learning-path.md`，并在 `helloagents/wiki/overview.md` 与四模块页（Beans/AOP/Tx/Web MVC）增加 Start Here/路线图入口，收敛新读者的“先跑什么/再读什么”路径。
 - `spring-core-beans`：新增 30 分钟快启章节（Start Here），并系统补齐/强化 docs（容器主线、BPP 顺序、FactoryBean、循环依赖、AOT/真实世界等）与可运行证据链；同时更新 `scripts/generate-spring-beans-public-api-index.py` 并重新生成 Appendix 95/96（补齐“坑点与排障”）。
@@ -21,6 +24,7 @@
 - `springboot-web-mvc`：再深化一层：新增 ExceptionResolvers 主线章节、Filter/Interceptor（sync+async lifecycle）可断言 Lab、条件请求对照（静态资源 If-Modified-Since/304 + ShallowEtagHeaderFilter）、以及 DeferredResult（timeout/fallback）测试闭环；同步补齐“坑点清单 → 可复现测试入口”绑定。
 - `springboot-web-mvc`：继续深化：补齐导读/自测/Part01+Part02 的“坑点待补齐”占位内容，并新增两组工程化边界 Labs：`@InitBinder#setAllowedFields` 防 mass assignment、`@ControllerAdvice` 的 `@Order` 优先级可复现验证。
 - `springboot-web-mvc`：深化 v3：新增 `@ControllerAdvice` 匹配规则可复现 Labs（`basePackages/annotations/assignableTypes` + selector 并集 OR 语义 + `@Order` 叠加），新增 binder `BindingResult#getSuppressedFields()` 证据链，以及 HttpMessageConverter 选择可观测（`ResponseBodyAdvice` 写入 `selectedConverterType/selectedContentType` 到响应头）与对应 docs 章节/排障清单升级。
+- 全模块：新增“主线时间线”章节 `<module>/docs/part-00-guide/03-mainline-timeline.md`（18 模块），并在该章节内提供至少 1 个可跑入口（`*LabTest`），用于把“顺读主线”变成可验证证据链。
 - `spring-core-beans`：新增循环依赖边界 Lab `SpringCoreBeansCircularDependencyBoundaryLabTest`（constructor cycle fail-fast vs `@Lazy`/`ObjectProvider` 打断），并同步补齐循环依赖章节与 early reference 交叉链接入口。
 - `spring-core-aop`：新增 exposeProxy 可验证 Lab `SpringCoreAopExposeProxyLabTest` + 示例 `ExposeProxyExampleService`，并补齐 exposeProxy 文档与“自调用绕过代理”排障条目。
 - `spring-core-tx`：新增传播行为进阶 Lab `SpringCoreTxPropagationMatrixLabTest`（MANDATORY/NEVER/NESTED 对照）与回滚规则 Lab `SpringCoreTxRollbackRulesLabTest`（Runtime vs Checked + rollbackFor/noRollbackFor），并补齐 propagation/rollback 文档与 appendix（pitfalls/self-check）入口。
@@ -37,8 +41,15 @@
 - `scripts`：移除章节契约相关脚本：`scripts/check-chapter-contract.py`、`scripts/ag-contract-docs.py`（不再推荐 A–G 作为写作规范，也不再提供相关闸门/自检工具）。
 ### Changed
 - `docs-site`：修复 MkDocs 入口脚本参数顺序（`python3 -m mkdocs build/serve -f ...`），并在同步时补齐复制 `helloagents/project.md` 与 `helloagents/history/index.md`，使 `bash scripts/docs-site-build.sh` 在 `--strict` 下可通过。
+- `docs-site`：站点导航新增“写作指南”入口（`docs-site/mkdocs.yml`），并在模块侧边栏目录中自动聚合新增的“主线时间线”章节。
+- `docs-site`：站点导航切换为 Book-only（侧边栏仅展示“主线之书”章节树）；`scripts/docs-site-sync.py` 改为注入书目录，模块 docs 作为素材库/搜索命中入口保留。
+- `scripts/check-md-relative-links.py`：支持校验站点绝对链接 `/book/...`（映射到 `docs-site/content/book/`），便于模块 docs 使用“redirect 到书章节”的稳定链接形式。
+- `springboot-basics`：试点将模块主线时间线章节迁移到书第 1 章，并保留旧入口作为 redirect（避免断链）。
+- 全模块 docs：停止使用 A–G（A.本章定位…G.小结）“契约式”章节骨架；统一去除字母前缀，并将“核心结论”转换为 summary 提示框，同时将 BOOKIFY 的实验入口提炼为章首提示框（更接近书籍阅读体验）；新增批处理脚本 `scripts/rewrite-docs-book-style.py`。
+- 全模块 docs：重排 `<module>/docs/README.md` 为书籍化目录页（第一屏给出主线时间线/导读入口；README 的 Markdown 链接清单作为 teaching coverage 的章节 SSOT）。
+- `spring-core-beans`：试点合并 Part 01 的前两章（原 02 章合并进 01 章），保留 `02-bean-registration.md` 作为 redirect 入口。
+- `springboot-web-mvc`：试点合并 Internals 章节（原 02 章合并进 01 章），保留 `02-argument-resolver-and-binder.md` 作为 redirect 入口。
 - `springboot-*` 与 `spring-core-*`（除 `spring-core-beans`/`springboot-web-mvc`）：深挖对齐（对标 `spring-core-beans`），补齐各模块 Guide 机制主线（导航图）、章节可断言坑点/边界与断点入口，并同步更新 `helloagents/wiki/modules/*.md`。
-- 全模块 docs：将 `docs/README.md` 引用的全部章节整理为统一的章节结构（A–G 二级标题，并保留 BOOKIFY 尾部导航）。A–G 仅作为既有排版，不再作为写作规范/闸门。
 - 根 `README.md`：跨模块学习路线入口统一指向 `<module>/docs/README.md`（Docs TOC）。
 - `spring-core-*`：对齐教学化文档规范：清理 docs 正文中的 `docs/NN` 缩写引用，统一替换为可解析的 Markdown 相对链接；统一章节末尾 `### 对应 Lab/Test` 入口块；并通过断链检查与教学覆盖检查。
 - `scripts/check-md-relative-links.py`：支持传入 docs 目录或单个 .md 文件进行模块级自检；默认扫描所有 `spring-core-*/docs` 与 `springboot-*/docs`。
