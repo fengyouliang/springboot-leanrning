@@ -44,3 +44,12 @@
 - [API 说明](api.md)
 - [数据模型说明](data.md)
 - [变更历史索引](../history/index.md)
+
+## 4. 文档站点（MkDocs）
+
+> 目标：把各模块的 `docs/` 聚合成一个可搜索、可侧边栏导航的静态站点（更像“技术专栏合集”的阅读体验）。
+
+- 同步站点输入目录（SSOT → `docs-site/.generated/docs`）：`python3 scripts/docs-site-sync.py`
+- 本地预览：`bash scripts/docs-site-serve.sh`
+- 严格构建（建议用于 CI）：`bash scripts/docs-site-build.sh`
+- GitHub Pages 发布：已提供 workflow `docs-site-pages.yml`（仓库根目录 `.github/workflows/` 下）；需要在 GitHub 仓库 `Settings → Pages` 中选择 `GitHub Actions` 作为 `Source`

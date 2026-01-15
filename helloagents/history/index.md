@@ -56,6 +56,8 @@
 | 202601092110 | depth_align_v2_batch01_sec_jpa_events_client | Enhancement | ✅Completed | [202601092110_depth_align_v2_batch01_sec_jpa_events_client](2026-01/202601092110_depth_align_v2_batch01_sec_jpa_events_client/) |
 | 202601131039 | teaching-experience-webmvc-beans | Enhancement | ✅Completed | [202601131039_teaching-experience-webmvc-beans](2026-01/202601131039_teaching-experience-webmvc-beans/) |
 | 202601141547 | finish-unfinished-tasks | Enhancement | ✅Completed | [202601141547_finish-unfinished-tasks](2026-01/202601141547_finish-unfinished-tasks/) |
+| 202601151209 | docs-site-mkdocs | Enhancement | ✅Completed | [202601151209_docs-site-mkdocs](2026-01/202601151209_docs-site-mkdocs/) |
+| 202601151259 | docs-site-github-pages | Enhancement | ✅Completed | [202601151259_docs-site-github-pages](2026-01/202601151259_docs-site-github-pages/) |
 
 ---
 
@@ -111,3 +113,5 @@
 - [202601092110_depth_align_v2_batch01_sec_jpa_events_client](2026-01/202601092110_depth_align_v2_batch01_sec_jpa_events_client/) - Batch01：Security/JPA/Events/WebClient 深挖对齐 v2（新增默认 Labs + 坑点可回归 + 自检闸门全绿 + wiki 同步）
 - [202601131039_teaching-experience-webmvc-beans](2026-01/202601131039_teaching-experience-webmvc-beans/) - spring-core-beans：新增 30 分钟快启 + 全模块知识点补齐（Start Here/断点观察点/自检/索引坑点）
 - [202601141547_finish-unfinished-tasks](2026-01/202601141547_finish-unfinished-tasks/) - 收敛新读者学习入口（learning-path）+ Web MVC Part 01 Debugger Pack + Beans 断点地图/空块补齐；通过 docs 闸门与全仓回归
+- [202601151209_docs-site-mkdocs](2026-01/202601151209_docs-site-mkdocs/) - docs-site：MkDocs 文档站点落地（聚合各模块 docs + helloagents/wiki，提供侧边栏导航与搜索）
+- [202601151259_docs-site-github-pages](2026-01/202601151259_docs-site-github-pages/) - docs-site：新增 GitHub Pages workflow（构建 + 发布）

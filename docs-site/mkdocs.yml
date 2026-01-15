@@ -1,0 +1,44 @@
+site_name: Spring Boot Learning（文档站）
+site_description: 多模块教学文档聚合站（专栏合集风格）
+site_dir: .site
+docs_dir: .generated/docs
+
+theme:
+  name: material
+  language: zh
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - toc.follow
+    - search.suggest
+    - search.highlight
+
+plugins:
+  - search
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+
+nav:
+  - 首页: index.md
+  - 知识库:
+      - 总览: helloagents/wiki/overview.md
+      - 学习路线图: helloagents/wiki/learning-path.md
+      - 架构说明: helloagents/wiki/arch.md
+      - API 说明: helloagents/wiki/api.md
+      - 数据模型说明: helloagents/wiki/data.md
+  - 模块文档:
+      - 模块总览: modules/index.md
+      - 入门（Basics）: springboot-basics/docs/README.md
+      - IoC/Beans: spring-core-beans/docs/README.md
+      - AOP: spring-core-aop/docs/README.md
+      - 事务（Tx）: spring-core-tx/docs/README.md
+      - Web MVC: springboot-web-mvc/docs/README.md
+

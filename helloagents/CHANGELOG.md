@@ -5,6 +5,8 @@
 ## [Unreleased]
 
 ### Added
+- `docs-site`：新增 MkDocs 文档站点骨架（`docs-site/mkdocs.yml` + `scripts/docs-site-sync.py` + serve/build 脚本），将各模块 `docs/` 与 `helloagents/wiki` 聚合为可搜索、可侧边栏导航的静态站点；生成目录与 build 输出已加入 `.gitignore`。
+- GitHub Pages：新增自动构建与发布 workflow（`.github/workflows/docs-site-pages.yml`），在 `push main/master` 时构建并发布 `docs-site/.site/`。
 - `helloagents`：新增学习路线图 `helloagents/wiki/learning-path.md`，并在 `helloagents/wiki/overview.md` 与四模块页（Beans/AOP/Tx/Web MVC）增加 Start Here/路线图入口，收敛新读者的“先跑什么/再读什么”路径。
 - `spring-core-beans`：新增 30 分钟快启章节（Start Here），并系统补齐/强化 docs（容器主线、BPP 顺序、FactoryBean、循环依赖、AOT/真实世界等）与可运行证据链；同时更新 `scripts/generate-spring-beans-public-api-index.py` 并重新生成 Appendix 95/96（补齐“坑点与排障”）。
 - `spring-core-events`：新增异步 multicaster 默认 Lab `SpringCoreEventsAsyncMulticasterLabTest`，用于可断言验证自定义 `ApplicationEventMulticaster` + `TaskExecutor` 的异步分发主线。
@@ -34,6 +36,7 @@
 ### Removed
 - `scripts`：移除章节契约相关脚本：`scripts/check-chapter-contract.py`、`scripts/ag-contract-docs.py`（不再推荐 A–G 作为写作规范，也不再提供相关闸门/自检工具）。
 ### Changed
+- `docs-site`：修复 MkDocs 入口脚本参数顺序（`python3 -m mkdocs build/serve -f ...`），并在同步时补齐复制 `helloagents/project.md` 与 `helloagents/history/index.md`，使 `bash scripts/docs-site-build.sh` 在 `--strict` 下可通过。
 - `springboot-*` 与 `spring-core-*`（除 `spring-core-beans`/`springboot-web-mvc`）：深挖对齐（对标 `spring-core-beans`），补齐各模块 Guide 机制主线（导航图）、章节可断言坑点/边界与断点入口，并同步更新 `helloagents/wiki/modules/*.md`。
 - 全模块 docs：将 `docs/README.md` 引用的全部章节整理为统一的章节结构（A–G 二级标题，并保留 BOOKIFY 尾部导航）。A–G 仅作为既有排版，不再作为写作规范/闸门。
 - 根 `README.md`：跨模块学习路线入口统一指向 `<module>/docs/README.md`（Docs TOC）。
