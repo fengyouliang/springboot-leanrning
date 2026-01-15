@@ -23,6 +23,10 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SITE_ROOT = REPO_ROOT / "docs-site"
 CONTENT_ROOT = SITE_ROOT / "content"
 GENERATED_ROOT = SITE_ROOT / ".generated" / "docs"
+GENERATED_MKDOCS_YML = SITE_ROOT / ".generated" / "mkdocs.yml"
+BASE_MKDOCS_YML = SITE_ROOT / "mkdocs.yml"
+AUTO_NAV_BEGIN = "# BEGIN AUTO MODULE NAV"
+AUTO_NAV_END = "# END AUTO MODULE NAV"
 
 
 def discover_modules(repo_root: Path) -> list[str]:
@@ -135,6 +139,190 @@ def generate_modules_index(modules: list[str]) -> None:
     out.write_text("\n".join(lines), encoding="utf-8")
 
 
+def yaml_quote(s: str) -> str:
+    escaped = s.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
+
+def read_first_h1_title(md_path: Path) -> str:
+    try:
+        text = md_path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        # 兜底：尽量不因单文件编码问题阻塞站点生成
+        text = md_path.read_text(encoding="utf-8", errors="ignore")
+
+    for raw in text.splitlines():
+        line = raw.strip()
+        if line.startswith("# "):
+            return line.removeprefix("# ").strip()
+        if line == "":
+            continue
+    return md_path.stem
+
+
+def format_group_title(group: str) -> str:
+    if group == "appendix":
+        return "Appendix"
+
+    if group.startswith("part-"):
+        # part-01-ioc-container -> Part 01：IoC Container
+        rest = group.removeprefix("part-")
+        parts = rest.split("-")
+        if len(parts) >= 2 and parts[0].isdigit():
+            part_no = parts[0]
+            tokens = parts[1:]
+        else:
+            part_no = ""
+            tokens = parts
+
+        def fmt_token(t: str) -> str:
+            mapping = {
+                "ioc": "IoC",
+                "aop": "AOP",
+                "mvc": "MVC",
+                "tx": "Tx",
+                "jpa": "JPA",
+                "ltw": "LTW",
+                "ctw": "CTW",
+                "sse": "SSE",
+                "api": "API",
+                "http": "HTTP",
+                "json": "JSON",
+                "xml": "XML",
+                "aot": "AOT",
+            }
+            if t in mapping:
+                return mapping[t]
+            if t.isdigit():
+                return t
+            return t[:1].upper() + t[1:].lower()
+
+        title = " ".join(fmt_token(t) for t in tokens if t)
+        if part_no:
+            return f"Part {part_no}：{title or group}"
+        return f"Part：{title or group}"
+
+    # fallback
+    return group.replace("-", " ")
+
+
+def build_module_nav_entries(module: str) -> list[str]:
+    module_root = REPO_ROOT / module
+    docs_root = module_root / "docs"
+    if not docs_root.exists():
+        return []
+
+    # 分组：按 docs 下的一级目录（part-xx-*/appendix）
+    groups: dict[str, list[Path]] = {}
+    for md in sorted(docs_root.rglob("*.md")):
+        rel = md.relative_to(docs_root)
+        if rel.name == "README.md":
+            continue
+        if len(rel.parts) < 2:
+            # docs 根目录下的零散 md（通常不会有），避免污染目录
+            continue
+        group = rel.parts[0]
+        groups.setdefault(group, []).append(md)
+
+    def group_sort_key(name: str) -> tuple[int, int, str]:
+        if name.startswith("part-"):
+            rest = name.removeprefix("part-")
+            head = rest.split("-", 1)[0]
+            if head.isdigit():
+                return (0, int(head), name)
+            return (0, 999, name)
+        if name == "appendix":
+            return (2, 0, name)
+        return (1, 0, name)
+
+    lines: list[str] = []
+    lines.append(f'          - {yaml_quote(module)}:')
+    lines.append(f'              - {yaml_quote("目录")}: {module}/docs/README.md')
+
+    for group in sorted(groups.keys(), key=group_sort_key):
+        title = format_group_title(group)
+        lines.append(f'              - {yaml_quote(title)}:')
+        for md in sorted(groups[group], key=lambda p: p.name):
+            rel_to_module = md.relative_to(module_root).as_posix()
+            page_title = read_first_h1_title(md)
+            lines.append(f'                  - {yaml_quote(page_title)}: {module}/{rel_to_module}')
+
+    return lines
+
+
+def generate_mkdocs_config(modules: list[str]) -> None:
+    """
+    生成 docs-site/.generated/mkdocs.yml：在基础 mkdocs.yml 上注入“模块详细目录”。
+
+    这样做的原因：模块章节很多（200+），手写 nav 难维护；以同步脚本生成目录更稳定。
+    """
+    if not BASE_MKDOCS_YML.exists():
+        return
+
+    raw_template_lines = BASE_MKDOCS_YML.read_text(encoding="utf-8").splitlines()
+
+    # 生成的 mkdocs.yml 位于 docs-site/.generated/ 下，需调整相对路径：
+    # - docs_dir: docs-site/.generated/docs -> 相对 GENERATED_MKDOCS_YML 为 "docs"
+    # - site_dir: docs-site/.site -> 相对 GENERATED_MKDOCS_YML 为 "../.site"
+    template_lines: list[str] = []
+    for line in raw_template_lines:
+        stripped = line.strip()
+        if stripped.startswith("docs_dir:"):
+            template_lines.append("docs_dir: docs")
+            continue
+        if stripped.startswith("site_dir:"):
+            template_lines.append("site_dir: ../.site")
+            continue
+        template_lines.append(line)
+
+    begin_idx = -1
+    end_idx = -1
+    for i, line in enumerate(template_lines):
+        if AUTO_NAV_BEGIN in line:
+            begin_idx = i
+        if AUTO_NAV_END in line:
+            end_idx = i
+            break
+
+    if begin_idx == -1 or end_idx == -1 or end_idx <= begin_idx:
+        print("[WARN] 未在 docs-site/mkdocs.yml 中找到 AUTO MODULE NAV 标记，跳过生成 mkdocs 配置。", file=sys.stderr)
+        return
+
+    preferred_order = [
+        "springboot-basics",
+        "spring-core-beans",
+        "spring-core-aop",
+        "spring-core-tx",
+        "springboot-web-mvc",
+    ]
+
+    ordered: list[str] = []
+    for m in preferred_order:
+        if m in modules:
+            ordered.append(m)
+    for m in modules:
+        if m not in ordered:
+            ordered.append(m)
+
+    auto_lines: list[str] = []
+    auto_lines.append(f'      - {yaml_quote("推荐顺序（主线）")}:')
+    for m in preferred_order:
+        if m in modules:
+            auto_lines.append(f'          - {yaml_quote(m)}: {m}/docs/README.md')
+
+    auto_lines.append(f'      - {yaml_quote("全部模块（快速入口）")}:')
+    for m in ordered:
+        auto_lines.append(f'          - {yaml_quote(m)}: {m}/docs/README.md')
+
+    auto_lines.append(f'      - {yaml_quote("全部模块（详细目录）")}:')
+    for m in ordered:
+        auto_lines.extend(build_module_nav_entries(m))
+
+    GENERATED_MKDOCS_YML.parent.mkdir(parents=True, exist_ok=True)
+    out_lines = template_lines[:begin_idx] + auto_lines + template_lines[end_idx + 1 :]
+    GENERATED_MKDOCS_YML.write_text("\n".join(out_lines) + "\n", encoding="utf-8")
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="docs-site-sync.py",
@@ -165,6 +353,7 @@ def main(argv: list[str]) -> int:
     sync_helloagents()
     sync_modules(modules)
     generate_modules_index(modules)
+    generate_mkdocs_config(modules)
 
     print(f"[OK] 已同步 {len(modules)} 个模块到 {GENERATED_ROOT}")
     return 0
