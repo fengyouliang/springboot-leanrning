@@ -32,9 +32,10 @@ bash scripts/docs-site-build.sh
 
 ## 目录说明
 
-- `docs-site/mkdocs.yml`：站点配置（主题/导航/插件）
+- `docs-site/mkdocs.yml`：站点配置模板（主题/插件/基础导航；模块详细目录由同步脚本自动生成）
 - `docs-site/content/`：站点手写内容（首页等），会被同步脚本复制到生成目录
 - `docs-site/.generated/`：同步脚本生成的站点输入目录（不提交）
+- `docs-site/.generated/mkdocs.yml`：同步脚本生成的最终 MkDocs 配置（包含“模块 → Part → 章节”的详细目录，不提交）
 - `docs-site/.site/`：MkDocs build 输出目录（不提交）
 
 ## GitHub Pages（自动构建 + 发布）
