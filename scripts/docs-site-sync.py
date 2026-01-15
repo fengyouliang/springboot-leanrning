@@ -323,10 +323,26 @@ def generate_mkdocs_config(modules: list[str]) -> None:
         ("Exercises & Solutions（练习与答案）", "book/exercises-and-solutions.md"),
         ("迁移规则（合并/拆章/redirect/断链）", "book/migration-rules.md"),
         ("写作指南（如何写得更像书）", "book-style.md"),
-        ("模块文档总览（素材库入口）", "modules/index.md"),
     ]
     for title, path in appendix_pages:
         auto_lines.append(f"          - {yaml_quote(title)}: {path}")
+
+    # 知识库（SSOT 在 helloagents/，站点只复制用于阅读）
+    auto_lines.append(f'          - {yaml_quote("知识库")}:')
+    kb_pages = [
+        ("知识库概览", "helloagents/wiki/overview.md"),
+        ("学习路线图", "helloagents/wiki/learning-path.md"),
+        ("项目约定", "helloagents/project.md"),
+        ("变更历史索引", "helloagents/history/index.md"),
+    ]
+    for title, path in kb_pages:
+        auto_lines.append(f"              - {yaml_quote(title)}: {path}")
+
+    # 模块 docs 作为素材库入口：在 Book-only 导航下仍保留“快速跳转”能力
+    auto_lines.append(f'          - {yaml_quote("模块文档（素材库入口）")}:')
+    auto_lines.append(f"              - {yaml_quote('模块总览')}: modules/index.md")
+    for module in sorted(modules):
+        auto_lines.append(f"              - {yaml_quote(module)}: {module}/docs/README.md")
 
     GENERATED_MKDOCS_YML.parent.mkdir(parents=True, exist_ok=True)
     out_lines = template_lines[:begin_idx] + auto_lines + template_lines[end_idx + 1 :]
