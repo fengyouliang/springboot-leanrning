@@ -55,7 +55,7 @@
   - 教学体验工具页：Labs 索引 / Debugger Pack / Exercises & Solutions / 迁移规则
   - 附录导航：包含知识库入口（overview/learning-path/history）与模块快速入口（模块 README 列表）
 - 模块 docs 仍保留：各模块 `docs/` 依然是机制细节与证据链的素材库；通过书内链接、站内搜索或 `modules/index.md` 访问。
-- 侧边栏目录生成：`scripts/docs-site-sync.py` 自动注入“主线之书”的章节树到 `docs-site/.generated/mkdocs.yml`（基础模板：`docs-site/mkdocs.yml`）。
+- 侧边栏目录生成：`scripts/docs-site-sync.py` 自动扫描 `docs-site/content/book/`，按 Part 分卷 + 目录短标题生成 Book-only 导航，并注入到 `docs-site/.generated/mkdocs.yml`（基础模板：`docs-site/mkdocs.yml`）。
 - Labs 索引生成：`python3 scripts/generate-book-labs-index.py`（输出：`docs-site/content/book/labs-index.md`）。
 - 同步站点输入目录（SSOT → `docs-site/.generated/docs`）：`python3 scripts/docs-site-sync.py`
 - 本地预览：`bash scripts/docs-site-serve.sh`

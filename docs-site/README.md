@@ -38,6 +38,16 @@ bash scripts/docs-site-build.sh
 - `docs-site/.generated/mkdocs.yml`：同步脚本生成的最终 MkDocs 配置（包含“主线之书”的目录树，不提交）
 - `docs-site/.site/`：MkDocs build 输出目录（不提交）
 
+## 目录生成规则（Book-only）
+
+Book-only 的侧边栏目录由 `scripts/docs-site-sync.py` 自动生成（注入到 `docs-site/.generated/mkdocs.yml`），规则如下：
+
+- **主线章节**：放在 `docs-site/content/book/` 下，文件名为 `NN-*.md`（`NN` 为两位数字，例如 `06-webmvc-mainline.md`）
+  - 会按章节号排序，并按 Part 分卷分组（避免侧边栏变成长列表）
+  - 目录标题会“短化”（侧边栏显示短标题，正文 `#` 标题可以保持完整）
+- **附录页**：同目录下的其它 `.md`（例如 `labs-index.md`）会被收纳到“附录 → 其它”
+- **固定附录入口**：Labs 索引 / Debugger Pack / Exercises & Solutions / 迁移规则 / 写作指南 / 知识库 / 模块入口，会以固定顺序出现在附录里
+
 ## GitHub Pages（自动构建 + 发布）
 
 本仓库已提供 GitHub Actions workflow，可在 GitHub 上自动构建并发布站点到 GitHub Pages：

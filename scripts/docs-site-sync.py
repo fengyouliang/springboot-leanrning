@@ -14,6 +14,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -250,6 +251,192 @@ def build_module_nav_entries(module: str) -> list[str]:
     return lines
 
 
+BOOK_CHAPTER_RE = re.compile(r"^(?P<no>\d{2})-(?P<slug>.+)\.md$")
+
+
+def fmt_token_for_nav(token: str) -> str:
+    mapping = {
+        "ioc": "IoC",
+        "aop": "AOP",
+        "mvc": "MVC",
+        "tx": "Tx",
+        "jpa": "JPA",
+        "ltw": "LTW",
+        "ctw": "CTW",
+        "sse": "SSE",
+        "api": "API",
+        "http": "HTTP",
+        "json": "JSON",
+        "xml": "XML",
+        "aot": "AOT",
+    }
+    if token in mapping:
+        return mapping[token]
+    if token.isdigit():
+        return token
+    if not token:
+        return token
+    return token[:1].upper() + token[1:].lower()
+
+
+def scan_book_pages(book_root: Path) -> tuple[list[tuple[int, Path]], list[Path]]:
+    """
+    扫描 docs-site/content/book 下的页面：
+
+    - 章节页：NN-*.md（NN 为两位数字）
+    - 附录页：其它 .md（例如 labs-index.md）
+    """
+    chapters: list[tuple[int, Path]] = []
+    appendix: list[Path] = []
+
+    if not book_root.is_dir():
+        return chapters, appendix
+
+    for md in sorted(book_root.glob("*.md")):
+        if md.name == "index.md":
+            continue
+        m = BOOK_CHAPTER_RE.match(md.name)
+        if m:
+            chapters.append((int(m.group("no")), md))
+        else:
+            appendix.append(md)
+
+    # 章节按编号排序（同号按文件名稳定排序）
+    chapters = sorted(chapters, key=lambda x: (x[0], x[1].name))
+    return chapters, appendix
+
+
+def short_chapter_nav_title(chapter_no: int, md_path: Path) -> str:
+    # 优先给出“短目录标题”（更像书的目录）
+    fixed: dict[int, str] = {
+        0: "00 Start Here",
+        1: "01 Boot",
+        2: "02 IoC（Beans）",
+        3: "03 AOP/Proxy",
+        4: "04 Weaving",
+        5: "05 Tx",
+        6: "06 Web MVC",
+        7: "07 Security",
+        8: "08 Data JPA",
+        9: "09 Cache",
+        10: "10 Async/Scheduling",
+        11: "11 Events",
+        12: "12 Resources",
+        13: "13 Profiles",
+        14: "14 Validation",
+        15: "15 Actuator",
+        16: "16 Web Client",
+        17: "17 Testing",
+        18: "18 Business Case",
+    }
+    if chapter_no in fixed:
+        return fixed[chapter_no]
+
+    # fallback：用文件名推导（去掉 NN- 前缀 + 常见尾缀），尽量短
+    stem = md_path.stem
+    prefix = f"{chapter_no:02d}-"
+    if stem.startswith(prefix):
+        stem = stem[len(prefix) :]
+    stem = stem.replace("-mainline", "").replace("-", " ").strip()
+    tokens = [fmt_token_for_nav(t) for t in stem.split() if t]
+    title = " ".join(tokens).strip()
+    if not title:
+        title = md_path.stem
+    return f"{chapter_no:02d} {title}"
+
+
+def build_book_only_nav_lines(modules: list[str]) -> list[str]:
+    """
+    生成注入到 mkdocs.yml 的 Book-only 导航：
+
+    - 章节按“分卷（Part）”分组
+    - 目录标题短化（nav title 短，正文标题可长）
+    - 自动扫描 docs-site/content/book（新增章节无需改脚本）
+    """
+    auto_lines: list[str] = []
+
+    book_root = CONTENT_ROOT / "book"
+    chapters, appendix_pages = scan_book_pages(book_root)
+    if not chapters:
+        print("[WARN] 未发现任何 book 章节页（docs-site/content/book/NN-*.md）。", file=sys.stderr)
+
+    # 分卷（保持编号连续，避免目录顺序看起来“跳号”）
+    part_defs: list[tuple[str, int, int]] = [
+        ("Part I：启动与配置", 0, 1),
+        ("Part II：容器（Beans）", 2, 2),
+        ("Part III：AOP / 事务", 3, 5),
+        ("Part IV：Web（MVC / Security）", 6, 7),
+        ("Part V：数据与基础设施", 8, 13),
+        ("Part VI：质量与交付", 14, 18),
+    ]
+
+    def part_for(no: int) -> str:
+        for title, start, end in part_defs:
+            if start <= no <= end:
+                return title
+        return "Part X：未归类"
+
+    parts: dict[str, list[tuple[int, Path]]] = {}
+    for no, md in chapters:
+        parts.setdefault(part_for(no), []).append((no, md))
+
+    # 按 part_defs 顺序输出；未归类放最后
+    for title, _, _ in part_defs:
+        if title not in parts:
+            continue
+        auto_lines.append(f"      - {yaml_quote(title)}:")
+        for no, md in parts[title]:
+            auto_lines.append(f"          - {yaml_quote(short_chapter_nav_title(no, md))}: book/{md.name}")
+
+    if "Part X：未归类" in parts:
+        auto_lines.append(f"      - {yaml_quote('Part X：未归类')}:")
+        for no, md in parts["Part X：未归类"]:
+            auto_lines.append(f"          - {yaml_quote(short_chapter_nav_title(no, md))}: book/{md.name}")
+
+    # 附录（分区更清晰：工具/知识库/模块入口/其它页面）
+    auto_lines.append(f"      - {yaml_quote('附录')}:")
+
+    # 1) 工具页（固定顺序）
+    auto_lines.append(f"          - {yaml_quote('工具')}:")
+    tool_pages = [
+        ("Labs 索引", "book/labs-index.md"),
+        ("Debugger Pack", "book/debugger-pack.md"),
+        ("Exercises & Solutions", "book/exercises-and-solutions.md"),
+        ("迁移规则", "book/migration-rules.md"),
+    ]
+    for title, path in tool_pages:
+        auto_lines.append(f"              - {yaml_quote(title)}: {path}")
+
+    # 2) 参考（写作指南 + 知识库）
+    auto_lines.append(f"          - {yaml_quote('参考')}:")
+    auto_lines.append(f"              - {yaml_quote('写作指南')}: book-style.md")
+    auto_lines.append(f"              - {yaml_quote('知识库')}:")
+    kb_pages = [
+        ("知识库概览", "helloagents/wiki/overview.md"),
+        ("学习路线图", "helloagents/wiki/learning-path.md"),
+        ("项目约定", "helloagents/project.md"),
+        ("变更历史索引", "helloagents/history/index.md"),
+    ]
+    for title, path in kb_pages:
+        auto_lines.append(f"                  - {yaml_quote(title)}: {path}")
+
+    # 3) 模块 docs 快速入口（素材库）
+    auto_lines.append(f"          - {yaml_quote('模块入口（素材库）')}:")
+    auto_lines.append(f"              - {yaml_quote('模块总览')}: modules/index.md")
+    for module in sorted(modules):
+        auto_lines.append(f"              - {yaml_quote(module)}: {module}/docs/README.md")
+
+    # 4) book/ 目录下其它未被固定索引覆盖的页面（自动发现，避免漏页）
+    known_appendix = {Path(p).name for _, p in tool_pages}
+    remaining = [p for p in appendix_pages if p.name not in known_appendix]
+    if remaining:
+        auto_lines.append(f"          - {yaml_quote('其它')}:")
+        for md in remaining:
+            auto_lines.append(f"              - {yaml_quote(read_first_h1_title(md))}: book/{md.name}")
+
+    return auto_lines
+
+
 def generate_mkdocs_config(modules: list[str]) -> None:
     """
     生成 docs-site/.generated/mkdocs.yml：在基础 mkdocs.yml 上注入“书（Book-only）目录”。
@@ -290,59 +477,7 @@ def generate_mkdocs_config(modules: list[str]) -> None:
         print("[WARN] 未在 docs-site/mkdocs.yml 中找到 AUTO BOOK NAV 标记，跳过生成 mkdocs 配置。", file=sys.stderr)
         return
 
-    auto_lines: list[str] = []
-    mainline_chapters = [
-        ("第 0 章：Start Here（如何运行与阅读）", "book/00-start-here.md"),
-        ("第 1 章：Boot 启动与配置主线", "book/01-boot-basics-mainline.md"),
-        ("第 2 章：IoC 容器主线（Beans）", "book/02-ioc-container-mainline.md"),
-        ("第 3 章：AOP/代理主线", "book/03-aop-proxy-mainline.md"),
-        ("第 4 章：织入主线（LTW/CTW）", "book/04-aop-weaving-mainline.md"),
-        ("第 5 章：事务主线（Tx）", "book/05-tx-mainline.md"),
-        ("第 6 章：Web MVC 请求主线", "book/06-webmvc-mainline.md"),
-        ("第 7 章：Security 主线", "book/07-security-mainline.md"),
-        ("第 8 章：Data JPA 主线", "book/08-data-jpa-mainline.md"),
-        ("第 9 章：Cache 主线", "book/09-cache-mainline.md"),
-        ("第 10 章：Async/Scheduling 主线", "book/10-async-scheduling-mainline.md"),
-        ("第 11 章：Events 主线", "book/11-events-mainline.md"),
-        ("第 12 章：Resources 主线", "book/12-resources-mainline.md"),
-        ("第 13 章：Profiles 主线", "book/13-profiles-mainline.md"),
-        ("第 14 章：Validation 主线", "book/14-validation-mainline.md"),
-        ("第 15 章：Actuator/Observability 主线", "book/15-actuator-observability-mainline.md"),
-        ("第 16 章：Web Client 主线", "book/16-web-client-mainline.md"),
-        ("第 17 章：Testing 主线", "book/17-testing-mainline.md"),
-        ("第 18 章：Business Case 收束", "book/18-business-case.md"),
-    ]
-
-    for title, path in mainline_chapters:
-        auto_lines.append(f"      - {yaml_quote(title)}: {path}")
-
-    auto_lines.append(f'      - {yaml_quote("附录")}:')
-    appendix_pages = [
-        ("Labs 索引（可跑入口）", "book/labs-index.md"),
-        ("Debugger Pack（断点/观察点/关键分支）", "book/debugger-pack.md"),
-        ("Exercises & Solutions（练习与答案）", "book/exercises-and-solutions.md"),
-        ("迁移规则（合并/拆章/redirect/断链）", "book/migration-rules.md"),
-        ("写作指南（如何写得更像书）", "book-style.md"),
-    ]
-    for title, path in appendix_pages:
-        auto_lines.append(f"          - {yaml_quote(title)}: {path}")
-
-    # 知识库（SSOT 在 helloagents/，站点只复制用于阅读）
-    auto_lines.append(f'          - {yaml_quote("知识库")}:')
-    kb_pages = [
-        ("知识库概览", "helloagents/wiki/overview.md"),
-        ("学习路线图", "helloagents/wiki/learning-path.md"),
-        ("项目约定", "helloagents/project.md"),
-        ("变更历史索引", "helloagents/history/index.md"),
-    ]
-    for title, path in kb_pages:
-        auto_lines.append(f"              - {yaml_quote(title)}: {path}")
-
-    # 模块 docs 作为素材库入口：在 Book-only 导航下仍保留“快速跳转”能力
-    auto_lines.append(f'          - {yaml_quote("模块文档（素材库入口）")}:')
-    auto_lines.append(f"              - {yaml_quote('模块总览')}: modules/index.md")
-    for module in sorted(modules):
-        auto_lines.append(f"              - {yaml_quote(module)}: {module}/docs/README.md")
+    auto_lines = build_book_only_nav_lines(modules)
 
     GENERATED_MKDOCS_YML.parent.mkdir(parents=True, exist_ok=True)
     out_lines = template_lines[:begin_idx] + auto_lines + template_lines[end_idx + 1 :]

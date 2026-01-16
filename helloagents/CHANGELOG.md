@@ -44,6 +44,7 @@
 - `docs-site`：站点导航新增“写作指南”入口（`docs-site/mkdocs.yml`），并在模块侧边栏目录中自动聚合新增的“主线时间线”章节。
 - `docs-site`：站点导航切换为 Book-only（侧边栏仅展示“主线之书”章节树）；`scripts/docs-site-sync.py` 改为注入书目录，模块 docs 作为素材库/搜索命中入口保留。
 - `docs-site`：Book-only 的“附录”导航补齐知识库入口（overview/learning-path/history）与模块快速入口（模块 README 列表），提升在“书目录”下的跳转效率。
+- `docs-site`：Book-only 目录进一步优化：主线章节按 Part 分卷展示、目录标题短化，并改为自动扫描 `docs-site/content/book/` 生成 nav（新增章节无需手改脚本中的章节列表）。
 - `scripts/check-md-relative-links.py`：支持校验站点绝对链接 `/book/...`（映射到 `docs-site/content/book/`），便于模块 docs 使用“redirect 到书章节”的稳定链接形式。
 - `springboot-basics`：试点将模块主线时间线章节迁移到书第 1 章，并保留旧入口作为 redirect（避免断链）。
 - 全模块 docs：停止使用 A–G（A.本章定位…G.小结）“契约式”章节骨架；统一去除字母前缀，并将“核心结论”转换为 summary 提示框，同时将 BOOKIFY 的实验入口提炼为章首提示框（更接近书籍阅读体验）；新增批处理脚本 `scripts/rewrite-docs-book-style.py`。
