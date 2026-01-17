@@ -18,7 +18,7 @@
 ## Impact Scope
 
 - **Modules:** `springboot-web-mvc`
-- **Files:** `springboot-web-mvc/docs/**`、`springboot-web-mvc/src/main/**`、`springboot-web-mvc/src/test/**`、`helloagents/wiki/modules/springboot-web-mvc.md`、`helloagents/CHANGELOG.md`
+- **Files:** `docs/web-mvc/springboot-web-mvc/**`、`springboot-web-mvc/src/main/**`、`springboot-web-mvc/src/test/**`、`helloagents/wiki/modules/springboot-web-mvc.md`、`helloagents/CHANGELOG.md`
 - **APIs:** 仅新增教学用端点（建议使用独立前缀，例如 `/api/advanced/**`），不破坏现有接口
 - **Data:** 无持久化数据（仅内存结构/示例用）
 

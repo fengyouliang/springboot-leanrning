@@ -14,7 +14,7 @@
 
 1. **全章节源码级深化（B）**：为每章补齐/统一 Deep Dive（源码主线调用链 + 关键分支/边界条件 + 断点入口与观察点），形成可复述主线。
 2. **Exercise → Solution 全量补齐（A）**：为现有 Exercise 增加对应 Solution（默认参与回归），确保答案持续可验证。
-3. **索引与互链优化（C）**：增强 `spring-core-beans/docs/README.md` 的章节映射能力（章节 ↔ Lab ↔ Exercise ↔ Solution），并补齐检索入口（从“现象/问题”定位到“章节 + 可运行入口”）。
+3. **索引与互链优化（C）**：增强 `docs/beans/spring-core-beans/README.md` 的章节映射能力（章节 ↔ Lab ↔ Exercise ↔ Solution），并补齐检索入口（从“现象/问题”定位到“章节 + 可运行入口”）。
 4. **持续验证**：所有改动必须通过模块默认回归与 docs 相对链接检查，防止“文档漂移/断链”。
 
 ## Impact Scope
@@ -23,7 +23,7 @@
   - `spring-core-beans`
   - `helloagents`（知识库同步、变更记录）
 - **Files:**
-  - `spring-core-beans/docs/**`（全量章节）
+  - `docs/beans/spring-core-beans/**`（全量章节）
   - `spring-core-beans/src/test/java/**`（新增/补齐 Solution，必要时补小型辅助类）
   - `helloagents/wiki/modules/spring-core-beans.md`（更新现状与入口）
   - `helloagents/CHANGELOG.md`（记录变更）

@@ -47,17 +47,12 @@
 
 ## 4. 文档站点（MkDocs）
 
-> 目标：把各模块的 `docs/` 聚合成一个可搜索的静态站点，并把跨模块的主线整理成**一本可顺读的书**（Book-only 导航）。
+> 目标：基于仓库根 `docs/` 构建可搜索的静态站点，并提供 **Book-only** 的顺读侧边栏目录。
 
-- 阅读入口（Book-only）：`docs-site/content/book/`
-  - 书的目录与阅读说明：`docs-site/content/book/index.md`
-  - 主线章节树：`docs-site/content/book/00-start-here.md` → `18-business-case.md`
-  - 教学体验工具页：Labs 索引 / Debugger Pack / Exercises & Solutions / 迁移规则
-  - 附录导航：包含知识库入口（overview/learning-path/history）与模块快速入口（模块 README 列表）
-- 模块 docs 仍保留：各模块 `docs/` 依然是机制细节与证据链的素材库；通过书内链接、站内搜索或 `modules/index.md` 访问。
-- 侧边栏目录生成：`scripts/docs-site-sync.py` 自动扫描 `docs-site/content/book/`，按 Part 分卷 + 目录短标题生成 Book-only 导航，并注入到 `docs-site/.generated/mkdocs.yml`（基础模板：`docs-site/mkdocs.yml`）。
-- Labs 索引生成：`python3 scripts/generate-book-labs-index.py`（输出：`docs-site/content/book/labs-index.md`）。
-- 同步站点输入目录（SSOT → `docs-site/.generated/docs`）：`python3 scripts/docs-site-sync.py`
+- 文档统一入口：`docs/README.md`（按主题索引）
+- Book（主线之书）：`docs/book/index.md`（目录与阅读说明）
+- 站点配置：`docs-site/mkdocs.yml`（`docs_dir: ../docs`）
+- Book-only 目录生成：`python3 scripts/docs-site-sync.py`（注入到 `docs-site/mkdocs.yml` 的 AUTO BOOK NAV 区段）
 - 本地预览：`bash scripts/docs-site-serve.sh`
-- 严格构建（建议用于 CI）：`bash scripts/docs-site-build.sh`
-- GitHub Pages 发布：已提供 workflow `docs-site-pages.yml`（仓库根目录 `.github/workflows/` 下）；需要在 GitHub 仓库 `Settings → Pages` 中选择 `GitHub Actions` 作为 `Source`
+- 构建：`bash scripts/docs-site-build.sh`
+- GitHub Pages 发布：workflow `.github/workflows/docs-site-pages.yml`（push 到 main/master 或 `workflow_dispatch`）

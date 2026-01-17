@@ -35,7 +35,7 @@
   - `spring-core-beans`（主要变更范围）
   - `helloagents/`（知识库同步与变更记录）
 - **Files:**
-  - `spring-core-beans/docs/**`（新增/重写/扩展章节、索引、附录）
+  - `docs/beans/spring-core-beans/**`（新增/重写/扩展章节、索引、附录）
   - `spring-core-beans/src/test/**`（新增/增强 Labs/Exercises 与测试支撑）
   - `scripts/`（可选：如需新增文档一致性/链接校验脚本）
   - `helloagents/wiki/**`、`helloagents/CHANGELOG.md`、`helloagents/history/**`（同步记录）

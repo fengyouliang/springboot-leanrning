@@ -13,7 +13,7 @@
 
 ## Change Content
 
-1. 为 `spring-core-beans/docs/**` 全量补齐导航（上一章｜目录｜下一章），并确保相对链接正确
+1. 为 `docs/beans/spring-core-beans/**` 全量补齐导航（上一章｜目录｜下一章），并确保相对链接正确
 2. 对“缺少复现入口/断点闭环呈现”的章节补齐统一的“复现入口/推荐断点/条件断点模板/观察点/运行命令”结构
 3. 新增 JSR-330 `@Inject` / `Provider<T>` 对照 Lab，并在文档中落位入口与差异说明
 4. 增强 testsupport 的 dump 工具，提升排障可观察性（候选集合/依赖边/来源定位）
@@ -23,7 +23,7 @@
 
 - **Modules:** `spring-core-beans`、`helloagents`
 - **Files:**
-  - `spring-core-beans/docs/**`
+  - `docs/beans/spring-core-beans/**`
   - `spring-core-beans/src/test/java/**`
   - `helloagents/wiki/**`
   - `helloagents/CHANGELOG.md`

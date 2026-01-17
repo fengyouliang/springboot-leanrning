@@ -13,10 +13,10 @@ Directory: `helloagents/history/2026-01/202601061038_spring_core_beans_spring_be
 
 > 目标：把“Public API 全覆盖”做成可检索、可维护的索引，而不是隐含约定。
 
-- [√] 1.1 新增索引生成脚本（从 `spring-beans-6.2.15-sources.jar` 提取 public 顶层类型清单），输出到 `spring-core-beans/docs/appendix/`（新增脚本文件 1 个）
+- [√] 1.1 新增索引生成脚本（从 `spring-beans-6.2.15-sources.jar` 提取 public 顶层类型清单），输出到 `docs/beans/spring-core-beans/appendix/`（新增脚本文件 1 个）
 - [√] 1.2 新增 `spring-beans Public API Index` 文档（按包分组 + 类型列表 + 映射字段：机制域/章节/Lab/（可选）Exercise/Solution）（新增 docs 文件 1 个）
-- [√] 1.3 在 `spring-core-beans/docs/README.md` 的 Appendix 区加入索引入口（修改 1 个文件）
-- [√] 1.4 在 `spring-core-beans/docs/appendix/92-knowledge-map.md` 增加“API 索引 → 机制域 → 章节/Lab”的检索入口（修改 1 个文件）
+- [√] 1.3 在 `docs/beans/spring-core-beans/README.md` 的 Appendix 区加入索引入口（修改 1 个文件）
+- [√] 1.4 在 `docs/beans/spring-core-beans/appendix/92-knowledge-map.md` 增加“API 索引 → 机制域 → 章节/Lab”的检索入口（修改 1 个文件）
 
 ## 2. 覆盖差距（Gap）审计：现有内容 vs Public API
 
@@ -67,7 +67,7 @@ Directory: `helloagents/history/2026-01/202601061038_spring_core_beans_spring_be
 ## 8. 验证门禁（每批次都要跑）
 
 - [√] 8.1 运行 `mvn -pl spring-core-beans test`
-- [√] 8.2 运行 `python3 scripts/check-md-relative-links.py spring-core-beans/docs`
+- [√] 8.2 运行 `python3 scripts/check-md-relative-links.py docs/beans/spring-core-beans`
 - [√] 8.3（可选）运行 API 索引再生，并确认仓库索引无漂移
 
 ## 9. 知识库同步（HelloAGENTS SSOT）

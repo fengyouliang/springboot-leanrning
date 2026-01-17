@@ -12,8 +12,7 @@
 
 注意：
 - 本脚本不会尝试“合并/拆章/重排主线时间线”（那是第二层，人工为主）。
-- 变更较大，建议在执行后运行：
-  - bash scripts/check-docs.sh
+- 变更较大，建议在执行后自行做一次站点构建预览（可选）：
   - bash scripts/docs-site-build.sh
 
 用法：
@@ -79,13 +78,21 @@ class RewriteStats:
 
 
 def discover_modules(repo_root: Path) -> list[str]:
+    docs_root = repo_root / "docs"
+    if not docs_root.is_dir():
+        return []
+
     modules: list[str] = []
-    for p in sorted(repo_root.iterdir()):
-        if not p.is_dir():
-            continue
-        if (p / "docs" / "README.md").is_file():
-            modules.append(p.name)
+    for readme in sorted(docs_root.glob("*/*/README.md")):
+        module = readme.parent.name
+        if (repo_root / module).is_dir():
+            modules.append(module)
     return modules
+
+
+def resolve_module_docs_root(module: str) -> Path | None:
+    candidates = sorted((REPO_ROOT / "docs").glob(f"*/{module}"))
+    return candidates[0] if candidates else None
 
 
 def read_text_utf8(path: Path) -> str:
@@ -221,8 +228,8 @@ def rewrite_markdown(text: str) -> str:
 
 
 def iter_module_docs_markdown(module: str) -> list[Path]:
-    docs_root = REPO_ROOT / module / "docs"
-    if not docs_root.is_dir():
+    docs_root = resolve_module_docs_root(module)
+    if docs_root is None or not docs_root.is_dir():
         return []
 
     paths = [p for p in docs_root.rglob("*.md") if p.is_file()]
@@ -265,7 +272,7 @@ def main(argv: list[str]) -> int:
     args = parse_args(argv[1:])
     modules = args.module or discover_modules(REPO_ROOT)
     if not modules:
-        print("[ERROR] 未发现任何包含 docs/README.md 的模块。", file=sys.stderr)
+        print("[ERROR] 未发现任何模块目录页（docs/<topic>/<module>/README.md）。", file=sys.stderr)
         return 2
 
     stats = run(modules, dry_run=args.dry_run)
@@ -276,4 +283,3 @@ def main(argv: list[str]) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv))
-

@@ -6,7 +6,7 @@
 
 目标：
 - 覆盖模块 docs 章节（SSOT：docs/README.md 链接清单）
-- 覆盖 Book-only 页面（docs-site/content/book/**/*.md）
+- 覆盖 Book-only 页面（docs/book/**/*.md）
 - 可重复执行（idempotent）：多次运行不会重复叠加
 
 卡片字段（五问）：

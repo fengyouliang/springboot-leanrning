@@ -15,7 +15,7 @@
   - Exercise/Solution：仅对“适合练习”的主题提供（Exercise 默认 @Disabled，Solution 默认参与回归）
 
 - **文件布局策略：**
-  - docs：补充放入 `spring-core-beans/docs/part-05-aot-and-real-world/`，保持“真实世界补齐/遗留机制”语义
+  - docs：补充放入 `docs/beans/spring-core-beans/part-05-aot-and-real-world/`，保持“真实世界补齐/遗留机制”语义
   - tests：新增 `spring-core-beans/src/test/java/.../part05_aot_and_real_world/*LabTest.java`
   - resources：XML、XSD、spring.handlers/schemas 放入 `spring-core-beans/src/test/resources/`，避免污染主 artifact
 
@@ -38,6 +38,6 @@
 
 - **Testing:**
   - `mvn -pl spring-core-beans test`
-  - `python3 scripts/check-md-relative-links.py spring-core-beans/docs`
+  - `python3 scripts/check-md-relative-links.py docs/beans/spring-core-beans`
 - **Deployment:** 无部署变更（教学仓库内容与 tests 增量）。
 

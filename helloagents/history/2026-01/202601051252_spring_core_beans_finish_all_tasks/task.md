@@ -5,7 +5,7 @@ Directory: `helloagents/plan/202601051252_spring_core_beans_finish_all_tasks/`
 ---
 
 ## 1. Docs 一致性收尾（导航 + 入口标准化）
-- [√] 1.1 为 `spring-core-beans/docs/**.md` 全量补齐“上一章｜目录｜下一章”导航，并确保相对链接正确（0 断链）
+- [√] 1.1 为 `docs/beans/spring-core-beans/**.md` 全量补齐“上一章｜目录｜下一章”导航，并确保相对链接正确（0 断链）
   - 交付物：已脚本化生成并写入/替换全部章节的导航行（42/42）
 - [√] 1.2 补齐缺少“复现入口/推荐断点/观察点/运行命令”的章节：至少覆盖 Part01/03/04 的章节页与 appendix/90/99
   - 交付物：已为 docs 全量补齐统一的 `## 0. 复现入口（可运行）` 入口块（25/25 缺口全部补齐）
@@ -16,7 +16,7 @@ Directory: `helloagents/plan/202601051252_spring_core_beans_finish_all_tasks/`
 - [√] 2.1 新增 Lab：JSR-330 `@Inject`/`Provider<T>`（与 `@Autowired`/`ObjectProvider` 对照），并在 DI 文档中落位入口
   - 交付物：
     - 新增：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansJsr330InjectionLabTest.java`
-    - 文档落位：`spring-core-beans/docs/part-01-ioc-container/03-dependency-injection-resolution.md`（新增 4.2 小节）
+    - 文档落位：`docs/beans/spring-core-beans/part-01-ioc-container/03-dependency-injection-resolution.md`（新增 4.2 小节）
     - 依赖补齐：`spring-core-beans/pom.xml`（test scope 引入 `jakarta.inject:jakarta.inject-api`）
 
 ## 3. testsupport 增强（排障可观察性）

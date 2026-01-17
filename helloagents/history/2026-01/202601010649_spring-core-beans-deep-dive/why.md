@@ -11,14 +11,14 @@
 
 ## 变更内容
 
-1. 扩写并重构 `spring-core-beans/docs/` 中的核心章节，使其覆盖“启动时间线、注入解析、生命周期、后处理器/代理、循环依赖、@Configuration 增强、FactoryBean”这些关键机制，并给出断点入口与观察点。
+1. 扩写并重构 `docs/beans/spring-core-beans/` 中的核心章节，使其覆盖“启动时间线、注入解析、生命周期、后处理器/代理、循环依赖、@Configuration 增强、FactoryBean”这些关键机制，并给出断点入口与观察点。
 2. 补齐 `spring-core-beans` 的可运行最小示例与 Labs/Exercises（`src/main/java` + `src/test/java`），让每个关键机制都能被稳定复现与断言。
 3. 清理/修正文档中对不存在代码的引用，使“README → docs → Labs”形成一致的学习路径。
 
 ## 影响范围
 
 - **Modules:** `spring-core-beans`
-- **Files:** `spring-core-beans/docs/*.md`、`spring-core-beans/README.md`、`spring-core-beans/src/main/java/**`、`spring-core-beans/src/test/java/**`
+- **Files:** `docs/beans/spring-core-beans/*.md`、`spring-core-beans/README.md`、`spring-core-beans/src/main/java/**`、`spring-core-beans/src/test/java/**`
 - **APIs:** 无对外 API 变更
 - **Data:** 无数据模型变更
 

@@ -5,7 +5,7 @@ Directory: `helloagents/plan/202601171204_docs_booklike_rewrite_all/`
 ---
 
 ## 1. 规则与脚本（第二层书籍化）
-- [√] 1.1 更新写作指南：补齐“二次书籍化（正文叙事与证据链）”规范到 `docs-site/content/book-style.md`，verify why.md#change-content
+- [√] 1.1 更新写作指南：补齐“二次书籍化（正文叙事与证据链）”规范到 `docs/book-style.md`，verify why.md#change-content
   - [√] 1.1.1 明确“正文二次书籍化”的章节结构：导读 → 主线推进 → 关键分支/坑点 → 证据链 → 小结与下一章承接
   - [√] 1.1.2 固化“证据链”写法：2–4 条观察点/断点/断言 + 对应推荐 Lab/源码入口（避免“跑了但不知道看什么”）
   - [√] 1.1.3 给出最小可复用模板片段与正反例：如何补齐空块/如何去重复实验入口/redirect 与工具页如何写
@@ -25,248 +25,248 @@ Directory: `helloagents/plan/202601171204_docs_booklike_rewrite_all/`
     - [√] 2.1.0.2 先试跑 1–2 个模块：review diff（结构/证据链/重复入口/空块），修正规则后再进入全量
     - [√] 2.1.0.3 分批执行与逐批闸门：每批执行后跑 `scripts/check-docs.sh` + `docs-site-build.sh`，避免一次性大爆炸
   - [√] 2.1.1 模块：springboot-basics（6 章）
-    - [√] 2.1.1.1 二次书籍化：`springboot-basics/docs/part-00-guide/003-03-mainline-timeline.md`
-    - [√] 2.1.1.2 二次书籍化：`springboot-basics/docs/part-00-guide/004-00-deep-dive-guide.md`
-    - [√] 2.1.1.3 二次书籍化：`springboot-basics/docs/part-01-boot-basics/005-01-property-sources-and-profiles.md`
-    - [√] 2.1.1.4 二次书籍化：`springboot-basics/docs/part-01-boot-basics/006-02-configuration-properties-binding.md`
-    - [√] 2.1.1.5 二次书籍化：`springboot-basics/docs/appendix/007-90-common-pitfalls.md`
-    - [√] 2.1.1.6 二次书籍化：`springboot-basics/docs/appendix/008-99-self-check.md`
+    - [√] 2.1.1.1 二次书籍化：`docs/basics/springboot-basics/part-00-guide/003-03-mainline-timeline.md`
+    - [√] 2.1.1.2 二次书籍化：`docs/basics/springboot-basics/part-00-guide/004-00-deep-dive-guide.md`
+    - [√] 2.1.1.3 二次书籍化：`docs/basics/springboot-basics/part-01-boot-basics/005-01-property-sources-and-profiles.md`
+    - [√] 2.1.1.4 二次书籍化：`docs/basics/springboot-basics/part-01-boot-basics/006-02-configuration-properties-binding.md`
+    - [√] 2.1.1.5 二次书籍化：`docs/basics/springboot-basics/appendix/007-90-common-pitfalls.md`
+    - [√] 2.1.1.6 二次书籍化：`docs/basics/springboot-basics/appendix/008-99-self-check.md`
   - [√] 2.1.2 模块：spring-core-beans（17 章）
-    - [√] 2.1.2.1 二次书籍化：`spring-core-beans/docs/part-00-guide/010-03-mainline-timeline.md`
-    - [√] 2.1.2.2 二次书籍化：`spring-core-beans/docs/part-00-guide/011-00-deep-dive-guide.md`
-    - [√] 2.1.2.3 二次书籍化：`spring-core-beans/docs/part-00-guide/012-01-quickstart-30min.md`
-    - [√] 2.1.2.4 二次书籍化：`spring-core-beans/docs/part-00-guide/013-02-breakpoint-map.md`
-    - [√] 2.1.2.5 二次书籍化：`spring-core-beans/docs/part-01-ioc-container/020-01-bean-mental-model.md`
-    - [√] 2.1.2.6 二次书籍化：`spring-core-beans/docs/part-01-ioc-container/014-03-dependency-injection-resolution.md`
-    - [√] 2.1.2.7 二次书籍化：`spring-core-beans/docs/part-01-ioc-container/015-04-scope-and-prototype.md`
-    - [√] 2.1.2.8 二次书籍化：`spring-core-beans/docs/part-01-ioc-container/016-05-lifecycle-and-callbacks.md`
-    - [√] 2.1.2.9 二次书籍化：`spring-core-beans/docs/part-01-ioc-container/017-06-post-processors.md`
-    - [√] 2.1.2.10 二次书籍化：`spring-core-beans/docs/part-01-ioc-container/018-07-configuration-enhancement.md`
-    - [√] 2.1.2.11 二次书籍化：`spring-core-beans/docs/part-02-boot-autoconfig/021-10-spring-boot-auto-configuration.md`
-    - [√] 2.1.2.12 二次书籍化：`spring-core-beans/docs/part-02-boot-autoconfig/019-11-debugging-and-observability.md`
-    - [√] 2.1.2.13 二次书籍化：`spring-core-beans/docs/part-03-container-internals/022-12-container-bootstrap-and-infrastructure.md`
-    - [√] 2.1.2.14 二次书籍化：`spring-core-beans/docs/part-04-wiring-and-boundaries/023-18-lazy-semantics.md`
-    - [√] 2.1.2.15 二次书籍化：`spring-core-beans/docs/part-05-aot-and-real-world/024-40-aot-and-native-overview.md`
-    - [√] 2.1.2.16 二次书籍化：`spring-core-beans/docs/appendix/025-90-common-pitfalls.md`
-    - [√] 2.1.2.17 二次书籍化：`spring-core-beans/docs/appendix/026-99-self-check.md`
+    - [√] 2.1.2.1 二次书籍化：`docs/beans/spring-core-beans/part-00-guide/010-03-mainline-timeline.md`
+    - [√] 2.1.2.2 二次书籍化：`docs/beans/spring-core-beans/part-00-guide/011-00-deep-dive-guide.md`
+    - [√] 2.1.2.3 二次书籍化：`docs/beans/spring-core-beans/part-00-guide/012-01-quickstart-30min.md`
+    - [√] 2.1.2.4 二次书籍化：`docs/beans/spring-core-beans/part-00-guide/013-02-breakpoint-map.md`
+    - [√] 2.1.2.5 二次书籍化：`docs/beans/spring-core-beans/part-01-ioc-container/020-01-bean-mental-model.md`
+    - [√] 2.1.2.6 二次书籍化：`docs/beans/spring-core-beans/part-01-ioc-container/014-03-dependency-injection-resolution.md`
+    - [√] 2.1.2.7 二次书籍化：`docs/beans/spring-core-beans/part-01-ioc-container/015-04-scope-and-prototype.md`
+    - [√] 2.1.2.8 二次书籍化：`docs/beans/spring-core-beans/part-01-ioc-container/016-05-lifecycle-and-callbacks.md`
+    - [√] 2.1.2.9 二次书籍化：`docs/beans/spring-core-beans/part-01-ioc-container/017-06-post-processors.md`
+    - [√] 2.1.2.10 二次书籍化：`docs/beans/spring-core-beans/part-01-ioc-container/018-07-configuration-enhancement.md`
+    - [√] 2.1.2.11 二次书籍化：`docs/beans/spring-core-beans/part-02-boot-autoconfig/021-10-spring-boot-auto-configuration.md`
+    - [√] 2.1.2.12 二次书籍化：`docs/beans/spring-core-beans/part-02-boot-autoconfig/019-11-debugging-and-observability.md`
+    - [√] 2.1.2.13 二次书籍化：`docs/beans/spring-core-beans/part-03-container-internals/022-12-container-bootstrap-and-infrastructure.md`
+    - [√] 2.1.2.14 二次书籍化：`docs/beans/spring-core-beans/part-04-wiring-and-boundaries/023-18-lazy-semantics.md`
+    - [√] 2.1.2.15 二次书籍化：`docs/beans/spring-core-beans/part-05-aot-and-real-world/024-40-aot-and-native-overview.md`
+    - [√] 2.1.2.16 二次书籍化：`docs/beans/spring-core-beans/appendix/025-90-common-pitfalls.md`
+    - [√] 2.1.2.17 二次书籍化：`docs/beans/spring-core-beans/appendix/026-99-self-check.md`
   - [√] 2.1.3 模块：spring-core-aop（14 章）
-    - [√] 2.1.3.1 二次书籍化：`spring-core-aop/docs/part-00-guide/028-03-mainline-timeline.md`
-    - [√] 2.1.3.2 二次书籍化：`spring-core-aop/docs/part-00-guide/029-00-deep-dive-guide.md`
-    - [√] 2.1.3.3 二次书籍化：`spring-core-aop/docs/part-01-proxy-fundamentals/030-01-aop-proxy-mental-model.md`
-    - [√] 2.1.3.4 二次书籍化：`spring-core-aop/docs/part-01-proxy-fundamentals/031-02-jdk-vs-cglib.md`
-    - [√] 2.1.3.5 二次书籍化：`spring-core-aop/docs/part-01-proxy-fundamentals/032-03-self-invocation.md`
-    - [√] 2.1.3.6 二次书籍化：`spring-core-aop/docs/part-01-proxy-fundamentals/033-04-final-and-proxy-limits.md`
-    - [√] 2.1.3.7 二次书籍化：`spring-core-aop/docs/part-01-proxy-fundamentals/034-05-expose-proxy.md`
-    - [√] 2.1.3.8 二次书籍化：`spring-core-aop/docs/part-01-proxy-fundamentals/035-06-debugging.md`
-    - [√] 2.1.3.9 二次书籍化：`spring-core-aop/docs/part-02-autoproxy-and-pointcuts/036-07-autoproxy-creator-mainline.md`
-    - [√] 2.1.3.10 二次书籍化：`spring-core-aop/docs/part-02-autoproxy-and-pointcuts/037-08-pointcut-expression-system.md`
-    - [√] 2.1.3.11 二次书籍化：`spring-core-aop/docs/part-03-proxy-stacking/038-09-multi-proxy-stacking.md`
-    - [√] 2.1.3.12 二次书籍化：`spring-core-aop/docs/part-03-proxy-stacking/039-10-real-world-stacking-playbook.md`
-    - [√] 2.1.3.13 二次书籍化：`spring-core-aop/docs/appendix/040-90-common-pitfalls.md`
-    - [√] 2.1.3.14 二次书籍化：`spring-core-aop/docs/appendix/041-99-self-check.md`
+    - [√] 2.1.3.1 二次书籍化：`docs/aop/spring-core-aop/part-00-guide/028-03-mainline-timeline.md`
+    - [√] 2.1.3.2 二次书籍化：`docs/aop/spring-core-aop/part-00-guide/029-00-deep-dive-guide.md`
+    - [√] 2.1.3.3 二次书籍化：`docs/aop/spring-core-aop/part-01-proxy-fundamentals/030-01-aop-proxy-mental-model.md`
+    - [√] 2.1.3.4 二次书籍化：`docs/aop/spring-core-aop/part-01-proxy-fundamentals/031-02-jdk-vs-cglib.md`
+    - [√] 2.1.3.5 二次书籍化：`docs/aop/spring-core-aop/part-01-proxy-fundamentals/032-03-self-invocation.md`
+    - [√] 2.1.3.6 二次书籍化：`docs/aop/spring-core-aop/part-01-proxy-fundamentals/033-04-final-and-proxy-limits.md`
+    - [√] 2.1.3.7 二次书籍化：`docs/aop/spring-core-aop/part-01-proxy-fundamentals/034-05-expose-proxy.md`
+    - [√] 2.1.3.8 二次书籍化：`docs/aop/spring-core-aop/part-01-proxy-fundamentals/035-06-debugging.md`
+    - [√] 2.1.3.9 二次书籍化：`docs/aop/spring-core-aop/part-02-autoproxy-and-pointcuts/036-07-autoproxy-creator-mainline.md`
+    - [√] 2.1.3.10 二次书籍化：`docs/aop/spring-core-aop/part-02-autoproxy-and-pointcuts/037-08-pointcut-expression-system.md`
+    - [√] 2.1.3.11 二次书籍化：`docs/aop/spring-core-aop/part-03-proxy-stacking/038-09-multi-proxy-stacking.md`
+    - [√] 2.1.3.12 二次书籍化：`docs/aop/spring-core-aop/part-03-proxy-stacking/039-10-real-world-stacking-playbook.md`
+    - [√] 2.1.3.13 二次书籍化：`docs/aop/spring-core-aop/appendix/040-90-common-pitfalls.md`
+    - [√] 2.1.3.14 二次书籍化：`docs/aop/spring-core-aop/appendix/041-99-self-check.md`
   - [√] 2.1.4 模块：spring-core-aop-weaving（8 章）
-    - [√] 2.1.4.1 二次书籍化：`spring-core-aop-weaving/docs/part-00-guide/043-03-mainline-timeline.md`
-    - [√] 2.1.4.2 二次书籍化：`spring-core-aop-weaving/docs/part-00-guide/044-00-deep-dive-guide.md`
-    - [√] 2.1.4.3 二次书籍化：`spring-core-aop-weaving/docs/part-01-mental-model/045-01-proxy-vs-weaving.md`
-    - [√] 2.1.4.4 二次书籍化：`spring-core-aop-weaving/docs/part-02-ltw/046-02-ltw-basics.md`
-    - [√] 2.1.4.5 二次书籍化：`spring-core-aop-weaving/docs/part-03-ctw/047-03-ctw-basics.md`
-    - [√] 2.1.4.6 二次书籍化：`spring-core-aop-weaving/docs/part-04-join-points/048-04-join-point-cookbook.md`
-    - [√] 2.1.4.7 二次书籍化：`spring-core-aop-weaving/docs/appendix/049-90-common-pitfalls.md`
-    - [√] 2.1.4.8 二次书籍化：`spring-core-aop-weaving/docs/appendix/050-99-self-check.md`
+    - [√] 2.1.4.1 二次书籍化：`docs/aop/spring-core-aop-weaving/part-00-guide/043-03-mainline-timeline.md`
+    - [√] 2.1.4.2 二次书籍化：`docs/aop/spring-core-aop-weaving/part-00-guide/044-00-deep-dive-guide.md`
+    - [√] 2.1.4.3 二次书籍化：`docs/aop/spring-core-aop-weaving/part-01-mental-model/045-01-proxy-vs-weaving.md`
+    - [√] 2.1.4.4 二次书籍化：`docs/aop/spring-core-aop-weaving/part-02-ltw/046-02-ltw-basics.md`
+    - [√] 2.1.4.5 二次书籍化：`docs/aop/spring-core-aop-weaving/part-03-ctw/047-03-ctw-basics.md`
+    - [√] 2.1.4.6 二次书籍化：`docs/aop/spring-core-aop-weaving/part-04-join-points/048-04-join-point-cookbook.md`
+    - [√] 2.1.4.7 二次书籍化：`docs/aop/spring-core-aop-weaving/appendix/049-90-common-pitfalls.md`
+    - [√] 2.1.4.8 二次书籍化：`docs/aop/spring-core-aop-weaving/appendix/050-99-self-check.md`
   - [√] 2.1.5 模块：spring-core-tx（10 章）
-    - [√] 2.1.5.1 二次书籍化：`spring-core-tx/docs/part-00-guide/052-03-mainline-timeline.md`
-    - [√] 2.1.5.2 二次书籍化：`spring-core-tx/docs/part-00-guide/053-00-deep-dive-guide.md`
-    - [√] 2.1.5.3 二次书籍化：`spring-core-tx/docs/part-01-transaction-basics/054-01-transaction-boundary.md`
-    - [√] 2.1.5.4 二次书籍化：`spring-core-tx/docs/part-01-transaction-basics/055-02-transactional-proxy.md`
-    - [√] 2.1.5.5 二次书籍化：`spring-core-tx/docs/part-01-transaction-basics/056-03-rollback-rules.md`
-    - [√] 2.1.5.6 二次书籍化：`spring-core-tx/docs/part-01-transaction-basics/057-04-propagation.md`
-    - [√] 2.1.5.7 二次书籍化：`spring-core-tx/docs/part-02-template-and-debugging/058-05-transaction-template.md`
-    - [√] 2.1.5.8 二次书籍化：`spring-core-tx/docs/part-02-template-and-debugging/059-06-debugging.md`
-    - [√] 2.1.5.9 二次书籍化：`spring-core-tx/docs/appendix/060-90-common-pitfalls.md`
-    - [√] 2.1.5.10 二次书籍化：`spring-core-tx/docs/appendix/061-99-self-check.md`
+    - [√] 2.1.5.1 二次书籍化：`docs/tx/spring-core-tx/part-00-guide/052-03-mainline-timeline.md`
+    - [√] 2.1.5.2 二次书籍化：`docs/tx/spring-core-tx/part-00-guide/053-00-deep-dive-guide.md`
+    - [√] 2.1.5.3 二次书籍化：`docs/tx/spring-core-tx/part-01-transaction-basics/054-01-transaction-boundary.md`
+    - [√] 2.1.5.4 二次书籍化：`docs/tx/spring-core-tx/part-01-transaction-basics/055-02-transactional-proxy.md`
+    - [√] 2.1.5.5 二次书籍化：`docs/tx/spring-core-tx/part-01-transaction-basics/056-03-rollback-rules.md`
+    - [√] 2.1.5.6 二次书籍化：`docs/tx/spring-core-tx/part-01-transaction-basics/057-04-propagation.md`
+    - [√] 2.1.5.7 二次书籍化：`docs/tx/spring-core-tx/part-02-template-and-debugging/058-05-transaction-template.md`
+    - [√] 2.1.5.8 二次书籍化：`docs/tx/spring-core-tx/part-02-template-and-debugging/059-06-debugging.md`
+    - [√] 2.1.5.9 二次书籍化：`docs/tx/spring-core-tx/appendix/060-90-common-pitfalls.md`
+    - [√] 2.1.5.10 二次书籍化：`docs/tx/spring-core-tx/appendix/061-99-self-check.md`
   - [√] 2.1.6 模块：springboot-web-mvc（21 章）
-    - [√] 2.1.6.1 二次书籍化：`springboot-web-mvc/docs/part-00-guide/063-03-mainline-timeline.md`
-    - [√] 2.1.6.2 二次书籍化：`springboot-web-mvc/docs/part-00-guide/064-00-deep-dive-guide.md`
-    - [√] 2.1.6.3 二次书籍化：`springboot-web-mvc/docs/part-00-guide/065-01-knowledge-map.md`
-    - [√] 2.1.6.4 二次书籍化：`springboot-web-mvc/docs/part-00-guide/066-02-breakpoint-map.md`
-    - [√] 2.1.6.5 二次书籍化：`springboot-web-mvc/docs/part-03-web-mvc-internals/067-01-dispatcherservlet-call-chain.md`
-    - [√] 2.1.6.6 二次书籍化：`springboot-web-mvc/docs/part-03-web-mvc-internals/068-03-message-converters-and-return-values.md`
-    - [√] 2.1.6.7 二次书籍化：`springboot-web-mvc/docs/part-03-web-mvc-internals/069-04-exception-resolvers-and-error-flow.md`
-    - [√] 2.1.6.8 二次书籍化：`springboot-web-mvc/docs/part-03-web-mvc-internals/070-05-controlleradvice-matching-and-ordering.md`
-    - [√] 2.1.6.9 二次书籍化：`springboot-web-mvc/docs/part-01-web-mvc/071-01-validation-and-error-shaping.md`
-    - [√] 2.1.6.10 二次书籍化：`springboot-web-mvc/docs/part-01-web-mvc/072-02-exception-handling.md`
-    - [√] 2.1.6.11 二次书籍化：`springboot-web-mvc/docs/part-01-web-mvc/073-03-binding-and-converters.md`
-    - [√] 2.1.6.12 二次书籍化：`springboot-web-mvc/docs/part-01-web-mvc/074-04-interceptor-and-filter-ordering.md`
-    - [√] 2.1.6.13 二次书籍化：`springboot-web-mvc/docs/part-01-web-mvc/075-05-interceptor-async-lifecycle.md`
-    - [√] 2.1.6.14 二次书籍化：`springboot-web-mvc/docs/part-02-view-mvc/076-01-thymeleaf-and-view-resolver.md`
-    - [√] 2.1.6.15 二次书籍化：`springboot-web-mvc/docs/part-04-rest-contract/077-01-content-negotiation-406-415.md`
-    - [√] 2.1.6.16 二次书籍化：`springboot-web-mvc/docs/part-05-real-world-http/078-01-cors-preflight.md`
-    - [√] 2.1.6.17 二次书籍化：`springboot-web-mvc/docs/part-06-async-sse/079-01-servlet-async-and-testing.md`
-    - [√] 2.1.6.18 二次书籍化：`springboot-web-mvc/docs/part-07-testing-debugging/080-01-webmvc-testing-and-troubleshooting.md`
-    - [√] 2.1.6.19 二次书籍化：`springboot-web-mvc/docs/part-08-security-observability/081-01-security-filterchain-and-mvc.md`
-    - [√] 2.1.6.20 二次书籍化：`springboot-web-mvc/docs/appendix/082-90-common-pitfalls.md`
-    - [√] 2.1.6.21 二次书籍化：`springboot-web-mvc/docs/appendix/083-99-self-check.md`
+    - [√] 2.1.6.1 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-00-guide/063-03-mainline-timeline.md`
+    - [√] 2.1.6.2 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-00-guide/064-00-deep-dive-guide.md`
+    - [√] 2.1.6.3 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-00-guide/065-01-knowledge-map.md`
+    - [√] 2.1.6.4 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-00-guide/066-02-breakpoint-map.md`
+    - [√] 2.1.6.5 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-03-web-mvc-internals/067-01-dispatcherservlet-call-chain.md`
+    - [√] 2.1.6.6 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-03-web-mvc-internals/068-03-message-converters-and-return-values.md`
+    - [√] 2.1.6.7 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-03-web-mvc-internals/069-04-exception-resolvers-and-error-flow.md`
+    - [√] 2.1.6.8 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-03-web-mvc-internals/070-05-controlleradvice-matching-and-ordering.md`
+    - [√] 2.1.6.9 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-01-web-mvc/071-01-validation-and-error-shaping.md`
+    - [√] 2.1.6.10 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-01-web-mvc/072-02-exception-handling.md`
+    - [√] 2.1.6.11 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-01-web-mvc/073-03-binding-and-converters.md`
+    - [√] 2.1.6.12 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-01-web-mvc/074-04-interceptor-and-filter-ordering.md`
+    - [√] 2.1.6.13 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-01-web-mvc/075-05-interceptor-async-lifecycle.md`
+    - [√] 2.1.6.14 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-02-view-mvc/076-01-thymeleaf-and-view-resolver.md`
+    - [√] 2.1.6.15 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-04-rest-contract/077-01-content-negotiation-406-415.md`
+    - [√] 2.1.6.16 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-05-real-world-http/078-01-cors-preflight.md`
+    - [√] 2.1.6.17 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-06-async-sse/079-01-servlet-async-and-testing.md`
+    - [√] 2.1.6.18 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-07-testing-debugging/080-01-webmvc-testing-and-troubleshooting.md`
+    - [√] 2.1.6.19 二次书籍化：`docs/web-mvc/springboot-web-mvc/part-08-security-observability/081-01-security-filterchain-and-mvc.md`
+    - [√] 2.1.6.20 二次书籍化：`docs/web-mvc/springboot-web-mvc/appendix/082-90-common-pitfalls.md`
+    - [√] 2.1.6.21 二次书籍化：`docs/web-mvc/springboot-web-mvc/appendix/083-99-self-check.md`
   - [√] 2.1.7 模块：springboot-security（9 章）
-    - [√] 2.1.7.1 二次书籍化：`springboot-security/docs/part-00-guide/085-03-mainline-timeline.md`
-    - [√] 2.1.7.2 二次书籍化：`springboot-security/docs/part-00-guide/086-00-deep-dive-guide.md`
-    - [√] 2.1.7.3 二次书籍化：`springboot-security/docs/part-01-security/087-01-basic-auth-and-authorization.md`
-    - [√] 2.1.7.4 二次书籍化：`springboot-security/docs/part-01-security/088-02-csrf.md`
-    - [√] 2.1.7.5 二次书籍化：`springboot-security/docs/part-01-security/089-03-method-security-and-proxy.md`
-    - [√] 2.1.7.6 二次书籍化：`springboot-security/docs/part-01-security/090-04-filter-chain-and-order.md`
-    - [√] 2.1.7.7 二次书籍化：`springboot-security/docs/part-01-security/091-05-jwt-stateless.md`
-    - [√] 2.1.7.8 二次书籍化：`springboot-security/docs/appendix/092-90-common-pitfalls.md`
-    - [√] 2.1.7.9 二次书籍化：`springboot-security/docs/appendix/093-99-self-check.md`
+    - [√] 2.1.7.1 二次书籍化：`docs/security/springboot-security/part-00-guide/085-03-mainline-timeline.md`
+    - [√] 2.1.7.2 二次书籍化：`docs/security/springboot-security/part-00-guide/086-00-deep-dive-guide.md`
+    - [√] 2.1.7.3 二次书籍化：`docs/security/springboot-security/part-01-security/087-01-basic-auth-and-authorization.md`
+    - [√] 2.1.7.4 二次书籍化：`docs/security/springboot-security/part-01-security/088-02-csrf.md`
+    - [√] 2.1.7.5 二次书籍化：`docs/security/springboot-security/part-01-security/089-03-method-security-and-proxy.md`
+    - [√] 2.1.7.6 二次书籍化：`docs/security/springboot-security/part-01-security/090-04-filter-chain-and-order.md`
+    - [√] 2.1.7.7 二次书籍化：`docs/security/springboot-security/part-01-security/091-05-jwt-stateless.md`
+    - [√] 2.1.7.8 二次书籍化：`docs/security/springboot-security/appendix/092-90-common-pitfalls.md`
+    - [√] 2.1.7.9 二次书籍化：`docs/security/springboot-security/appendix/093-99-self-check.md`
   - [√] 2.1.8 模块：springboot-data-jpa（11 章）
-    - [√] 2.1.8.1 二次书籍化：`springboot-data-jpa/docs/part-00-guide/095-03-mainline-timeline.md`
-    - [√] 2.1.8.2 二次书籍化：`springboot-data-jpa/docs/part-00-guide/096-00-deep-dive-guide.md`
-    - [√] 2.1.8.3 二次书籍化：`springboot-data-jpa/docs/part-01-data-jpa/097-01-entity-states.md`
-    - [√] 2.1.8.4 二次书籍化：`springboot-data-jpa/docs/part-01-data-jpa/098-02-persistence-context.md`
-    - [√] 2.1.8.5 二次书籍化：`springboot-data-jpa/docs/part-01-data-jpa/099-03-flush-and-visibility.md`
-    - [√] 2.1.8.6 二次书籍化：`springboot-data-jpa/docs/part-01-data-jpa/100-04-dirty-checking.md`
-    - [√] 2.1.8.7 二次书籍化：`springboot-data-jpa/docs/part-01-data-jpa/101-05-fetching-and-n-plus-one.md`
-    - [√] 2.1.8.8 二次书籍化：`springboot-data-jpa/docs/part-01-data-jpa/102-06-datajpatest-slice.md`
-    - [√] 2.1.8.9 二次书籍化：`springboot-data-jpa/docs/part-01-data-jpa/103-07-debug-sql.md`
-    - [√] 2.1.8.10 二次书籍化：`springboot-data-jpa/docs/appendix/104-90-common-pitfalls.md`
-    - [√] 2.1.8.11 二次书籍化：`springboot-data-jpa/docs/appendix/105-99-self-check.md`
+    - [√] 2.1.8.1 二次书籍化：`docs/data-jpa/springboot-data-jpa/part-00-guide/095-03-mainline-timeline.md`
+    - [√] 2.1.8.2 二次书籍化：`docs/data-jpa/springboot-data-jpa/part-00-guide/096-00-deep-dive-guide.md`
+    - [√] 2.1.8.3 二次书籍化：`docs/data-jpa/springboot-data-jpa/part-01-data-jpa/097-01-entity-states.md`
+    - [√] 2.1.8.4 二次书籍化：`docs/data-jpa/springboot-data-jpa/part-01-data-jpa/098-02-persistence-context.md`
+    - [√] 2.1.8.5 二次书籍化：`docs/data-jpa/springboot-data-jpa/part-01-data-jpa/099-03-flush-and-visibility.md`
+    - [√] 2.1.8.6 二次书籍化：`docs/data-jpa/springboot-data-jpa/part-01-data-jpa/100-04-dirty-checking.md`
+    - [√] 2.1.8.7 二次书籍化：`docs/data-jpa/springboot-data-jpa/part-01-data-jpa/101-05-fetching-and-n-plus-one.md`
+    - [√] 2.1.8.8 二次书籍化：`docs/data-jpa/springboot-data-jpa/part-01-data-jpa/102-06-datajpatest-slice.md`
+    - [√] 2.1.8.9 二次书籍化：`docs/data-jpa/springboot-data-jpa/part-01-data-jpa/103-07-debug-sql.md`
+    - [√] 2.1.8.10 二次书籍化：`docs/data-jpa/springboot-data-jpa/appendix/104-90-common-pitfalls.md`
+    - [√] 2.1.8.11 二次书籍化：`docs/data-jpa/springboot-data-jpa/appendix/105-99-self-check.md`
   - [√] 2.1.9 模块：springboot-cache（9 章）
-    - [√] 2.1.9.1 二次书籍化：`springboot-cache/docs/part-00-guide/107-03-mainline-timeline.md`
-    - [√] 2.1.9.2 二次书籍化：`springboot-cache/docs/part-00-guide/108-00-deep-dive-guide.md`
-    - [√] 2.1.9.3 二次书籍化：`springboot-cache/docs/part-01-cache/109-01-cacheable-basics.md`
-    - [√] 2.1.9.4 二次书籍化：`springboot-cache/docs/part-01-cache/110-02-cacheput-and-evict.md`
-    - [√] 2.1.9.5 二次书籍化：`springboot-cache/docs/part-01-cache/111-03-key-condition-unless.md`
-    - [√] 2.1.9.6 二次书籍化：`springboot-cache/docs/part-01-cache/112-04-sync-stampede.md`
-    - [√] 2.1.9.7 二次书籍化：`springboot-cache/docs/part-01-cache/113-05-expiry-with-ticker.md`
-    - [√] 2.1.9.8 二次书籍化：`springboot-cache/docs/appendix/114-90-common-pitfalls.md`
-    - [√] 2.1.9.9 二次书籍化：`springboot-cache/docs/appendix/115-99-self-check.md`
+    - [√] 2.1.9.1 二次书籍化：`docs/cache/springboot-cache/part-00-guide/107-03-mainline-timeline.md`
+    - [√] 2.1.9.2 二次书籍化：`docs/cache/springboot-cache/part-00-guide/108-00-deep-dive-guide.md`
+    - [√] 2.1.9.3 二次书籍化：`docs/cache/springboot-cache/part-01-cache/109-01-cacheable-basics.md`
+    - [√] 2.1.9.4 二次书籍化：`docs/cache/springboot-cache/part-01-cache/110-02-cacheput-and-evict.md`
+    - [√] 2.1.9.5 二次书籍化：`docs/cache/springboot-cache/part-01-cache/111-03-key-condition-unless.md`
+    - [√] 2.1.9.6 二次书籍化：`docs/cache/springboot-cache/part-01-cache/112-04-sync-stampede.md`
+    - [√] 2.1.9.7 二次书籍化：`docs/cache/springboot-cache/part-01-cache/113-05-expiry-with-ticker.md`
+    - [√] 2.1.9.8 二次书籍化：`docs/cache/springboot-cache/appendix/114-90-common-pitfalls.md`
+    - [√] 2.1.9.9 二次书籍化：`docs/cache/springboot-cache/appendix/115-99-self-check.md`
   - [√] 2.1.10 模块：springboot-async-scheduling（9 章）
-    - [√] 2.1.10.1 二次书籍化：`springboot-async-scheduling/docs/part-00-guide/117-03-mainline-timeline.md`
-    - [√] 2.1.10.2 二次书籍化：`springboot-async-scheduling/docs/part-00-guide/118-00-deep-dive-guide.md`
-    - [√] 2.1.10.3 二次书籍化：`springboot-async-scheduling/docs/part-01-async-scheduling/119-01-async-proxy-mental-model.md`
-    - [√] 2.1.10.4 二次书籍化：`springboot-async-scheduling/docs/part-01-async-scheduling/120-02-executor-and-threading.md`
-    - [√] 2.1.10.5 二次书籍化：`springboot-async-scheduling/docs/part-01-async-scheduling/121-03-exceptions.md`
-    - [√] 2.1.10.6 二次书籍化：`springboot-async-scheduling/docs/part-01-async-scheduling/122-04-self-invocation.md`
-    - [√] 2.1.10.7 二次书籍化：`springboot-async-scheduling/docs/part-01-async-scheduling/123-05-scheduling-basics.md`
-    - [√] 2.1.10.8 二次书籍化：`springboot-async-scheduling/docs/appendix/124-90-common-pitfalls.md`
-    - [√] 2.1.10.9 二次书籍化：`springboot-async-scheduling/docs/appendix/125-99-self-check.md`
+    - [√] 2.1.10.1 二次书籍化：`docs/async-scheduling/springboot-async-scheduling/part-00-guide/117-03-mainline-timeline.md`
+    - [√] 2.1.10.2 二次书籍化：`docs/async-scheduling/springboot-async-scheduling/part-00-guide/118-00-deep-dive-guide.md`
+    - [√] 2.1.10.3 二次书籍化：`docs/async-scheduling/springboot-async-scheduling/part-01-async-scheduling/119-01-async-proxy-mental-model.md`
+    - [√] 2.1.10.4 二次书籍化：`docs/async-scheduling/springboot-async-scheduling/part-01-async-scheduling/120-02-executor-and-threading.md`
+    - [√] 2.1.10.5 二次书籍化：`docs/async-scheduling/springboot-async-scheduling/part-01-async-scheduling/121-03-exceptions.md`
+    - [√] 2.1.10.6 二次书籍化：`docs/async-scheduling/springboot-async-scheduling/part-01-async-scheduling/122-04-self-invocation.md`
+    - [√] 2.1.10.7 二次书籍化：`docs/async-scheduling/springboot-async-scheduling/part-01-async-scheduling/123-05-scheduling-basics.md`
+    - [√] 2.1.10.8 二次书籍化：`docs/async-scheduling/springboot-async-scheduling/appendix/124-90-common-pitfalls.md`
+    - [√] 2.1.10.9 二次书籍化：`docs/async-scheduling/springboot-async-scheduling/appendix/125-99-self-check.md`
   - [√] 2.1.11 模块：spring-core-events（11 章）
-    - [√] 2.1.11.1 二次书籍化：`spring-core-events/docs/part-00-guide/127-03-mainline-timeline.md`
-    - [√] 2.1.11.2 二次书籍化：`spring-core-events/docs/part-00-guide/128-00-deep-dive-guide.md`
-    - [√] 2.1.11.3 二次书籍化：`spring-core-events/docs/part-01-event-basics/129-01-event-mental-model.md`
-    - [√] 2.1.11.4 二次书籍化：`spring-core-events/docs/part-01-event-basics/130-02-multiple-listeners-and-order.md`
-    - [√] 2.1.11.5 二次书籍化：`spring-core-events/docs/part-01-event-basics/131-03-condition-and-payload.md`
-    - [√] 2.1.11.6 二次书籍化：`spring-core-events/docs/part-01-event-basics/132-04-sync-and-exceptions.md`
-    - [√] 2.1.11.7 二次书籍化：`spring-core-events/docs/part-02-async-and-transactional/133-05-async-listener.md`
-    - [√] 2.1.11.8 二次书籍化：`spring-core-events/docs/part-02-async-and-transactional/134-06-async-multicaster.md`
-    - [√] 2.1.11.9 二次书籍化：`spring-core-events/docs/part-02-async-and-transactional/135-07-transactional-event-listener.md`
-    - [√] 2.1.11.10 二次书籍化：`spring-core-events/docs/appendix/136-90-common-pitfalls.md`
-    - [√] 2.1.11.11 二次书籍化：`spring-core-events/docs/appendix/137-99-self-check.md`
+    - [√] 2.1.11.1 二次书籍化：`docs/events/spring-core-events/part-00-guide/127-03-mainline-timeline.md`
+    - [√] 2.1.11.2 二次书籍化：`docs/events/spring-core-events/part-00-guide/128-00-deep-dive-guide.md`
+    - [√] 2.1.11.3 二次书籍化：`docs/events/spring-core-events/part-01-event-basics/129-01-event-mental-model.md`
+    - [√] 2.1.11.4 二次书籍化：`docs/events/spring-core-events/part-01-event-basics/130-02-multiple-listeners-and-order.md`
+    - [√] 2.1.11.5 二次书籍化：`docs/events/spring-core-events/part-01-event-basics/131-03-condition-and-payload.md`
+    - [√] 2.1.11.6 二次书籍化：`docs/events/spring-core-events/part-01-event-basics/132-04-sync-and-exceptions.md`
+    - [√] 2.1.11.7 二次书籍化：`docs/events/spring-core-events/part-02-async-and-transactional/133-05-async-listener.md`
+    - [√] 2.1.11.8 二次书籍化：`docs/events/spring-core-events/part-02-async-and-transactional/134-06-async-multicaster.md`
+    - [√] 2.1.11.9 二次书籍化：`docs/events/spring-core-events/part-02-async-and-transactional/135-07-transactional-event-listener.md`
+    - [√] 2.1.11.10 二次书籍化：`docs/events/spring-core-events/appendix/136-90-common-pitfalls.md`
+    - [√] 2.1.11.11 二次书籍化：`docs/events/spring-core-events/appendix/137-99-self-check.md`
   - [√] 2.1.12 模块：spring-core-resources（10 章）
-    - [√] 2.1.12.1 二次书籍化：`spring-core-resources/docs/part-00-guide/139-03-mainline-timeline.md`
-    - [√] 2.1.12.2 二次书籍化：`spring-core-resources/docs/part-00-guide/140-00-deep-dive-guide.md`
-    - [√] 2.1.12.3 二次书籍化：`spring-core-resources/docs/part-01-resource-abstraction/141-01-resource-abstraction.md`
-    - [√] 2.1.12.4 二次书籍化：`spring-core-resources/docs/part-01-resource-abstraction/142-02-classpath-locations.md`
-    - [√] 2.1.12.5 二次书籍化：`spring-core-resources/docs/part-01-resource-abstraction/143-03-classpath-star-and-pattern.md`
-    - [√] 2.1.12.6 二次书籍化：`spring-core-resources/docs/part-01-resource-abstraction/144-04-exists-and-handles.md`
-    - [√] 2.1.12.7 二次书籍化：`spring-core-resources/docs/part-01-resource-abstraction/145-05-reading-and-encoding.md`
-    - [√] 2.1.12.8 二次书籍化：`spring-core-resources/docs/part-01-resource-abstraction/146-06-jar-vs-filesystem.md`
-    - [√] 2.1.12.9 二次书籍化：`spring-core-resources/docs/appendix/147-90-common-pitfalls.md`
-    - [√] 2.1.12.10 二次书籍化：`spring-core-resources/docs/appendix/148-99-self-check.md`
+    - [√] 2.1.12.1 二次书籍化：`docs/resources/spring-core-resources/part-00-guide/139-03-mainline-timeline.md`
+    - [√] 2.1.12.2 二次书籍化：`docs/resources/spring-core-resources/part-00-guide/140-00-deep-dive-guide.md`
+    - [√] 2.1.12.3 二次书籍化：`docs/resources/spring-core-resources/part-01-resource-abstraction/141-01-resource-abstraction.md`
+    - [√] 2.1.12.4 二次书籍化：`docs/resources/spring-core-resources/part-01-resource-abstraction/142-02-classpath-locations.md`
+    - [√] 2.1.12.5 二次书籍化：`docs/resources/spring-core-resources/part-01-resource-abstraction/143-03-classpath-star-and-pattern.md`
+    - [√] 2.1.12.6 二次书籍化：`docs/resources/spring-core-resources/part-01-resource-abstraction/144-04-exists-and-handles.md`
+    - [√] 2.1.12.7 二次书籍化：`docs/resources/spring-core-resources/part-01-resource-abstraction/145-05-reading-and-encoding.md`
+    - [√] 2.1.12.8 二次书籍化：`docs/resources/spring-core-resources/part-01-resource-abstraction/146-06-jar-vs-filesystem.md`
+    - [√] 2.1.12.9 二次书籍化：`docs/resources/spring-core-resources/appendix/147-90-common-pitfalls.md`
+    - [√] 2.1.12.10 二次书籍化：`docs/resources/spring-core-resources/appendix/148-99-self-check.md`
   - [√] 2.1.13 模块：spring-core-profiles（5 章）
-    - [√] 2.1.13.1 二次书籍化：`spring-core-profiles/docs/part-00-guide/150-03-mainline-timeline.md`
-    - [√] 2.1.13.2 二次书籍化：`spring-core-profiles/docs/part-00-guide/151-00-deep-dive-guide.md`
-    - [√] 2.1.13.3 二次书籍化：`spring-core-profiles/docs/part-01-profiles/152-01-profile-activation-and-bean-selection.md`
-    - [√] 2.1.13.4 二次书籍化：`spring-core-profiles/docs/appendix/153-90-common-pitfalls.md`
-    - [√] 2.1.13.5 二次书籍化：`spring-core-profiles/docs/appendix/154-99-self-check.md`
+    - [√] 2.1.13.1 二次书籍化：`docs/profiles/spring-core-profiles/part-00-guide/150-03-mainline-timeline.md`
+    - [√] 2.1.13.2 二次书籍化：`docs/profiles/spring-core-profiles/part-00-guide/151-00-deep-dive-guide.md`
+    - [√] 2.1.13.3 二次书籍化：`docs/profiles/spring-core-profiles/part-01-profiles/152-01-profile-activation-and-bean-selection.md`
+    - [√] 2.1.13.4 二次书籍化：`docs/profiles/spring-core-profiles/appendix/153-90-common-pitfalls.md`
+    - [√] 2.1.13.5 二次书籍化：`docs/profiles/spring-core-profiles/appendix/154-99-self-check.md`
   - [√] 2.1.14 模块：spring-core-validation（10 章）
-    - [√] 2.1.14.1 二次书籍化：`spring-core-validation/docs/part-00-guide/156-03-mainline-timeline.md`
-    - [√] 2.1.14.2 二次书籍化：`spring-core-validation/docs/part-00-guide/157-00-deep-dive-guide.md`
-    - [√] 2.1.14.3 二次书籍化：`spring-core-validation/docs/part-01-validation-core/158-01-constraint-mental-model.md`
-    - [√] 2.1.14.4 二次书籍化：`spring-core-validation/docs/part-01-validation-core/159-02-programmatic-validator.md`
-    - [√] 2.1.14.5 二次书籍化：`spring-core-validation/docs/part-01-validation-core/160-03-method-validation-proxy.md`
-    - [√] 2.1.14.6 二次书籍化：`spring-core-validation/docs/part-01-validation-core/161-04-groups.md`
-    - [√] 2.1.14.7 二次书籍化：`spring-core-validation/docs/part-01-validation-core/162-05-custom-constraint.md`
-    - [√] 2.1.14.8 二次书籍化：`spring-core-validation/docs/part-01-validation-core/163-06-debugging.md`
-    - [√] 2.1.14.9 二次书籍化：`spring-core-validation/docs/appendix/164-90-common-pitfalls.md`
-    - [√] 2.1.14.10 二次书籍化：`spring-core-validation/docs/appendix/165-99-self-check.md`
+    - [√] 2.1.14.1 二次书籍化：`docs/validation/spring-core-validation/part-00-guide/156-03-mainline-timeline.md`
+    - [√] 2.1.14.2 二次书籍化：`docs/validation/spring-core-validation/part-00-guide/157-00-deep-dive-guide.md`
+    - [√] 2.1.14.3 二次书籍化：`docs/validation/spring-core-validation/part-01-validation-core/158-01-constraint-mental-model.md`
+    - [√] 2.1.14.4 二次书籍化：`docs/validation/spring-core-validation/part-01-validation-core/159-02-programmatic-validator.md`
+    - [√] 2.1.14.5 二次书籍化：`docs/validation/spring-core-validation/part-01-validation-core/160-03-method-validation-proxy.md`
+    - [√] 2.1.14.6 二次书籍化：`docs/validation/spring-core-validation/part-01-validation-core/161-04-groups.md`
+    - [√] 2.1.14.7 二次书籍化：`docs/validation/spring-core-validation/part-01-validation-core/162-05-custom-constraint.md`
+    - [√] 2.1.14.8 二次书籍化：`docs/validation/spring-core-validation/part-01-validation-core/163-06-debugging.md`
+    - [√] 2.1.14.9 二次书籍化：`docs/validation/spring-core-validation/appendix/164-90-common-pitfalls.md`
+    - [√] 2.1.14.10 二次书籍化：`docs/validation/spring-core-validation/appendix/165-99-self-check.md`
   - [√] 2.1.15 模块：springboot-actuator（5 章）
-    - [√] 2.1.15.1 二次书籍化：`springboot-actuator/docs/part-00-guide/167-03-mainline-timeline.md`
-    - [√] 2.1.15.2 二次书籍化：`springboot-actuator/docs/part-00-guide/168-00-deep-dive-guide.md`
-    - [√] 2.1.15.3 二次书籍化：`springboot-actuator/docs/part-01-actuator/169-01-actuator-basics.md`
-    - [√] 2.1.15.4 二次书籍化：`springboot-actuator/docs/appendix/170-90-common-pitfalls.md`
-    - [√] 2.1.15.5 二次书籍化：`springboot-actuator/docs/appendix/171-99-self-check.md`
+    - [√] 2.1.15.1 二次书籍化：`docs/actuator/springboot-actuator/part-00-guide/167-03-mainline-timeline.md`
+    - [√] 2.1.15.2 二次书籍化：`docs/actuator/springboot-actuator/part-00-guide/168-00-deep-dive-guide.md`
+    - [√] 2.1.15.3 二次书籍化：`docs/actuator/springboot-actuator/part-01-actuator/169-01-actuator-basics.md`
+    - [√] 2.1.15.4 二次书籍化：`docs/actuator/springboot-actuator/appendix/170-90-common-pitfalls.md`
+    - [√] 2.1.15.5 二次书籍化：`docs/actuator/springboot-actuator/appendix/171-99-self-check.md`
   - [√] 2.1.16 模块：springboot-web-client（9 章）
-    - [√] 2.1.16.1 二次书籍化：`springboot-web-client/docs/part-00-guide/173-03-mainline-timeline.md`
-    - [√] 2.1.16.2 二次书籍化：`springboot-web-client/docs/part-00-guide/174-00-deep-dive-guide.md`
-    - [√] 2.1.16.3 二次书籍化：`springboot-web-client/docs/part-01-web-client/175-01-restclient-basics.md`
-    - [√] 2.1.16.4 二次书籍化：`springboot-web-client/docs/part-01-web-client/176-02-webclient-basics.md`
-    - [√] 2.1.16.5 二次书籍化：`springboot-web-client/docs/part-01-web-client/177-03-error-handling.md`
-    - [√] 2.1.16.6 二次书籍化：`springboot-web-client/docs/part-01-web-client/178-04-timeout-and-retry.md`
-    - [√] 2.1.16.7 二次书籍化：`springboot-web-client/docs/part-01-web-client/179-05-testing-with-mockwebserver.md`
-    - [√] 2.1.16.8 二次书籍化：`springboot-web-client/docs/appendix/180-90-common-pitfalls.md`
-    - [√] 2.1.16.9 二次书籍化：`springboot-web-client/docs/appendix/181-99-self-check.md`
+    - [√] 2.1.16.1 二次书籍化：`docs/web-client/springboot-web-client/part-00-guide/173-03-mainline-timeline.md`
+    - [√] 2.1.16.2 二次书籍化：`docs/web-client/springboot-web-client/part-00-guide/174-00-deep-dive-guide.md`
+    - [√] 2.1.16.3 二次书籍化：`docs/web-client/springboot-web-client/part-01-web-client/175-01-restclient-basics.md`
+    - [√] 2.1.16.4 二次书籍化：`docs/web-client/springboot-web-client/part-01-web-client/176-02-webclient-basics.md`
+    - [√] 2.1.16.5 二次书籍化：`docs/web-client/springboot-web-client/part-01-web-client/177-03-error-handling.md`
+    - [√] 2.1.16.6 二次书籍化：`docs/web-client/springboot-web-client/part-01-web-client/178-04-timeout-and-retry.md`
+    - [√] 2.1.16.7 二次书籍化：`docs/web-client/springboot-web-client/part-01-web-client/179-05-testing-with-mockwebserver.md`
+    - [√] 2.1.16.8 二次书籍化：`docs/web-client/springboot-web-client/appendix/180-90-common-pitfalls.md`
+    - [√] 2.1.16.9 二次书籍化：`docs/web-client/springboot-web-client/appendix/181-99-self-check.md`
   - [√] 2.1.17 模块：springboot-testing（5 章）
-    - [√] 2.1.17.1 二次书籍化：`springboot-testing/docs/part-00-guide/183-03-mainline-timeline.md`
-    - [√] 2.1.17.2 二次书籍化：`springboot-testing/docs/part-00-guide/184-00-deep-dive-guide.md`
-    - [√] 2.1.17.3 二次书籍化：`springboot-testing/docs/part-01-testing/185-01-slice-and-mocking.md`
-    - [√] 2.1.17.4 二次书籍化：`springboot-testing/docs/appendix/186-90-common-pitfalls.md`
-    - [√] 2.1.17.5 二次书籍化：`springboot-testing/docs/appendix/187-99-self-check.md`
+    - [√] 2.1.17.1 二次书籍化：`docs/testing/springboot-testing/part-00-guide/183-03-mainline-timeline.md`
+    - [√] 2.1.17.2 二次书籍化：`docs/testing/springboot-testing/part-00-guide/184-00-deep-dive-guide.md`
+    - [√] 2.1.17.3 二次书籍化：`docs/testing/springboot-testing/part-01-testing/185-01-slice-and-mocking.md`
+    - [√] 2.1.17.4 二次书籍化：`docs/testing/springboot-testing/appendix/186-90-common-pitfalls.md`
+    - [√] 2.1.17.5 二次书籍化：`docs/testing/springboot-testing/appendix/187-99-self-check.md`
   - [√] 2.1.18 模块：springboot-business-case（5 章）
-    - [√] 2.1.18.1 二次书籍化：`springboot-business-case/docs/part-00-guide/189-03-mainline-timeline.md`
-    - [√] 2.1.18.2 二次书籍化：`springboot-business-case/docs/part-00-guide/190-00-deep-dive-guide.md`
-    - [√] 2.1.18.3 二次书籍化：`springboot-business-case/docs/part-01-business-case/191-01-architecture-and-flow.md`
-    - [√] 2.1.18.4 二次书籍化：`springboot-business-case/docs/appendix/192-90-common-pitfalls.md`
-    - [√] 2.1.18.5 二次书籍化：`springboot-business-case/docs/appendix/193-99-self-check.md`
-- [√] 2.2 Book 全量执行：覆盖 `docs-site/content/book/**`（含工具页与 redirect 页），verify why.md#requirement-全量章节读起来像书
+    - [√] 2.1.18.1 二次书籍化：`docs/business-case/springboot-business-case/part-00-guide/189-03-mainline-timeline.md`
+    - [√] 2.1.18.2 二次书籍化：`docs/business-case/springboot-business-case/part-00-guide/190-00-deep-dive-guide.md`
+    - [√] 2.1.18.3 二次书籍化：`docs/business-case/springboot-business-case/part-01-business-case/191-01-architecture-and-flow.md`
+    - [√] 2.1.18.4 二次书籍化：`docs/business-case/springboot-business-case/appendix/192-90-common-pitfalls.md`
+    - [√] 2.1.18.5 二次书籍化：`docs/business-case/springboot-business-case/appendix/193-99-self-check.md`
+- [√] 2.2 Book 全量执行：覆盖 `docs/book/**`（含工具页与 redirect 页），verify why.md#requirement-全量章节读起来像书
   - [√] 2.2.0 执行准备与分类（必做）
-    - [√] 2.2.0.1 扫描并固化清单：统计 `docs-site/content/book/**/*.md`=43（正文/工具/redirect），输出可复查报告
+    - [√] 2.2.0.1 扫描并固化清单：统计 `docs/book/**/*.md`=43（正文/工具/redirect），输出可复查报告
     - [√] 2.2.0.2 识别 redirect 页并定义最小模板：仅保留“已迁移说明 + 新位置链接 + 导航”，不扩写正文
     - [√] 2.2.0.3 试跑代表页：抽 3 个正文页 + 1 个工具页 + 1 个 redirect 页做 diff review，确认规则后再全量
   - [√] 2.2.1 Book 正文页（主线章节）
-    - [√] 2.2.1.1 二次书籍化：`docs-site/content/book/001-start-here.md`
-    - [√] 2.2.1.2 二次书籍化：`docs-site/content/book/002-boot-basics-mainline.md`
-    - [√] 2.2.1.3 二次书籍化：`docs-site/content/book/009-ioc-container-mainline.md`
-    - [√] 2.2.1.4 二次书籍化：`docs-site/content/book/027-aop-proxy-mainline.md`
-    - [√] 2.2.1.5 二次书籍化：`docs-site/content/book/042-aop-weaving-mainline.md`
-    - [√] 2.2.1.6 二次书籍化：`docs-site/content/book/051-tx-mainline.md`
-    - [√] 2.2.1.7 二次书籍化：`docs-site/content/book/062-webmvc-mainline.md`
-    - [√] 2.2.1.8 二次书籍化：`docs-site/content/book/084-security-mainline.md`
-    - [√] 2.2.1.9 二次书籍化：`docs-site/content/book/094-data-jpa-mainline.md`
-    - [√] 2.2.1.10 二次书籍化：`docs-site/content/book/106-cache-mainline.md`
-    - [√] 2.2.1.11 二次书籍化：`docs-site/content/book/116-async-scheduling-mainline.md`
-    - [√] 2.2.1.12 二次书籍化：`docs-site/content/book/126-events-mainline.md`
-    - [√] 2.2.1.13 二次书籍化：`docs-site/content/book/138-resources-mainline.md`
-    - [√] 2.2.1.14 二次书籍化：`docs-site/content/book/149-profiles-mainline.md`
-    - [√] 2.2.1.15 二次书籍化：`docs-site/content/book/155-validation-mainline.md`
-    - [√] 2.2.1.16 二次书籍化：`docs-site/content/book/166-actuator-observability-mainline.md`
-    - [√] 2.2.1.17 二次书籍化：`docs-site/content/book/172-web-client-mainline.md`
-    - [√] 2.2.1.18 二次书籍化：`docs-site/content/book/182-testing-mainline.md`
-    - [√] 2.2.1.19 二次书籍化：`docs-site/content/book/188-business-case.md`
+    - [√] 2.2.1.1 二次书籍化：`docs/book/001-start-here.md`
+    - [√] 2.2.1.2 二次书籍化：`docs/book/002-boot-basics-mainline.md`
+    - [√] 2.2.1.3 二次书籍化：`docs/book/009-ioc-container-mainline.md`
+    - [√] 2.2.1.4 二次书籍化：`docs/book/027-aop-proxy-mainline.md`
+    - [√] 2.2.1.5 二次书籍化：`docs/book/042-aop-weaving-mainline.md`
+    - [√] 2.2.1.6 二次书籍化：`docs/book/051-tx-mainline.md`
+    - [√] 2.2.1.7 二次书籍化：`docs/book/062-webmvc-mainline.md`
+    - [√] 2.2.1.8 二次书籍化：`docs/book/084-security-mainline.md`
+    - [√] 2.2.1.9 二次书籍化：`docs/book/094-data-jpa-mainline.md`
+    - [√] 2.2.1.10 二次书籍化：`docs/book/106-cache-mainline.md`
+    - [√] 2.2.1.11 二次书籍化：`docs/book/116-async-scheduling-mainline.md`
+    - [√] 2.2.1.12 二次书籍化：`docs/book/126-events-mainline.md`
+    - [√] 2.2.1.13 二次书籍化：`docs/book/138-resources-mainline.md`
+    - [√] 2.2.1.14 二次书籍化：`docs/book/149-profiles-mainline.md`
+    - [√] 2.2.1.15 二次书籍化：`docs/book/155-validation-mainline.md`
+    - [√] 2.2.1.16 二次书籍化：`docs/book/166-actuator-observability-mainline.md`
+    - [√] 2.2.1.17 二次书籍化：`docs/book/172-web-client-mainline.md`
+    - [√] 2.2.1.18 二次书籍化：`docs/book/182-testing-mainline.md`
+    - [√] 2.2.1.19 二次书籍化：`docs/book/188-business-case.md`
   - [√] 2.2.2 Book 工具/索引页（允许 N/A）
-    - [√] 2.2.2.1 工具页二次书籍化：`docs-site/content/book/index.md`
-    - [√] 2.2.2.2 工具页二次书籍化：`docs-site/content/book/labs-index.md`
-    - [√] 2.2.2.3 工具页二次书籍化：`docs-site/content/book/debugger-pack.md`
-    - [√] 2.2.2.4 工具页二次书籍化：`docs-site/content/book/exercises-and-solutions.md`
-    - [√] 2.2.2.5 工具页二次书籍化：`docs-site/content/book/migration-rules.md`
+    - [√] 2.2.2.1 工具页二次书籍化：`docs/book/index.md`
+    - [√] 2.2.2.2 工具页二次书籍化：`docs/book/labs-index.md`
+    - [√] 2.2.2.3 工具页二次书籍化：`docs/book/debugger-pack.md`
+    - [√] 2.2.2.4 工具页二次书籍化：`docs/book/exercises-and-solutions.md`
+    - [√] 2.2.2.5 工具页二次书籍化：`docs/book/migration-rules.md`
   - [√] 2.2.3 Book redirect 页（最小改写/校验）
-    - [√] 2.2.3.1 redirect 最小改写/校验：`docs-site/content/book/00-start-here.md`
-    - [√] 2.2.3.2 redirect 最小改写/校验：`docs-site/content/book/01-boot-basics-mainline.md`
-    - [√] 2.2.3.3 redirect 最小改写/校验：`docs-site/content/book/02-ioc-container-mainline.md`
-    - [√] 2.2.3.4 redirect 最小改写/校验：`docs-site/content/book/03-aop-proxy-mainline.md`
-    - [√] 2.2.3.5 redirect 最小改写/校验：`docs-site/content/book/04-aop-weaving-mainline.md`
-    - [√] 2.2.3.6 redirect 最小改写/校验：`docs-site/content/book/05-tx-mainline.md`
-    - [√] 2.2.3.7 redirect 最小改写/校验：`docs-site/content/book/06-webmvc-mainline.md`
-    - [√] 2.2.3.8 redirect 最小改写/校验：`docs-site/content/book/07-security-mainline.md`
-    - [√] 2.2.3.9 redirect 最小改写/校验：`docs-site/content/book/08-data-jpa-mainline.md`
-    - [√] 2.2.3.10 redirect 最小改写/校验：`docs-site/content/book/09-cache-mainline.md`
-    - [√] 2.2.3.11 redirect 最小改写/校验：`docs-site/content/book/10-async-scheduling-mainline.md`
-    - [√] 2.2.3.12 redirect 最小改写/校验：`docs-site/content/book/11-events-mainline.md`
-    - [√] 2.2.3.13 redirect 最小改写/校验：`docs-site/content/book/12-resources-mainline.md`
-    - [√] 2.2.3.14 redirect 最小改写/校验：`docs-site/content/book/13-profiles-mainline.md`
-    - [√] 2.2.3.15 redirect 最小改写/校验：`docs-site/content/book/14-validation-mainline.md`
-    - [√] 2.2.3.16 redirect 最小改写/校验：`docs-site/content/book/15-actuator-observability-mainline.md`
-    - [√] 2.2.3.17 redirect 最小改写/校验：`docs-site/content/book/16-web-client-mainline.md`
-    - [√] 2.2.3.18 redirect 最小改写/校验：`docs-site/content/book/17-testing-mainline.md`
-    - [√] 2.2.3.19 redirect 最小改写/校验：`docs-site/content/book/18-business-case.md`
+    - [√] 2.2.3.1 redirect 最小改写/校验：`docs/book/00-start-here.md`
+    - [√] 2.2.3.2 redirect 最小改写/校验：`docs/book/01-boot-basics-mainline.md`
+    - [√] 2.2.3.3 redirect 最小改写/校验：`docs/book/02-ioc-container-mainline.md`
+    - [√] 2.2.3.4 redirect 最小改写/校验：`docs/book/03-aop-proxy-mainline.md`
+    - [√] 2.2.3.5 redirect 最小改写/校验：`docs/book/04-aop-weaving-mainline.md`
+    - [√] 2.2.3.6 redirect 最小改写/校验：`docs/book/05-tx-mainline.md`
+    - [√] 2.2.3.7 redirect 最小改写/校验：`docs/book/06-webmvc-mainline.md`
+    - [√] 2.2.3.8 redirect 最小改写/校验：`docs/book/07-security-mainline.md`
+    - [√] 2.2.3.9 redirect 最小改写/校验：`docs/book/08-data-jpa-mainline.md`
+    - [√] 2.2.3.10 redirect 最小改写/校验：`docs/book/09-cache-mainline.md`
+    - [√] 2.2.3.11 redirect 最小改写/校验：`docs/book/10-async-scheduling-mainline.md`
+    - [√] 2.2.3.12 redirect 最小改写/校验：`docs/book/11-events-mainline.md`
+    - [√] 2.2.3.13 redirect 最小改写/校验：`docs/book/12-resources-mainline.md`
+    - [√] 2.2.3.14 redirect 最小改写/校验：`docs/book/13-profiles-mainline.md`
+    - [√] 2.2.3.15 redirect 最小改写/校验：`docs/book/14-validation-mainline.md`
+    - [√] 2.2.3.16 redirect 最小改写/校验：`docs/book/15-actuator-observability-mainline.md`
+    - [√] 2.2.3.17 redirect 最小改写/校验：`docs/book/16-web-client-mainline.md`
+    - [√] 2.2.3.18 redirect 最小改写/校验：`docs/book/17-testing-mainline.md`
+    - [√] 2.2.3.19 redirect 最小改写/校验：`docs/book/18-business-case.md`
   - [√] 2.2.4 全量执行 + 验收（Book）
     - [√] 2.2.4.1 全量执行后跑闸门：`bash scripts/check-docs.sh`（断链/卡片/coverage 全绿）
     - [√] 2.2.4.2 全量执行后 strict build：`bash scripts/docs-site-build.sh`（`mkdocs build --strict` 全绿）
@@ -275,24 +275,24 @@ Directory: `helloagents/plan/202601171204_docs_booklike_rewrite_all/`
     - [√] 2.3.0.1 抽样策略：每模块至少 1 章（优先 mainline timeline / deep dive guide），记录抽样清单便于追溯
     - [√] 2.3.0.2 校对 checklist：叙事连贯、结论可验证（观察点/断点/断言清晰）、重复实验入口清零、总结有承接
     - [√] 2.3.0.3 精修边界：以卡片为事实来源，不凭空扩写机制细节；对关键段落补“怎么验证/看什么”而非堆字
-  - [√] 2.3.1 人工精修（springboot-basics）：`springboot-basics/docs/part-00-guide/003-03-mainline-timeline.md`
-  - [√] 2.3.2 人工精修（spring-core-beans）：`spring-core-beans/docs/part-00-guide/010-03-mainline-timeline.md`
-  - [√] 2.3.3 人工精修（spring-core-aop）：`spring-core-aop/docs/part-00-guide/028-03-mainline-timeline.md`
-  - [√] 2.3.4 人工精修（spring-core-aop-weaving）：`spring-core-aop-weaving/docs/part-00-guide/043-03-mainline-timeline.md`
-  - [√] 2.3.5 人工精修（spring-core-tx）：`spring-core-tx/docs/part-00-guide/052-03-mainline-timeline.md`
-  - [√] 2.3.6 人工精修（springboot-web-mvc）：`springboot-web-mvc/docs/part-00-guide/063-03-mainline-timeline.md`
-  - [√] 2.3.7 人工精修（springboot-security）：`springboot-security/docs/part-00-guide/085-03-mainline-timeline.md`
-  - [√] 2.3.8 人工精修（springboot-data-jpa）：`springboot-data-jpa/docs/part-00-guide/095-03-mainline-timeline.md`
-  - [√] 2.3.9 人工精修（springboot-cache）：`springboot-cache/docs/part-00-guide/107-03-mainline-timeline.md`
-  - [√] 2.3.10 人工精修（springboot-async-scheduling）：`springboot-async-scheduling/docs/part-00-guide/117-03-mainline-timeline.md`
-  - [√] 2.3.11 人工精修（spring-core-events）：`spring-core-events/docs/part-00-guide/127-03-mainline-timeline.md`
-  - [√] 2.3.12 人工精修（spring-core-resources）：`spring-core-resources/docs/part-00-guide/139-03-mainline-timeline.md`
-  - [√] 2.3.13 人工精修（spring-core-profiles）：`spring-core-profiles/docs/part-00-guide/150-03-mainline-timeline.md`
-  - [√] 2.3.14 人工精修（spring-core-validation）：`spring-core-validation/docs/part-00-guide/156-03-mainline-timeline.md`
-  - [√] 2.3.15 人工精修（springboot-actuator）：`springboot-actuator/docs/part-00-guide/167-03-mainline-timeline.md`
-  - [√] 2.3.16 人工精修（springboot-web-client）：`springboot-web-client/docs/part-00-guide/173-03-mainline-timeline.md`
-  - [√] 2.3.17 人工精修（springboot-testing）：`springboot-testing/docs/part-00-guide/183-03-mainline-timeline.md`
-  - [√] 2.3.18 人工精修（springboot-business-case）：`springboot-business-case/docs/part-00-guide/189-03-mainline-timeline.md`
+  - [√] 2.3.1 人工精修（springboot-basics）：`docs/basics/springboot-basics/part-00-guide/003-03-mainline-timeline.md`
+  - [√] 2.3.2 人工精修（spring-core-beans）：`docs/beans/spring-core-beans/part-00-guide/010-03-mainline-timeline.md`
+  - [√] 2.3.3 人工精修（spring-core-aop）：`docs/aop/spring-core-aop/part-00-guide/028-03-mainline-timeline.md`
+  - [√] 2.3.4 人工精修（spring-core-aop-weaving）：`docs/aop/spring-core-aop-weaving/part-00-guide/043-03-mainline-timeline.md`
+  - [√] 2.3.5 人工精修（spring-core-tx）：`docs/tx/spring-core-tx/part-00-guide/052-03-mainline-timeline.md`
+  - [√] 2.3.6 人工精修（springboot-web-mvc）：`docs/web-mvc/springboot-web-mvc/part-00-guide/063-03-mainline-timeline.md`
+  - [√] 2.3.7 人工精修（springboot-security）：`docs/security/springboot-security/part-00-guide/085-03-mainline-timeline.md`
+  - [√] 2.3.8 人工精修（springboot-data-jpa）：`docs/data-jpa/springboot-data-jpa/part-00-guide/095-03-mainline-timeline.md`
+  - [√] 2.3.9 人工精修（springboot-cache）：`docs/cache/springboot-cache/part-00-guide/107-03-mainline-timeline.md`
+  - [√] 2.3.10 人工精修（springboot-async-scheduling）：`docs/async-scheduling/springboot-async-scheduling/part-00-guide/117-03-mainline-timeline.md`
+  - [√] 2.3.11 人工精修（spring-core-events）：`docs/events/spring-core-events/part-00-guide/127-03-mainline-timeline.md`
+  - [√] 2.3.12 人工精修（spring-core-resources）：`docs/resources/spring-core-resources/part-00-guide/139-03-mainline-timeline.md`
+  - [√] 2.3.13 人工精修（spring-core-profiles）：`docs/profiles/spring-core-profiles/part-00-guide/150-03-mainline-timeline.md`
+  - [√] 2.3.14 人工精修（spring-core-validation）：`docs/validation/spring-core-validation/part-00-guide/156-03-mainline-timeline.md`
+  - [√] 2.3.15 人工精修（springboot-actuator）：`docs/actuator/springboot-actuator/part-00-guide/167-03-mainline-timeline.md`
+  - [√] 2.3.16 人工精修（springboot-web-client）：`docs/web-client/springboot-web-client/part-00-guide/173-03-mainline-timeline.md`
+  - [√] 2.3.17 人工精修（springboot-testing）：`docs/testing/springboot-testing/part-00-guide/183-03-mainline-timeline.md`
+  - [√] 2.3.18 人工精修（springboot-business-case）：`docs/business-case/springboot-business-case/part-00-guide/189-03-mainline-timeline.md`
 
 ## 3. Security Check
 - [√] 3.1 执行安全检查：确认无生产环境操作、无敏感信息写入、脚本不引入破坏性命令（per G9）

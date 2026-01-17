@@ -47,7 +47,7 @@
 - **脚本优先（便于统一）：**
   - `bash scripts/test-module.sh <module>`
   - `bash scripts/test-all.sh`
-  - `bash scripts/check-docs.sh`（断链检查 + 教学覆盖）
+  - `bash scripts/docs-site-build.sh`（可选：本地构建文档站点预览）
 
 ### 文档 ↔ 测试入口绑定约定
 
@@ -103,7 +103,7 @@
    - 文档内部与知识库一律使用 Markdown 相对链接（仓库内可解析）。
 2. **索引集中、入口收敛**
    - 模块入口以 `helloagents/wiki/modules/<module>.md` 为“知识库侧索引”。
-   - 模块内部入口以 `<module>/docs/README.md` 为“模块侧索引（书本目录）”。
+   - 模块内部入口以 `docs/<topic>/<module>/README.md` 为“模块侧索引（目录页）”。
    - 全局主线入口以 `helloagents/wiki/learning-path.md` 为“路线图索引”。
 3. **避免 `docs/NN` 缩写引用**
    - 章节引用必须写成真实相对路径链接，避免读者误解与断链。

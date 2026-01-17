@@ -16,8 +16,8 @@
 ## Start Here（路线图 / 断点地图 / 第一个可运行入口）
 
 - 路线图：`helloagents/wiki/learning-path.md`
-- Docs Start Here：`springboot-web-mvc/docs/README.md`
-- 断点地图（Part 01 Debugger Pack）：`springboot-web-mvc/docs/part-00-guide/02-breakpoint-map.md`
+- Docs Start Here：`docs/web-mvc/springboot-web-mvc/README.md`
+- 断点地图（Part 01 Debugger Pack）：`docs/web-mvc/springboot-web-mvc/part-00-guide/02-breakpoint-map.md`
 - 第一个可运行入口（3 分钟开跑）：
   - `mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcLabTest#pingEndpointReturnsPong test`
   - 对应测试类：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcLabTest.java`
@@ -48,8 +48,8 @@
 
 ## Docs & 复现入口
 
-- **Docs Index:** `springboot-web-mvc/docs/README.md`
-- **Docs Guide:** `springboot-web-mvc/docs/part-00-guide/00-deep-dive-guide.md`
+- **Docs Index:** `docs/web-mvc/springboot-web-mvc/README.md`
+- **Docs Guide:** `docs/web-mvc/springboot-web-mvc/part-00-guide/00-deep-dive-guide.md`
 - **Labs:**
   - `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcLabTest.java`
   - `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcSpringBootLabTest.java`
@@ -95,7 +95,7 @@
 - [202601080925_springboot-web-mvc-deep-dive-part08-security-observability](../../history/2026-01/202601080925_springboot-web-mvc-deep-dive-part08-security-observability/) - ✅ 已执行：新增知识地图、ProblemDetail 对照、ETag/304、Part 08（Security/Observability）与对应 Labs/排障升级
 - [202601071635_springboot-web-mvc-advanced-deep-dive](../../history/2026-01/202601071635_springboot-web-mvc-advanced-deep-dive/) - ✅ 已执行：扩展 advanced deep dive（机制内核/契约与 Jackson/真实 HTTP/Async/SSE/排障），新增 docs Part 03–07 与对应 Labs
 - [202601071034_all_modules_docs_ag_contract](../../history/2026-01/202601071034_all_modules_docs_ag_contract/) - ✅ 已执行：全模块 docs 章节结构整理（A–G 结构 + 对应 Lab/Test 入口块）；后续不再推荐 A–G 作为写作规范/闸门
-- [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过 `scripts/check-docs.sh`
+- [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/<topic>/<module>/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章）
 - [202601041358_springboot-part-structure-sync](../../history/2026-01/202601041358_springboot-part-structure-sync/) - ✅ 已执行：对齐 docs Part 与 src/main/src/test 分包，并修复 README/docs 引用
 - [202601061309_springboot-web-mvc-thymeleaf-view-rendering](../../history/2026-01/202601061309_springboot-web-mvc-thymeleaf-view-rendering/) - ✅ 已执行：补齐传统 MVC（Thymeleaf/表单/错误页/Accept）+ docs 与 tests 闭环
 - [202601062024_springboot_modules_teaching_rollout](../../history/2026-01/202601062024_springboot_modules_teaching_rollout/) - ✅ 已执行：docs/README 章节链接 SSOT 化 + guide/appendix 可跑入口块补齐 + 自检闸门覆盖

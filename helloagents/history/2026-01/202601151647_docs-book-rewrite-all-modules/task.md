@@ -12,7 +12,7 @@ Directory: `helloagents/plan/202601151647_docs-book-rewrite-all-modules/`
 - [√] 2.1 新增批处理脚本：全仓移除 A–G 字母前缀与 AG-CONTRACT 标记
 - [√] 2.2 将“核心结论”转换为 `summary` 提示框（更像书的“本章要点”）
 - [√] 2.3 把 `BOOKIFY` 的 Lab/Test 信息提炼为章首 `example` 提示框
-- [√] 2.4 更新模块/知识库中对 A–G 的说明（例如 `spring-core-beans/docs/README.md`）
+- [√] 2.4 更新模块/知识库中对 A–G 的说明（例如 `docs/beans/spring-core-beans/README.md`）
 
 ## 3. 校验（自动化迁移后）
 - [√] 3.1 `bash scripts/check-docs.sh` 通过

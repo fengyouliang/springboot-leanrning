@@ -7,7 +7,7 @@
 目标：
 1) 以“最合理学习顺序”为基线，生成全书章节顺序（Start Here → 各模块主线 → 模块章节）。
 2) 为每个章节分配全局唯一 Chapter ID（001-...），并把 Chapter ID 固化到文件名：
-   - Book-only 主线章节：docs-site/content/book/00-18 对应的主线章节页（不包含 index/tool pages）
+   - Book-only 主线章节：docs/book/00-18 对应的主线章节页（不包含 index/tool pages）
    - 模块章节：以各模块 docs/README.md 链接清单为 SSOT 的章节集合（排除 README 本身）
 3) 批量修复 Markdown 相对链接：根据“旧路径 → 新路径”的映射表重写链接目标，避免断链。
 4) 为每个章节 upsert 全书导航（上一章 / 全书目录 / 下一章），使任意一章都可顺读到底。
@@ -217,7 +217,7 @@ def iter_module_chapters_ordered(repo_root: Path, module_root: Path) -> list[Pat
 
 def find_book_page_by_slug(book_root: Path, slug: str) -> Path | None:
     """
-    在 docs-site/content/book 下查找主线章节页：
+    在 docs/book 下查找主线章节页：
     - 允许旧命名：00-start-here.md（stem 去掉两位前缀后 == slug）
     - 允许新命名：001-start-here.md（stem 去掉三位前缀后 == slug）
     """
@@ -401,7 +401,7 @@ def rename_files(repo_root: Path, mapping: dict[str, str], dry_run: bool) -> int
 
 def resolve_book_abs_link_to_repo_path(dest: str) -> Path | None:
     """
-    解析 /book/... 的站点绝对链接到仓库真实文件路径（docs-site/content/book/*.md）。
+    解析 /book/... 的站点绝对链接到仓库真实文件路径（docs/book/*.md）。
     返回 repo_root 下的绝对 Path。
     """
     if dest == "/book" or dest == "/book/":
@@ -504,8 +504,8 @@ def rewrite_one_dest(
     except ValueError:
         return raw_dest
 
-    if repo_rel.startswith("docs-site/content/"):
-        current_site = Path(repo_rel).relative_to("docs-site/content").as_posix()
+    if repo_rel.startswith("docs/"):
+        current_site = Path(repo_rel).relative_to("docs").as_posix()
     else:
         current_site = repo_rel
 
@@ -534,8 +534,8 @@ def rewrite_one_dest(
     except ValueError:
         return raw_dest
 
-    if new_repo_rel.startswith("docs-site/content/"):
-        new_site = Path(new_repo_rel).relative_to("docs-site/content").as_posix()
+    if new_repo_rel.startswith("docs/"):
+        new_site = Path(new_repo_rel).relative_to("docs").as_posix()
     else:
         new_site = new_repo_rel
 
@@ -557,9 +557,9 @@ def rewrite_markdown_links_in_file(repo_root: Path, md_file: Path, mapping: dict
     changed = False
     out_lines: list[str] = []
 
-    # 只对 docs-site/content 下的页面启用 site-mode：
-    # - 这些页面在 MkDocs 中的路径与仓库路径不同（例如 docs-site/content/book -> book）
-    # - 模块 docs 仍需保持“仓库相对链接可解析”，以通过 scripts/check-md-relative-links.py
+    # 只对 docs 下的页面启用 site-mode：
+    # - 这些页面在 MkDocs 中的路径与仓库路径不同（例如 docs/book -> book）
+    # - 站点构建时仍建议保持“仓库相对链接可解析”，便于本地阅读与排障
     site_mode = False
     try:
         site_mode = md_file.is_relative_to(CONTENT_ROOT)
@@ -620,7 +620,7 @@ def iter_markdown_files_for_rewrite(repo_root: Path) -> list[Path]:
     """
     只重写“活文档”：
     - 根 README.md
-    - docs-site/content（book pages）
+    - docs（book pages）
     - 各模块 docs（含 docs/README.md）
     - helloagents/wiki（项目知识库入口）
 
@@ -693,9 +693,9 @@ def upsert_global_nav_for_one_file(
     except ValueError:
         return False
 
-    is_content_page = repo_rel.startswith("docs-site/content/")
+    is_content_page = repo_rel.startswith("docs/")
     if is_content_page:
-        current_site = Path(repo_rel).relative_to("docs-site/content").as_posix()
+        current_site = Path(repo_rel).relative_to("docs").as_posix()
     else:
         current_site = repo_rel
 
@@ -703,17 +703,17 @@ def upsert_global_nav_for_one_file(
 
     def mk_link(item: ChapterItem) -> str:
         repo_target_rel = item.rel_path
-        is_book_page = repo_target_rel.startswith("docs-site/content/book/")
+        is_book_page = repo_target_rel.startswith("docs/book/")
 
-        # 模块 docs 中链接到 book：用 /book/<slug>/ 形式（同时兼容 mkdocs 与 check-docs）
+        # 模块文档中链接到 book：用 /book/<slug>/ 形式（兼容 mkdocs 的页面路由）
         if (not is_content_page) and is_book_page:
-            site_target = Path(repo_target_rel).relative_to("docs-site/content").as_posix()
+            site_target = Path(repo_target_rel).relative_to("docs").as_posix()
             slug = Path(site_target).stem
             return f"[{item.title}](/book/{slug}/)"
 
         # 其它情况：用站点相对路径（MkDocs 能解析）
-        if repo_target_rel.startswith("docs-site/content/"):
-            site_target = Path(repo_target_rel).relative_to("docs-site/content").as_posix()
+        if repo_target_rel.startswith("docs/"):
+            site_target = Path(repo_target_rel).relative_to("docs").as_posix()
         else:
             site_target = repo_target_rel
         rel = posixpath.relpath(site_target, start=current_site_dir)

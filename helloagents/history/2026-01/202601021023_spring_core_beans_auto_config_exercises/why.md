@@ -20,7 +20,7 @@
 ## Impact Scope
 
 - **Modules:** `spring-core-beans`
-- **Files:** `spring-core-beans/src/test/java/...`、`spring-core-beans/docs/10-spring-boot-auto-configuration.md`
+- **Files:** `spring-core-beans/src/test/java/...`、`docs/beans/spring-core-beans/10-spring-boot-auto-configuration.md`
 - **APIs:** None
 - **Data:** None
 

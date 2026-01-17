@@ -24,7 +24,7 @@
    - 参考答案尽量“最小改动、最小依赖”，避免引入外部环境敏感点
 
 3. **索引与互链增强**
-   - 在 `spring-core-beans/docs/README.md` 增加“章节 ↔ Lab ↔ Exercise ↔ Solution”映射（以表格/列表形式）
+   - 在 `docs/beans/spring-core-beans/README.md` 增加“章节 ↔ Lab ↔ Exercise ↔ Solution”映射（以表格/列表形式）
    - 在每章结尾统一补“练习题指引”：指向相关 Exercise/ Solution（如果该章没有专属练习，则指向 Part 级练习集合）
    - 保持章节“上一章｜目录｜下一章”导航一致性，并修复相对链接
 
@@ -32,7 +32,7 @@
    - 按 Part 分批推进：Part01 → Part02 → Part03 → Part04 → Part05 → Appendix/全局索引收敛
    - 每批次必跑：
      - `mvn -pl spring-core-beans test`
-     - `python3 scripts/check-md-relative-links.py spring-core-beans/docs`
+     - `python3 scripts/check-md-relative-links.py docs/beans/spring-core-beans`
 
 ## Architecture Design
 
@@ -48,7 +48,7 @@
 ### Testing
 - 模块回归：`mvn -pl spring-core-beans test`
 - 单点验证：按章节对应 Lab/Solution 运行单测（在文档中给出命令）
-- docs 链接检查：`python3 scripts/check-md-relative-links.py spring-core-beans/docs`
+- docs 链接检查：`python3 scripts/check-md-relative-links.py docs/beans/spring-core-beans`
 
 ### Deployment
 无部署步骤（仓库内容更新 + CI 回归）。

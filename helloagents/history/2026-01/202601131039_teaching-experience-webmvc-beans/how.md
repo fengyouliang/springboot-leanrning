@@ -50,7 +50,7 @@
 - 每个实验写清楚：跑什么、看什么、在哪打断点、看哪些观察点
 - 结束后给出“下一步深挖推荐链接”（回到 `00-deep-dive-guide.md` 与 Part 01/03 的核心章节）
 
-同时在 `spring-core-beans/docs/README.md` 强化 Start Here，把快启路线放到最前面，降低第一次进入的心理负担。
+同时在 `docs/beans/spring-core-beans/README.md` 强化 Start Here，把快启路线放到最前面，降低第一次进入的心理负担。
 
 #### 4) 教学质量门禁：把“体验要求”固化成自动检查
 

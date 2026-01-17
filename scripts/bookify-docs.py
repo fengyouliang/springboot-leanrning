@@ -4,8 +4,8 @@
 """
 全模块 docs 书本化（Bookify）：为每个章节 upsert “对应 Lab/Test”入口块与“上一章｜目录｜下一章”导航。
 
-设计目标（与本仓库自检脚本对齐）：
-1) 以每个模块 `docs/README.md` 的章节链接清单为 SSOT；
+设计目标：
+1) 以 `docs/<topic>/<module>/README.md` 的章节链接清单为 SSOT；
 2) 不改写正文知识点，只在文末插入/更新一个稳定的尾部区块；
 3) 可重复执行（idempotent）：多次运行不会重复叠加；
 4) 尽量不破坏既有“可跑入口”引用：不会主动删除正文中的 Lab/Test 引用。
@@ -30,7 +30,7 @@ from typing import Iterable
 MD_LINK_WITH_TEXT_RE = re.compile(r"(!?)\[([^\]]*)\]\(([^)]+)\)")
 SCHEME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.-]*:")
 
-# 与 scripts/check-teaching-coverage.py 对齐（用于生成“对应 Lab/Test”列表）
+# 用于生成“对应 Lab/Test”列表（从正文中提取可能的入口类名/测试文件路径）
 TEST_CLASS_RE = re.compile(
     r"\b([A-Za-z_][A-Za-z0-9_]*(?:LabTest|ExerciseTest|ExerciseSolutionTest))\b"
 )
@@ -84,14 +84,27 @@ def normalize_md_link_target(raw: str) -> str | None:
     return dest or None
 
 
-def discover_modules(repo_root: Path) -> list[str]:
-    modules: list[str] = []
-    for p in sorted(repo_root.iterdir()):
-        if not p.is_dir():
+def discover_modules(repo_root: Path) -> list[tuple[str, Path]]:
+    """
+    发现“有模块目录页”的模块：以 docs/<topic>/<module>/README.md 为准。
+    返回 (module_name, docs_readme_path)。
+    """
+    docs_root = repo_root / "docs"
+    if not docs_root.is_dir():
+        return []
+
+    modules: list[tuple[str, Path]] = []
+    for readme in sorted(docs_root.glob("*/*/README.md")):
+        module = readme.parent.name
+        if not (repo_root / module).is_dir():
             continue
-        if (p / "docs" / "README.md").is_file():
-            modules.append(p.name)
+        modules.append((module, readme))
     return modules
+
+
+def resolve_docs_readme(repo_root: Path, module: str) -> Path | None:
+    candidates = sorted((repo_root / "docs").glob(f"*/{module}/README.md"))
+    return candidates[0] if candidates else None
 
 
 def iter_links_from_docs_readme(readme: Path) -> Iterable[tuple[str, str]]:
@@ -108,14 +121,13 @@ def iter_links_from_docs_readme(readme: Path) -> Iterable[tuple[str, str]]:
         yield title, target_raw
 
 
-def iter_chapters_ordered_by_last_occurrence(repo_root: Path, module_root: Path) -> list[ChapterRef]:
-    readme = module_root / "docs" / "README.md"
-    if not readme.is_file():
+def iter_chapters_ordered_by_last_occurrence(repo_root: Path, docs_readme: Path) -> list[ChapterRef]:
+    if not docs_readme.is_file():
         return []
 
     index = 0
     last: dict[Path, ChapterRef] = {}
-    for title, target_raw in iter_links_from_docs_readme(readme):
+    for title, target_raw in iter_links_from_docs_readme(docs_readme):
         index += 1
         target = normalize_md_link_target(target_raw)
         if target is None:
@@ -125,14 +137,14 @@ def iter_chapters_ordered_by_last_occurrence(repo_root: Path, module_root: Path)
         if not target.endswith(".md"):
             continue
 
-        chapter = (readme.parent / target).resolve()
+        chapter = (docs_readme.parent / target).resolve()
         try:
             chapter.relative_to(repo_root)
         except ValueError:
             continue
         if "/docs/" not in chapter.as_posix():
             continue
-        if chapter == readme:
+        if chapter == docs_readme:
             continue
 
         # 使用“最后一次出现”的标题与顺序，避免 docs/README.md 中“快速定位”类重复链接影响主线顺序
@@ -268,12 +280,12 @@ def remove_trailing_nav_line(content: str) -> tuple[str, bool]:
 def build_bookify_footer(
     repo_root: Path,
     module_root: Path,
+    docs_readme: Path,
     chapter: ChapterRef,
     prev_ref: ChapterRef | None,
     next_ref: ChapterRef | None,
     module_test_class_names: set[str],
 ) -> list[str]:
-    docs_readme = module_root / "docs" / "README.md"
     chapter_dir = chapter.chapter.parent
 
     toc_rel = relpath_posix(docs_readme, chapter_dir)
@@ -335,6 +347,7 @@ def build_bookify_footer(
 def upsert_bookify_footer(
     repo_root: Path,
     module_root: Path,
+    docs_readme: Path,
     chapters: list[ChapterRef],
     dry_run: bool,
 ) -> tuple[int, int, list[str]]:
@@ -374,6 +387,7 @@ def upsert_bookify_footer(
         footer_lines = build_bookify_footer(
             repo_root=repo_root,
             module_root=module_root,
+            docs_readme=docs_readme,
             chapter=chapter,
             prev_ref=prev_ref,
             next_ref=next_ref,
@@ -396,7 +410,7 @@ def upsert_bookify_footer(
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="bookify-docs.py",
-        description="为各模块 docs 章节统一尾部入口块与导航（以 docs/README.md 为 SSOT）。",
+        description="为模块文档章节统一尾部入口块与导航（以 docs/<topic>/<module>/README.md 为 SSOT）。",
     )
     parser.add_argument(
         "--dry-run",
@@ -416,30 +430,43 @@ def main(argv: list[str]) -> int:
     repo_root = Path(__file__).resolve().parents[1]
     args = parse_args(argv[1:])
 
-    modules = args.module or discover_modules(repo_root)
-    if not modules:
-        print("[ERROR] No module with docs/README.md found.", file=sys.stderr)
+    if args.module:
+        module_items: list[tuple[str, Path]] = []
+        for module in args.module:
+            docs_readme = resolve_docs_readme(repo_root, module)
+            if docs_readme is None:
+                module_items.append((module, Path()))
+                continue
+            module_items.append((module, docs_readme))
+    else:
+        module_items = discover_modules(repo_root)
+
+    if not module_items:
+        print("[ERROR] 未发现任何模块目录页（docs/<topic>/<module>/README.md）。", file=sys.stderr)
         return 2
 
     total_changed = 0
     total_files = 0
     all_warnings: list[str] = []
 
-    for module in modules:
+    for module, docs_readme in module_items:
         module_root = repo_root / module
-        readme = module_root / "docs" / "README.md"
-        if not readme.is_file():
-            all_warnings.append(f"- {module}: missing docs/README.md")
+        if not module_root.is_dir():
+            all_warnings.append(f"- {module}: missing module directory")
+            continue
+        if not docs_readme or not docs_readme.is_file():
+            all_warnings.append(f"- {module}: missing docs/<topic>/{module}/README.md")
             continue
 
-        chapters = iter_chapters_ordered_by_last_occurrence(repo_root, module_root)
+        chapters = iter_chapters_ordered_by_last_occurrence(repo_root, docs_readme)
         if not chapters:
-            all_warnings.append(f"- {module}: no chapters parsed from docs/README.md")
+            all_warnings.append(f"- {module}: no chapters parsed from docs README")
             continue
 
         changed, total, warnings = upsert_bookify_footer(
             repo_root=repo_root,
             module_root=module_root,
+            docs_readme=docs_readme,
             chapters=chapters,
             dry_run=args.dry_run,
         )
@@ -457,7 +484,7 @@ def main(argv: list[str]) -> int:
         if len(all_warnings) > 50:
             print(f"- ... and {len(all_warnings) - 50} more")
 
-    print(f"[DONE] modules={len(modules)} total_chapters={total_files} changed={total_changed} dry_run={args.dry_run}")
+    print(f"[DONE] modules={len(module_items)} total_chapters={total_files} changed={total_changed} dry_run={args.dry_run}")
 
     # missing chapters are treated as error, because navigation requires an actual file
     missing = [w for w in all_warnings if w.startswith("- missing chapter:")]
@@ -468,4 +495,3 @@ def main(argv: list[str]) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv))
-

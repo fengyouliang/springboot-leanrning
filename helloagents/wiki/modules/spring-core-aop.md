@@ -13,7 +13,7 @@
 ## Start Here（路线图 / 第一个可运行入口）
 
 - 路线图：`helloagents/wiki/learning-path.md`
-- Docs Index：`spring-core-aop/docs/README.md`
+- Docs Index：`docs/aop/spring-core-aop/README.md`
 - 第一个可运行入口（3 分钟开跑）：
   - `mvn -q -pl spring-core-aop -Dtest=SpringCoreAopLabTest#adviceIsAppliedToTracedMethod test`
   - 对应测试类：`spring-core-aop/src/test/java/com/learning/springboot/springcoreaop/part01_proxy_fundamentals/SpringCoreAopLabTest.java`
@@ -21,12 +21,12 @@
 ## Specifications
 
 ### Source Layout
-- docs：`spring-core-aop/docs/README.md`（目录页）
-- docs：`spring-core-aop/docs/part-00-guide/`（深挖指南）
-- docs：`spring-core-aop/docs/part-01-proxy-fundamentals/`（代理基础/自调用/限制/调试）
-- docs：`spring-core-aop/docs/part-02-autoproxy-and-pointcuts/`（AutoProxyCreator 主线/pointcut 系统）
-- docs：`spring-core-aop/docs/part-03-proxy-stacking/`（多代理叠加/真实项目 playbook）
-- docs：`spring-core-aop/docs/appendix/`（常见坑/自测题）
+- docs：`docs/aop/spring-core-aop/README.md`（目录页）
+- docs：`docs/aop/spring-core-aop/part-00-guide/`（深挖指南）
+- docs：`docs/aop/spring-core-aop/part-01-proxy-fundamentals/`（代理基础/自调用/限制/调试）
+- docs：`docs/aop/spring-core-aop/part-02-autoproxy-and-pointcuts/`（AutoProxyCreator 主线/pointcut 系统）
+- docs：`docs/aop/spring-core-aop/part-03-proxy-stacking/`（多代理叠加/真实项目 playbook）
+- docs：`docs/aop/spring-core-aop/appendix/`（常见坑/自测题）
 - src(main)：`spring-core-aop/src/main/java/com/learning/springboot/springcoreaop/SpringCoreAopApplication.java`（入口，包名保持不变）
 - src(main)：`spring-core-aop/src/main/java/com/learning/springboot/springcoreaop/part01_proxy_fundamentals/**`
 - src(main)：`spring-core-aop/src/main/java/com/learning/springboot/springcoreaop/part02_autoproxy_and_pointcuts/**`
@@ -36,7 +36,7 @@
 - src(test)：`spring-core-aop/src/test/java/com/learning/springboot/springcoreaop/part03_proxy_stacking/**`
 
 ### Docs Index
-- 入口：`spring-core-aop/docs/README.md`
+- 入口：`docs/aop/spring-core-aop/README.md`
 
 ### Requirement: AOP 学习闭环
 **Module:** spring-core-aop
@@ -67,7 +67,7 @@
 - 能解释 why：call path 必须走 proxy
 - 能说明常见工程解法（拆分 bean / 自注入 / exposeProxy）与风险
 - 对应可复现闭环入口：
-  - `spring-core-aop/docs/part-01-proxy-fundamentals/05-expose-proxy.md`
+  - `docs/aop/spring-core-aop/part-01-proxy-fundamentals/05-expose-proxy.md`
   - `spring-core-aop/src/main/java/com/learning/springboot/springcoreaop/part01_proxy_fundamentals/ExposeProxyExampleService.java`
   - `spring-core-aop/src/test/java/com/learning/springboot/springcoreaop/part01_proxy_fundamentals/SpringCoreAopExposeProxyLabTest.java`
 
@@ -97,7 +97,7 @@
 
 - [202601091802_modules_depth_align_to_beans](../../history/2026-01/202601091802_modules_depth_align_to_beans/) - ✅ 已执行：对标 spring-core-beans 深挖升级（补齐 Guide 机制主线与章节可断言坑点，强化导航与排障入口）
 - [202601071034_all_modules_docs_ag_contract](../../history/2026-01/202601071034_all_modules_docs_ag_contract/) - ✅ 已执行：全模块 docs 章节结构整理（A–G 结构 + 对应 Lab/Test 入口块）；后续不再推荐 A–G 作为写作规范/闸门
-- [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过 `scripts/check-docs.sh`
+- [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/<topic>/<module>/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章）
 - [202601061556_spring_core_modules_teaching_rollout](../../history/2026-01/202601061556_spring_core_modules_teaching_rollout/) - ✅ 已执行：对齐 docs 目录页/Part 编号与章节末尾“对应 Lab/Test”入口块，清理正文 `docs/NN` 缩写引用，并通过断链检查与教学覆盖检查
 - [202601010804_spring-core-aop-deep-dive](../../history/2026-01/202601010804_spring-core-aop-deep-dive/) - ✅ 已执行：新增深挖指南/自测题，扩写 01-06/90，补齐源码级断点与排障闭环
 - [202601010845_beans-aop-deep-dive-v2](../../history/2026-01/202601010845_beans-aop-deep-dive-v2/) - ✅ 已执行：新增 07-09（AutoProxyCreator 主线/pointcut/多代理叠加），并新增 Labs 覆盖 proceed 嵌套、this vs target、多 advisor vs 套娃 proxy

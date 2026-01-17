@@ -20,7 +20,7 @@ Directory: `helloagents/history/2026-01/202601061309_springboot-web-mvc-thymelea
 - [√] 3.3 补齐 API 侧常见 400（malformed JSON/类型转换）统一错误体到 `springboot-web-mvc/src/main/java/com/learning/springboot/bootwebmvc/part01_web_mvc/GlobalExceptionHandler.java`，验证 why.md#r3-s2
 
 ## 4. Docs 更新（学习路径与机制解释）
-- [√] 4.1 增加传统 MVC 主线文档到 `springboot-web-mvc/docs/part-02-view-mvc/`（Thymeleaf/ModelAndView/表单校验与回显/错误页与内容协商），并更新索引 `springboot-web-mvc/docs/README.md`
+- [√] 4.1 增加传统 MVC 主线文档到 `docs/web-mvc/springboot-web-mvc/part-02-view-mvc/`（Thymeleaf/ModelAndView/表单校验与回显/错误页与内容协商），并更新索引 `docs/web-mvc/springboot-web-mvc/README.md`
 - [√] 4.2 更新模块总览与命令说明：`springboot-web-mvc/README.md`（新增页面路由、阅读顺序、Labs/Exercises 入口）
 
 ## 5. Testing（MockMvc + 端到端）

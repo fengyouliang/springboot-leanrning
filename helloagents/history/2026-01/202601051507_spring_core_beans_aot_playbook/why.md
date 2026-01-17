@@ -24,7 +24,7 @@
   - `spring-core-beans`
   - `helloagents`（知识库同步）
 - **Files:**
-  - `spring-core-beans/docs/**`
+  - `docs/beans/spring-core-beans/**`
   - `spring-core-beans/src/test/java/**`
   - `spring-core-beans/README.md`
   - `helloagents/wiki/modules/spring-core-beans.md`

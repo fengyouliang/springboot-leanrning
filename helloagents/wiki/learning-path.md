@@ -14,7 +14,7 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansLabTest#usesQualifierToResolv
 
 你接下来应该做：
 
-1. 先读：`spring-core-beans/docs/part-00-guide/01-quickstart-30min.md`
+1. 先读：`docs/beans/spring-core-beans/part-00-guide/01-quickstart-30min.md`
 2. 再做：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansExerciseTest.java`
 
 ---
@@ -25,18 +25,18 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansLabTest#usesQualifierToResolv
 
 ### 1.1 Beans（IoC 容器与依赖注入）
 
-- Start Here（文档）：`spring-core-beans/docs/part-00-guide/01-quickstart-30min.md`
+- Start Here（文档）：`docs/beans/spring-core-beans/part-00-guide/01-quickstart-30min.md`
 - 第一个可运行入口：
   - 命令：`mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansLabTest#usesQualifierToResolveMultipleBeans test`
   - 测试类：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part00_guide/SpringCoreBeansLabTest.java`
 - 推荐下一步：
-  1. 读完 Part 00 guide（`spring-core-beans/docs/part-00-guide/README.md`）
-  2. 进入 Part 01：注册 → 注入解析 → 生命周期（`spring-core-beans/docs/part-01-ioc-container/README.md`）
+  1. 读完 Part 00 guide（`docs/beans/spring-core-beans/part-00-guide/README.md`）
+  2. 进入 Part 01：注册 → 注入解析 → 生命周期（`docs/beans/spring-core-beans/part-01-ioc-container/README.md`）
   3. 做练习：`SpringCoreBeansExerciseTest`（默认存在 Solution 对照）
 
 ### 1.2 AOP（代理与切面）
 
-- Start Here（文档）：`spring-core-aop/docs/README.md`
+- Start Here（文档）：`docs/aop/spring-core-aop/README.md`
 - 第一个可运行入口：
   - 命令：`mvn -q -pl spring-core-aop -Dtest=SpringCoreAopLabTest#adviceIsAppliedToTracedMethod test`
   - 测试类：`spring-core-aop/src/test/java/com/learning/springboot/springcoreaop/part01_proxy_fundamentals/SpringCoreAopLabTest.java`
@@ -46,23 +46,23 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansLabTest#usesQualifierToResolv
 
 ### 1.3 Tx（事务：边界/传播/回滚）
 
-- Start Here（文档）：`spring-core-tx/docs/README.md`
+- Start Here（文档）：`docs/tx/spring-core-tx/README.md`
 - 第一个可运行入口：
   - 命令：`mvn -q -pl spring-core-tx -Dtest=SpringCoreTxLabTest#transactionsAreActiveInsideTransactionalMethods test`
   - 测试类：`spring-core-tx/src/test/java/com/learning/springboot/springcoretx/part01_transaction_basics/SpringCoreTxLabTest.java`
 - 推荐下一步：
-  1. 读：`spring-core-tx/docs/part-01-transaction-basics/04-propagation.md`
+  1. 读：`docs/tx/spring-core-tx/part-01-transaction-basics/04-propagation.md`
   2. 跑矩阵：`SpringCoreTxPropagationMatrixLabTest`
   3. 做练习：`spring-core-tx/src/test/java/com/learning/springboot/springcoretx/part00_guide/SpringCoreTxExerciseTest.java`
 
 ### 1.4 Web MVC（请求处理链路：绑定/校验/异常/拦截器）
 
-- Start Here（文档）：`springboot-web-mvc/docs/README.md`
+- Start Here（文档）：`docs/web-mvc/springboot-web-mvc/README.md`
 - 第一个可运行入口（MockMvc 版本）：
   - 命令：`mvn -q -pl springboot-web-mvc -Dtest=BootWebMvcLabTest#pingEndpointReturnsPong test`
   - 测试类：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part01_web_mvc/BootWebMvcLabTest.java`
 - 推荐下一步：
-  1. 读 Part 01：校验/异常/绑定（`springboot-web-mvc/docs/part-01-web-mvc/README.md`）
+  1. 读 Part 01：校验/异常/绑定（`docs/web-mvc/springboot-web-mvc/part-01-web-mvc/README.md`）
   2. 再跑链路追踪：`BootWebMvcTraceLabTest#syncTraceRecordsFilterAndInterceptorOrder`
   3. 做练习：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part00_guide/BootWebMvcExerciseTest.java`
 

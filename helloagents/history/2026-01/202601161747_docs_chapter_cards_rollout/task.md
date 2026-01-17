@@ -8,14 +8,14 @@ Directory: `helloagents/plan/202601161747_docs_chapter_cards_rollout/`
 
 - [√] 0.1 定义“章节集合 SSOT”
   - 模块章节：以 18 个模块 `docs/README.md` 内的 Markdown 链接清单为 SSOT（共 174 章）
-  - Book-only：以 `docs-site/content/book/` 为 SSOT（编号章 0–18 + 工具页/附录页）
+  - Book-only：以 `docs/book/` 为 SSOT（编号章 0–18 + 工具页/附录页）
 - [√] 0.2 约定“工具页/索引页”也强制五问（允许 `源码入口：N/A（本页为索引/工具页）` / `推荐 Lab：N/A`）
 
 ---
 
 ## 1. 模板与写作 SSOT（把规则写进书的写作指南）
 
-- [√] 1.1 更新 `docs-site/content/book-style.md`：新增“章节学习卡片（五问）”规范
+- [√] 1.1 更新 `docs/book-style.md`：新增“章节学习卡片（五问）”规范
 - [√] 1.2 定义学习卡片字段最小标准（每章必须包含）
   - 知识点（1 句话边界）
   - 怎么用（最常见用法 + 场景）

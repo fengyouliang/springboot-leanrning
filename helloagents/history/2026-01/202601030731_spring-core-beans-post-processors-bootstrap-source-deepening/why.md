@@ -21,8 +21,8 @@
 ## Impact Scope
 - **Modules:** `spring-core-beans`
 - **Files:**
-  - `spring-core-beans/docs/06-post-processors.md`
-  - `spring-core-beans/docs/12-container-bootstrap-and-infrastructure.md`
+  - `docs/beans/spring-core-beans/06-post-processors.md`
+  - `docs/beans/spring-core-beans/12-container-bootstrap-and-infrastructure.md`
   - `spring-core-beans/src/test/java/...`（新增最小 Lab，帮助理解 `static @Bean` 的必要性）
   - `helloagents/wiki/modules/spring-core-beans.md`
   - `helloagents/CHANGELOG.md`

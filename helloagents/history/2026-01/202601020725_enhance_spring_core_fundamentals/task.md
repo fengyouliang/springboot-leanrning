@@ -9,8 +9,8 @@ Directory: `helloagents/plan/202601020725_enhance_spring_core_fundamentals/`
 - [√] 1.2 更新 `spring-core-beans/README.md`：新增 “学习路线（入门→进阶→深挖）” 表格，把 **最小入门路线** 固定为 3 个入口（`SpringCoreBeansLabTest` / `SpringCoreBeansContainerLabTest` / `docs/00-deep-dive-guide.md`），并为每一层给出“你应该能解释清楚什么”
 - [√] 1.3 更新 `spring-core-beans/README.md`：新增 “容器主线（refresh call chain）一页纸” 小节：以 `AbstractApplicationContext#refresh` 为主线，把 BFPP → BPP → 实例化/注入/初始化/销毁 对应到本模块 docs（`06/12/14/30/31/17`）与 Labs（`ContainerLabTest`/`BeanCreationTraceLabTest`/`LifecycleCallbackOrderLabTest`）
 - [√] 1.4 更新 `spring-core-beans/README.md`：新增 “运行态观察点（spring-boot:run）” 小节，把 `BeansDemoRunner` 的关键输出（DI 选择、prototype 行为、生命周期标记等）映射到对应 docs 与 Labs/Exercises（同 1.1 场景验证）
-- [√] 1.5 更新 `spring-core-beans/docs/00-deep-dive-guide.md`：补齐 “断点地图（按阶段）” 与 “从一个入口测试走完全链路” 示例（建议入口：`SpringCoreBeansBeanCreationTraceLabTest` 或 `SpringCoreBeansBootstrapInternalsLabTest`）
-- [√] 1.6 更新 `spring-core-beans/docs/11-debugging-and-observability.md`：补齐 “IoC/DI 与生命周期 Debug Playbook”（推荐断点：`ConfigurationClassPostProcessor` / `PostProcessorRegistrationDelegate` / `AutowiredAnnotationBeanPostProcessor` / `CommonAnnotationBeanPostProcessor` 等，并给出最小复现入口测试类）
+- [√] 1.5 更新 `docs/beans/spring-core-beans/00-deep-dive-guide.md`：补齐 “断点地图（按阶段）” 与 “从一个入口测试走完全链路” 示例（建议入口：`SpringCoreBeansBeanCreationTraceLabTest` 或 `SpringCoreBeansBootstrapInternalsLabTest`）
+- [√] 1.6 更新 `docs/beans/spring-core-beans/11-debugging-and-observability.md`：补齐 “IoC/DI 与生命周期 Debug Playbook”（推荐断点：`ConfigurationClassPostProcessor` / `PostProcessorRegistrationDelegate` / `AutowiredAnnotationBeanPostProcessor` / `CommonAnnotationBeanPostProcessor` 等，并给出最小复现入口测试类）
 - [√] 1.7 更新 `spring-core-beans/src/main/java/com/learning/springboot/springcorebeans/BeansDemoRunner.java`：增强结构化输出（建议固定 key 前缀，包含：active profiles、beanDefinitionCount、`TextFormatter` beans 列表、FormattingService 实际注入实现、prototype 行为、`@PostConstruct` 标记）
 - [√] 1.8 在**现有基础上优先补强**“容器主线时间线”实验：
   - 优先选择并扩展已有 Labs（例如 `SpringCoreBeansBeanCreationTraceLabTest` / `SpringCoreBeansContainerLabTest` / `SpringCoreBeansLifecycleCallbackOrderLabTest`）来覆盖与串联 **BFPP 改定义 → 注入阶段 → init 回调 → BPP 包装/替换**
@@ -23,12 +23,12 @@ Directory: `helloagents/plan/202601020725_enhance_spring_core_fundamentals/`
 - [√] 1.14 增强 `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansExerciseTest.java`：新增 1 个与 1.12 对应的练习题（默认 `@Disabled`），引导学习者用不同手段修复歧义并写断言（`@Qualifier` vs `@Primary` 对比）
 - [√] 1.15 模块内验证：运行 `mvn -pl spring-core-beans test`，确保新增/补强的 Labs 稳定；若出现不稳定，优先调整为“事件/对象记录 + 断言”而不是依赖输出时序
 - [√] 1.16 把新增面试点“插入到正文对应小节”（禁止新建独立面试题汇总文档）：定义统一格式（题目/追问/复现入口），并在各章节中按主题落位（验证：why.md「Requirement: 面试导向知识点沉淀到正文…」）
-- [√] 1.17 在 `spring-core-beans/docs/01-bean-mental-model.md` 的 “BeanFactory vs ApplicationContext：责任边界” 小节**正文中**插入面试块：题目 + 追问（refresh 关联、能力边界）+ 复现入口（优先复用 `SpringCoreBeansBootstrapInternalsLabTest`；若不足则新增最小 Lab 并补链接）
-- [√] 1.18 在 `spring-core-beans/docs/03-dependency-injection-resolution.md` 的“候选收集/候选收敛”附近插入面试块：题目 + 追问（`findAutowireCandidates`/`determineAutowireCandidate`/泛型匹配）+ 复现入口（`SpringCoreBeansBeanGraphDebugLabTest`、`SpringCoreBeansAutowireCandidateSelectionLabTest`）
-- [√] 1.19 在 `spring-core-beans/docs/33-autowire-candidate-selection-primary-priority-order.md` 的“单注入 vs 集合注入规则差异”附近插入面试块：题目 + 追问（`@Order` 不能解决单注入歧义、集合排序）+ 复现入口（`SpringCoreBeansAutowireCandidateSelectionLabTest`）
-- [√] 1.20 在 `spring-core-beans/docs/05-lifecycle-and-callbacks.md` 的 Aware 小节**正文中**插入面试块：题目 + 追问（谁调用 Aware、发生在注入/初始化链路哪个阶段）+ 复现入口（`SpringCoreBeansLifecycleCallbackOrderLabTest`）
-- [√] 1.21 在 `spring-core-beans/docs/16-early-reference-and-circular.md` 的 early reference / 三级缓存解释段落中插入面试块：题目 + 追问（构造器 vs setter、三级缓存的“工厂”意义、代理为何让问题更复杂）+ 复现入口（`SpringCoreBeansEarlyReferenceLabTest`、`SpringCoreBeansContainerLabTest`）
-- [√] 1.22 在 `spring-core-beans/docs/31-proxying-phase-bpp-wraps-bean.md` 的“替换为 proxy 的阶段/影响”段落中插入面试块：题目 + 追问（JDK vs CGLIB、按实现类获取失败、定位哪个 BPP 替换对象）+ 复现入口（`SpringCoreBeansBeanCreationTraceLabTest`、`SpringCoreBeansProxyingPhaseLabTest`）
+- [√] 1.17 在 `docs/beans/spring-core-beans/01-bean-mental-model.md` 的 “BeanFactory vs ApplicationContext：责任边界” 小节**正文中**插入面试块：题目 + 追问（refresh 关联、能力边界）+ 复现入口（优先复用 `SpringCoreBeansBootstrapInternalsLabTest`；若不足则新增最小 Lab 并补链接）
+- [√] 1.18 在 `docs/beans/spring-core-beans/03-dependency-injection-resolution.md` 的“候选收集/候选收敛”附近插入面试块：题目 + 追问（`findAutowireCandidates`/`determineAutowireCandidate`/泛型匹配）+ 复现入口（`SpringCoreBeansBeanGraphDebugLabTest`、`SpringCoreBeansAutowireCandidateSelectionLabTest`）
+- [√] 1.19 在 `docs/beans/spring-core-beans/33-autowire-candidate-selection-primary-priority-order.md` 的“单注入 vs 集合注入规则差异”附近插入面试块：题目 + 追问（`@Order` 不能解决单注入歧义、集合排序）+ 复现入口（`SpringCoreBeansAutowireCandidateSelectionLabTest`）
+- [√] 1.20 在 `docs/beans/spring-core-beans/05-lifecycle-and-callbacks.md` 的 Aware 小节**正文中**插入面试块：题目 + 追问（谁调用 Aware、发生在注入/初始化链路哪个阶段）+ 复现入口（`SpringCoreBeansLifecycleCallbackOrderLabTest`）
+- [√] 1.21 在 `docs/beans/spring-core-beans/16-early-reference-and-circular.md` 的 early reference / 三级缓存解释段落中插入面试块：题目 + 追问（构造器 vs setter、三级缓存的“工厂”意义、代理为何让问题更复杂）+ 复现入口（`SpringCoreBeansEarlyReferenceLabTest`、`SpringCoreBeansContainerLabTest`）
+- [√] 1.22 在 `docs/beans/spring-core-beans/31-proxying-phase-bpp-wraps-bean.md` 的“替换为 proxy 的阶段/影响”段落中插入面试块：题目 + 追问（JDK vs CGLIB、按实现类获取失败、定位哪个 BPP 替换对象）+ 复现入口（`SpringCoreBeansBeanCreationTraceLabTest`、`SpringCoreBeansProxyingPhaseLabTest`）
 - [√] 1.23 若 1.17/1.21/1.22 出现“缺少可复现入口”的情况，新增最小 Lab（单主题、稳定断言）并在对应章节正文中引用该 Lab；新增 Lab 命名必须体现主题（例如 `...BeanFactoryVsApplicationContextLabTest` / `...ThreeLevelCacheLabTest` / `...ProxyTypePitfallsLabTest`）
 
 ## 2. spring-core-aop

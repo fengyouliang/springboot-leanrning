@@ -6,7 +6,7 @@ Directory: `helloagents/plan/202601151209_docs-site-mkdocs/`
 
 ## 1. 站点骨架（配置与入口）
 - [√] 1.1 新增 `docs-site/mkdocs.yml`（Material 主题 + 中文 + 基础导航）
-- [√] 1.2 新增 `docs-site/content/index.md`（站点首页）
+- [√] 1.2 新增 `docs/index.md`（站点首页）
 - [√] 1.3 新增 `docs-site/requirements.txt`（MkDocs 依赖）
 - [√] 1.4 新增 `docs-site/README.md`（使用说明）
 

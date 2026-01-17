@@ -23,7 +23,7 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 1.1 Guide 源码级深化（关键分支 → call chain + 断点锚点 + playbook）
 
-- [√] 1.1 在 `springboot-security/docs/part-00-guide/00-deep-dive-guide.md` 增补以下内容（以“测试断言 → 调用链 → 断点锚点”反推）：
+- [√] 1.1 在 `docs/security/springboot-security/part-00-guide/00-deep-dive-guide.md` 增补以下内容（以“测试断言 → 调用链 → 断点锚点”反推）：
   - 关键分支矩阵（建议放在 `C.3 本模块的关键分支` 后）：每条分支都补齐 `Call Chain Sketch` + `Breakpoints` + `Evidence (Lab/Test#method)`。
   - 分支 S1（新增）：**多 `SecurityFilterChain` 命中与顺序（securityMatcher + @Order）**
     - Evidence：`BootSecurityMultiFilterChainOrderLabTest#jwtPathMatchesJwtChain_andApiPathMatchesBasicChain`
@@ -88,21 +88,21 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 1.4 章节对照坑点/边界：01-basic-auth-and-authorization（新增 ≥1）
 
-- [√] 1.4 在 `springboot-security/docs/part-01-security/01-basic-auth-and-authorization.md` 新增 **坑点 2**（可断言）：
+- [√] 1.4 在 `docs/security/springboot-security/part-01-security/01-basic-auth-and-authorization.md` 新增 **坑点 2**（可断言）：
   - 主题：`hasRole("ADMIN")` 与 `authorities("ADMIN")` 的前缀边界（ROLE_）
   - Verification：`BootSecurityLabTest#adminEndpointReturns403WhenAuthorityAdminButMissingRolePrefix_asPitfall`
   - Breakpoints：`SecurityConfig#apiChain`（规则定义）/ `JsonAccessDeniedHandler#handle`（403 塑形）
 
 ### 1.5 章节对照坑点/边界：02-csrf（新增 ≥1）
 
-- [√] 1.5 在 `springboot-security/docs/part-01-security/02-csrf.md` 新增 **坑点 2**（可断言）：
+- [√] 1.5 在 `docs/security/springboot-security/part-01-security/02-csrf.md` 新增 **坑点 2**（可断言）：
   - 主题：**“我禁用了 CSRF 但还是 403”** 的常见原因：禁用发生在另一条 `SecurityFilterChain`（请求命中错链）
   - Verification：`BootSecurityLabTest#csrfBlocksPostEvenWhenAuthenticated` + `BootSecurityLabTest#jwtPostDoesNotRequireCsrf` + `BootSecurityMultiFilterChainOrderLabTest#jwtPathMatchesJwtChain_andApiPathMatchesBasicChain`
   - Breakpoints：`FilterChainProxy#doFilterInternal` / `DefaultSecurityFilterChain#matches` / `CsrfFilter#doFilterInternal`
 
 ### 1.6 章节对照坑点/边界：03-method-security-and-proxy（新增 ≥1）
 
-- [√] 1.6 在 `springboot-security/docs/part-01-security/03-method-security-and-proxy.md` 做两件事：
+- [√] 1.6 在 `docs/security/springboot-security/part-01-security/03-method-security-and-proxy.md` 做两件事：
   - 把现有“散落描述”整理成标准坑点结构（坑点 1：self-invocation 绕过）
     - Verification：`BootSecurityLabTest#selfInvocationBypassesMethodSecurityAsAPitfall`
     - Breakpoints：`SelfInvocationPitfallService#outerCallsAdminOnly` / `SelfInvocationPitfallService#adminOnly`
@@ -112,14 +112,14 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 1.7 章节对照坑点/边界：04-filter-chain-and-order（新增 ≥1）
 
-- [√] 1.7 在 `springboot-security/docs/part-01-security/04-filter-chain-and-order.md` 新增 **坑点 2**（可断言）：
+- [√] 1.7 在 `docs/security/springboot-security/part-01-security/04-filter-chain-and-order.md` 新增 **坑点 2**（可断言）：
   - 主题：只凭“响应码/行为”判断命中哪条链路容易误判，推荐用 `FilterChainProxy#getFilters` 建立证据链
   - Verification：`BootSecurityMultiFilterChainOrderLabTest#jwtPathMatchesJwtChain_andApiPathMatchesBasicChain`
   - Breakpoints：`FilterChainProxy#doFilterInternal` / `DefaultSecurityFilterChain#matches`
 
 ### 1.8 章节对照坑点/边界：05-jwt-stateless（新增 ≥1）
 
-- [√] 1.8 在 `springboot-security/docs/part-01-security/05-jwt-stateless.md` 补齐 `F. 常见坑与边界`（至少 2 条，保证有 ≥1 新增且可断言）：
+- [√] 1.8 在 `docs/security/springboot-security/part-01-security/05-jwt-stateless.md` 补齐 `F. 常见坑与边界`（至少 2 条，保证有 ≥1 新增且可断言）：
   - 坑点 1（新增，可断言）：Authorization header 缺少 `Bearer ` 前缀 → 401
     - Verification：`BootSecurityLabTest#jwtSecureEndpointReturns401WhenBearerPrefixMissing_asPitfall`
     - Breakpoints：`JsonAuthenticationEntryPoint#commence`
@@ -129,7 +129,7 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 1.9 Appendix：90-common-pitfalls（新增 ≥1，可断言）
 
-- [√] 1.9 在 `springboot-security/docs/appendix/90-common-pitfalls.md`：
+- [√] 1.9 在 `docs/security/springboot-security/appendix/90-common-pitfalls.md`：
   - 把“清单式条目”至少补齐 1 个为标准结构坑点（Symptom/Root Cause/Verification/Breakpoints/Fix）
   - 推荐新增条目：多 `SecurityFilterChain` 命中错链导致 CSRF/认证行为异常
     - Verification：`BootSecurityMultiFilterChainOrderLabTest#jwtPathMatchesJwtChain_andApiPathMatchesBasicChain`
@@ -137,7 +137,7 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 1.10 Self-check：99-self-check（新增 ≥1 自测题 + ≥1 对照坑点）
 
-- [√] 1.10 在 `springboot-security/docs/appendix/99-self-check.md`：
+- [√] 1.10 在 `docs/security/springboot-security/appendix/99-self-check.md`：
   - 自测题新增 ≥1：要求读者能给出“断点锚点 + 对应可跑入口”（例如：如何证明命中哪条 filter chain？）
   - 新增 **坑点 2**（可断言）：链路分流没验证导致排障走错方向
     - Verification：`BootSecurityMultiFilterChainOrderLabTest#jwtPathMatchesJwtChain_andApiPathMatchesBasicChain`
@@ -152,7 +152,7 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 2.1 Guide 源码级深化（关键分支 → call chain + 断点锚点 + playbook）
 
-- [√] 2.1 在 `springboot-data-jpa/docs/part-00-guide/00-deep-dive-guide.md` 增补以下内容：
+- [√] 2.1 在 `docs/data-jpa/springboot-data-jpa/part-00-guide/00-deep-dive-guide.md` 增补以下内容：
   - 关键分支矩阵：每条分支补齐 `Call Chain Sketch` + `Breakpoints` + `Evidence (Lab/Test#method)`。
   - 分支 J1（补齐）：**save 的入口语义：persist vs merge（新旧实体分流）**
     - Evidence：新增 `BootDataJpaMergeAndDetachLabTest#mergeReturnsManagedCopy_andOriginalStaysDetached`
@@ -191,35 +191,35 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 2.3 章节对照坑点/边界：01-entity-states（新增 ≥1）
 
-- [√] 2.3 在 `springboot-data-jpa/docs/part-01-data-jpa/01-entity-states.md` 新增 **坑点 2**（可断言）：
+- [√] 2.3 在 `docs/data-jpa/springboot-data-jpa/part-01-data-jpa/01-entity-states.md` 新增 **坑点 2**（可断言）：
   - 主题：merge 返回的是 managed copy，原对象仍 detached（改错对象导致“看似没生效”）
   - Verification：`BootDataJpaMergeAndDetachLabTest#mergeReturnsManagedCopy_andOriginalStaysDetached`
   - Breakpoints：`EntityManager#merge` / `EntityManager#contains`
 
 ### 2.4 章节对照坑点/边界：02-persistence-context（新增 ≥1）
 
-- [√] 2.4 在 `springboot-data-jpa/docs/part-01-data-jpa/02-persistence-context.md` 新增 **坑点 2**（可断言）：
+- [√] 2.4 在 `docs/data-jpa/springboot-data-jpa/part-01-data-jpa/02-persistence-context.md` 新增 **坑点 2**（可断言）：
   - 主题：“同一事务里两次 find 得到的是同一个对象”导致你误以为是 DB 的最新事实（identity map 误导）
   - Verification：新增 `BootDataJpaLabTest#sameEntityLoadedTwiceIsSameInstanceWithinPersistenceContext_asPitfall`（断言 `ref1 == ref2`，clear 后 `ref1 != ref3`）
   - Breakpoints：`EntityManager#find` / `EntityManager#clear`
 
 ### 2.5 章节对照坑点/边界：03-flush-and-visibility（新增 ≥1）
 
-- [√] 2.5 在 `springboot-data-jpa/docs/part-01-data-jpa/03-flush-and-visibility.md` 新增 **坑点 2**（可断言）：
+- [√] 2.5 在 `docs/data-jpa/springboot-data-jpa/part-01-data-jpa/03-flush-and-visibility.md` 新增 **坑点 2**（可断言）：
   - 主题：FlushMode.AUTO：某些查询会触发自动 flush，导致你以为“只是读”但出现写 SQL
   - Verification：新增 `BootDataJpaLabTest#queryMayTriggerAutoFlush_asPitfall`（用 Hibernate Statistics 断言查询前后 statement count 变化）
   - Breakpoints：`EntityManager#flush`（观察谁触发）
 
 ### 2.6 章节对照坑点/边界：04-dirty-checking（新增 ≥1）
 
-- [√] 2.6 在 `springboot-data-jpa/docs/part-01-data-jpa/04-dirty-checking.md` 新增 **坑点 2**（可断言）：
+- [√] 2.6 在 `docs/data-jpa/springboot-data-jpa/part-01-data-jpa/04-dirty-checking.md` 新增 **坑点 2**（可断言）：
   - 主题：你以为“只读查询”，但在同一 persistence context 里对 managed entity 的改动会在 flush/commit 时自动写回（无 save 也会更新）
   - Verification：复用 `BootDataJpaLabTest#dirtyCheckingPersistsChangesOnFlush`，并新增一个对照测试（可选）：`BootDataJpaLabTest#accidentalDirtyChangeGetsPersisted_asPitfall`
   - Breakpoints：`EntityManager#flush`
 
 ### 2.7 章节对照坑点/边界：05-fetching-and-n-plus-one（新增 ≥1）
 
-- [√] 2.7 在 `springboot-data-jpa/docs/part-01-data-jpa/05-fetching-and-n-plus-one.md` 新增 **坑点 2**（可断言）：
+- [√] 2.7 在 `docs/data-jpa/springboot-data-jpa/part-01-data-jpa/05-fetching-and-n-plus-one.md` 新增 **坑点 2**（可断言）：
   - 主题：事务外访问 lazy 关联 → `LazyInitializationException`
   - Verification：新增 `BootDataJpaLabTest#lazyInitializationExceptionWhenAccessingLazyOutsidePersistenceContext_asPitfall`
     - 建议实现：保存 author+books → flush+clear → 获取 entity → 结束事务/清掉上下文后访问 lazy 集合并断言异常
@@ -227,26 +227,26 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 2.8 章节对照坑点/边界：06-datajpatest-slice（新增 ≥1）
 
-- [√] 2.8 在 `springboot-data-jpa/docs/part-01-data-jpa/06-datajpatest-slice.md` 新增 **坑点 2**（可断言）：
+- [√] 2.8 在 `docs/data-jpa/springboot-data-jpa/part-01-data-jpa/06-datajpatest-slice.md` 新增 **坑点 2**（可断言）：
   - 主题：`@DataJpaTest` 的数据库/上下文边界与生产不一致（常见：H2 dialect/行为差异）
   - Verification：新增 `BootDataJpaLabTest#dataJpaTestUsesH2DatabaseByDefault_asBoundary`（断言 DataSource JDBC URL 包含 `jdbc:h2:`）
   - Breakpoints：无强制（以断言为证据链）
 
 ### 2.9 章节对照坑点/边界：07-debug-sql（新增 ≥1）
 
-- [√] 2.9 在 `springboot-data-jpa/docs/part-01-data-jpa/07-debug-sql.md` 补齐 `F. 常见坑与边界`（新增 ≥1，可断言）：
+- [√] 2.9 在 `docs/data-jpa/springboot-data-jpa/part-01-data-jpa/07-debug-sql.md` 补齐 `F. 常见坑与边界`（新增 ≥1，可断言）：
   - 推荐坑点：只看 show-sql 容易误判，建议用 Hibernate Statistics 固化“SQL 数量”证据链（N+1/自动 flush）
   - Verification：`BootDataJpaLabTest#nPlusOneHappensWhenAccessingLazyCollections` / `BootDataJpaLabTest#entityGraphCanAvoidNPlusOne_whenFetchingCollections` / `BootDataJpaLabTest#queryMayTriggerAutoFlush_asPitfall`
 
 ### 2.10 Appendix：90-common-pitfalls（新增 ≥1，可断言）
 
-- [√] 2.10 在 `springboot-data-jpa/docs/appendix/90-common-pitfalls.md`：
+- [√] 2.10 在 `docs/data-jpa/springboot-data-jpa/appendix/90-common-pitfalls.md`：
   - 至少新增 1 个“标准结构坑点”（推荐：merge 返回新对象/改错对象）
   - 绑定 Verification：`BootDataJpaMergeAndDetachLabTest#mergeReturnsManagedCopy_andOriginalStaysDetached`
 
 ### 2.11 Self-check：99-self-check（新增 ≥1 自测题 + ≥1 对照坑点）
 
-- [√] 2.11 在 `springboot-data-jpa/docs/appendix/99-self-check.md`：
+- [√] 2.11 在 `docs/data-jpa/springboot-data-jpa/appendix/99-self-check.md`：
   - 自测题新增 ≥1：要求回答时必须给出“断点锚点 + 可跑入口”（例如：如何证明 query 触发 auto flush？）
   - 新增 **坑点 2**（可断言）：merge 的对象语义（改错对象）
     - Verification：`BootDataJpaMergeAndDetachLabTest#mergeReturnsManagedCopy_andOriginalStaysDetached`
@@ -261,7 +261,7 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 3.1 Guide 源码级深化（关键分支 → call chain + 断点锚点 + playbook）
 
-- [√] 3.1 在 `spring-core-events/docs/part-00-guide/00-deep-dive-guide.md`：
+- [√] 3.1 在 `docs/events/spring-core-events/part-00-guide/00-deep-dive-guide.md`：
   - 为现有 5 条关键分支逐条补齐：call chain sketch + 断点锚点（class#method）+ Evidence（Lab/Test#method）。
   - 新增关键分支 E6（新增）：**listener filtering：supportsEventType/sourceType 导致“为什么没触发”**
     - Evidence：新增 `SpringCoreEventsListenerFilteringLabTest#smartListenerFiltersByEventTypeAndSourceType`
@@ -292,7 +292,7 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 3.3 章节对照坑点/边界：01-event-mental-model（新增 ≥1）
 
-- [√] 3.3 在 `spring-core-events/docs/part-01-event-basics/01-event-mental-model.md` 新增 **坑点 2**（可断言）：
+- [√] 3.3 在 `docs/events/spring-core-events/part-01-event-basics/01-event-mental-model.md` 新增 **坑点 2**（可断言）：
   - 主题：事件对象可变会导致多个 listener 互相污染（建议 immutable record）
   - Verification：新增一个最小测试（推荐放在 `SpringCoreEventsMechanicsLabTest`）：
     - `mutableEventCanBeMutatedAcrossListeners_asPitfall`（listener1 改字段，listener2 观察到变化）
@@ -300,26 +300,26 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 3.4 章节对照坑点/边界：02-multiple-listeners-and-order（新增 ≥1）
 
-- [√] 3.4 在 `spring-core-events/docs/part-01-event-basics/02-multiple-listeners-and-order.md` 新增 **坑点 2**（可断言）：
+- [√] 3.4 在 `docs/events/spring-core-events/part-01-event-basics/02-multiple-listeners-and-order.md` 新增 **坑点 2**（可断言）：
   - 主题：`@Order` 值越小越先执行（常见误解：以为越大越先）
   - Verification：`SpringCoreEventsLabTest#orderedListenersFollowOrderAnnotation`
 
 ### 3.5 章节对照坑点/边界：03-condition-and-payload（新增 ≥1）
 
-- [√] 3.5 在 `spring-core-events/docs/part-01-event-basics/03-condition-and-payload.md` 新增 **坑点 3**（可断言）：
+- [√] 3.5 在 `docs/events/spring-core-events/part-01-event-basics/03-condition-and-payload.md` 新增 **坑点 3**（可断言）：
   - 主题：listener 没触发可能不是没注册，而是被 condition 过滤（不会报错）
   - Verification：`SpringCoreEventsLabTest#conditionalEventListenerOnlyRunsWhenConditionMatches`
   - Breakpoints：`ApplicationListenerMethodAdapter#shouldHandle`（或等价判断点，按版本存在性调整）
 
 ### 3.6 章节对照坑点/边界：04-sync-and-exceptions（新增 ≥1）
 
-- [√] 3.6 在 `spring-core-events/docs/part-01-event-basics/04-sync-and-exceptions.md` 新增 **坑点 2**（可断言）：
+- [√] 3.6 在 `docs/events/spring-core-events/part-01-event-basics/04-sync-and-exceptions.md` 新增 **坑点 2**（可断言）：
   - 主题：一个 listener 抛异常会中断后续 listener（默认行为：异常传播 + dispatch 终止）
   - Verification：新增 `SpringCoreEventsMechanicsLabTest#exceptionStopsDispatch_andLaterListenersNotInvoked_asPitfall`
 
 ### 3.7 章节对照坑点/边界：05-async-listener（新增 ≥1）
 
-- [√] 3.7 在 `spring-core-events/docs/part-02-async-and-transactional/05-async-listener.md` 补齐 `F. 常见坑与边界`（至少 1 条可断言）：
+- [√] 3.7 在 `docs/events/spring-core-events/part-02-async-and-transactional/05-async-listener.md` 补齐 `F. 常见坑与边界`（至少 1 条可断言）：
   - 坑点 1：没 `@EnableAsync` 时 `@Async` 被忽略（“看起来写了但没生效”）
     - Verification：`SpringCoreEventsMechanicsLabTest#asyncAnnotationIsIgnored_withoutEnableAsync`
   - 坑点 2（可选但推荐）：异步 listener 切线程导致 ThreadLocal/事务上下文不可用
@@ -327,7 +327,7 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 3.8 章节对照坑点/边界：06-async-multicaster（新增 ≥1）
 
-- [√] 3.8 在 `spring-core-events/docs/part-02-async-and-transactional/06-async-multicaster.md` 新增 **坑点 2**（可断言）：
+- [√] 3.8 在 `docs/events/spring-core-events/part-02-async-and-transactional/06-async-multicaster.md` 新增 **坑点 2**（可断言）：
   - 主题：async multicaster 下 listener 异常不会炸回发布方（需要 ErrorHandler 承接）
   - Verification：新增 `SpringCoreEventsAsyncMulticasterLabTest#asyncMulticasterDoesNotPropagateListenerException_toPublisher_asPitfall`：
     - multicaster.setTaskExecutor(...) + setErrorHandler(...) 捕获异常
@@ -335,20 +335,20 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 3.9 章节对照坑点/边界：07-transactional-event-listener（新增 ≥1）
 
-- [√] 3.9 在 `spring-core-events/docs/part-02-async-and-transactional/07-transactional-event-listener.md` 补齐 `F. 常见坑与边界`（至少 1 条可断言）：
+- [√] 3.9 在 `docs/events/spring-core-events/part-02-async-and-transactional/07-transactional-event-listener.md` 补齐 `F. 常见坑与边界`（至少 1 条可断言）：
   - 坑点 1：普通 `@EventListener` 不理解事务边界，回滚也已经产生副作用
     - Verification：新增 `SpringCoreEventsTransactionalEventLabTest#syncListenerRunsEvenWhenRollback_butAfterCommitDoesNot_asPitfall`（对照 `@TransactionalEventListener(AFTER_COMMIT)`）
   - Breakpoints：`TransactionalApplicationListenerMethodAdapter#onApplicationEvent`
 
 ### 3.10 Appendix：90-common-pitfalls（新增 ≥1，可断言）
 
-- [√] 3.10 在 `spring-core-events/docs/appendix/90-common-pitfalls.md` 新增 ≥1 条标准结构坑点（推荐：listener filtering 导致没触发）：
+- [√] 3.10 在 `docs/events/spring-core-events/appendix/90-common-pitfalls.md` 新增 ≥1 条标准结构坑点（推荐：listener filtering 导致没触发）：
   - Verification：`SpringCoreEventsListenerFilteringLabTest#smartListenerFiltersByEventTypeAndSourceType`
   - Breakpoints：`AbstractApplicationEventMulticaster#getApplicationListeners`
 
 ### 3.11 Self-check：99-self-check（新增 ≥1 自测题 + ≥1 对照坑点）
 
-- [√] 3.11 在 `spring-core-events/docs/appendix/99-self-check.md`：
+- [√] 3.11 在 `docs/events/spring-core-events/appendix/99-self-check.md`：
   - 自测题新增 ≥1：要求“给出断点锚点 + 对应可跑入口”
   - 新增 **坑点 2**（可断言）：listener filtering/condition 过滤导致“没触发”的分流排障
     - Verification：`SpringCoreEventsListenerFilteringLabTest#smartListenerFiltersByEventTypeAndSourceType` + `SpringCoreEventsLabTest#conditionalEventListenerOnlyRunsWhenConditionMatches`
@@ -363,7 +363,7 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 4.1 Guide 源码级深化（关键分支 → call chain + 断点锚点 + playbook）
 
-- [√] 4.1 在 `springboot-web-client/docs/part-00-guide/00-deep-dive-guide.md`：
+- [√] 4.1 在 `docs/web-client/springboot-web-client/part-00-guide/00-deep-dive-guide.md`：
   - 为现有 4 条关键分支逐条补齐：call chain sketch + 断点锚点（class#method）+ Evidence（Lab/Test#method）。
   - 新增关键分支 W5（新增）：**WebClient filter 链顺序 + “必须调用 next.exchange”边界**
     - Evidence：新增 `BootWebClientWebClientFilterOrderLabTest#filtersWrapInOrder_andNextExchangeIsRequired`
@@ -389,14 +389,14 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 4.3 章节对照坑点/边界：01-restclient-basics（新增 ≥1）
 
-- [√] 4.3 在 `springboot-web-client/docs/part-01-web-client/01-restclient-basics.md` 新增 **坑点 2**（可断言）：
+- [√] 4.3 在 `docs/web-client/springboot-web-client/part-01-web-client/01-restclient-basics.md` 新增 **坑点 2**（可断言）：
   - 主题：只配置/只关注 happy path，没把 timeout 做成确定性实验（导致线上挂死/测试 flaky）
   - Verification：`BootWebClientRestClientLabTest#restClientReadTimeoutFailsFast`
   - Breakpoints：`RestClientGreetingClient` 的 timeout 配置入口（按实际类/方法补齐到 class#method）
 
 ### 4.4 章节对照坑点/边界：02-webclient-basics（新增 ≥1）
 
-- [√] 4.4 在 `springboot-web-client/docs/part-01-web-client/02-webclient-basics.md` 新增 **坑点 2**（可断言）：
+- [√] 4.4 在 `docs/web-client/springboot-web-client/part-01-web-client/02-webclient-basics.md` 新增 **坑点 2**（可断言）：
   - 主题：`Mono` 是 lazy 的，不订阅就不会发请求（“看起来调用了 client，其实什么都没发生”）
   - Verification：新增 `BootWebClientWebClientLabTest#webClientDoesNothingUntilSubscribed_asPitfall`：
     - 调用 `client.getGreeting("Alice")` 但不订阅
@@ -405,31 +405,31 @@ Directory: `helloagents/plan/202601092110_depth_align_v2_batch01_sec_jpa_events_
 
 ### 4.5 章节对照坑点/边界：03-error-handling（新增 ≥1）
 
-- [√] 4.5 在 `springboot-web-client/docs/part-01-web-client/03-error-handling.md` 新增 **坑点 2**（可断言）：
+- [√] 4.5 在 `docs/web-client/springboot-web-client/part-01-web-client/03-error-handling.md` 新增 **坑点 2**（可断言）：
   - 主题：`onStatus` 只覆盖 HTTP status，timeout/连接失败走的是异常分支（需要独立处理或至少在测试里覆盖）
   - Verification：`BootWebClientWebClientLabTest#webClientResponseTimeoutFailsFast`（对照 4xx/5xx mapping）
 
 ### 4.6 章节对照坑点/边界：04-timeout-and-retry（新增 ≥1）
 
-- [√] 4.6 在 `springboot-web-client/docs/part-01-web-client/04-timeout-and-retry.md` 新增 **坑点 2**（可断言）：
+- [√] 4.6 在 `docs/web-client/springboot-web-client/part-01-web-client/04-timeout-and-retry.md` 新增 **坑点 2**（可断言）：
   - 主题：retry 的“次数语义”容易 off-by-one（maxAttempts vs retry 次数）
   - Verification：`BootWebClientWebClientLabTest#webClientRetriesOn5xxAndEventuallySucceeds`（必须提及 request count=2 的证据链）
 
 ### 4.7 章节对照坑点/边界：05-testing-with-mockwebserver（新增 ≥1）
 
-- [√] 4.7 在 `springboot-web-client/docs/part-01-web-client/05-testing-with-mockwebserver.md` 把 `F. 常见坑与边界` 补齐为标准结构坑点（至少 1 条可断言）：
+- [√] 4.7 在 `docs/web-client/springboot-web-client/part-01-web-client/05-testing-with-mockwebserver.md` 把 `F. 常见坑与边界` 补齐为标准结构坑点（至少 1 条可断言）：
   - 推荐坑点：只断言响应不读取/断言 `RecordedRequest`，容易让“请求契约”悄悄变坏
   - Verification：`BootWebClientRestClientLabTest#restClientSendsExpectedPathAndHeaders` / `BootWebClientWebClientLabTest#webClientSendsExpectedPathAndHeaders`
 
 ### 4.8 Appendix：90-common-pitfalls（新增 ≥1，可断言）
 
-- [√] 4.8 在 `springboot-web-client/docs/appendix/90-common-pitfalls.md`：
+- [√] 4.8 在 `docs/web-client/springboot-web-client/appendix/90-common-pitfalls.md`：
   - 新增 ≥1 条标准结构坑点（推荐：Mono 未订阅/Filter 未调用 next.exchange 导致“请求没发出去”）
   - Verification：`BootWebClientWebClientFilterOrderLabTest#filterThatDoesNotCallNext_shortCircuitsRequest_asPitfall` + `BootWebClientWebClientLabTest#webClientDoesNothingUntilSubscribed_asPitfall`
 
 ### 4.9 Self-check：99-self-check（新增 ≥1 自测题 + ≥1 对照坑点）
 
-- [√] 4.9 在 `springboot-web-client/docs/appendix/99-self-check.md`：
+- [√] 4.9 在 `docs/web-client/springboot-web-client/appendix/99-self-check.md`：
   - 自测题新增 ≥1：要求给出“断点锚点 + 可跑入口”（例如：如何证明 filter 链顺序？）
   - 新增 **坑点 2**（可断言）：filter short-circuit/Mono 未订阅导致误判为网络问题
     - Verification：`BootWebClientWebClientFilterOrderLabTest#filterThatDoesNotCallNext_shortCircuitsRequest_asPitfall`

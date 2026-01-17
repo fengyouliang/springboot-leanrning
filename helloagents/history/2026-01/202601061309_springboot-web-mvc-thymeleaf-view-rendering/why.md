@@ -13,7 +13,7 @@
 
 ## Impact Scope
 - **Modules:** `springboot-web-mvc`
-- **Files:** `springboot-web-mvc/pom.xml`、`springboot-web-mvc/src/main/java/**`、`springboot-web-mvc/src/main/resources/templates/**`、`springboot-web-mvc/src/test/java/**`、`springboot-web-mvc/docs/**`
+- **Files:** `springboot-web-mvc/pom.xml`、`springboot-web-mvc/src/main/java/**`、`springboot-web-mvc/src/main/resources/templates/**`、`springboot-web-mvc/src/test/java/**`、`docs/web-mvc/springboot-web-mvc/**`
 - **APIs:** 新增页面路由（建议前缀 `/pages/**`）；现有 `/api/**` 保持 JSON API 语义
 - **Data:** 无持久化数据变更（仅示例用内存数据或无状态页面）
 

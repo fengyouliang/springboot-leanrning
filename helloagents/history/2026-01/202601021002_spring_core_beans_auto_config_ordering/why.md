@@ -25,7 +25,7 @@
 ## Impact Scope
 
 - **Modules:** `spring-core-beans`
-- **Files:** `spring-core-beans/docs/*`、`spring-core-beans/src/test/java/...`
+- **Files:** `docs/beans/spring-core-beans/*`、`spring-core-beans/src/test/java/...`
 - **APIs:** None
 - **Data:** None
 

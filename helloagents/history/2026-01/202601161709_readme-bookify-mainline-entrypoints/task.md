@@ -11,8 +11,8 @@ Directory: `helloagents/plan/202601161709_readme-bookify-mainline-entrypoints/`
 
 ## 2. 主线章节入口
 
-- [√] 2.1 为 `docs-site/content/book/00-start-here.md` 补齐 Lab + Exercise 入口
-- [√] 2.2 为 `docs-site/content/book/01-18` 补齐每章最小可跑入口（Lab 命令）+ Exercise 路径
+- [√] 2.1 为 `docs/book/00-start-here.md` 补齐 Lab + Exercise 入口
+- [√] 2.2 为 `docs/book/01-18` 补齐每章最小可跑入口（Lab 命令）+ Exercise 路径
 
 ## 3. 验证
 

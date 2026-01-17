@@ -5,8 +5,8 @@ Directory: `helloagents/plan/202601010845_beans-aop-deep-dive-v2/`
 ---
 
 ## 1. spring-core-aop（文档：源码主线 / 链条 / pointcut / 多代理）
-- [√] 1.1 增补“AutoProxyCreator/Advisor/Advice/Pointcut 主线”文档，并把断点导航补齐到 `spring-core-aop/docs/part-00-guide/00-deep-dive-guide.md`
-- [√] 1.2 增补“拦截器链执行细节（MethodInvocation#proceed 嵌套）”文档，并补齐断点清单到 `spring-core-aop/docs/part-01-proxy-fundamentals/06-debugging.md`
+- [√] 1.1 增补“AutoProxyCreator/Advisor/Advice/Pointcut 主线”文档，并把断点导航补齐到 `docs/aop/spring-core-aop/part-00-guide/00-deep-dive-guide.md`
+- [√] 1.2 增补“拦截器链执行细节（MethodInvocation#proceed 嵌套）”文档，并补齐断点清单到 `docs/aop/spring-core-aop/part-01-proxy-fundamentals/06-debugging.md`
 - [√] 1.3 增补“pointcut 表达式系统”文档（execution/within/this/target/args/@annotation/... + 常见误判）
 - [√] 1.4 增补“多代理叠加与顺序”文档（单 proxy 多 advisor vs 多层 proxy + 真实项目排障 checklist）
 - [√] 1.5 更新 `spring-core-aop/README.md` 阅读路径与章节索引

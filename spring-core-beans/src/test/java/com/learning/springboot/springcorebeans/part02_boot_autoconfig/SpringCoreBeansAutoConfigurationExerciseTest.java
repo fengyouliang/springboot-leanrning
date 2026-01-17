@@ -33,7 +33,7 @@ class SpringCoreBeansAutoConfigurationExerciseTest {
                         - `spring-core-beans/src/test/java/.../SpringCoreBeansAutoConfigurationLabTest.java`
                         - `spring-core-beans/src/test/java/.../SpringCoreBeansConditionEvaluationReportLabTest.java`（matchIfMissing 三态）
                         - `spring-core-beans/src/test/java/.../SpringCoreBeansAutoConfigurationOrderingLabTest.java`（顺序/时机类问题的最小复现写法）
-                        - `spring-core-beans/docs/part-02-boot-autoconfig/10-spring-boot-auto-configuration.md`
+                        - `docs/beans/spring-core-beans/part-02-boot-autoconfig/10-spring-boot-auto-configuration.md`
                         """)
                 .isFalse();
     }
@@ -51,7 +51,7 @@ class SpringCoreBeansAutoConfigurationExerciseTest {
                         3) 再用 @Primary/@Qualifier 让它变成“确定性选择”。
 
                         建议阅读：
-                        - `spring-core-beans/docs/part-01-ioc-container/03-dependency-injection-resolution.md`
+                        - `docs/beans/spring-core-beans/part-01-ioc-container/03-dependency-injection-resolution.md`
                         """)
                 .isFalse();
     }
@@ -68,7 +68,7 @@ class SpringCoreBeansAutoConfigurationExerciseTest {
                         2) 测试里断言关键事实（Bean 存在/类型），而不是断言整段日志。
 
                         建议阅读：
-                        - `spring-core-beans/docs/part-02-boot-autoconfig/11-debugging-and-observability.md`
+                        - `docs/beans/spring-core-beans/part-02-boot-autoconfig/11-debugging-and-observability.md`
                         """)
                 .isFalse();
     }
@@ -118,7 +118,7 @@ class SpringCoreBeansAutoConfigurationExerciseTest {
 
                         参考实现：
                         - `spring-core-beans/src/test/java/.../SpringCoreBeansConditionEvaluationReportLabTest.java`
-                        - `spring-core-beans/docs/part-02-boot-autoconfig/10-spring-boot-auto-configuration.md`
+                        - `docs/beans/spring-core-beans/part-02-boot-autoconfig/10-spring-boot-auto-configuration.md`
                         """)
                 .isFalse();
     }
@@ -164,7 +164,7 @@ class SpringCoreBeansAutoConfigurationExerciseTest {
 
                         参考实现：
                         - `spring-core-beans/src/test/java/.../SpringCoreBeansAutoConfigurationOrderingLabTest.java`
-                        - `spring-core-beans/docs/part-02-boot-autoconfig/10-spring-boot-auto-configuration.md`
+                        - `docs/beans/spring-core-beans/part-02-boot-autoconfig/10-spring-boot-auto-configuration.md`
                         """)
                 .isFalse();
     }

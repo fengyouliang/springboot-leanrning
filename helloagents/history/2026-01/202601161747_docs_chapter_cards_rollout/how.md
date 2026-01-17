@@ -67,4 +67,4 @@
 
 - 已覆盖章节数 / 总章节数
 - 闸门结果（断链/构建/覆盖检查）
-- 风格问题沉淀到 `docs-site/content/book-style.md`（作为写作 SSOT）
+- 风格问题沉淀到 `docs/book-style.md`（作为写作 SSOT）

@@ -70,14 +70,14 @@ mvn -pl springboot-security test
 
 ## 推荐 docs 阅读顺序（从现象到机制）
 
-（docs 目录页：[`docs/README.md`](docs/README.md)）
+（docs 目录页：[`docs/README.md`](../docs/security/springboot-security/README.md)）
 
-1. [401 vs 403：Basic Auth 与授权规则](docs/part-01-security/01-basic-auth-and-authorization.md)
-2. [CSRF：为什么 POST 会被拦？](docs/part-01-security/02-csrf.md)
-3. [Method Security 与代理：self-invocation 陷阱](docs/part-01-security/03-method-security-and-proxy.md)
-4. [FilterChain：多链路 + 顺序 + 自定义 Filter](docs/part-01-security/04-filter-chain-and-order.md)
-5. [JWT/Stateless：Bearer token + scope](docs/part-01-security/05-jwt-stateless.md)
-6. [常见坑清单](docs/appendix/90-common-pitfalls.md)
+1. [401 vs 403：Basic Auth 与授权规则](../docs/security/springboot-security/part-01-security/01-basic-auth-and-authorization.md)
+2. [CSRF：为什么 POST 会被拦？](../docs/security/springboot-security/part-01-security/02-csrf.md)
+3. [Method Security 与代理：self-invocation 陷阱](../docs/security/springboot-security/part-01-security/03-method-security-and-proxy.md)
+4. [FilterChain：多链路 + 顺序 + 自定义 Filter](../docs/security/springboot-security/part-01-security/04-filter-chain-and-order.md)
+5. [JWT/Stateless：Bearer token + scope](../docs/security/springboot-security/part-01-security/05-jwt-stateless.md)
+6. [常见坑清单](../docs/security/springboot-security/appendix/90-common-pitfalls.md)
 
 ## Labs / Exercises 索引（按知识点 / 难度）
 

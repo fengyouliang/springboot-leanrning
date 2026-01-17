@@ -36,7 +36,7 @@
   - `helloagents`（SSOT 同步、变更记录与归档）
 - **Files:**
   - `spring-core-aop/pom.xml`（新增学习用依赖：事务与方法鉴权）
-  - `spring-core-aop/docs/*`（新增 10 号章节 + 更新现有导航/链接）
+  - `docs/aop/spring-core-aop/*`（新增 10 号章节 + 更新现有导航/链接）
   - `spring-core-aop/src/test/java/...`（新增真实叠加 Labs + 链条观察工具/断言）
   - `helloagents/wiki/modules/*`、`helloagents/CHANGELOG.md`、`helloagents/history/index.md`
 - **APIs:** 无对外 API 变更

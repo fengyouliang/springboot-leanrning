@@ -38,7 +38,7 @@
   - `helloagents`（知识库说明、变更记录、方案包）
 - **文件：**
   - `docs-site/mkdocs.yml`
-  - `docs-site/content/book/**.md`（新增）
+  - `docs/book/**.md`（新增）
   - `scripts/docs-site-sync.py`（导航生成逻辑调整）
   - `scripts/check-docs.sh` / `scripts/check-teaching-coverage.py`（如引入 book 级闸门）
   - 各模块 `docs/README.md` 与部分章节（当进入“物理迁移/合并拆章”阶段）

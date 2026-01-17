@@ -5,7 +5,7 @@ Directory: `helloagents/plan/202601032012_spring-core-beans-bookify-docs/`
 ---
 
 ## 1. spring-core-beans（Docs IA + TOC）
-- [√] 1.1 新增目录页 `spring-core-beans/docs/README.md`：给出 Part 概览 + 主线阅读路径，verify why.md#目录页--part-结构像书一样从目录开始顺读
+- [√] 1.1 新增目录页 `docs/beans/spring-core-beans/README.md`：给出 Part 概览 + 主线阅读路径，verify why.md#目录页--part-结构像书一样从目录开始顺读
 - [√] 1.2 设计 Part 目录结构与“章节映射表（旧→新）”，并在目录页固化，verify why.md#目录页--part-结构像书一样从目录开始顺读
 
 ## 2. spring-core-beans（章节迁移：按 Part 分批）
@@ -24,7 +24,7 @@ Directory: `helloagents/plan/202601032012_spring-core-beans-bookify-docs/`
 
 ## 4. spring-core-beans（全局链接修复与一致性审计）
 - [√] 4.1 更新 `spring-core-beans/README.md` 的 docs 链接/阅读顺序索引，确保入口指向新目录，verify why.md#章节导航与链接正确
-- [√] 4.2 全局扫描并修复 `spring-core-beans/docs/**` 内部链接（含 cross-part 引用），并做一次“目录可达/上下章可达”审计，verify why.md#章节导航与链接正确
+- [√] 4.2 全局扫描并修复 `docs/beans/spring-core-beans/**` 内部链接（含 cross-part 引用），并做一次“目录可达/上下章可达”审计，verify why.md#章节导航与链接正确
 
 ## 5. Security Check
 - [√] 5.1 执行安全自检（G9）：确认 docs 不引入敏感信息、不粘贴大段第三方源码、链接不指向生产/内部地址

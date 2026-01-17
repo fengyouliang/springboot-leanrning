@@ -14,7 +14,7 @@
 ### Implementation Key Points
 
 1. **以 docs/README.md 为 SSOT 扩展目录结构**
-   - `springboot-web-mvc/docs/README.md` 继续作为文档入口与索引。
+   - `docs/web-mvc/springboot-web-mvc/README.md` 继续作为文档入口与索引。
    - 新增 Part 08 的目录链接，并补齐“Start Here”中的知识地图入口。
    - 每个新增/修改章节必须有明确“可跑入口块”（Lab/Test 文件或类名），以通过 `scripts/check-docs.sh`。
 

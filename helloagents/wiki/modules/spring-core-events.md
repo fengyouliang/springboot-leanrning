@@ -13,18 +13,18 @@
 ## Specifications
 
 ### Source Layout
-- docs：`spring-core-events/docs/README.md`（目录页）
-- docs：`spring-core-events/docs/part-00-guide/`（深挖指南）
-- docs：`spring-core-events/docs/part-01-event-basics/`（事件基础）
-- docs：`spring-core-events/docs/part-02-async-and-transactional/`（异步与事务事件）
-- docs：`spring-core-events/docs/appendix/`（常见坑/自测题）
+- docs：`docs/events/spring-core-events/README.md`（目录页）
+- docs：`docs/events/spring-core-events/part-00-guide/`（深挖指南）
+- docs：`docs/events/spring-core-events/part-01-event-basics/`（事件基础）
+- docs：`docs/events/spring-core-events/part-02-async-and-transactional/`（异步与事务事件）
+- docs：`docs/events/spring-core-events/appendix/`（常见坑/自测题）
 - src(main)：`spring-core-events/src/main/java/com/learning/springboot/springcoreevents/SpringCoreEventsApplication.java`（入口，包名保持不变）
 - src(main)：`spring-core-events/src/main/java/com/learning/springboot/springcoreevents/part01_event_basics/**`
 - src(test)：`spring-core-events/src/test/java/com/learning/springboot/springcoreevents/part00_guide/**`
 - src(test)：`spring-core-events/src/test/java/com/learning/springboot/springcoreevents/part01_event_basics/**`
 
 ### Docs Index
-- 入口：`spring-core-events/docs/README.md`
+- 入口：`docs/events/spring-core-events/README.md`
 
 ### Requirement: 事件系统学习闭环
 **Module:** spring-core-events
@@ -54,7 +54,7 @@
 - [202601091802_modules_depth_align_to_beans](../../history/2026-01/202601091802_modules_depth_align_to_beans/) - ✅ 已执行：对标 spring-core-beans 深挖升级（Guide 机制主线 + 每章可断言坑点 + 默认 Lab 覆盖补齐）
 - [202601092110_depth_align_v2_batch01_sec_jpa_events_client](../../history/2026-01/202601092110_depth_align_v2_batch01_sec_jpa_events_client/) - ✅ 已执行：batch01 深挖对齐 v2（补齐 listener filtering 默认 Lab + async/tx 章节坑点入口 + 自测入口补齐）
 - [202601071034_all_modules_docs_ag_contract](../../history/2026-01/202601071034_all_modules_docs_ag_contract/) - ✅ 已执行：全模块 docs 章节结构整理（A–G 结构 + 对应 Lab/Test 入口块）；后续不再推荐 A–G 作为写作规范/闸门
-- [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过 `scripts/check-docs.sh`
+- [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/<topic>/<module>/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章）
 - [202601061556_spring_core_modules_teaching_rollout](../../history/2026-01/202601061556_spring_core_modules_teaching_rollout/) - ✅ 已执行：补齐 docs/07（TransactionalEventListener）可运行闭环（新增事务事件 Lab + docs 入口块），并对齐 docs 目录页/入口块规范与自检脚本
 - [202601021322_complete_spring_core_fundamentals_remaining](../../history/2026-01/202601021322_complete_spring_core_fundamentals_remaining/) - ✅ 已执行：补齐 `EventsDemoRunner` 结构化输出（线程/异常传播）与 throwing listener（特定输入触发）
 - [202601041046_spring-core-part-structure-sync](../../history/2026-01/202601041046_spring-core-part-structure-sync/) - ✅ 已执行：对齐 docs Part 目录结构与 src/main+src/test 分包结构（语义化 Part 命名），并修复 README/跨模块引用路径

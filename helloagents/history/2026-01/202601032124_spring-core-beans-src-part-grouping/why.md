@@ -13,11 +13,11 @@
 1. 将 `spring-core-beans/src/main/java`（除 `com.learning.springboot.springcorebeans.SpringCoreBeansApplication` 外）按 docs Part 结构拆分到子包。
 2. 将 `spring-core-beans/src/test/java` 按 docs Part 结构拆分到子包（Labs/Exercises 归类到对应 Part）。
 3. 引入 `testsupport`（测试支撑包）承载跨 Part 复用的测试工具/marker，避免 package-private 可见性问题。
-4. 在移动/改包后，全量修复 `spring-core-beans/docs/**` 中对源码路径的引用（含 `src/main/java` 与 `src/test/java`）。
+4. 在移动/改包后，全量修复 `docs/beans/spring-core-beans/**` 中对源码路径的引用（含 `src/main/java` 与 `src/test/java`）。
 
 ## Impact Scope
 - **Modules:** `spring-core-beans`
-- **Files:** `src/main/java/**`, `src/test/java/**`, `spring-core-beans/docs/**`（仅路径引用修复，不减少知识点）
+- **Files:** `src/main/java/**`, `src/test/java/**`, `docs/beans/spring-core-beans/**`（仅路径引用修复，不减少知识点）
 - **APIs:** 无对外 API 变更（仅内部 demo/labs 包结构调整）
 - **Data:** 无
 

@@ -7,8 +7,8 @@
 设计目标：
 - 输入：本地 Maven 仓库的 spring-beans-*-sources.jar（默认 Spring 6.2.15）
 - 输出：
-  1) spring-core-beans/docs/appendix/95-spring-beans-public-api-index.md
-  2) spring-core-beans/docs/appendix/96-spring-beans-public-api-gap.md
+  1) docs/beans/spring-core-beans/appendix/95-spring-beans-public-api-index.md
+  2) docs/beans/spring-core-beans/appendix/96-spring-beans-public-api-gap.md
 
 说明：
 - 本脚本优先保证“可维护 + 可重复生成”，不追求实现 Java 语法的完美解析。
@@ -124,7 +124,7 @@ def _iter_public_types(sources_jar: Path) -> list[PublicType]:
 
 def _mapping_rules() -> tuple[MappingRule, ...]:
     # chapter/lab 路径：
-    # - chapter：相对 spring-core-beans/docs/ 的路径
+    # - chapter：相对 docs/beans/spring-core-beans/ 的路径
     # - lab：相对 spring-core-beans/ 的路径（会在 Markdown 中换算成 ../../src/...）
     return (
         MappingRule(
@@ -503,7 +503,7 @@ def _patch_generated_appendix(markdown: str, *, kind: str) -> str:
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
-        description="生成 spring-beans Public API 索引与 gap 清单（写入 spring-core-beans/docs/appendix）。"
+        description="生成 spring-beans Public API 索引与 gap 清单（写入 docs/beans/spring-core-beans/appendix）。"
     )
     parser.add_argument("--version", default="6.2.15", help="Spring Framework spring-beans 版本（默认：6.2.15）")
     parser.add_argument(
@@ -513,12 +513,12 @@ def main(argv: list[str]) -> int:
     )
     parser.add_argument(
         "--out-index",
-        default="spring-core-beans/docs/appendix/95-spring-beans-public-api-index.md",
+        default="docs/beans/spring-core-beans/appendix/95-spring-beans-public-api-index.md",
         help="索引输出路径（相对 repo root）",
     )
     parser.add_argument(
         "--out-gap",
-        default="spring-core-beans/docs/appendix/96-spring-beans-public-api-gap.md",
+        default="docs/beans/spring-core-beans/appendix/96-spring-beans-public-api-gap.md",
         help="gap 输出路径（相对 repo root）",
     )
     args = parser.parse_args(argv)

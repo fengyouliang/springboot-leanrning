@@ -16,8 +16,8 @@
 ## Impact Scope
 - **Modules:** `spring-core-beans`
 - **Files:**
-  - `spring-core-beans/docs/00-deep-dive-guide.md`
-  - `spring-core-beans/docs/99-self-check.md`
+  - `docs/beans/spring-core-beans/00-deep-dive-guide.md`
+  - `docs/beans/spring-core-beans/99-self-check.md`
 - **Knowledge Base:**
   - `helloagents/wiki/modules/spring-core-beans.md`
   - `helloagents/CHANGELOG.md`

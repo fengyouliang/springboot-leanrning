@@ -22,7 +22,7 @@
 - **Modules:** `spring-core-beans`、`helloagents`
 - **Files:**
   - `spring-core-beans/src/test/java/**`
-  - `spring-core-beans/docs/**`
+  - `docs/beans/spring-core-beans/**`
   - `helloagents/wiki/**`
   - `helloagents/CHANGELOG.md`
 

@@ -2,7 +2,7 @@
 
 ## Requirement Background
 
-当前 `spring-core-beans/docs/` 的知识点覆盖已经比较全面，但阅读体验更像“分散的章节片段拼接”，主要痛点是：
+当前 `docs/beans/spring-core-beans/` 的知识点覆盖已经比较全面，但阅读体验更像“分散的章节片段拼接”，主要痛点是：
 
 1. **缺少“像书一样”的目录与分卷结构**：读者不知道应该从哪里开始、按什么顺序推进、每一部分的学习目标是什么。
 2. **章节契约不统一**：不同章节的开头/结尾信息密度和风格不一致，导致读者在章节切换时需要重复建立上下文。
@@ -30,7 +30,7 @@
 ## Impact Scope
 
 - **Modules:** `spring-core-beans`、`helloagents`（知识库与变更记录）
-- **Files:** 主要影响 `spring-core-beans/docs/**`（大量章节将移动/重命名并补齐模板），并新增 `spring-core-beans/docs/README.md`（或等价目录文件）
+- **Files:** 主要影响 `docs/beans/spring-core-beans/**`（大量章节将移动/重命名并补齐模板），并新增 `docs/beans/spring-core-beans/README.md`（或等价目录文件）
 - **APIs:** 无
 - **Data:** 无
 

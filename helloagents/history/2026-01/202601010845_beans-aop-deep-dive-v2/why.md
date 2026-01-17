@@ -25,9 +25,9 @@
   - `spring-core-aop`
   - `spring-core-beans`
 - **Files:**
-  - `spring-core-aop/docs/*`（新增/扩写若干章节，更新阅读导航）
+  - `docs/aop/spring-core-aop/*`（新增/扩写若干章节，更新阅读导航）
   - `spring-core-aop/src/test/java/...`（新增/增强 Labs）
-  - `spring-core-beans/docs/*`（扩写 BPP/代理章节，补齐 AOP 典型实现承接）
+  - `docs/beans/spring-core-beans/*`（扩写 BPP/代理章节，补齐 AOP 典型实现承接）
   - `helloagents/wiki/modules/*`（知识库同步）
   - `helloagents/CHANGELOG.md`、`helloagents/history/index.md`（记录与可追溯）
 - **APIs:** 无对外 API 变更

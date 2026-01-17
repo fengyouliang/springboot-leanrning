@@ -10,7 +10,7 @@
 
 2) **Book-only 章节补齐“可跑入口”**
 
-- 在 `docs-site/content/book/00-18` 各章尾部新增统一区块：`## 本章可跑入口（最小闭环）`
+- 在 `docs/book/00-18` 各章尾部新增统一区块：`## 本章可跑入口（最小闭环）`
 - 每章固定提供两条信息（用 inline code 展示，避免站内断链风险）：
   - Lab：`mvn -q -pl <module> -Dtest=<LabTest> test` + 对应测试文件路径
   - Exercise：对应 `*ExerciseTest.java` 文件路径（提示默认 `@Disabled`）

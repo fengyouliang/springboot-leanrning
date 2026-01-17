@@ -17,8 +17,8 @@ Directory: `helloagents/plan/202601032124_spring-core-beans-src-part-grouping/`
 - [√] 3.4 按 Part 将 container internals 相关测试迁移到 `com.learning.springboot.springcorebeans.part03`，修复 package/import，verify why.md#requirement-part-based-source-grouping
 - [√] 3.5 按 Part 将 wiring & boundaries 相关测试迁移到 `com.learning.springboot.springcorebeans.part04`，修复 package/import，verify why.md#requirement-part-based-source-grouping
 
-## 4. Docs Path Fix (spring-core-beans/docs)
-- [√] 4.1 全量修复 `spring-core-beans/docs/**` 中对 `src/main/java` 与 `src/test/java` 的源码路径引用（链接/文本），verify why.md#requirement-docs-source-path-consistency
+## 4. Docs Path Fix (docs/beans/spring-core-beans)
+- [√] 4.1 全量修复 `docs/beans/spring-core-beans/**` 中对 `src/main/java` 与 `src/test/java` 的源码路径引用（链接/文本），verify why.md#requirement-docs-source-path-consistency
 
 ## 5. Security Check
 - [√] 5.1 执行安全自检（不引入敏感信息/生产配置；不提升权限；避免误改启动类包名），verify why.md#risk-assessment

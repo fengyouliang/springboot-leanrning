@@ -7,9 +7,9 @@
 ## Module Overview
 
 - **Responsibility:** 提供 Bean 机制的系统文档与可运行 Labs/Exercises，用于建立源码级心智模型与排障能力。
-- **Docs Reading:** 推荐从 `spring-core-beans/docs/README.md` 开始（书本目录 + Part 划分）；主线可按 Part 顺读，每章顶部提供“上一章｜目录｜下一章”导航，降低章节切换成本。
-- **Start Here（30 分钟快启）:** 先跑 3 个最小实验建立容器主线直觉，再进入深潜：`spring-core-beans/docs/part-00-guide/01-quickstart-30min.md`。
-- **断点地图（可复用清单）:** `spring-core-beans/docs/part-00-guide/02-breakpoint-map.md`
+- **Docs Reading:** 推荐从 `docs/beans/spring-core-beans/README.md` 开始（书本目录 + Part 划分）；主线可按 Part 顺读，每章顶部提供“上一章｜目录｜下一章”导航，降低章节切换成本。
+- **Start Here（30 分钟快启）:** 先跑 3 个最小实验建立容器主线直觉，再进入深潜：`docs/beans/spring-core-beans/part-00-guide/01-quickstart-30min.md`。
+- **断点地图（可复用清单）:** `docs/beans/spring-core-beans/part-00-guide/02-breakpoint-map.md`
 - **Learning Path（路线图）:** `helloagents/wiki/learning-path.md`（主线：Beans → AOP → Tx → Web MVC）
 - **第一个可运行入口（3 分钟开跑）:**
   - `mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansLabTest#usesQualifierToResolveMultipleBeans test`
@@ -22,12 +22,12 @@
 
 为保证“像书本一样”的可发现性与可复现性，`spring-core-beans` 的源码与测试代码按 docs 的 Part 结构分组：
 
-- `spring-core-beans/docs/part-01-ioc-container/**` ⇔ `src/main/java/.../part01_ioc_container/**` + `src/test/java/.../part01_ioc_container/**`
-- `spring-core-beans/docs/part-02-boot-autoconfig/**` ⇔ `src/test/java/.../part02_boot_autoconfig/**`
-- `spring-core-beans/docs/part-03-container-internals/**` ⇔ `src/test/java/.../part03_container_internals/**`
-- `spring-core-beans/docs/part-04-wiring-and-boundaries/**` ⇔ `src/test/java/.../part04_wiring_and_boundaries/**`
-- `spring-core-beans/docs/part-05-aot-and-real-world/**` ⇔ `src/test/java/.../part05_aot_and_real_world/**`
-- `spring-core-beans/docs/appendix/**` ⇔ `src/test/java/.../appendix/**`
+- `docs/beans/spring-core-beans/part-01-ioc-container/**` ⇔ `src/main/java/.../part01_ioc_container/**` + `src/test/java/.../part01_ioc_container/**`
+- `docs/beans/spring-core-beans/part-02-boot-autoconfig/**` ⇔ `src/test/java/.../part02_boot_autoconfig/**`
+- `docs/beans/spring-core-beans/part-03-container-internals/**` ⇔ `src/test/java/.../part03_container_internals/**`
+- `docs/beans/spring-core-beans/part-04-wiring-and-boundaries/**` ⇔ `src/test/java/.../part04_wiring_and_boundaries/**`
+- `docs/beans/spring-core-beans/part-05-aot-and-real-world/**` ⇔ `src/test/java/.../part05_aot_and_real_world/**`
+- `docs/beans/spring-core-beans/appendix/**` ⇔ `src/test/java/.../appendix/**`
 - 跨 Part 的测试支撑：`src/test/java/.../testsupport/**`
 
 约束（必须遵守）：
@@ -52,22 +52,22 @@
 - 能解释 PropertySources 的优先级与“占位符解析”如何接入 BeanFactory 的值解析链路
 - 能解释：refresh 前/后修改 Environment 对 Bean 的影响边界（不会 retroactive 影响已创建 bean）
 - 对应可复现闭环入口：
-  - `spring-core-beans/docs/part-04-wiring-and-boundaries/38-environment-and-propertysource.md`
+  - `docs/beans/spring-core-beans/part-04-wiring-and-boundaries/38-environment-and-propertysource.md`
   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansEnvironmentPropertySourceLabTest.java`
 
 #### Scenario: 能把 BeanFactory API 当作“最小容器”理解（并解释与 ApplicationContext 的边界）
 - 能解释：为什么 plain BeanFactory 不会自动启用注解注入/生命周期（需要显式 BPP），以及 BPP 安装顺序/时机的影响
 - 能给出最小可运行路径：`DefaultListableBeanFactory` + 手动注册 annotation processors + `addBeanPostProcessor` 的可断言对照
 - 对应可复现闭环入口：
-  - `spring-core-beans/docs/part-04-wiring-and-boundaries/39-beanfactory-api-deep-dive.md`
+  - `docs/beans/spring-core-beans/part-04-wiring-and-boundaries/39-beanfactory-api-deep-dive.md`
   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanFactoryApiLabTest.java`
 
 #### Scenario: 能讲清循环依赖“能救/不能救”的边界（含代理介入）
 - 文档解释三层缓存与 early reference 的真实语义
 - 提供 Lab 覆盖：构造器循环失败、setter 循环可能成功、代理介入导致 early reference 行为变化
 - 对应可复现闭环入口：
-  - `spring-core-beans/docs/part-01-ioc-container/09-circular-dependencies.md`
-  - `spring-core-beans/docs/part-03-container-internals/16-early-reference-and-circular.md`
+  - `docs/beans/spring-core-beans/part-01-ioc-container/09-circular-dependencies.md`
+  - `docs/beans/spring-core-beans/part-03-container-internals/16-early-reference-and-circular.md`
   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansCircularDependencyBoundaryLabTest.java`
 
 #### Scenario: 能把 Bean 三层模型映射到关键类与扩展点
@@ -82,8 +82,8 @@
 - 能用 `PostProcessorRegistrationDelegate` 的两段算法解释：为什么 BFPP/BDRPP 更早、为什么 BPP 注册发生在 refresh 中前段、以及顺序如何由“三段分组 + comparator”决定
 - 能解释 `addBeanPostProcessor` 的 list 语义：为什么它绕过容器排序、为什么执行顺序 = 注册顺序、以及“BPP 不会 retroactive”的时机陷阱
 - 对应可复现闭环入口：
-  - `spring-core-beans/docs/part-03-container-internals/14-post-processor-ordering.md`
-  - `spring-core-beans/docs/part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md`
+  - `docs/beans/spring-core-beans/part-03-container-internals/14-post-processor-ordering.md`
+  - `docs/beans/spring-core-beans/part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md`
   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansPostProcessorOrderingLabTest.java`
   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProgrammaticBeanPostProcessorLabTest.java`
 
@@ -91,8 +91,8 @@
 - 能说清：AOT/Native 的关键是“构建期契约”，RuntimeHints 用于声明反射/代理/资源需求
 - 能用 JVM 单测验证 hints 的存在性（不必构建 native image）
 - 对应可复现闭环入口：
-  - `spring-core-beans/docs/part-05-aot-and-real-world/40-aot-and-native-overview.md`
-  - `spring-core-beans/docs/part-05-aot-and-real-world/41-runtimehints-basics.md`
+  - `docs/beans/spring-core-beans/part-05-aot-and-real-world/40-aot-and-native-overview.md`
+  - `docs/beans/spring-core-beans/part-05-aot-and-real-world/41-runtimehints-basics.md`
   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAotRuntimeHintsLabTest.java`
 
 #### Scenario: 能补齐“真实世界高频但易忽略”的机制（XML/容器外对象/SpEL/自定义 Qualifier）
@@ -101,10 +101,10 @@
 - 能解释 `@Value("#{...}")` 的 SpEL 链路（与 `${...}` 占位符的职责边界）
 - 能用自定义 Qualifier（meta-annotation）把候选收敛规则提升为业务语义
 - 对应可复现闭环入口：
-  - `spring-core-beans/docs/part-05-aot-and-real-world/42-xml-bean-definition-reader.md`
-  - `spring-core-beans/docs/part-05-aot-and-real-world/43-autowirecapablebeanfactory-external-objects.md`
-  - `spring-core-beans/docs/part-05-aot-and-real-world/44-spel-and-value-expression.md`
-  - `spring-core-beans/docs/part-05-aot-and-real-world/45-custom-qualifier-meta-annotation.md`
+  - `docs/beans/spring-core-beans/part-05-aot-and-real-world/42-xml-bean-definition-reader.md`
+  - `docs/beans/spring-core-beans/part-05-aot-and-real-world/43-autowirecapablebeanfactory-external-objects.md`
+  - `docs/beans/spring-core-beans/part-05-aot-and-real-world/44-spel-and-value-expression.md`
+  - `docs/beans/spring-core-beans/part-05-aot-and-real-world/45-custom-qualifier-meta-annotation.md`
   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/*LabTest.java`
 
 ## Dependencies
@@ -114,7 +114,7 @@
 ## Change History
 
 - [202601071034_all_modules_docs_ag_contract](../../history/2026-01/202601071034_all_modules_docs_ag_contract/) - ✅ 已执行：全模块 docs 章节结构整理（A–G 结构 + 对应 Lab/Test 入口块）；后续不再推荐 A–G 作为写作规范/闸门
-- [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过 `scripts/check-docs.sh`
+- [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/<topic>/<module>/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章）
 - [202601061556_spring_core_modules_teaching_rollout](../../history/2026-01/202601061556_spring_core_modules_teaching_rollout/) - ✅ 已执行：清理 docs 正文残留的 `docs/NN` 缩写引用，统一替换为“章节名 + 真实相对路径”的 Markdown 链接，并通过断链检查与教学覆盖检查
 - [202601010649_spring-core-beans-deep-dive](../../history/2026-01/202601010649_spring-core-beans-deep-dive/) - ✅ 已执行：深化 DI/生命周期/PostProcessor/循环依赖/@Configuration/FactoryBean，并补齐坑点与自测题的闭环指引
 - [202601010845_beans-aop-deep-dive-v2](../../history/2026-01/202601010845_beans-aop-deep-dive-v2/) - ✅ 已执行：在 BPP/代理/顺序章节补齐 AutoProxyCreator 承接，并补齐与 AOP 模块的多代理叠加闭环链接
@@ -142,5 +142,5 @@
 - [202601060957_spring_core_beans_environment_beanfactory_deepening](../../history/2026-01/202601060957_spring_core_beans_environment_beanfactory_deepening/) - ✅ 已执行：补齐 Spring Framework `BeanFactory API` 与 `Environment Abstraction` 深挖闭环（docs 38–39 + Labs）
 - [202601061038_spring_core_beans_spring_beans_api_full_coverage](../../history/2026-01/202601061038_spring_core_beans_spring_beans_api_full_coverage/) - ✅ 已执行：新增 spring-beans Public API 索引（95/96）+ AOT/ServiceLoader* 补齐 + Explore/Debug 用例（97）
 - [202601061359_spring_core_beans_beans_support_utils](../../history/2026-01/202601061359_spring_core_beans_beans_support_utils/) - ✅ 已执行：补齐 `org.springframework.beans.support` support 工具类闭环（ArgumentConvertingMethodInvoker/ResourceEditorRegistrar/PropertyComparator/PagedListHolder/SortDefinition）并新增可运行 Lab，Appendix 96 Gap 归零
-- [20260106_docs-crossref-fix](../../../spring-core-beans/docs/part-00-guide/011-00-deep-dive-guide.md) - ✅ 已执行：将 `docs/01`、`docs/06/12/14/31/16/15` 这类缩写引用替换为真实章节链接，避免误解为路径
+- [20260106_docs-crossref-fix](../../../docs/beans/spring-core-beans/part-00-guide/011-00-deep-dive-guide.md) - ✅ 已执行：将 `docs/01`、`docs/06/12/14/31/16/15` 这类缩写引用替换为真实章节链接，避免误解为路径
 - [202601131039_teaching-experience-webmvc-beans](../../history/2026-01/202601131039_teaching-experience-webmvc-beans/) - ✅ 已执行：spring-core-beans：新增 30 分钟快启 + docs 知识点补齐（Start Here/断点观察点/自检/索引坑点）

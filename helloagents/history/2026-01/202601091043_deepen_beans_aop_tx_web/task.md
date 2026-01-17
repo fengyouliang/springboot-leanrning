@@ -76,7 +76,7 @@ Directory: `helloagents/plan/202601091043_deepen_beans_aop_tx_web/`
 ### 1.1 场景 S1：BPP/BFPP 顺序（“顺序就是机制”）
 
 #### 1.1.1 文档（把顺序写成可断点时间线）
-- [-] 1.1.1.1 更新 `spring-core-beans/docs/part-01-ioc-container/` 相关章节：给出 refresh 时间线（以关键方法/关键类为节点）
+- [-] 1.1.1.1 更新 `docs/beans/spring-core-beans/part-01-ioc-container/` 相关章节：给出 refresh 时间线（以关键方法/关键类为节点）
 - [-] 1.1.1.2 增加 BFPP vs BPP 对比表：作用对象（BeanDefinition vs Bean instance）、执行时机、常见用途、典型坑
 - [-] 1.1.1.3 增加排序规则说明：`PriorityOrdered` / `Ordered` / 无序，分别在哪一步生效
 - [-] 1.1.1.4 增加“为什么你写的 BPP 没生效”的 checklist：注册时机、包扫描、条件装配、BeanFactory 类型等
@@ -99,11 +99,11 @@ Directory: `helloagents/plan/202601091043_deepen_beans_aop_tx_web/`
 ### 1.2 场景 S2：循环依赖边界（能救/不能救）
 
 #### 1.2.1 文档（把边界写成对照矩阵）
-- [√] 1.2.1.1 更新 `spring-core-beans/docs/part-01-ioc-container/09-circular-dependencies.md`：
+- [√] 1.2.1.1 更新 `docs/beans/spring-core-beans/part-01-ioc-container/09-circular-dependencies.md`：
   - constructor vs setter 的根因差异
   - singleton vs prototype 的边界
   - `@Lazy` / `ObjectProvider` 的“打断策略”与代价
-- [√] 1.2.1.2 更新 `spring-core-beans/docs/part-03-container-internals/16-early-reference-and-circular.md`：
+- [√] 1.2.1.2 更新 `docs/beans/spring-core-beans/part-03-container-internals/16-early-reference-and-circular.md`：
   - early singleton exposure 的关键节点
   - `getEarlyBeanReference` 与 AOP 代理的关系（只写机制，不绑定具体实现细节）
 - [-] 1.2.1.3 在上述两章末尾补齐：对照用例索引（每个分支对应一个 test 方法）
@@ -118,7 +118,7 @@ Directory: `helloagents/plan/202601091043_deepen_beans_aop_tx_web/`
 - [-] 1.2.2.4 增加用例：引入 AOP 时 early reference 的表现（证明“早期引用拿到的是谁”这件事）
 
 #### 1.2.3 Troubleshooting（把坑写成清单）
-- [-] 1.2.3.1 在 `spring-core-beans/docs/appendix/90-common-pitfalls.md` 增加条目：
+- [-] 1.2.3.1 在 `docs/beans/spring-core-beans/appendix/90-common-pitfalls.md` 增加条目：
   - “循环依赖为什么突然报错（升级版本/引入构造注入/引入代理）”
   - “@Lazy 能救但为什么带来 NPE/时序问题”
   - “ObjectProvider 为什么能救但为什么会推迟失败”
@@ -168,7 +168,7 @@ Directory: `helloagents/plan/202601091043_deepen_beans_aop_tx_web/`
 ### 2.1 场景 S1：自调用导致 AOP 不生效（机制边界）
 
 #### 2.1.1 文档（把“为什么不生效”说清楚）
-- [√] 2.1.1.1 更新 `spring-core-aop/docs/appendix/90-common-pitfalls.md`：
+- [√] 2.1.1.1 更新 `docs/aop/spring-core-aop/appendix/90-common-pitfalls.md`：
   - this 调用绕过代理的根因
   - 为什么“加了 @Transactional/@Async 也不生效”同理（代理边界）
   - 三种修复策略：拆分 bean / 自注入代理 / exposeProxy（说明生产边界）
@@ -188,7 +188,7 @@ Directory: `helloagents/plan/202601091043_deepen_beans_aop_tx_web/`
 ### 2.2 场景 S2：AutoProxyCreator 主线（为什么它能代理你）
 
 #### 2.2.1 文档（把 APC 写成“可断点主线”）
-- [-] 2.2.1.1 更新 `spring-core-aop/docs/part-02-autoproxy-and-pointcuts/`：补齐 APC 发生在 BPP after-init 的主线解释
+- [-] 2.2.1.1 更新 `docs/aop/spring-core-aop/part-02-autoproxy-and-pointcuts/`：补齐 APC 发生在 BPP after-init 的主线解释
 - [-] 2.2.1.2 增加“Advisor 装配与匹配”章节：Advisor 来源、Pointcut 匹配、MethodMatcher
 - [-] 2.2.1.3 增加“为什么这个 bean 没被代理”的 checklist：
   - 无 Advisor 命中
@@ -205,7 +205,7 @@ Directory: `helloagents/plan/202601091043_deepen_beans_aop_tx_web/`
 ### 2.3 场景 S3：JDK vs CGLIB（类型差异与限制）
 
 #### 2.3.1 文档（把“类型差异”写成对照表）
-- [-] 2.3.1.1 更新 `spring-core-aop/docs/part-01-proxy-fundamentals/`：补齐 JDK/CGLIB 选择条件
+- [-] 2.3.1.1 更新 `docs/aop/spring-core-aop/part-01-proxy-fundamentals/`：补齐 JDK/CGLIB 选择条件
 - [-] 2.3.1.2 增加“final/private/static/构造器”对 AOP 生效影响说明（强调 CGLIB 限制与可观察症状）
 - [-] 2.3.1.3 增加“类型断言与排障入口”（如何在测试里断言代理类型、如何从异常反推）
 
@@ -237,11 +237,11 @@ Directory: `helloagents/plan/202601091043_deepen_beans_aop_tx_web/`
 ### 3.1 场景 S1：事务边界与代理（为什么必须跨 bean）
 
 #### 3.1.1 文档（把边界写成“排障 checklist”）
-- [-] 3.1.1.1 更新 `spring-core-tx/docs/part-01-transaction-basics/01-transaction-boundary.md`：补齐“边界”的可验证结论
-- [-] 3.1.1.2 更新 `spring-core-tx/docs/part-01-transaction-basics/02-transactional-proxy.md`：
+- [-] 3.1.1.1 更新 `docs/tx/spring-core-tx/part-01-transaction-basics/01-transaction-boundary.md`：补齐“边界”的可验证结论
+- [-] 3.1.1.2 更新 `docs/tx/spring-core-tx/part-01-transaction-basics/02-transactional-proxy.md`：
   - `@Transactional` 如何变成 Advisor/Interceptor
   - 推荐断点：TransactionInterceptor/TransactionAspectSupport
-- [-] 3.1.1.3 在 `spring-core-tx/docs/appendix/90-common-pitfalls.md` 增补：
+- [-] 3.1.1.3 在 `docs/tx/spring-core-tx/appendix/90-common-pitfalls.md` 增补：
   - “事务不生效（自调用/非 public/未被代理）” checklist（绑定 Lab）
 
 #### 3.1.2 Labs（把“事务不生效”钉死）
@@ -252,7 +252,7 @@ Directory: `helloagents/plan/202601091043_deepen_beans_aop_tx_web/`
 ### 3.2 场景 S2：传播行为矩阵（挂起/新开/嵌套）
 
 #### 3.2.1 文档（把传播写成“矩阵 + 用例索引”）
-- [√] 3.2.1.1 更新 `spring-core-tx/docs/part-01-transaction-basics/04-propagation.md`：
+- [√] 3.2.1.1 更新 `docs/tx/spring-core-tx/part-01-transaction-basics/04-propagation.md`：
   - 常用 vs 进阶分层（REQUIRED/REQUIRES_NEW/NESTED/MANDATORY/NEVER/NOT_SUPPORTED/SUPPORTS）
   - 每种传播的“可观察信号”（谁挂起/谁新开/是否 savepoint）
   - 每个传播绑定到具体 test method
@@ -270,11 +270,11 @@ Directory: `helloagents/plan/202601091043_deepen_beans_aop_tx_web/`
 ### 3.3 场景 S3：回滚规则（Runtime vs Checked）
 
 #### 3.3.1 文档（把规则写成“可预测表”）
-- [√] 3.3.1.1 新增/深化 `spring-core-tx/docs/part-01-transaction-basics/03-rollback-rules.md`：
+- [√] 3.3.1.1 新增/深化 `docs/tx/spring-core-tx/part-01-transaction-basics/03-rollback-rules.md`：
   - 默认规则总结表
   - rollbackFor/noRollbackFor 的覆盖关系
   - 捕获吞异常导致“不回滚/UnexpectedRollback”的机制
-- [-] 3.3.1.2 在 `spring-core-tx/docs/appendix/90-common-pitfalls.md` 增补回滚相关排障条目（每条绑定 Lab）
+- [-] 3.3.1.2 在 `docs/tx/spring-core-tx/appendix/90-common-pitfalls.md` 增补回滚相关排障条目（每条绑定 Lab）
 
 #### 3.3.2 Labs（把规则钉死）
 - [√] 3.3.2.1 新增 `SpringCoreTxRollbackRulesLabTest`
@@ -285,8 +285,8 @@ Directory: `helloagents/plan/202601091043_deepen_beans_aop_tx_web/`
 - [-] 3.3.2.6 用例：try/catch 吞异常导致“看似成功但回滚/rollback-only”对照（用数据库结果断言）
 
 ### 3.4 Tx 自检与排障（体验对齐）
-- [-] 3.4.1 重构 `spring-core-tx/docs/appendix/90-common-pitfalls.md` 为统一模板，并覆盖至少 15 条
-- [-] 3.4.2 更新 `spring-core-tx/docs/appendix/99-self-check.md`：新增至少 20 题（传播+回滚+边界）
+- [-] 3.4.1 重构 `docs/tx/spring-core-tx/appendix/90-common-pitfalls.md` 为统一模板，并覆盖至少 15 条
+- [-] 3.4.2 更新 `docs/tx/spring-core-tx/appendix/99-self-check.md`：新增至少 20 题（传播+回滚+边界）
 - [√] 3.4.3 在 `helloagents/wiki/modules/spring-core-tx.md` 汇总：Docs/Labs/排障入口
 
 ### 3.5 Tx 阶段性回归
@@ -332,8 +332,8 @@ Directory: `helloagents/plan/202601091043_deepen_beans_aop_tx_web/`
 ### 4.2 场景 S2：异常处理链路（Resolver/Advice/默认处理）
 
 #### 4.2.1 文档（把 resolver 顺序写清楚）
-- [√] 4.2.1.1 更新 `springboot-web-mvc/docs/part-01-web-mvc/02-exception-handling.md`：补齐“异常解析链路概览 + 验证入口”
-- [√] 4.2.1.2 更新 `springboot-web-mvc/docs/part-03-web-mvc-internals/04-exception-resolvers-and-error-flow.md`：
+- [√] 4.2.1.1 更新 `docs/web-mvc/springboot-web-mvc/part-01-web-mvc/02-exception-handling.md`：补齐“异常解析链路概览 + 验证入口”
+- [√] 4.2.1.2 更新 `docs/web-mvc/springboot-web-mvc/part-03-web-mvc-internals/04-exception-resolvers-and-error-flow.md`：
   - ExceptionHandlerExceptionResolver / ResponseStatusExceptionResolver / DefaultHandlerExceptionResolver 顺序
   - @ControllerAdvice 匹配规则
   - 与 Boot error controller 的交界
@@ -363,8 +363,8 @@ Directory: `helloagents/plan/202601091043_deepen_beans_aop_tx_web/`
 - [-] 4.3.2.5 用例：同一异常在“FilterChain 阶段” vs “Controller 阶段”抛出时的处理差异
 
 ### 4.4 Web MVC 自检与排障
-- [-] 4.4.1 重构 `springboot-web-mvc/docs/appendix/90-common-pitfalls.md`（统一模板，至少 15 条）
-- [-] 4.4.2 更新 `springboot-web-mvc/docs/appendix/99-self-check.md`（至少 20 题）
+- [-] 4.4.1 重构 `docs/web-mvc/springboot-web-mvc/appendix/90-common-pitfalls.md`（统一模板，至少 15 条）
+- [-] 4.4.2 更新 `docs/web-mvc/springboot-web-mvc/appendix/99-self-check.md`（至少 20 题）
 - [√] 4.4.3 更新 `helloagents/wiki/modules/springboot-web-mvc.md`
 
 ### 4.5 Web MVC 阶段性回归

@@ -14,13 +14,13 @@
 
 ### Source Layout
 
-- docs：`spring-core-aop-weaving/docs/README.md`（目录页）
-- docs：`spring-core-aop-weaving/docs/part-00-guide/`（跑通指南：LTW/CTW）
-- docs：`spring-core-aop-weaving/docs/part-01-mental-model/`（Proxy vs Weaving 心智模型）
-- docs：`spring-core-aop-weaving/docs/part-02-ltw/`（LTW：agent + aop.xml + include 范围）
-- docs：`spring-core-aop-weaving/docs/part-03-ctw/`（CTW：编译期织入与范围控制）
-- docs：`spring-core-aop-weaving/docs/part-04-join-points/`（Join Point/Pointcut Cookbook）
-- docs：`spring-core-aop-weaving/docs/appendix/`（常见坑/自测题）
+- docs：`docs/aop/spring-core-aop-weaving/README.md`（目录页）
+- docs：`docs/aop/spring-core-aop-weaving/part-00-guide/`（跑通指南：LTW/CTW）
+- docs：`docs/aop/spring-core-aop-weaving/part-01-mental-model/`（Proxy vs Weaving 心智模型）
+- docs：`docs/aop/spring-core-aop-weaving/part-02-ltw/`（LTW：agent + aop.xml + include 范围）
+- docs：`docs/aop/spring-core-aop-weaving/part-03-ctw/`（CTW：编译期织入与范围控制）
+- docs：`docs/aop/spring-core-aop-weaving/part-04-join-points/`（Join Point/Pointcut Cookbook）
+- docs：`docs/aop/spring-core-aop-weaving/appendix/`（常见坑/自测题）
 - src(main)：`spring-core-aop-weaving/src/main/java/com/learning/springboot/springcoreaopweaving/SpringCoreAopWeavingApplication.java`（入口）
 - src(main)：`spring-core-aop-weaving/src/main/java/com/learning/springboot/springcoreaopweaving/support/**`（可断言观察点：InvocationLog/JoinPointEvent）
 - src(main)：`spring-core-aop-weaving/src/main/java/com/learning/springboot/springcoreaopweaving/ctwtargets/**`（CTW 目标对象）
@@ -33,7 +33,7 @@
 
 ### Docs Index
 
-- 入口：`spring-core-aop-weaving/docs/README.md`
+- 入口：`docs/aop/spring-core-aop-weaving/README.md`
 
 ### Requirement: LTW/CTW 可验证闭环
 
@@ -70,6 +70,6 @@
 
 - [202601091802_modules_depth_align_to_beans](../../history/2026-01/202601091802_modules_depth_align_to_beans/) - ✅ 已执行：对标 spring-core-beans 深挖升级（Guide 机制主线 + 每章可断言坑点 + 排障入口统一）
 - [202601071034_all_modules_docs_ag_contract](../../history/2026-01/202601071034_all_modules_docs_ag_contract/) - ✅ 已执行：全模块 docs 章节结构整理（A–G 结构 + 对应 Lab/Test 入口块）；后续不再推荐 A–G 作为写作规范/闸门
-- [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章），并通过 `scripts/check-docs.sh`
+- [202601062218_all_modules_docs_bookify](../../history/2026-01/202601062218_all_modules_docs_bookify/) - ✅ 已执行：以 docs/<topic>/<module>/README.md 为 SSOT，对全部章节 upsert 统一尾部区块（### 对应 Lab/Test + 上一章｜目录｜下一章）
 - [202601061556_spring_core_modules_teaching_rollout](../../history/2026-01/202601061556_spring_core_modules_teaching_rollout/) - ✅ 已执行：对齐 docs 目录页/Part 编号与章节末尾“对应 Lab/Test”入口块，清理正文 `docs/NN` 缩写引用，并通过断链检查与教学覆盖检查
 - [202601061341_spring-core-aop-weaving](../../history/2026-01/202601061341_spring-core-aop-weaving/) - ✅ 已执行：创建 `spring-core-aop-weaving` 作为 weaving 深挖模块（LTW/CTW + join point cookbook + Labs/Exercises）

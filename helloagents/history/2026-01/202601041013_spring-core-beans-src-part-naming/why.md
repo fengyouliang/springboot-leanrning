@@ -11,12 +11,12 @@
 ## Change Content
 1. 将 `src/main/java` 与 `src/test/java` 下的分组目录由 `part00/part01/...` 改为 `part00_guide/part01_ioc_container/...` 等具名形式。
 2. 同步修改 Java package 声明与引用 import，保证编译与测试均正常。
-3. 同步修复 `spring-core-beans/docs/**`、`spring-core-beans/README.md`、`helloagents/wiki/modules/spring-core-beans.md` 中所有源码路径引用。
+3. 同步修复 `docs/beans/spring-core-beans/**`、`spring-core-beans/README.md`、`helloagents/wiki/modules/spring-core-beans.md` 中所有源码路径引用。
 4. **约束保持不变**：`com.learning.springboot.springcorebeans.SpringCoreBeansApplication` 包名与路径保持不变。
 
 ## Impact Scope
 - **Modules:** `spring-core-beans`
-- **Files:** `src/main/java/**`, `src/test/java/**`, `spring-core-beans/docs/**`, `spring-core-beans/README.md`, `helloagents/wiki/modules/spring-core-beans.md`
+- **Files:** `src/main/java/**`, `src/test/java/**`, `docs/beans/spring-core-beans/**`, `spring-core-beans/README.md`, `helloagents/wiki/modules/spring-core-beans.md`
 - **APIs:** 无（工程结构调整）
 - **Data:** 无
 

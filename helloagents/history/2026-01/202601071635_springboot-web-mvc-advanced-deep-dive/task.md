@@ -5,7 +5,7 @@ Directory: `helloagents/plan/202601071635_springboot-web-mvc-advanced-deep-dive/
 ---
 
 ## 1. Docs 目录与章节结构（SSOT）
-- [√] 1.1 更新目录：在 `springboot-web-mvc/docs/README.md` 增加 Part 03–07 的章节链接（明确到文件名），包含：
+- [√] 1.1 更新目录：在 `docs/web-mvc/springboot-web-mvc/README.md` 增加 Part 03–07 的章节链接（明确到文件名），包含：
   - Part 03：`part-03-web-mvc-internals/01-dispatcherservlet-call-chain.md`、`part-03-web-mvc-internals/02-argument-resolver-and-binder.md`、`part-03-web-mvc-internals/03-message-converters-and-return-values.md`
   - Part 04：`part-04-rest-contract/01-content-negotiation-406-415.md`、`part-04-rest-contract/02-jackson-objectmapper-controls.md`、`part-04-rest-contract/03-error-contract-hardening.md`
   - Part 05：`part-05-real-world-http/01-cors-preflight.md`、`part-05-real-world-http/02-multipart-upload.md`、`part-05-real-world-http/03-download-and-streaming.md`、`part-05-real-world-http/04-static-resources-and-cache.md`
@@ -13,7 +13,7 @@ Directory: `helloagents/plan/202601071635_springboot-web-mvc-advanced-deep-dive/
   - Part 07：`part-07-testing-debugging/01-webmvc-testing-and-troubleshooting.md`
   verify why.md#core-scenarios
 - [√] 1.2 创建章节骨架：为上面所有 `.md` 文件创建最小可读骨架（沿用仓库现有章节结构），并在每章的 “E. 最小可运行实验（Lab）” 写入对应 `*LabTest` 类名，确保 `scripts/check-teaching-coverage.py --module springboot-web-mvc` 解析得到可跑入口（可以同一个 LabTest 被多个章节引用），verify why.md#core-scenarios
-- [√] 1.3 更新导读：在 `springboot-web-mvc/docs/part-00-guide/00-deep-dive-guide.md` 的 “推荐阅读顺序” 中插入 Part 03–07，并补一句“先跑哪个 LabTest 再读哪几章”的建议（例如：先跑 Internals/Contract/RealWorld/Async 这 4 个 Lab），verify why.md#core-scenarios
+- [√] 1.3 更新导读：在 `docs/web-mvc/springboot-web-mvc/part-00-guide/00-deep-dive-guide.md` 的 “推荐阅读顺序” 中插入 Part 03–07，并补一句“先跑哪个 LabTest 再读哪几章”的建议（例如：先跑 Internals/Contract/RealWorld/Async 这 4 个 Lab），verify why.md#core-scenarios
 
 ## 2. Part 03 - Web MVC Internals（DispatcherServlet 全链路）
 - [√] 2.1 新增参数注解：新增 `springboot-web-mvc/src/main/java/com/learning/springboot/bootwebmvc/part03_internals/ClientIp.java`（用于标记 controller 方法参数），约束：仅支持 `String` 参数，verify why.md#dispatcherServlet-全链路可观察
@@ -24,9 +24,9 @@ Directory: `helloagents/plan/202601071635_springboot-web-mvc-advanced-deep-dive/
   - 带 `X-Forwarded-For: 1.2.3.4, 5.6.7.8` 时 `clientIp == 1.2.3.4`
   - 不带 `X-Forwarded-For` 时，通过 `RequestPostProcessor` 设置 `remoteAddr=8.8.8.8` 并断言 `clientIp == 8.8.8.8`
   verify why.md#dispatcherServlet-全链路可观察
-- [√] 2.6 补齐 docs：在 `springboot-web-mvc/docs/part-03-web-mvc-internals/01-dispatcherservlet-call-chain.md` 写清“从测试用例反推调用链”的观察点，并列出建议断点（`DispatcherServlet#doDispatch`、`RequestMappingHandlerMapping`、`RequestMappingHandlerAdapter`、`HandlerMethodArgumentResolverComposite`、`AbstractMessageConverterMethodProcessor`、`ExceptionHandlerExceptionResolver`），引用 `BootWebMvcInternalsLabTest`，verify why.md#dispatcherServlet-全链路可观察
-- [√] 2.7 补齐 docs：在 `springboot-web-mvc/docs/part-03-web-mvc-internals/02-argument-resolver-and-binder.md` 写清 `ArgumentResolver` vs `@InitBinder`/`WebDataBinder` 的职责边界，并给出“什么时候写 resolver、什么时候写 converter”的判断标准（配合本模块现有 binding 章节），引用 `BootWebMvcInternalsLabTest` + `BootWebMvcLabTest`，verify why.md#dispatcherServlet-全链路可观察
-- [√] 2.8 补齐 docs：在 `springboot-web-mvc/docs/part-03-web-mvc-internals/03-message-converters-and-return-values.md` 解释 `HttpMessageConverter` 在链路中的位置（与 `@RequestBody/@ResponseBody` 对应），并把 Part 04 的 strict media type 例子作为“可观察证据”链接过去，引用 `BootWebMvcContractJacksonLabTest`，verify why.md#dispatcherServlet-全链路可观察
+- [√] 2.6 补齐 docs：在 `docs/web-mvc/springboot-web-mvc/part-03-web-mvc-internals/01-dispatcherservlet-call-chain.md` 写清“从测试用例反推调用链”的观察点，并列出建议断点（`DispatcherServlet#doDispatch`、`RequestMappingHandlerMapping`、`RequestMappingHandlerAdapter`、`HandlerMethodArgumentResolverComposite`、`AbstractMessageConverterMethodProcessor`、`ExceptionHandlerExceptionResolver`），引用 `BootWebMvcInternalsLabTest`，verify why.md#dispatcherServlet-全链路可观察
+- [√] 2.7 补齐 docs：在 `docs/web-mvc/springboot-web-mvc/part-03-web-mvc-internals/02-argument-resolver-and-binder.md` 写清 `ArgumentResolver` vs `@InitBinder`/`WebDataBinder` 的职责边界，并给出“什么时候写 resolver、什么时候写 converter”的判断标准（配合本模块现有 binding 章节），引用 `BootWebMvcInternalsLabTest` + `BootWebMvcLabTest`，verify why.md#dispatcherServlet-全链路可观察
+- [√] 2.8 补齐 docs：在 `docs/web-mvc/springboot-web-mvc/part-03-web-mvc-internals/03-message-converters-and-return-values.md` 解释 `HttpMessageConverter` 在链路中的位置（与 `@RequestBody/@ResponseBody` 对应），并把 Part 04 的 strict media type 例子作为“可观察证据”链接过去，引用 `BootWebMvcContractJacksonLabTest`，verify why.md#dispatcherServlet-全链路可观察
 
 ## 3. Part 04 - REST Contract & Jackson（契约与序列化可控）
 - [√] 3.1 新增 REST 契约端点：新增 `springboot-web-mvc/src/main/java/com/learning/springboot/bootwebmvc/part04_contract/RestContractController.java`，至少包含：
@@ -47,9 +47,9 @@ Directory: `helloagents/plan/202601071635_springboot-web-mvc-advanced-deep-dive/
   - “严格 JSON”拒绝未知字段：对 `/strict-echo` 用 `Content-Type: application/vnd.learning.strict+json` 发送包含多余字段（如 `extra`），断言返回 400 + `ApiError.message == "malformed_json"`
   - JSON 时间字段可控：对 `/echo` 发送固定 `createdAt` 字符串并断言回显一致
   verify why.md#rest-契约与序列化可控httpmessageconverter--jackson
-- [√] 3.6 补齐 docs：在 `springboot-web-mvc/docs/part-04-rest-contract/01-content-negotiation-406-415.md` 用本 Lab 的 406/415 用例讲清 `Accept`/`Content-Type`/`produces`/`consumes` 与异常类型（`HttpMediaTypeNotAcceptableException`/`HttpMediaTypeNotSupportedException`），引用 `BootWebMvcContractJacksonLabTest`，verify why.md#rest-契约与序列化可控httpmessageconverter--jackson
-- [√] 3.7 补齐 docs：在 `springboot-web-mvc/docs/part-04-rest-contract/02-jackson-objectmapper-controls.md` 用 “strict media type → strict converter → strict ObjectMapper” 的例子讲清“配置如何做到不破坏默认 JSON 行为”，引用 `BootWebMvcContractJacksonLabTest`，verify why.md#rest-契约与序列化可控httpmessageconverter--jackson
-- [√] 3.8 补齐 docs：在 `springboot-web-mvc/docs/part-04-rest-contract/03-error-contract-hardening.md` 用现有 `ApiError` 解释“解析失败 vs 校验失败 vs 类型不匹配”的分流点（异常类型/触发阶段），并明确哪些错误不建议用 200 包装，引用 `BootWebMvcLabTest` + `BootWebMvcContractJacksonLabTest`，verify why.md#rest-契约与序列化可控httpmessageconverter--jackson
+- [√] 3.6 补齐 docs：在 `docs/web-mvc/springboot-web-mvc/part-04-rest-contract/01-content-negotiation-406-415.md` 用本 Lab 的 406/415 用例讲清 `Accept`/`Content-Type`/`produces`/`consumes` 与异常类型（`HttpMediaTypeNotAcceptableException`/`HttpMediaTypeNotSupportedException`），引用 `BootWebMvcContractJacksonLabTest`，verify why.md#rest-契约与序列化可控httpmessageconverter--jackson
+- [√] 3.7 补齐 docs：在 `docs/web-mvc/springboot-web-mvc/part-04-rest-contract/02-jackson-objectmapper-controls.md` 用 “strict media type → strict converter → strict ObjectMapper” 的例子讲清“配置如何做到不破坏默认 JSON 行为”，引用 `BootWebMvcContractJacksonLabTest`，verify why.md#rest-契约与序列化可控httpmessageconverter--jackson
+- [√] 3.8 补齐 docs：在 `docs/web-mvc/springboot-web-mvc/part-04-rest-contract/03-error-contract-hardening.md` 用现有 `ApiError` 解释“解析失败 vs 校验失败 vs 类型不匹配”的分流点（异常类型/触发阶段），并明确哪些错误不建议用 200 包装，引用 `BootWebMvcLabTest` + `BootWebMvcContractJacksonLabTest`，verify why.md#rest-契约与序列化可控httpmessageconverter--jackson
 
 ## 4. Part 05 - Real World HTTP（CORS / Multipart / Download / Static）
 - [√] 4.1 新增 CORS 配置：新增 `springboot-web-mvc/src/main/java/com/learning/springboot/bootwebmvc/part05_real_world/AdvancedCorsConfig.java`（实现 `WebMvcConfigurer`），只对 `/api/advanced/cors/**` 生效，至少配置：允许 Origin `https://example.com`、允许方法 `GET`、允许 header `X-Request-Id`，verify why.md#真实-web-场景补齐corsmultipartdownloadstatic
@@ -75,8 +75,8 @@ Directory: `helloagents/plan/202601071635_springboot-web-mvc-advanced-deep-dive/
   - Async：`GET /api/advanced/async/ping` 断言 `asyncStarted`，随后 `asyncDispatch` 断言 200 + JSON `message=="pong"`
   - SSE：`GET /api/advanced/sse/ping` 断言 200 + `Content-Type` 为 `text/event-stream`（或兼容），并断言响应体包含 `data: ping-1`（至少一条）
   verify why.md#async--sse可选但深入
-- [√] 5.4 补齐 docs：在 `springboot-web-mvc/docs/part-06-async-sse/01-servlet-async-and-testing.md` 解释“为什么 asyncDispatch 是必要的”，列出推荐断点（`WebAsyncManager`、`CallableMethodReturnValueHandler` 等），引用 `BootWebMvcAsyncSseLabTest`，verify why.md#async--sse可选但深入
-- [√] 5.5 补齐 docs：在 `springboot-web-mvc/docs/part-06-async-sse/02-sse-emitter.md` 解释 SSE 协议片段（`data:`/空行）与为什么要“有限事件 + 快速完成”来避免 flaky，引用 `BootWebMvcAsyncSseLabTest`，verify why.md#async--sse可选但深入
+- [√] 5.4 补齐 docs：在 `docs/web-mvc/springboot-web-mvc/part-06-async-sse/01-servlet-async-and-testing.md` 解释“为什么 asyncDispatch 是必要的”，列出推荐断点（`WebAsyncManager`、`CallableMethodReturnValueHandler` 等），引用 `BootWebMvcAsyncSseLabTest`，verify why.md#async--sse可选但深入
+- [√] 5.5 补齐 docs：在 `docs/web-mvc/springboot-web-mvc/part-06-async-sse/02-sse-emitter.md` 解释 SSE 协议片段（`data:`/空行）与为什么要“有限事件 + 快速完成”来避免 flaky，引用 `BootWebMvcAsyncSseLabTest`，verify why.md#async--sse可选但深入
 
 ## 6. Part 07 - Testing & Troubleshooting（测试与排障进阶）
 - [√] 6.1 新增 LabTest（testing/debugging）：新增 `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part07_testing/BootWebMvcTestingDebuggingLabTest.java`（`@WebMvcTest(RestContractController.class)` + 必要 `@Import`），至少覆盖：
@@ -84,7 +84,7 @@ Directory: `helloagents/plan/202601071635_springboot-web-mvc-advanced-deep-dive/
   - 通过 `MvcResult#getResolvedException()` 断言 406 的异常类型是 `HttpMediaTypeNotAcceptableException`
   - （可选）断言 `result.getHandler()` 是 `HandlerMethod` 且方法名匹配预期（帮助定位“到底走了哪个 handler”）
   verify why.md#测试与排障进阶体系化
-- [√] 6.2 补齐章节：在 `springboot-web-mvc/docs/part-07-testing-debugging/01-webmvc-testing-and-troubleshooting.md` 写出“红测排障脚本”：
+- [√] 6.2 补齐章节：在 `docs/web-mvc/springboot-web-mvc/part-07-testing-debugging/01-webmvc-testing-and-troubleshooting.md` 写出“红测排障脚本”：
   - 先看 status/响应体，再看 `resolvedException`，最后打断点（给出每类状态码的断点清单）
   - slice vs full 的判断：什么时候 `@WebMvcTest` 不够，需要 `@SpringBootTest(webEnvironment=RANDOM_PORT)`
   引用 `BootWebMvcTestingDebuggingLabTest` + 现有 `BootWebMvcSpringBootLabTest`，verify why.md#测试与排障进阶体系化

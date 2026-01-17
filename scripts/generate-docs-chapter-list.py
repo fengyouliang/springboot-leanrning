@@ -4,9 +4,9 @@
 """
 生成“章节集合 SSOT”清单（用于全量文档改写/进度追踪）。
 
-约定（与本仓库的 teaching coverage 口径一致）：
-- 模块章节：以每个模块 `docs/README.md` 内的 Markdown 链接清单为 SSOT（排除 README 本身）
-- Book-only：`docs-site/content/book/**/*.md`
+约定：
+- 模块章节：以 `docs/<topic>/<module>/README.md` 内的 Markdown 链接清单为 SSOT（排除 README 本身）
+- Book-only：`docs/book/**/*.md`
 
 输出：
 - 默认输出到 stdout（TSV）
@@ -61,13 +61,23 @@ def normalize_md_link_target(raw: str) -> str | None:
     return dest or None
 
 
-def discover_modules(repo_root: Path) -> list[str]:
-    modules: list[str] = []
-    for p in sorted(repo_root.iterdir()):
-        if not p.is_dir():
+def discover_modules(repo_root: Path) -> list[tuple[str, Path]]:
+    """
+    发现“有模块目录页”的模块：以 docs/<topic>/<module>/README.md 为准。
+    返回 (module_name, docs_readme_path)。
+    """
+    docs_root = repo_root / "docs"
+    if not docs_root.is_dir():
+        return []
+
+    modules: list[tuple[str, Path]] = []
+    for readme in sorted(docs_root.glob("*/*/README.md")):
+        module = readme.parent.name
+        # 仅收录确实存在代码模块目录的条目（避免把非模块目录误判为模块）
+        if not (repo_root / module).is_dir():
             continue
-        if (p / "docs" / "README.md").is_file():
-            modules.append(p.name)
+        modules.append((module, readme))
+
     return modules
 
 
@@ -82,15 +92,14 @@ def iter_links_from_docs_readme(readme: Path) -> Iterable[tuple[str, str]]:
         yield title, target_raw
 
 
-def iter_module_chapters(repo_root: Path, module_root: Path) -> list[Chapter]:
-    readme = module_root / "docs" / "README.md"
-    if not readme.is_file():
+def iter_module_chapters(repo_root: Path, module: str, docs_readme: Path) -> list[Chapter]:
+    if not docs_readme.is_file():
         return []
 
-    # 使用“最后一次出现”作为章节顺序（与 bookify/check-teaching-coverage 口径一致）
+    # 使用“最后一次出现”作为章节顺序（避免目录页里“快速定位”类重复链接干扰主线顺序）
     index = 0
     last: dict[Path, tuple[int, str]] = {}
-    for title, target_raw in iter_links_from_docs_readme(readme):
+    for title, target_raw in iter_links_from_docs_readme(docs_readme):
         index += 1
         target = normalize_md_link_target(target_raw)
         if target is None or is_external_link(target):
@@ -98,14 +107,14 @@ def iter_module_chapters(repo_root: Path, module_root: Path) -> list[Chapter]:
         if not target.endswith(".md"):
             continue
 
-        chapter = (readme.parent / target).resolve()
+        chapter = (docs_readme.parent / target).resolve()
         try:
             chapter.relative_to(repo_root)
         except ValueError:
             continue
         if "/docs/" not in chapter.as_posix():
             continue
-        if chapter == readme:
+        if chapter == docs_readme:
             continue
 
         last[chapter] = (index, title or chapter.name)
@@ -117,7 +126,7 @@ def iter_module_chapters(repo_root: Path, module_root: Path) -> list[Chapter]:
         chapters.append(
             Chapter(
                 kind="module",
-                module=module_root.name,
+                module=module,
                 path=chapter_path.relative_to(repo_root).as_posix(),
                 title=title,
             )
@@ -126,7 +135,7 @@ def iter_module_chapters(repo_root: Path, module_root: Path) -> list[Chapter]:
 
 
 def iter_book_pages(repo_root: Path) -> list[Chapter]:
-    book_root = repo_root / "docs-site" / "content" / "book"
+    book_root = repo_root / "docs" / "book"
     if not book_root.is_dir():
         return []
     pages: list[Chapter] = []
@@ -204,8 +213,8 @@ def main(argv: list[str]) -> int:
     chapters: list[Chapter] = []
 
     if include_modules:
-        for module_name in discover_modules(repo_root):
-            chapters.extend(iter_module_chapters(repo_root, repo_root / module_name))
+        for module_name, docs_readme in discover_modules(repo_root):
+            chapters.extend(iter_module_chapters(repo_root, module_name, docs_readme))
 
     if include_book:
         chapters.extend(iter_book_pages(repo_root))
@@ -230,4 +239,3 @@ def main(argv: list[str]) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(os.sys.argv))
-

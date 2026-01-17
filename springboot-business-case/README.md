@@ -42,7 +42,7 @@ mvn -pl springboot-business-case test
 
 ## 推荐 docs 阅读顺序
 
-（docs 目录页：[`docs/README.md`](docs/README.md)）
+（docs 目录页：[`docs/README.md`](../docs/business-case/springboot-business-case/README.md)）
 
 建议按“先跑通链路 → 再拆机制”的顺序：
 
@@ -52,9 +52,9 @@ mvn -pl springboot-business-case test
 4. 自测题：`docs/appendix/99-self-check.md`
 5. 先跑接口 + 跑 `BootBusinessCaseLabTest`：把“现象”固定下来
 6. 出现疑问时按链路拆解：
-   - 代理/AOP：`spring-core-aop/docs/part-01-proxy-fundamentals/01-aop-proxy-mental-model.md`、`spring-core-aop/docs/part-01-proxy-fundamentals/03-self-invocation.md`
-   - 事务：`spring-core-tx/docs/part-01-transaction-basics/01-transaction-boundary.md`、`spring-core-tx/docs/part-01-transaction-basics/02-transactional-proxy.md`
-   - 事件与事务时机：`spring-core-events/docs/part-02-async-and-transactional/07-transactional-event-listener.md`
+   - 代理/AOP：`docs/aop/spring-core-aop/part-01-proxy-fundamentals/01-aop-proxy-mental-model.md`、`docs/aop/spring-core-aop/part-01-proxy-fundamentals/03-self-invocation.md`
+   - 事务：`docs/tx/spring-core-tx/part-01-transaction-basics/01-transaction-boundary.md`、`docs/tx/spring-core-tx/part-01-transaction-basics/02-transactional-proxy.md`
+   - 事件与事务时机：`docs/events/spring-core-events/part-02-async-and-transactional/07-transactional-event-listener.md`
 
 ## Labs / Exercises 索引（按知识点 / 难度）
 

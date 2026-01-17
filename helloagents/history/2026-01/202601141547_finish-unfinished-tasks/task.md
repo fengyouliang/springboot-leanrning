@@ -16,16 +16,16 @@
 
 ## 2. springboot-web-mvc：Part 01 Debugger Pack + 关键分支 Labs
 - [√] 2.1 补齐 Part 01 文档的 `Debug 建议`/Call-chain/关键分支说明（01~05）
-- [√] 2.2 新增 `springboot-web-mvc/docs/part-00-guide/02-breakpoint-map.md` 并更新 docs README 导航
+- [√] 2.2 新增 `docs/web-mvc/springboot-web-mvc/part-00-guide/02-breakpoint-map.md` 并更新 docs README 导航
 - [√] 2.3 补齐 Part 01 缺失知识点的最小 Labs（方法级入口），并把证据链写回文档（method validation / BindingResult / resolver priority / InitBinder / 404/405/415 等）
 - [√] 2.4 完善 view 章节常见坑（Thymeleaf + ViewResolver）并绑定 Lab 入口
 
 ## 3. spring-core-beans：文档空块补齐 + 方法级入口绑定
-- [√] 3.1 新增 `spring-core-beans/docs/part-00-guide/02-breakpoint-map.md`（容器主线断点/观察点清单）
-- [√] 3.2 补齐 `spring-core-beans/docs/part-00-guide/00-deep-dive-guide.md` 等空洞段落（入口测试/断点/获得什么）
+- [√] 3.1 新增 `docs/beans/spring-core-beans/part-00-guide/02-breakpoint-map.md`（容器主线断点/观察点清单）
+- [√] 3.2 补齐 `docs/beans/spring-core-beans/part-00-guide/00-deep-dive-guide.md` 等空洞段落（入口测试/断点/获得什么）
 - [√] 3.3 系统补齐 docs 中 `对应测试：`/`入口：`/`一句话自检`/`排障分流`/`源码锚点` 空块（Part 01/03/04/Appendix）
 - [√] 3.4 复核并补齐 Part 05（AOT & Real World）章节的模板残留与入口测试绑定（40~50）
-- [√] 3.5 更新 `spring-core-beans/docs/README.md` 索引与导航，确保 1~2 次跳转可达
+- [√] 3.5 更新 `docs/beans/spring-core-beans/README.md` 索引与导航，确保 1~2 次跳转可达
 
 ## 4. 回归与闸门
 - [√] 4.1 运行四模块测试回归：beans/aop/tx/webmvc

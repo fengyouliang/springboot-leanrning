@@ -3,4 +3,4 @@ set -euo pipefail
 
 python3 scripts/docs-site-sync.py
 
-python3 -m mkdocs build -f docs-site/.generated/mkdocs.yml --strict
+python3 -m mkdocs build -f docs-site/mkdocs.yml

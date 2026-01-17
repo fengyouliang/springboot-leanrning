@@ -30,7 +30,7 @@
 
 5. **章节清单与执行范围**
    - 模块章节：以各模块 `docs/README.md` 的 Markdown 链接清单为 SSOT。
-   - Book：`docs-site/content/book/**/*.md` 全量纳入（含工具页与 redirect 页）。
+   - Book：`docs/book/**/*.md` 全量纳入（含工具页与 redirect 页）。
 
 ---
 

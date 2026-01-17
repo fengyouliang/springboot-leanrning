@@ -9,7 +9,7 @@ Directory: `helloagents/plan/202601052200_spring_core_beans_beans_package_full_c
 ### 1.1 XML namespace 扩展闭环（NamespaceHandler/Parser）
 - [√] 1.1.1 新增 XML namespace extension Lab（可断言）：`spring-core-beans/src/test/java/.../part05_aot_and_real_world/SpringCoreBeansXmlNamespaceExtensionLabTest.java`
 - [√] 1.1.2 新增 test resources：`META-INF/spring.handlers` / `META-INF/spring.schemas` / XSD / demo XML（确保 classpath 可解析）
-- [√] 1.1.3 新增 docs 章节：`spring-core-beans/docs/part-05-aot-and-real-world/46-xml-namespace-extension.md`（主线/边界/误区/断点/观察点/复现入口）
+- [√] 1.1.3 新增 docs 章节：`docs/beans/spring-core-beans/part-05-aot-and-real-world/46-xml-namespace-extension.md`（主线/边界/误区/断点/观察点/复现入口）
 
 ### 1.2 BeanDefinitionReader 多输入源（Properties/Groovy）
 - [√] 1.2.1 新增 PropertiesBeanDefinitionReader Lab：`SpringCoreBeansPropertiesBeanDefinitionReaderLabTest`
@@ -33,8 +33,8 @@ Directory: `helloagents/plan/202601052200_spring_core_beans_beans_package_full_c
 - [√] 1.5.3 新增 docs 章节：`50-property-editor-and-value-resolution.md`（定义层 value → 实例层注入的主线）
 
 ## 2. 目录与检索收敛
-- [√] 2.1 更新 `spring-core-beans/docs/README.md`：把 46–50 加入 Part05 TOC，并在“快速定位/对照表”补齐入口
-- [√] 2.2 更新 `spring-core-beans/docs/appendix/92-knowledge-map.md`：补齐 5 组机制的检索路径（Concept → Chapter → Lab）
+- [√] 2.1 更新 `docs/beans/spring-core-beans/README.md`：把 46–50 加入 Part05 TOC，并在“快速定位/对照表”补齐入口
+- [√] 2.2 更新 `docs/beans/spring-core-beans/appendix/92-knowledge-map.md`：补齐 5 组机制的检索路径（Concept → Chapter → Lab）
 
 ## 3. Security Check
 - [√] 3.1 执行安全自检（G9）：确认无外联/无硬编码敏感信息/无破坏性命令；若新增依赖记录版本与风险
@@ -45,7 +45,7 @@ Directory: `helloagents/plan/202601052200_spring_core_beans_beans_package_full_c
 
 ## 5. Verification
 - [√] 5.1 运行 `mvn -pl spring-core-beans test`
-- [√] 5.2 运行 `python3 scripts/check-md-relative-links.py spring-core-beans/docs`
+- [√] 5.2 运行 `python3 scripts/check-md-relative-links.py docs/beans/spring-core-beans`
 
 ## 6. Migration
 - [√] 6.1 将方案包迁移至 `helloagents/history/2026-01/202601052200_spring_core_beans_beans_package_full_coverage/` 并更新 `helloagents/history/index.md`

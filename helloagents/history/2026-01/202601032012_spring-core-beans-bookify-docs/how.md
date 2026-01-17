@@ -9,7 +9,7 @@
 ### Implementation Key Points
 
 1. **建立 docs 的“书本入口”**
-   - 新增 `spring-core-beans/docs/README.md`（目录页/Part 概览/主线阅读路径）
+   - 新增 `docs/beans/spring-core-beans/README.md`（目录页/Part 概览/主线阅读路径）
    - 目录页的组织风格参考 Spring 官方 Reference Docs：先给“全书总览”，再给“分 Part 的章节树”
 
 2. **信息架构（IA）重构：Part 目录 + 章节迁移**

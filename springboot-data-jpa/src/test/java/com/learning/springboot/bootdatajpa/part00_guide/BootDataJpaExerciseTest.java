@@ -22,7 +22,7 @@ class BootDataJpaExerciseTest {
 
                         参考：
                         - `springboot-data-jpa/src/test/java/com/learning/springboot/bootdatajpa/part01_data_jpa/BootDataJpaLabTest.java`
-                        - `springboot-data-jpa/docs/part-01-data-jpa/01-entity-states.md`
+                        - `docs/data-jpa/springboot-data-jpa/part-01-data-jpa/01-entity-states.md`
                         """)
                 .isFalse();
     }
@@ -40,8 +40,8 @@ class BootDataJpaExerciseTest {
                         3) 记录你观察到的现象，并尝试一种修复（例如 fetch join / EntityGraph）。
 
                         建议阅读：
-                        - `springboot-data-jpa/docs/part-01-data-jpa/05-fetching-and-n-plus-one.md`
-                        - `springboot-data-jpa/docs/part-01-data-jpa/07-debug-sql.md`
+                        - `docs/data-jpa/springboot-data-jpa/part-01-data-jpa/05-fetching-and-n-plus-one.md`
+                        - `docs/data-jpa/springboot-data-jpa/part-01-data-jpa/07-debug-sql.md`
 
                         常见坑：
                         - 只看日志容易误判；先用断言固定结论，再用 SQL 日志解释原因
@@ -62,7 +62,7 @@ class BootDataJpaExerciseTest {
                         3) 用断言/查询证明“测试结束后数据是否还在”。
 
                         建议阅读：
-                        - `springboot-data-jpa/docs/part-01-data-jpa/06-datajpatest-slice.md`
+                        - `docs/data-jpa/springboot-data-jpa/part-01-data-jpa/06-datajpatest-slice.md`
                         """)
                 .isFalse();
     }
@@ -97,7 +97,7 @@ class BootDataJpaExerciseTest {
                         2) 准备数据后调用该方法，并对返回内容做断言。
 
                         参考：
-                        - `springboot-data-jpa/docs/appendix/90-common-pitfalls.md`
+                        - `docs/data-jpa/springboot-data-jpa/appendix/90-common-pitfalls.md`
                         """)
                 .isFalse();
     }

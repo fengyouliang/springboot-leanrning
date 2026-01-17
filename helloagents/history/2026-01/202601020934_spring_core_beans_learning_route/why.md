@@ -34,8 +34,8 @@
   - `spring-core-beans`
 - **Files（预期）：**
   - `spring-core-beans/README.md`
-  - `spring-core-beans/docs/00-deep-dive-guide.md`
-  - `spring-core-beans/docs/11-debugging-and-observability.md`
+  - `docs/beans/spring-core-beans/00-deep-dive-guide.md`
+  - `docs/beans/spring-core-beans/11-debugging-and-observability.md`
   - `spring-core-beans/src/main/java/**/BeansDemoRunner.java`
   - `spring-core-beans/src/test/java/**/SpringCoreBeansInjectionAmbiguityLabTest.java`
   - `spring-core-beans/src/test/java/**/SpringCoreBeansExerciseTest.java`

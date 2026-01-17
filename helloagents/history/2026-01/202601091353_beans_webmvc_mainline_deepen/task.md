@@ -51,13 +51,13 @@ Directory: `helloagents/plan/202601091353_beans_webmvc_mainline_deepen/`
 ### 2.1 文档主线：补齐“候选收敛决策树”（不新增章节编号，优先扩充现有章）
 
 #### 2.1.1 扩充候选收敛顺序（加入 by-name fallback）
-- [√] 2.1.1.1 更新 `spring-core-beans/docs/part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md`：明确单依赖决胜顺序包含“依赖名匹配 beanName”的分支
+- [√] 2.1.1.1 更新 `docs/beans/spring-core-beans/part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md`：明确单依赖决胜顺序包含“依赖名匹配 beanName”的分支
 - [√] 2.1.1.2 在同一章补齐对照表：`@Qualifier` vs `@Primary` vs name fallback vs `@Priority`（每个条目：解决什么/何时生效/典型坑）
 - [√] 2.1.1.3 在同一章补齐源码锚点：`DefaultListableBeanFactory#determineAutowireCandidate`（建议断点）
 
 #### 2.1.2 把“相关 Lab”从散点变成主线导航
 - [√] 2.1.2.1 在 33 章末尾补充“关联 Lab 索引”：InjectionAmbiguity/JSR330/CustomQualifier/ResourceInjection/GenericPitfalls
-- [√] 2.1.2.2 在 `spring-core-beans/docs/README.md` 的“注入失败”快速定位条目中补齐：by-name fallback 与对应 Lab（新增后需回填）
+- [√] 2.1.2.2 在 `docs/beans/spring-core-beans/README.md` 的“注入失败”快速定位条目中补齐：by-name fallback 与对应 Lab（新增后需回填）
 
 ### 2.2 Labs：新增/强化 by-name fallback 与决胜优先级对照
 
@@ -94,7 +94,7 @@ Directory: `helloagents/plan/202601091353_beans_webmvc_mainline_deepen/`
 ### 2.4 Troubleshooting & Self-check：把坑与自测题补齐并绑定入口
 
 #### 2.4.1 Pitfalls 清单（至少 8 条）
-- [√] 2.4.1.1 更新 `spring-core-beans/docs/appendix/90-common-pitfalls.md`：新增条目“`@Order` 不能解决单注入歧义”
+- [√] 2.4.1.1 更新 `docs/beans/spring-core-beans/appendix/90-common-pitfalls.md`：新增条目“`@Order` 不能解决单注入歧义”
 - [√] 2.4.1.2 同文件新增条目“by-name fallback 为什么有时会‘注错’”（强调：依赖名变化/重构风险）
 - [√] 2.4.1.3 同文件新增条目“Qualifier 与 Primary 冲突时怎么判断谁生效”
 - [√] 2.4.1.4 同文件新增条目“ObjectProvider#getIfAvailable vs getIfUnique 的区别（以及排障建议）”
@@ -103,7 +103,7 @@ Directory: `helloagents/plan/202601091353_beans_webmvc_mainline_deepen/`
 - [√] 2.4.1.7 自检：确认 pitfall 里的 test 文件路径与类名真实存在
 
 #### 2.4.2 自测题（至少新增 10 题）
-- [√] 2.4.2.1 更新 `spring-core-beans/docs/appendix/99-self-check.md`：新增“候选收敛决策树”相关题目（每题绑定 doc + test）
+- [√] 2.4.2.1 更新 `docs/beans/spring-core-beans/appendix/99-self-check.md`：新增“候选收敛决策树”相关题目（每题绑定 doc + test）
 - [√] 2.4.2.2 新增题目示例方向：
   - 何时会走 by-name fallback？
   - `@Primary` 与 `@Priority` 的优先级与边界
@@ -142,7 +142,7 @@ Directory: `helloagents/plan/202601091353_beans_webmvc_mainline_deepen/`
 ### 3.2 文档：把概念升级为“可执行排障步骤”
 
 #### 3.2.1 扩充 Security 与 MVC 相对位置文档
-- [√] 3.2.1.1 更新 `springboot-web-mvc/docs/part-08-security-observability/01-security-filterchain-and-mvc.md`：新增小节“如何证明没进入 DispatcherServlet”
+- [√] 3.2.1.1 更新 `docs/web-mvc/springboot-web-mvc/part-08-security-observability/01-security-filterchain-and-mvc.md`：新增小节“如何证明没进入 DispatcherServlet”
 - [√] 3.2.1.2 在该小节加入明确步骤：
   - 用 MockMvc 获取 `handler/resolvedException`
   - 若 handler=null：优先怀疑 FilterChain（Security/Filter）
@@ -150,21 +150,21 @@ Directory: `helloagents/plan/202601091353_beans_webmvc_mainline_deepen/`
 - [√] 3.2.1.3 同文件补齐 Lab 引用：新增边界 Lab + 既有 `BootWebMvcSecurityLabTest`
 
 #### 3.2.2 把边界写入 resolver 主线章节（交叉引用即可）
-- [√] 3.2.2.1 更新 `springboot-web-mvc/docs/part-03-web-mvc-internals/04-exception-resolvers-and-error-flow.md`：补充一条“401/403 往往发生在 DispatcherServlet 之前”，并链接到 part-08 文档与边界 Lab
+- [√] 3.2.2.1 更新 `docs/web-mvc/springboot-web-mvc/part-03-web-mvc-internals/04-exception-resolvers-and-error-flow.md`：补充一条“401/403 往往发生在 DispatcherServlet 之前”，并链接到 part-08 文档与边界 Lab
 
 #### 3.2.3 把排障套路写入 testing/debugging 章节
-- [√] 3.2.3.1 更新 `springboot-web-mvc/docs/part-07-testing-debugging/01-webmvc-testing-and-troubleshooting.md`：新增排障 checklist 条目“401/403：先看 handler/resolvedException 再看 controller”
+- [√] 3.2.3.1 更新 `docs/web-mvc/springboot-web-mvc/part-07-testing-debugging/01-webmvc-testing-and-troubleshooting.md`：新增排障 checklist 条目“401/403：先看 handler/resolvedException 再看 controller”
 
 ### 3.3 Troubleshooting & Self-check
 
 #### 3.3.1 Pitfalls（至少新增 8 条中的 4 条与 Security 相关）
-- [√] 3.3.1.1 更新 `springboot-web-mvc/docs/appendix/90-common-pitfalls.md`：新增条目“@ControllerAdvice 捕不到 401/403”
+- [√] 3.3.1.1 更新 `docs/web-mvc/springboot-web-mvc/appendix/90-common-pitfalls.md`：新增条目“@ControllerAdvice 捕不到 401/403”
 - [√] 3.3.1.2 同文件新增条目“POST 变 403：CSRF 误伤如何验证/如何修”
 - [√] 3.3.1.3 同文件新增条目“@WebMvcTest 为什么突然 401/403（slice 默认也会过 filters）”
 - [√] 3.3.1.4 每条必须绑定：doc + LabTest + 推荐断点（DelegatingFilterProxy/FilterChainProxy/CsrfFilter）
 
 #### 3.3.2 自测题（可先留到下一轮，但需要占位）
-- [√] 3.3.2.1 更新 `springboot-web-mvc/docs/appendix/99-self-check.md`：新增至少 6 题（如文件已存在）
+- [√] 3.3.2.1 更新 `docs/web-mvc/springboot-web-mvc/appendix/99-self-check.md`：新增至少 6 题（如文件已存在）
 
 ### 3.4 Web MVC 阶段回归
 - [√] 3.4.1 运行 Web MVC 模块：`bash scripts/test-module.sh springboot-web-mvc`

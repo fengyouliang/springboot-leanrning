@@ -2,7 +2,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/00-start-here.md",
+    "path": "docs/book/00-start-here.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -11,7 +11,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/001-start-here.md",
+    "path": "docs/book/001-start-here.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -20,7 +20,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/002-boot-basics-mainline.md",
+    "path": "docs/book/002-boot-basics-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -29,7 +29,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/009-ioc-container-mainline.md",
+    "path": "docs/book/009-ioc-container-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -38,7 +38,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/01-boot-basics-mainline.md",
+    "path": "docs/book/01-boot-basics-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -47,7 +47,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/02-ioc-container-mainline.md",
+    "path": "docs/book/02-ioc-container-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -56,7 +56,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/027-aop-proxy-mainline.md",
+    "path": "docs/book/027-aop-proxy-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -65,7 +65,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/03-aop-proxy-mainline.md",
+    "path": "docs/book/03-aop-proxy-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -74,7 +74,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/04-aop-weaving-mainline.md",
+    "path": "docs/book/04-aop-weaving-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -83,7 +83,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/042-aop-weaving-mainline.md",
+    "path": "docs/book/042-aop-weaving-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -92,7 +92,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/05-tx-mainline.md",
+    "path": "docs/book/05-tx-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -101,7 +101,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/051-tx-mainline.md",
+    "path": "docs/book/051-tx-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -110,7 +110,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/06-webmvc-mainline.md",
+    "path": "docs/book/06-webmvc-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -119,7 +119,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/062-webmvc-mainline.md",
+    "path": "docs/book/062-webmvc-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -128,7 +128,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/07-security-mainline.md",
+    "path": "docs/book/07-security-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -137,7 +137,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/08-data-jpa-mainline.md",
+    "path": "docs/book/08-data-jpa-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -146,7 +146,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/084-security-mainline.md",
+    "path": "docs/book/084-security-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -155,7 +155,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/09-cache-mainline.md",
+    "path": "docs/book/09-cache-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -164,7 +164,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/094-data-jpa-mainline.md",
+    "path": "docs/book/094-data-jpa-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -173,7 +173,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/10-async-scheduling-mainline.md",
+    "path": "docs/book/10-async-scheduling-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -182,7 +182,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/106-cache-mainline.md",
+    "path": "docs/book/106-cache-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -191,7 +191,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/11-events-mainline.md",
+    "path": "docs/book/11-events-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -200,7 +200,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/116-async-scheduling-mainline.md",
+    "path": "docs/book/116-async-scheduling-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -209,7 +209,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/12-resources-mainline.md",
+    "path": "docs/book/12-resources-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -218,7 +218,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/126-events-mainline.md",
+    "path": "docs/book/126-events-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -227,7 +227,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/13-profiles-mainline.md",
+    "path": "docs/book/13-profiles-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -236,7 +236,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/138-resources-mainline.md",
+    "path": "docs/book/138-resources-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -245,7 +245,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/14-validation-mainline.md",
+    "path": "docs/book/14-validation-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -254,7 +254,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/149-profiles-mainline.md",
+    "path": "docs/book/149-profiles-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -263,7 +263,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/15-actuator-observability-mainline.md",
+    "path": "docs/book/15-actuator-observability-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -272,7 +272,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/155-validation-mainline.md",
+    "path": "docs/book/155-validation-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -281,7 +281,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/16-web-client-mainline.md",
+    "path": "docs/book/16-web-client-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -290,7 +290,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/166-actuator-observability-mainline.md",
+    "path": "docs/book/166-actuator-observability-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -299,7 +299,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/17-testing-mainline.md",
+    "path": "docs/book/17-testing-mainline.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -308,7 +308,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/172-web-client-mainline.md",
+    "path": "docs/book/172-web-client-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -317,7 +317,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/18-business-case.md",
+    "path": "docs/book/18-business-case.md",
     "page_type": "redirect",
     "status": "changed",
     "warnings": [],
@@ -326,7 +326,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/182-testing-mainline.md",
+    "path": "docs/book/182-testing-mainline.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -335,7 +335,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/188-business-case.md",
+    "path": "docs/book/188-business-case.md",
     "page_type": "normal",
     "status": "changed",
     "warnings": [],
@@ -344,7 +344,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/debugger-pack.md",
+    "path": "docs/book/debugger-pack.md",
     "page_type": "tool",
     "status": "changed",
     "warnings": [],
@@ -353,7 +353,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/exercises-and-solutions.md",
+    "path": "docs/book/exercises-and-solutions.md",
     "page_type": "tool",
     "status": "changed",
     "warnings": [],
@@ -362,7 +362,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/index.md",
+    "path": "docs/book/index.md",
     "page_type": "tool",
     "status": "changed",
     "warnings": [],
@@ -371,7 +371,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/labs-index.md",
+    "path": "docs/book/labs-index.md",
     "page_type": "tool",
     "status": "changed",
     "warnings": [],
@@ -380,7 +380,7 @@
   {
     "kind": "book",
     "module": "",
-    "path": "docs-site/content/book/migration-rules.md",
+    "path": "docs/book/migration-rules.md",
     "page_type": "tool",
     "status": "changed",
     "warnings": [],

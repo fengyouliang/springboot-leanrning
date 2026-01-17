@@ -129,3 +129,4 @@
 - [202601161747_docs_chapter_cards_rollout](2026-01/202601161747_docs_chapter_cards_rollout/) - 全量 docs：为全部章节 upsert “章节学习卡片（五问闭环）”，并新增批处理/自检脚本与闸门，保证每章第一屏包含知识点/使用/原理/源码入口/Lab 推荐
 - [202601162341_docs_global_book_chapters](2026-01/202601162341_docs_global_book_chapters/) - 全站：以模块 docs/README.md 为 SSOT，固化全局章节编号（001- 前缀）与全书顺读导航（分卷→模块→章节 + prev/next），并补齐旧 Book 主线 00–18 redirect 兼容入口
 - [202601171204_docs_booklike_rewrite_all](2026-01/202601171204_docs_booklike_rewrite_all/) - 全站：章节正文二次书籍化（V2）全量改写（modules 174 章 + Book 43 页），补齐导读/证据链/收束承接并清理空块与重复入口；通过 docs 闸门与 mkdocs strict build
+- [202601171641_docs_unify_by_topic](2026-01/202601171641_docs_unify_by_topic/) - 全站 docs：文档迁移到仓库根 `docs/` 并按主题归档；下线 docs 门禁脚本与 strict 校验，docs-site 改为直接读取 `docs/` 构建发布

@@ -31,7 +31,7 @@ Directory: `helloagents/plan/202601061341_spring-core-aop-weaving/`
 
 ## 3. spring-core-aop-weaving（Docs：目录结构与学习路线）
 - [√] 3.1 新增模块级入口文档 `spring-core-aop-weaving/README.md`：目标、前置、命令、Labs/Exercises 索引、与 `spring-core-aop` 的对照入口，验证 `why.md#requirement-learning-navigation`
-- [√] 3.2 新增 docs 目录页 `spring-core-aop-weaving/docs/README.md`：按 Part 列出章节与推荐顺序，验证 `why.md#requirement-learning-navigation`
+- [√] 3.2 新增 docs 目录页 `docs/aop/spring-core-aop-weaving/README.md`：按 Part 列出章节与推荐顺序，验证 `why.md#requirement-learning-navigation`
 - [√] 3.3 新增 Part 00（阅读指南）：解释“为什么单独开模块 + 如何跑 LTW/CTW + 如何排障”，验证 `why.md#requirement-learning-navigation`
 - [√] 3.4 新增 Part 01（心智模型）：proxy vs weaving、join point 概览、`call vs execution`、`this/target` 的语义差异，验证 `why.md#requirement-join-points-and-advanced-pointcuts`
 - [√] 3.5 新增 Part 02（LTW）：`-javaagent`、`META-INF/aop.xml`、include/exclude、classloader 相关坑，验证 `why.md#requirement-ltw-minimal-loop`
@@ -92,7 +92,7 @@ Directory: `helloagents/plan/202601061341_spring-core-aop-weaving/`
 - [√] 11.5 更新 `helloagents/CHANGELOG.md`：记录新增模块与关键能力（LTW/CTW + join point 覆盖），验证 `why.md#requirement-learning-navigation`
 
 ## 12. Quality Verification
-- [√] 12.1 运行并通过：`python3 scripts/check-md-relative-links.py spring-core-aop-weaving/docs`
+- [√] 12.1 运行并通过：`python3 scripts/check-md-relative-links.py docs/aop/spring-core-aop-weaving`
 - [√] 12.2 运行并通过：`mvn -pl spring-core-aop-weaving test`
 - [-] 12.3（可选）运行全仓库：`mvn -q test`（如耗时过长，可先跳过但需在结果中标注）
 

@@ -20,7 +20,7 @@
 
 ## Impact Scope
 - **Modules:** `spring-core-beans`
-- **Files:** `spring-core-beans/docs/01-bean-mental-model.md`、`spring-core-beans/docs/02-bean-registration.md`、`spring-core-beans/docs/03-dependency-injection-resolution.md`、`spring-core-beans/docs/05-lifecycle-and-callbacks.md`、`spring-core-beans/docs/09-circular-dependencies.md`；以及知识库记录 `helloagents/wiki/modules/spring-core-beans.md`、`helloagents/CHANGELOG.md`、`helloagents/history/index.md`
+- **Files:** `docs/beans/spring-core-beans/01-bean-mental-model.md`、`docs/beans/spring-core-beans/02-bean-registration.md`、`docs/beans/spring-core-beans/03-dependency-injection-resolution.md`、`docs/beans/spring-core-beans/05-lifecycle-and-callbacks.md`、`docs/beans/spring-core-beans/09-circular-dependencies.md`；以及知识库记录 `helloagents/wiki/modules/spring-core-beans.md`、`helloagents/CHANGELOG.md`、`helloagents/history/index.md`
 - **APIs:** None
 - **Data:** None
 

@@ -13,7 +13,7 @@ Directory: `helloagents/plan/202601010649_spring-core-beans-deep-dive/`
 - [√] 1.5 深化 循环依赖与 early reference（docs/09、docs/16）：补齐三层缓存、Boot 默认差异与代理介入边界
 - [√] 1.6 深化 `@Configuration` 增强（docs/07）：补齐 proxyBeanMethods 语义与源码锚点
 - [√] 1.7 深化 FactoryBean（docs/08、docs/23、docs/29）：补齐 type matching / allowEagerInit / 缓存语义与边界
-- [√] 1.8 扩写 [90. 常见坑](../../../spring-core-beans/docs/90-common-pitfalls.md) 与 [99. 自测题](../../../spring-core-beans/docs/99-self-check.md)，让每条坑都能映射到对应章节与 Lab
+- [√] 1.8 扩写 [90. 常见坑](../../../docs/beans/spring-core-beans/90-common-pitfalls.md) 与 [99. 自测题](../../../docs/beans/spring-core-beans/99-self-check.md)，让每条坑都能映射到对应章节与 Lab
 - [√] 1.9 README 一致性检查：确保 docs 链接与测试路径仍一致（必要时小幅修订）
 
 ## 2. Security Check

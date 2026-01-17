@@ -1,6 +1,6 @@
 # task.md - spring-core-beans docs coherence
 
-> 目标：解决 `spring-core-beans/docs` 章节“拼接感/不连贯”，在不丢知识点的前提下，把 01→02→03 读起来像连续教程。
+> 目标：解决 `docs/beans/spring-core-beans` 章节“拼接感/不连贯”，在不丢知识点的前提下，把 01→02→03 读起来像连续教程。
 
 - [√] 重构 `docs/01-bean-mental-model.md`：补齐章节契约（本章定位/输出/实验/下一章），把“可选深挖”与主线阅读分层表达
 - [√] 重构 `docs/02-bean-registration.md`：强化与 01 的承接（定义层），补齐到 03 的桥接（实例层依赖解析入口）

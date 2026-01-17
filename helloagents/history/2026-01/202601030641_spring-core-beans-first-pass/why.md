@@ -20,7 +20,7 @@
 
 ## Impact Scope
 - **Modules:** `spring-core-beans`
-- **Files:** 主要使用 `spring-core-beans/docs/*`、`spring-core-beans/src/test/*`（必要时补充查看 `spring-core-beans/src/main/*`）
+- **Files:** 主要使用 `docs/beans/spring-core-beans/*`、`spring-core-beans/src/test/*`（必要时补充查看 `spring-core-beans/src/main/*`）
 - **APIs:** None
 - **Data:** None
 

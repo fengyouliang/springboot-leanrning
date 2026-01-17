@@ -562,7 +562,7 @@ def rewrite_redirect_page(*, original: str, path: Path, card: ChapterCard | None
             out.append("")
     out.append("## 返回")
     # module redirect 通常有 README；book redirect 也可回 index
-    if path.as_posix().startswith("docs-site/content/book/"):
+    if path.as_posix().startswith("docs/book/"):
         out.append("- [全书目录](/book/)")
     else:
         # 尽量复用已有相对 README 链接

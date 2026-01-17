@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-生成“主线之书”的 Labs 索引页（docs-site/content/book/labs-index.md）。
+生成“主线之书”的 Labs 索引页（docs/book/labs-index.md）。
 
 目标：
 1) 扫描所有包含 docs/README.md 的模块；
@@ -11,7 +11,7 @@
 
 用法：
   python3 scripts/generate-book-labs-index.py
-  python3 scripts/generate-book-labs-index.py --out docs-site/content/book/labs-index.md
+  python3 scripts/generate-book-labs-index.py --out docs/book/labs-index.md
 """
 
 from __future__ import annotations
@@ -126,12 +126,12 @@ def build_markdown(modules: list[str]) -> str:
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="generate-book-labs-index.py",
-        description="生成 docs-site/content/book/labs-index.md（按模块收集 *LabTest.java）。",
+        description="生成 docs/book/labs-index.md（按模块收集 *LabTest.java）。",
     )
     parser.add_argument(
         "--out",
         default=str(DEFAULT_OUT),
-        help="输出 markdown 文件路径（默认：docs-site/content/book/labs-index.md）。",
+        help="输出 markdown 文件路径（默认：docs/book/labs-index.md）。",
     )
     return parser.parse_args(argv)
 

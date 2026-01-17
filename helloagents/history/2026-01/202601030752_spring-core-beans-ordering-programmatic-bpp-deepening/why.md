@@ -17,8 +17,8 @@
 ## Impact Scope
 - **Modules:** `spring-core-beans`
 - **Files (Docs):**
-  - `spring-core-beans/docs/14-post-processor-ordering.md`
-  - `spring-core-beans/docs/25-programmatic-bpp-registration.md`
+  - `docs/beans/spring-core-beans/14-post-processor-ordering.md`
+  - `docs/beans/spring-core-beans/25-programmatic-bpp-registration.md`
 - **Files (Labs, if needed):**
   - `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/SpringCoreBeansPostProcessorOrderingLabTest.java`
 - **Knowledge Base:**

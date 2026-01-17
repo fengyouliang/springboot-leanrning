@@ -18,7 +18,7 @@
 ## 影响范围
 
 - **Modules:** `spring-core-aop`
-- **Files:** `spring-core-aop/README.md`、`spring-core-aop/docs/*.md`
+- **Files:** `spring-core-aop/README.md`、`docs/aop/spring-core-aop/*.md`
 - **APIs:** 无对外 API 变更
 - **Data:** 无数据模型变更
 

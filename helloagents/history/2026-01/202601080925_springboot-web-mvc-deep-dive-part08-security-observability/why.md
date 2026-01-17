@@ -23,7 +23,7 @@
 ## Impact Scope
 
 - **Modules:** `springboot-web-mvc`
-- **Files:** `springboot-web-mvc/docs/**`、`springboot-web-mvc/src/main/**`、`springboot-web-mvc/src/test/**`、`helloagents/wiki/modules/springboot-web-mvc.md`、`helloagents/CHANGELOG.md`
+- **Files:** `docs/web-mvc/springboot-web-mvc/**`、`springboot-web-mvc/src/main/**`、`springboot-web-mvc/src/test/**`、`helloagents/wiki/modules/springboot-web-mvc.md`、`helloagents/CHANGELOG.md`
 - **Dependencies:** 可能新增 `spring-boot-starter-security` / `spring-boot-starter-actuator`（以“最小接入、兼容既有行为”为原则）
 - **APIs:** 仅新增教学用端点（建议使用独立前缀，例如 `/api/advanced/**`），不破坏既有接口与页面路由
 - **Data:** 无持久化数据（示例以最小内存结构或纯演示为主）

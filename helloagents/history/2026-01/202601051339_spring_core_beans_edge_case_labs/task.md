@@ -7,15 +7,15 @@ Directory: `helloagents/history/2026-01/202601051339_spring_core_beans_edge_case
 ## 1. Labs：编程式注册差异
 - [√] 1.1 新增 Lab：`SpringCoreBeansProgrammaticRegistrationLabTest`（registerBeanDefinition/registerSingleton/registerBean 对照）
   - 交付物：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansProgrammaticRegistrationLabTest.java`
-- [√] 1.2 更新 docs：在 `spring-core-beans/docs/part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md` 补齐编程式注册差异与入口命令
+- [√] 1.2 更新 docs：在 `docs/beans/spring-core-beans/part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md` 补齐编程式注册差异与入口命令
 
 ## 2. Labs：raw injection despite wrapping
 - [√] 2.1 新增 Lab：`SpringCoreBeansRawInjectionDespiteWrappingLabTest`（allowRawInjectionDespiteWrapping 的最小复现）
-- [√] 2.2 更新 docs：在 `spring-core-beans/docs/part-03-container-internals/16-early-reference-and-circular.md` 补齐 raw injection 风险与开关说明，并落位 Lab 入口
+- [√] 2.2 更新 docs：在 `docs/beans/spring-core-beans/part-03-container-internals/16-early-reference-and-circular.md` 补齐 raw injection 风险与开关说明，并落位 Lab 入口
 
 ## 3. Labs：prototype 销毁语义
 - [√] 3.1 新增 Lab：`SpringCoreBeansPrototypeDestroySemanticsLabTest`（prototype 默认不销毁 + destroyBean 手动销毁）
-- [√] 3.2 更新 docs：在 `spring-core-beans/docs/part-01-ioc-container/04-scope-and-prototype.md` 与 `05-lifecycle-and-callbacks.md` 补齐 prototype 销毁语义与入口
+- [√] 3.2 更新 docs：在 `docs/beans/spring-core-beans/part-01-ioc-container/04-scope-and-prototype.md` 与 `05-lifecycle-and-callbacks.md` 补齐 prototype 销毁语义与入口
 
 ## 4. Security Check
 - [√] 4.1 执行安全自检（G9）：确保无敏感信息、无高风险命令、无生产环境操作暗示

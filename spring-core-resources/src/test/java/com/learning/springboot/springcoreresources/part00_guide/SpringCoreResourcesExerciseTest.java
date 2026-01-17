@@ -31,8 +31,8 @@ class SpringCoreResourcesExerciseTest {
                     3) 重新运行：`mvn -pl spring-core-resources test`
 
                     建议阅读：
-                    - `spring-core-resources/docs/part-01-resource-abstraction/02-classpath-locations.md`
-                    - `spring-core-resources/docs/part-01-resource-abstraction/04-exists-and-handles.md`
+                    - `docs/resources/spring-core-resources/part-01-resource-abstraction/02-classpath-locations.md`
+                    - `docs/resources/spring-core-resources/part-01-resource-abstraction/04-exists-and-handles.md`
 
                     常见坑：
                     - `getResource(...)` 返回的是 handle，不代表资源一定存在
@@ -62,7 +62,7 @@ class SpringCoreResourcesExerciseTest {
                         2) 写测试：断言 metadata 字段（不要只靠日志）。
 
                         建议阅读：
-                        - `spring-core-resources/docs/part-01-resource-abstraction/05-reading-and-encoding.md`
+                        - `docs/resources/spring-core-resources/part-01-resource-abstraction/05-reading-and-encoding.md`
                         """)
                 .isFalse();
     }
@@ -80,7 +80,7 @@ class SpringCoreResourcesExerciseTest {
                         3) 把结论写到 README 或笔记里。
 
                         建议阅读：
-                        - `spring-core-resources/docs/part-01-resource-abstraction/06-jar-vs-filesystem.md`
+                        - `docs/resources/spring-core-resources/part-01-resource-abstraction/06-jar-vs-filesystem.md`
                         """)
                 .isFalse();
     }
@@ -114,7 +114,7 @@ class SpringCoreResourcesExerciseTest {
                         2) 写测试分别触发两类场景，并断言你设计的行为。
 
                         建议阅读：
-                        - `spring-core-resources/docs/part-01-resource-abstraction/04-exists-and-handles.md`
+                        - `docs/resources/spring-core-resources/part-01-resource-abstraction/04-exists-and-handles.md`
                         """)
                 .isFalse();
     }

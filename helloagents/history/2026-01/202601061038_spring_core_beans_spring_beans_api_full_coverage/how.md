@@ -67,7 +67,7 @@
 
 每批次必须通过：
 - `mvn -pl spring-core-beans test`
-- `python3 scripts/check-md-relative-links.py spring-core-beans/docs`
+- `python3 scripts/check-md-relative-links.py docs/beans/spring-core-beans`
 
 （可选增强）
 - Public API 索引再生并与仓库内索引一致（漂移检查）
