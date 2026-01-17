@@ -4,19 +4,19 @@
 
 ## 从这里开始（建议顺序）
 
-1. [主线时间线](part-00-guide/03-mainline-timeline.md)
-2. [深挖导读](part-00-guide/00-deep-dive-guide.md)
+1. [主线时间线](part-00-guide/117-03-mainline-timeline.md)
+2. [深挖导读](part-00-guide/118-00-deep-dive-guide.md)
 
 ## 顺读主线
 
-- [@Async 心智模型](part-01-async-scheduling/01-async-proxy-mental-model.md)
-- [Executor 与线程模型](part-01-async-scheduling/02-executor-and-threading.md)
-- [异常处理](part-01-async-scheduling/03-exceptions.md)
-- [self-invocation](part-01-async-scheduling/04-self-invocation.md)
-- [@Scheduled 基础](part-01-async-scheduling/05-scheduling-basics.md)
+- [@Async 心智模型](part-01-async-scheduling/119-01-async-proxy-mental-model.md)
+- [Executor 与线程模型](part-01-async-scheduling/120-02-executor-and-threading.md)
+- [异常处理](part-01-async-scheduling/121-03-exceptions.md)
+- [self-invocation](part-01-async-scheduling/122-04-self-invocation.md)
+- [@Scheduled 基础](part-01-async-scheduling/123-05-scheduling-basics.md)
 
 ## 排坑与自检
 
-- [常见坑](appendix/90-common-pitfalls.md)
-- [自检](appendix/99-self-check.md)
+- [常见坑](appendix/124-90-common-pitfalls.md)
+- [自检](appendix/125-99-self-check.md)
 

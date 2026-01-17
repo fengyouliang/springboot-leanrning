@@ -132,9 +132,9 @@
 建议断点：
 
 - “启动时报 BeanDefinitionOverrideException/同名冲突” → **定义层**：这是 BeanDefinition 注册阶段就失败，与实例化/注入无关（本章第 2 节）
-- “我以为覆盖能解决按类型歧义” → **不是覆盖问题，是注入候选选择问题**：同名覆盖 ≠ 同类型多候选（见 [03](../part-01-ioc-container/03-dependency-injection-resolution.md)/[33](33-autowire-candidate-selection-primary-priority-order.md)）
+- “我以为覆盖能解决按类型歧义” → **不是覆盖问题，是注入候选选择问题**：同名覆盖 ≠ 同类型多候选（见 [03](../part-01-ioc-container/014-03-dependency-injection-resolution.md)/[33](33-autowire-candidate-selection-primary-priority-order.md)）
 - “行为在不同环境不一致（有时覆盖、有时报错）” → **定义层配置差异**：检查 allowBeanDefinitionOverriding 的默认值/配置来源（本章第 4 节）
-- “覆盖发生了但结果难 debug” → **定义层可观测性问题**：优先用 `getBeanDefinition(beanName)` 确认最终定义，并结合 [11](../part-02-boot-autoconfig/11-debugging-and-observability.md) 的排查流程
+- “覆盖发生了但结果难 debug” → **定义层可观测性问题**：优先用 `getBeanDefinition(beanName)` 确认最终定义，并结合 [11](../part-02-boot-autoconfig/019-11-debugging-and-observability.md) 的排查流程
 
 - 你能解释清楚：覆盖开关控制的是“同名 BeanDefinition”冲突，而不是“按类型注入”的选择规则吗？
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansBeanDefinitionOverridingLabTest.java`

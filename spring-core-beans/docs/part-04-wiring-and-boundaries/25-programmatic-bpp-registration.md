@@ -333,7 +333,7 @@ addBeanPostProcessor(bpp):
 
 - `AutowireCapableBeanFactory#autowireBean(existing)`：补齐依赖注入
 - `AutowireCapableBeanFactory#initializeBean(existing, beanName)`：补齐初始化与 BPP 链路
-- 销毁阶段：用 `destroyBean` 显式触发销毁回调（与 prototype 销毁语义一起理解，见 [05. 生命周期：初始化、销毁与回调（@PostConstruct/@PreDestroy 等）](../part-01-ioc-container/05-lifecycle-and-callbacks.md)）
+- 销毁阶段：用 `destroyBean` 显式触发销毁回调（与 prototype 销毁语义一起理解，见 [05. 生命周期：初始化、销毁与回调（@PostConstruct/@PreDestroy 等）](../part-01-ioc-container/016-05-lifecycle-and-callbacks.md)）
 
 - 定义层注册入口：`DefaultListableBeanFactory#registerBeanDefinition`、`GenericApplicationContext#registerBean`
 - 实例层注册入口：`DefaultSingletonBeanRegistry#registerSingleton`

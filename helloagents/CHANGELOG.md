@@ -7,8 +7,10 @@
 ### Added
 - `docs-site`：新增 MkDocs 文档站点骨架（`docs-site/mkdocs.yml` + `scripts/docs-site-sync.py` + serve/build 脚本），将各模块 `docs/` 与 `helloagents/wiki` 聚合为可搜索、可侧边栏导航的静态站点；生成目录与 build 输出已加入 `.gitignore`。
 - `docs-site`：新增“写作指南”页面 `docs-site/content/book-style.md`，用于统一书籍化重排原则（主线时间线先行、提示框作为插入段、redirect 保留旧入口）。
+- `docs-site`：在写作指南中新增“章节学习卡片（五问闭环）”规范（知识点 / 怎么使用 / 原理 / 源码入口 / 推荐 Lab），用于把每章的学习目标、可运行入口与源码证据链收敛到第一屏。
 - `docs-site`：新增“主线之书（Book-only）”目录骨架（`docs-site/content/book/`），覆盖 18 模块的跨模块时间线章节树，并新增工具页（Labs 索引 / Debugger Pack / Exercises & Solutions / 迁移规则）。
 - `scripts`：新增 Labs 索引生成脚本 `scripts/generate-book-labs-index.py`（扫描各模块 `src/test/java/*LabTest.java` 生成 `docs-site/content/book/labs-index.md`）。
+- `scripts`：新增“章节学习卡片（五问闭环）”批处理与自检脚本（`scripts/upsert-chapter-cards.py` / `scripts/check-chapter-cards.py` / `scripts/generate-docs-chapter-list.py`），并将检查接入 `scripts/check-docs.sh` 作为闸门，保证全量章节覆盖（198 页）。
 - GitHub Pages：新增自动构建与发布 workflow（`.github/workflows/docs-site-pages.yml`），在 `push main/master` 时构建并发布 `docs-site/.site/`。
 - `helloagents`：新增学习路线图 `helloagents/wiki/learning-path.md`，并在 `helloagents/wiki/overview.md` 与四模块页（Beans/AOP/Tx/Web MVC）增加 Start Here/路线图入口，收敛新读者的“先跑什么/再读什么”路径。
 - `spring-core-beans`：新增 30 分钟快启章节（Start Here），并系统补齐/强化 docs（容器主线、BPP 顺序、FactoryBean、循环依赖、AOT/真实世界等）与可运行证据链；同时更新 `scripts/generate-spring-beans-public-api-index.py` 并重新生成 Appendix 95/96（补齐“坑点与排障”）。
@@ -40,6 +42,9 @@
 ### Removed
 - `scripts`：移除章节契约相关脚本：`scripts/check-chapter-contract.py`、`scripts/ag-contract-docs.py`（不再推荐 A–G 作为写作规范，也不再提供相关闸门/自检工具）。
 ### Changed
+- 根 `README.md`：前置“主线之书（Book）”入口（Book TOC + 两条阅读路径），并按推荐学习顺序串起模块与主线节点，降低新读者找路成本。
+- `docs-site/content/book/`：为主线节点章节补齐“本章可跑入口（最小闭环）”（Lab 命令 + Exercise 路径），让章节具备“读 → 跑 → 改”的独立闭环。
+- `docs-site/content/book/094/116/138`：改写正文为更“像书”的叙事结构（开场问题 → 心智模型 → 主线时间线 → 读者检查点 → 证据链观察点），减少“像说明书”的条目感。
 - `docs-site`：修复 MkDocs 入口脚本参数顺序（`python3 -m mkdocs build/serve -f ...`），并在同步时补齐复制 `helloagents/project.md` 与 `helloagents/history/index.md`，使 `bash scripts/docs-site-build.sh` 在 `--strict` 下可通过。
 - `docs-site`：站点导航新增“写作指南”入口（`docs-site/mkdocs.yml`），并在模块侧边栏目录中自动聚合新增的“主线时间线”章节。
 - `docs-site`：站点导航切换为 Book-only（侧边栏仅展示“主线之书”章节树）；`scripts/docs-site-sync.py` 改为注入书目录，模块 docs 作为素材库/搜索命中入口保留。
@@ -48,6 +53,9 @@
 - `scripts/check-md-relative-links.py`：支持校验站点绝对链接 `/book/...`（映射到 `docs-site/content/book/`），便于模块 docs 使用“redirect 到书章节”的稳定链接形式。
 - `springboot-basics`：试点将模块主线时间线章节迁移到书第 1 章，并保留旧入口作为 redirect（避免断链）。
 - 全模块 docs：停止使用 A–G（A.本章定位…G.小结）“契约式”章节骨架；统一去除字母前缀，并将“核心结论”转换为 summary 提示框，同时将 BOOKIFY 的实验入口提炼为章首提示框（更接近书籍阅读体验）；新增批处理脚本 `scripts/rewrite-docs-book-style.py`。
+- `docs-site/content/book-style.md`：补齐“正文二次书籍化（第二层）”规范：统一叙事节奏（导读→主线推进→关键分支/坑点→证据链→小结与下一章承接），并给出最小模板片段与常见反例修复方式。
+- `scripts`：新增正文二次书籍化批处理脚本 `scripts/rewrite-chapters-booklike-v2.py`（以章节学习卡片为 SSOT，支持 dry-run/report/按模块执行，默认幂等）；并新增可选自检脚本 `scripts/check-booklike-v2.py`，通过 env 开关接入 `scripts/check-docs.sh` 作为可选闸门。
+- 全站章节（modules + book）：对模块 docs SSOT 174 章与 Book 43 页全量执行二次书籍化批处理（补齐导读/证据链/小结承接，清理空块与重复实验入口，redirect 页保持最小形态），并通过 `bash scripts/check-docs.sh` 与 `bash scripts/docs-site-build.sh`（`mkdocs --strict`）验收。
 - 全模块 docs：重排 `<module>/docs/README.md` 为书籍化目录页（第一屏给出主线时间线/导读入口；README 的 Markdown 链接清单作为 teaching coverage 的章节 SSOT）。
 - `spring-core-beans`：试点合并 Part 01 的前两章（原 02 章合并进 01 章），保留 `02-bean-registration.md` 作为 redirect 入口。
 - `springboot-web-mvc`：试点合并 Internals 章节（原 02 章合并进 01 章），保留 `02-argument-resolver-and-binder.md` 作为 redirect 入口。

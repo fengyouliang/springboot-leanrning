@@ -2,6 +2,44 @@
 
 这个仓库是一个面向初学者的 Spring Boot 学习工作区：**一个模块对应一个主题**，每个模块都可以单独运行与测试。
 
+如果你希望“像读书一样学”，本仓库还提供一条跨模块可顺读的 **主线之书（Book）**：按最合理学习顺序把 Boot/Core 机制串起来，并把每个 Markdown 文档视为“书的一章”（每章第一屏提供“五问闭环”+ 推荐 Lab/Test）。
+
+## 阅读方式（像读书一样）
+
+- **顺读主线（推荐）**：从 [`docs-site/content/book/index.md`](docs-site/content/book/index.md) 进入全书目录，按每章顶部的“上一章｜全书目录｜下一章”顺读；每章都配一个推荐 Lab/Test（Exercises 默认 `@Disabled`）。
+- **目标驱动（更快）**：从下方 [模块目录](#模块目录catalog) 选择你关心的主题 → 打开模块 `docs/README.md` 看“主线时间线” → 先跑一个 `*LabTest.java` 把现象变成断言证据 → 再开启 `*ExerciseTest.java` 动手改写。
+
+> 想要可搜索、按“分卷→模块→章节”侧边栏顺读的站点体验：看 [`docs-site/README.md`](docs-site/README.md)（本地预览/构建/Pages 发布）。
+
+## 目录（主线之书 Book TOC）
+
+- 目录页（入口）：[`docs-site/content/book/index.md`](docs-site/content/book/index.md)
+
+<details>
+<summary>展开：主线节点（每模块一章）</summary>
+
+- [第 1 章：Start Here（如何运行、如何读、如何调试）](docs-site/content/book/001-start-here.md)
+- [第 2 章：Boot 启动与配置主线](docs-site/content/book/002-boot-basics-mainline.md)
+- [第 9 章：IoC 容器主线（Beans）](docs-site/content/book/009-ioc-container-mainline.md)
+- [第 27 章：AOP/代理主线](docs-site/content/book/027-aop-proxy-mainline.md)
+- [第 42 章：织入主线（LTW/CTW）](docs-site/content/book/042-aop-weaving-mainline.md)
+- [第 51 章：事务主线（Tx）](docs-site/content/book/051-tx-mainline.md)
+- [第 62 章：Web MVC 请求主线](docs-site/content/book/062-webmvc-mainline.md)
+- [第 84 章：Security 主线](docs-site/content/book/084-security-mainline.md)
+- [第 94 章：Data JPA 主线](docs-site/content/book/094-data-jpa-mainline.md)
+- [第 106 章：Cache 主线](docs-site/content/book/106-cache-mainline.md)
+- [第 116 章：Async/Scheduling 主线](docs-site/content/book/116-async-scheduling-mainline.md)
+- [第 126 章：Events 主线](docs-site/content/book/126-events-mainline.md)
+- [第 138 章：Resources 主线](docs-site/content/book/138-resources-mainline.md)
+- [第 149 章：Profiles 主线](docs-site/content/book/149-profiles-mainline.md)
+- [第 155 章：Validation 主线](docs-site/content/book/155-validation-mainline.md)
+- [第 166 章：Actuator/Observability 主线](docs-site/content/book/166-actuator-observability-mainline.md)
+- [第 172 章：Web Client 主线](docs-site/content/book/172-web-client-mainline.md)
+- [第 182 章：Testing 主线](docs-site/content/book/182-testing-mainline.md)
+- [第 188 章：Business Case 收束](docs-site/content/book/188-business-case.md)
+
+</details>
+
 ## 环境要求
 
 - JDK：`17`
@@ -196,19 +234,19 @@ mvn -pl springboot-basics spring-boot:run
 下面这些“连接线”往往比单个知识点更重要：它们能解释为什么你在不同模块里会遇到同一类现象。
 
 - **代理（Proxy）是共同底座**：AOP、事务（`@Transactional`）、方法参数校验（method validation）都依赖代理机制  
-  - 从机制角度建议先读：[AOP 心智模型](spring-core-aop/docs/part-01-proxy-fundamentals/01-aop-proxy-mental-model.md)、[`@Transactional` 也是代理](spring-core-tx/docs/part-01-transaction-basics/02-transactional-proxy.md)、[方法参数校验也需要代理](spring-core-validation/docs/part-01-validation-core/03-method-validation-proxy.md)
+  - 从机制角度建议先读：[AOP 心智模型](spring-core-aop/docs/part-01-proxy-fundamentals/030-01-aop-proxy-mental-model.md)、[`@Transactional` 也是代理](spring-core-tx/docs/part-01-transaction-basics/055-02-transactional-proxy.md)、[方法参数校验也需要代理](spring-core-validation/docs/part-01-validation-core/160-03-method-validation-proxy.md)
 - **织入（Weaving）是代理的能力上限之外**：当你需要 `call/constructor/get/set/withincode/cflow` 这类 join point 或希望“非 Spring Bean 也能拦截”时，去看 `spring-core-aop-weaving`  
-  - 对照：[`spring-core-aop-weaving` 深挖指南](spring-core-aop-weaving/docs/part-00-guide/00-deep-dive-guide.md)、[Proxy vs Weaving 心智模型](spring-core-aop-weaving/docs/part-01-mental-model/01-proxy-vs-weaving.md)
+  - 对照：[`spring-core-aop-weaving` 深挖指南](spring-core-aop-weaving/docs/part-00-guide/044-00-deep-dive-guide.md)、[Proxy vs Weaving 心智模型](spring-core-aop-weaving/docs/part-01-mental-model/045-01-proxy-vs-weaving.md)
 - **自调用（self-invocation）是代理世界第一大坑**：同一个类里用 `this.xxx()` 调用会绕过代理，因此 AOP/Tx 都可能“不生效”  
-  - 对照：[AOP 自调用陷阱](spring-core-aop/docs/part-01-proxy-fundamentals/03-self-invocation.md)、[Tx 常见坑清单](spring-core-tx/docs/appendix/90-common-pitfalls.md)
+  - 对照：[AOP 自调用陷阱](spring-core-aop/docs/part-01-proxy-fundamentals/032-03-self-invocation.md)、[Tx 常见坑清单](spring-core-tx/docs/appendix/060-90-common-pitfalls.md)
 - **事务边界决定持久化行为**：JPA 的 flush / dirty checking 不是“魔法”，它强依赖事务与 persistence context  
-  - 对照：[JPA Persistence Context](springboot-data-jpa/docs/part-01-data-jpa/02-persistence-context.md)、[事务边界](spring-core-tx/docs/part-01-transaction-basics/01-transaction-boundary.md)
+  - 对照：[JPA Persistence Context](springboot-data-jpa/docs/part-01-data-jpa/098-02-persistence-context.md)、[事务边界](spring-core-tx/docs/part-01-transaction-basics/054-01-transaction-boundary.md)
 - **事件（Events）与事务（Tx）的时机关系**：同步事件 vs after-commit 事件（`@TransactionalEventListener`）能解释“回滚了但监听器为什么执行了/没执行”  
-  - 从现象入手：[spring-core-events](spring-core-events/docs/README.md)、[`@TransactionalEventListener`（after-commit）](spring-core-events/docs/part-02-async-and-transactional/07-transactional-event-listener.md)、[springboot-business-case](springboot-business-case/docs/README.md)
+  - 从现象入手：[spring-core-events](spring-core-events/docs/README.md)、[`@TransactionalEventListener`（after-commit）](spring-core-events/docs/part-02-async-and-transactional/135-07-transactional-event-listener.md)、[springboot-business-case](springboot-business-case/docs/README.md)
 - **资源（Resources）是很多能力的地基**：配置文件、classpath 扫描、jar/本地差异，最终都会回到 `Resource` 抽象  
-  - 对照：[Resource 抽象](spring-core-resources/docs/part-01-resource-abstraction/01-resource-abstraction.md)、[jar vs filesystem](spring-core-resources/docs/part-01-resource-abstraction/06-jar-vs-filesystem.md)
+  - 对照：[Resource 抽象](spring-core-resources/docs/part-01-resource-abstraction/141-01-resource-abstraction.md)、[jar vs filesystem](spring-core-resources/docs/part-01-resource-abstraction/146-06-jar-vs-filesystem.md)
 - **测试切片 vs 全量上下文**：`@DataJpaTest` / `@WebMvcTest` 用来快速验证机制，`@SpringBootTest` 更接近集成链路  
-  - 对照：[springboot-testing](springboot-testing/docs/README.md)、[`@DataJpaTest` 切片](springboot-data-jpa/docs/part-01-data-jpa/06-datajpatest-slice.md)
+  - 对照：[springboot-testing](springboot-testing/docs/README.md)、[`@DataJpaTest` 切片](springboot-data-jpa/docs/part-01-data-jpa/102-06-datajpatest-slice.md)
 
 ## 常见问题
 

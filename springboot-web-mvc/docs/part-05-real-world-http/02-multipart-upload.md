@@ -43,6 +43,6 @@
 
 - Lab：`BootWebMvcRealWorldHttpLabTest`
 
-上一章：[part-05-real-world-http/01-cors-preflight.md](01-cors-preflight.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-05-real-world-http/03-download-and-streaming.md](03-download-and-streaming.md)
+上一章：[part-05-real-world-http/01-cors-preflight.md](078-01-cors-preflight.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-05-real-world-http/03-download-and-streaming.md](03-download-and-streaming.md)
 
 <!-- BOOKIFY:END -->

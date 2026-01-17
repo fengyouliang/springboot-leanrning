@@ -4,32 +4,32 @@
 
 ## 从这里开始（建议顺序）
 
-1. [主线时间线](part-00-guide/03-mainline-timeline.md)
-2. [深挖导读](part-00-guide/00-deep-dive-guide.md)
-3. [30 分钟快速闭环](part-00-guide/01-quickstart-30min.md)
-4. [断点图（排障优先）](part-00-guide/02-breakpoint-map.md)
+1. [主线时间线](part-00-guide/010-03-mainline-timeline.md)
+2. [深挖导读](part-00-guide/011-00-deep-dive-guide.md)
+3. [30 分钟快速闭环](part-00-guide/012-01-quickstart-30min.md)
+4. [断点图（排障优先）](part-00-guide/013-02-breakpoint-map.md)
 
 ## 顺读主线（先把容器跑通）
 
-1. [Bean 心智模型（含注册入口）](part-01-ioc-container/01-bean-mental-model.md)
-2. [依赖解析与注入](part-01-ioc-container/03-dependency-injection-resolution.md)
-3. [作用域与 prototype](part-01-ioc-container/04-scope-and-prototype.md)
-4. [生命周期与回调](part-01-ioc-container/05-lifecycle-and-callbacks.md)
-5. [扩展点：Post-Processor](part-01-ioc-container/06-post-processors.md)
-6. [配置类增强](part-01-ioc-container/07-configuration-enhancement.md)
-7. [Spring Boot 自动配置如何落到容器](part-02-boot-autoconfig/10-spring-boot-auto-configuration.md)
-8. [调试与观测](part-02-boot-autoconfig/11-debugging-and-observability.md)
+1. [Bean 心智模型（含注册入口）](part-01-ioc-container/020-01-bean-mental-model.md)
+2. [依赖解析与注入](part-01-ioc-container/014-03-dependency-injection-resolution.md)
+3. [作用域与 prototype](part-01-ioc-container/015-04-scope-and-prototype.md)
+4. [生命周期与回调](part-01-ioc-container/016-05-lifecycle-and-callbacks.md)
+5. [扩展点：Post-Processor](part-01-ioc-container/017-06-post-processors.md)
+6. [配置类增强](part-01-ioc-container/018-07-configuration-enhancement.md)
+7. [Spring Boot 自动配置如何落到容器](part-02-boot-autoconfig/021-10-spring-boot-auto-configuration.md)
+8. [调试与观测](part-02-boot-autoconfig/019-11-debugging-and-observability.md)
 
 ## 深挖索引（按 Part）
 
-- Part 01：IoC Container（基础主线）：[01](part-01-ioc-container/01-bean-mental-model.md)
-- Part 02：Boot Autoconfig（把 Boot 接回容器）：[10](part-02-boot-autoconfig/10-spring-boot-auto-configuration.md)
-- Part 03：Container Internals（内部机制与顺序）：[12](part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
-- Part 04：Wiring & Boundaries（边界、坑点与真实世界）：[18](part-04-wiring-and-boundaries/18-lazy-semantics.md)
-- Part 05：AOT & Real World（AOT/Native/输入形态）：[40](part-05-aot-and-real-world/40-aot-and-native-overview.md)
+- Part 01：IoC Container（基础主线）：[01](part-01-ioc-container/020-01-bean-mental-model.md)
+- Part 02：Boot Autoconfig（把 Boot 接回容器）：[10](part-02-boot-autoconfig/021-10-spring-boot-auto-configuration.md)
+- Part 03：Container Internals（内部机制与顺序）：[12](part-03-container-internals/022-12-container-bootstrap-and-infrastructure.md)
+- Part 04：Wiring & Boundaries（边界、坑点与真实世界）：[18](part-04-wiring-and-boundaries/023-18-lazy-semantics.md)
+- Part 05：AOT & Real World（AOT/Native/输入形态）：[40](part-05-aot-and-real-world/024-40-aot-and-native-overview.md)
 
 ## 排坑与自检
 
-- [常见坑](appendix/90-common-pitfalls.md)
-- [自检](appendix/99-self-check.md)
+- [常见坑](appendix/025-90-common-pitfalls.md)
+- [自检](appendix/026-99-self-check.md)
 

@@ -15,6 +15,6 @@
 
 - Lab：`BootWebMvcInternalsLabTest` / `BootWebMvcLabTest` / `BootWebMvcBindingDeepDiveLabTest`
 
-上一章：[part-03-web-mvc-internals/01-dispatcherservlet-call-chain.md](01-dispatcherservlet-call-chain.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-03-web-mvc-internals/03-message-converters-and-return-values.md](03-message-converters-and-return-values.md)
+上一章：[part-03-web-mvc-internals/01-dispatcherservlet-call-chain.md](067-01-dispatcherservlet-call-chain.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-03-web-mvc-internals/03-message-converters-and-return-values.md](068-03-message-converters-and-return-values.md)
 
 <!-- BOOKIFY:END -->

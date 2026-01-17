@@ -149,6 +149,6 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansAotRuntimeHintsLabTest test
 - Lab：`SpringCoreBeansAotRuntimeHintsLabTest`
 - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansAotRuntimeHintsLabTest.java`
 
-上一章：[40. AOT / Native 总览：为什么“JVM 能跑”不等于“Native 能跑”](40-aot-and-native-overview.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[42. XML → BeanDefinitionReader：定义层解析与错误分型](42-xml-bean-definition-reader.md)
+上一章：[40. AOT / Native 总览：为什么“JVM 能跑”不等于“Native 能跑”](024-40-aot-and-native-overview.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[42. XML → BeanDefinitionReader：定义层解析与错误分型](42-xml-bean-definition-reader.md)
 
 <!-- BOOKIFY:END -->

@@ -4,16 +4,16 @@
 
 ## 从这里开始（建议顺序）
 
-1. [主线时间线](part-00-guide/03-mainline-timeline.md)
-2. [深挖导读](part-00-guide/00-deep-dive-guide.md)
+1. [主线时间线](part-00-guide/085-03-mainline-timeline.md)
+2. [深挖导读](part-00-guide/086-00-deep-dive-guide.md)
 
 ## 顺读主线
 
-- [基础认证与授权](part-01-security/01-basic-auth-and-authorization.md)
-- [CSRF](part-01-security/02-csrf.md)
-- [方法安全与代理](part-01-security/03-method-security-and-proxy.md)
-- [FilterChain 与顺序](part-01-security/04-filter-chain-and-order.md)
-- [JWT 无状态](part-01-security/05-jwt-stateless.md)
+- [基础认证与授权](part-01-security/087-01-basic-auth-and-authorization.md)
+- [CSRF](part-01-security/088-02-csrf.md)
+- [方法安全与代理](part-01-security/089-03-method-security-and-proxy.md)
+- [FilterChain 与顺序](part-01-security/090-04-filter-chain-and-order.md)
+- [JWT 无状态](part-01-security/091-05-jwt-stateless.md)
 
 ## 关联模块（按需串联）
 
@@ -22,6 +22,6 @@
 
 ## 排坑与自检
 
-- [常见坑](appendix/90-common-pitfalls.md)
-- [自检](appendix/99-self-check.md)
+- [常见坑](appendix/092-90-common-pitfalls.md)
+- [自检](appendix/093-99-self-check.md)
 

@@ -100,7 +100,7 @@ prototype 的语义是：
 
 ## 排障分流：这是定义层问题还是实例层问题？
 
-- “`@PostConstruct` 没触发/注入为 null” → **优先定义层/基础设施问题**：容器是否具备注解处理器？（见 [12](12-container-bootstrap-and-infrastructure.md)）
+- “`@PostConstruct` 没触发/注入为 null” → **优先定义层/基础设施问题**：容器是否具备注解处理器？（见 [12](022-12-container-bootstrap-and-infrastructure.md)）
 - “`@PreDestroy` 没触发” → **优先实例层/生命周期语义问题**：是不是 prototype？context 是否真的 close？（本章第 2 节）
 - “BPP 里依赖复杂 bean 导致顺序怪异” → **实例层 + 顺序问题**：BPP 本身会很早创建/注册，必要时拆分依赖（对照 [14](14-post-processor-ordering.md)、[25](../part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md)）
 - “我以为 destroy 回调一定会执行” → **实例层 + scope 语义问题**：prototype 的销毁不由容器托管（本章第 2 节）
@@ -209,6 +209,6 @@ prototype 的语义是：
 - Lab：`SpringCoreBeansLifecycleCallbackOrderLabTest`
 - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansLifecycleCallbackOrderLabTest.java`
 
-上一章：[16. early reference 与循环依赖：getEarlyBeanReference](16-early-reference-and-circular.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[18. @Lazy 的真实语义：延迟的是谁、延迟到哪一步](../part-04-wiring-and-boundaries/18-lazy-semantics.md)
+上一章：[16. early reference 与循环依赖：getEarlyBeanReference](16-early-reference-and-circular.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[18. @Lazy 的真实语义：延迟的是谁、延迟到哪一步](../part-04-wiring-and-boundaries/023-18-lazy-semantics.md)
 
 <!-- BOOKIFY:END -->

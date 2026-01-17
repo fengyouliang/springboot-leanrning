@@ -116,7 +116,7 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansAutowireCapableBeanFactoryLabTes
 ## 常见坑与边界
 
 - [25. 手工添加 BeanPostProcessor：顺序与 Ordered 的陷阱](../part-04-wiring-and-boundaries/25-programmatic-bpp-registration.md)
-- [05. 初始化、销毁与回调](../part-01-ioc-container/05-lifecycle-and-callbacks.md)
+- [05. 初始化、销毁与回调](../part-01-ioc-container/016-05-lifecycle-and-callbacks.md)
 
 ## 4. 常见误区
 

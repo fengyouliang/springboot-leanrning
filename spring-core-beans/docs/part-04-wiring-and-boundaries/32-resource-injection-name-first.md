@@ -37,7 +37,7 @@
 
 对照阅读：
 
-- [12. 容器启动与基础设施处理器：为什么注解能工作？](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
+- [12. 容器启动与基础设施处理器：为什么注解能工作？](../part-03-container-internals/022-12-container-bootstrap-and-infrastructure.md)
 
 ## 2. 现象：注册 processors 后，`@Resource` 默认按字段名注入（name-first）
 
@@ -82,9 +82,9 @@
 
 ## 6. 延伸阅读（把注入模型连起来）
 
-- DI 候选选择（类型/名称/Qualifier/Primary）：[03. 依赖注入解析](../part-01-ioc-container/03-dependency-injection-resolution.md)
+- DI 候选选择（类型/名称/Qualifier/Primary）：[03. 依赖注入解析](../part-01-ioc-container/014-03-dependency-injection-resolution.md)
 - 注入发生在容器的哪个阶段：[`postProcessProperties` 与 field vs constructor](30-injection-phase-field-vs-constructor.md)
-- 注解能力从哪来：[`registerAnnotationConfigProcessors`](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
+- 注解能力从哪来：[`registerAnnotationConfigProcessors`](../part-03-container-internals/022-12-container-bootstrap-and-infrastructure.md)
 
 入口：
 
@@ -156,7 +156,7 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansResourceInjectionLabTest test
 - “`@Resource` 字段一直为 null” → **优先定义层/基础设施问题**：容器是否注册了 `CommonAnnotationBeanPostProcessor`？（看 `registerAnnotationConfigProcessors`）
 - “注入到了错误的 bean / name 对不上” → **实例层（name-first 解析）**：字段名/显式 name 是否真的对应 beanName？（本章第 2 节）
 - “name 找不到后兜底 type 还是报多候选” → **实例层（候选解析）**：转到 [33](33-autowire-candidate-selection-primary-priority-order.md) 的选择规则
-- “以为它等价于 `@Autowired`” → **概念差异**：`@Resource` 默认 name-first，`@Autowired` 默认 type-first（对照 [03](../part-01-ioc-container/03-dependency-injection-resolution.md)）
+- “以为它等价于 `@Autowired`” → **概念差异**：`@Resource` 默认 name-first，`@Autowired` 默认 type-first（对照 [03](../part-01-ioc-container/014-03-dependency-injection-resolution.md)）
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansResourceInjectionLabTest.java`
 推荐断点：`CommonAnnotationBeanPostProcessor#postProcessProperties`、`CommonAnnotationBeanPostProcessor#autowireResource`、`DefaultListableBeanFactory#doResolveDependency`
 

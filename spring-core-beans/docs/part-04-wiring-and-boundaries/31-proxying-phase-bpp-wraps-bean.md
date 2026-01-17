@@ -229,7 +229,7 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansProxyingPhaseLabTest test
 - “AOP/事务/拦截器不生效” → **优先实例层（调用链是否走代理）**：入口调用是否发生在 proxy 上？self-invocation 必然绕过（本章第 2 节）
 - “按实现类注入/按实现类 getBean 失败” → **实例层（代理暴露类型）**：JDK proxy 只实现接口（本章第 3 节 + `doResolveDependency`）
 - “我以为容器里的 bean 一定是原始对象” → **实例层机制**：BPP 可以替换最终暴露对象（本章第 1 节 + `applyBeanPostProcessorsAfterInitialization`）
-- “不知道从哪里下断点” → **回到容器时间线**：从 [00](../part-00-guide/00-deep-dive-guide.md) 的 `initializeBean/doCreateBean` 入口开始定位
+- “不知道从哪里下断点” → **回到容器时间线**：从 [00](../part-00-guide/011-00-deep-dive-guide.md) 的 `initializeBean/doCreateBean` 入口开始定位
 
 - `beanName`：给断点加条件只看目标 bean（否则命中会很多）
 - `existingBean` / `bean`（入参）：原始对象引用

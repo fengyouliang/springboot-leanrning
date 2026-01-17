@@ -45,6 +45,6 @@
 
 - Lab：`BootWebMvcContractJacksonLabTest`
 
-上一章：[part-04-rest-contract/01-content-negotiation-406-415.md](01-content-negotiation-406-415.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-04-rest-contract/03-error-contract-hardening.md](03-error-contract-hardening.md)
+上一章：[part-04-rest-contract/01-content-negotiation-406-415.md](077-01-content-negotiation-406-415.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-04-rest-contract/03-error-contract-hardening.md](03-error-contract-hardening.md)
 
 <!-- BOOKIFY:END -->

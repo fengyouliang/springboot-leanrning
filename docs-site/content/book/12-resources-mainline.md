@@ -1,29 +1,17 @@
-# 第 12 章：Resources 主线
+# （Redirect）Resources 主线（旧入口）
 
-这一章解决的问题是：**为什么 `classpath:` 在 IDE 里能读到、打成 jar 后就读不到，为什么 pattern 扫描会漏/多，`exists()` 和 `getFile()` 有什么陷阱**。
+<!-- CHAPTER-CARD:START -->
+!!! summary "章节学习卡片（五问闭环）"
 
----
+    - 知识点：Redirect（旧路径兼容）
+    - 怎么使用：本页为旧路径保留；请跳转到新章节继续阅读与运行。
+    - 原理：通过 redirect 页面保留历史入口，避免断链与读者迷路；正文与可跑入口统一在新章节维护。
+    - 源码入口：见新章节
+    - 推荐 Lab：见新章节
+<!-- CHAPTER-CARD:END -->
 
-## 主线（按时间线顺读）
+## 已迁移
+本页为旧入口兼容页，正文已迁移到：[新位置](138-resources-mainline.md)。
 
-1. 统一抽象：`Resource`（file/classpath/url/byte array 等）
-2. 加载入口：`ResourceLoader` / `ApplicationContext` 提供统一加载能力
-3. pattern 扫描：`PathMatchingResourcePatternResolver` 支持 `classpath*:` 等语法
-4. jar 语义差异：能 `getInputStream()` 不代表能 `getFile()`
-5. 常见坑：路径前缀、相对路径基准、jar 场景下 file 语义失效
-
----
-
-## 深挖入口（模块 docs）
-
-- 模块目录页：[`spring-core-resources/docs/README.md`](../spring-core-resources/docs/README.md)
-- 模块主线时间线（含可跑入口）：[`spring-core-resources/docs/part-00-guide/03-mainline-timeline.md`](../spring-core-resources/docs/part-00-guide/03-mainline-timeline.md)
-
----
-
-## 下一章怎么接
-
-配置与资源加载之后，最容易被忽略但极其常见的“开关”是 Profile：它同时影响配置与 Bean 注册。我们单独把它串一遍。
-
-- 下一章：[第 13 章：Profiles 主线](13-profiles-mainline.md)
-
+## 返回
+- [全书目录](/book/)

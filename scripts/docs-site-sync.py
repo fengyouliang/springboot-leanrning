@@ -14,6 +14,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import shutil
 import sys
@@ -28,6 +29,18 @@ GENERATED_MKDOCS_YML = SITE_ROOT / ".generated" / "mkdocs.yml"
 BASE_MKDOCS_YML = SITE_ROOT / "mkdocs.yml"
 AUTO_NAV_BEGIN = "# BEGIN AUTO BOOK NAV"
 AUTO_NAV_END = "# END AUTO BOOK NAV"
+BOOK_ORDER_CONFIG = REPO_ROOT / "scripts" / "book-order.json"
+
+GLOBAL_PREFIX_RE = re.compile(r"^(?P<no>\d{3})-(?P<rest>.+)$")
+LEGACY_BOOK_PREFIX_RE = re.compile(r"^(?P<no>\d{2})-(?P<rest>.+)$")
+
+BOOK_TOOL_PAGES = {
+    "index.md",
+    "labs-index.md",
+    "debugger-pack.md",
+    "exercises-and-solutions.md",
+    "migration-rules.md",
+}
 
 
 def discover_modules(repo_root: Path) -> list[str]:
@@ -101,14 +114,14 @@ def sync_modules(modules: list[str]) -> None:
 
 
 def generate_modules_index(modules: list[str]) -> None:
-    # 主题顺序（未列出的模块按名称追加）
-    preferred_order = [
-        "springboot-basics",
-        "spring-core-beans",
-        "spring-core-aop",
-        "spring-core-tx",
-        "springboot-web-mvc",
-    ]
+    # 模块顺序（全书 SSOT）
+    preferred_order: list[str] = []
+    if BOOK_ORDER_CONFIG.is_file():
+        try:
+            cfg = json.loads(BOOK_ORDER_CONFIG.read_text(encoding="utf-8"))
+            preferred_order = list(cfg.get("module_order") or [])
+        except Exception:
+            preferred_order = []
 
     ordered: list[str] = []
     for m in preferred_order:
@@ -207,196 +220,183 @@ def format_group_title(group: str) -> str:
     return group.replace("-", " ")
 
 
-def build_module_nav_entries(module: str) -> list[str]:
+def strip_numeric_prefix_from_stem(stem: str) -> str:
+    m = GLOBAL_PREFIX_RE.match(stem)
+    if m:
+        return m.group("rest")
+    m = LEGACY_BOOK_PREFIX_RE.match(stem)
+    if m:
+        return m.group("rest")
+    return stem
+
+
+def load_book_order_config() -> dict:
+    if not BOOK_ORDER_CONFIG.is_file():
+        raise SystemExit(f"[ERROR] 缺少全书顺序配置：{BOOK_ORDER_CONFIG}")
+    return json.loads(BOOK_ORDER_CONFIG.read_text(encoding="utf-8"))
+
+
+def find_book_page_by_slug(slug: str) -> Path:
+    book_root = CONTENT_ROOT / "book"
+
+    candidates: list[Path] = []
+    for md in sorted(book_root.glob("*.md")):
+        if not md.is_file():
+            continue
+        if md.name in BOOK_TOOL_PAGES:
+            continue
+        if strip_numeric_prefix_from_stem(md.stem) == slug:
+            candidates.append(md)
+
+    if not candidates:
+        raise SystemExit(f"[ERROR] 未找到 book 主线章节页：slug={slug}")
+
+    # 兼容旧路径（例如 00-18 的 redirect 页面）时，优先选择全局 3 位编号（001-xxx）。
+    def score(p: Path) -> tuple[int, int, str]:
+        m = GLOBAL_PREFIX_RE.match(p.stem)
+        if m:
+            return (0, int(m.group("no")), p.name)
+        m2 = LEGACY_BOOK_PREFIX_RE.match(p.stem)
+        if m2:
+            return (1, int(m2.group("no")), p.name)
+        return (2, 9999, p.name)
+
+    return min(candidates, key=score)
+
+
+def content_rel_path(md: Path) -> str:
+    return md.relative_to(CONTENT_ROOT).as_posix()
+
+
+def iter_module_chapters_ordered_by_last_occurrence(module: str) -> list[Path]:
     module_root = REPO_ROOT / module
-    docs_root = module_root / "docs"
-    if not docs_root.exists():
+    readme = module_root / "docs" / "README.md"
+    if not readme.is_file():
         return []
 
-    # 分组：按 docs 下的一级目录（part-xx-*/appendix）
-    groups: dict[str, list[Path]] = {}
-    for md in sorted(docs_root.rglob("*.md")):
-        rel = md.relative_to(docs_root)
-        if rel.name == "README.md":
+    md_link_re = re.compile(r"(!?)\[([^\]]*)\]\(([^)]+)\)")
+    scheme_re = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.-]*:")
+
+    def is_external(dest: str) -> bool:
+        if dest.startswith("#") or dest.startswith("//"):
+            return True
+        return bool(scheme_re.match(dest))
+
+    def normalize(raw: str) -> str | None:
+        dest = raw.strip()
+        if not dest:
+            return None
+        if dest.startswith("<") and dest.endswith(">"):
+            dest = dest[1:-1].strip()
+        if " " in dest or "\t" in dest:
+            dest = re.split(r"\s+", dest, maxsplit=1)[0]
+        if "#" in dest:
+            dest = dest.split("#", 1)[0]
+        return dest or None
+
+    index = 0
+    last: dict[Path, int] = {}
+    content = readme.read_text(encoding="utf-8", errors="replace")
+    for m in md_link_re.finditer(content):
+        is_image = m.group(1) == "!"
+        if is_image:
             continue
-        if len(rel.parts) < 2:
-            # docs 根目录下的零散 md（通常不会有），避免污染目录
+        target_raw = m.group(3)
+        index += 1
+        target = normalize(target_raw)
+        if target is None or is_external(target):
             continue
-        group = rel.parts[0]
-        groups.setdefault(group, []).append(md)
-
-    def group_sort_key(name: str) -> tuple[int, int, str]:
-        if name.startswith("part-"):
-            rest = name.removeprefix("part-")
-            head = rest.split("-", 1)[0]
-            if head.isdigit():
-                return (0, int(head), name)
-            return (0, 999, name)
-        if name == "appendix":
-            return (2, 0, name)
-        return (1, 0, name)
-
-    lines: list[str] = []
-    lines.append(f'          - {yaml_quote(module)}:')
-    lines.append(f'              - {yaml_quote("目录")}: {module}/docs/README.md')
-
-    for group in sorted(groups.keys(), key=group_sort_key):
-        title = format_group_title(group)
-        lines.append(f'              - {yaml_quote(title)}:')
-        for md in sorted(groups[group], key=lambda p: p.name):
-            rel_to_module = md.relative_to(module_root).as_posix()
-            page_title = read_first_h1_title(md)
-            lines.append(f'                  - {yaml_quote(page_title)}: {module}/{rel_to_module}')
-
-    return lines
-
-
-BOOK_CHAPTER_RE = re.compile(r"^(?P<no>\d{2})-(?P<slug>.+)\.md$")
-
-
-def fmt_token_for_nav(token: str) -> str:
-    mapping = {
-        "ioc": "IoC",
-        "aop": "AOP",
-        "mvc": "MVC",
-        "tx": "Tx",
-        "jpa": "JPA",
-        "ltw": "LTW",
-        "ctw": "CTW",
-        "sse": "SSE",
-        "api": "API",
-        "http": "HTTP",
-        "json": "JSON",
-        "xml": "XML",
-        "aot": "AOT",
-    }
-    if token in mapping:
-        return mapping[token]
-    if token.isdigit():
-        return token
-    if not token:
-        return token
-    return token[:1].upper() + token[1:].lower()
-
-
-def scan_book_pages(book_root: Path) -> tuple[list[tuple[int, Path]], list[Path]]:
-    """
-    扫描 docs-site/content/book 下的页面：
-
-    - 章节页：NN-*.md（NN 为两位数字）
-    - 附录页：其它 .md（例如 labs-index.md）
-    """
-    chapters: list[tuple[int, Path]] = []
-    appendix: list[Path] = []
-
-    if not book_root.is_dir():
-        return chapters, appendix
-
-    for md in sorted(book_root.glob("*.md")):
-        if md.name == "index.md":
+        if not target.endswith(".md"):
             continue
-        m = BOOK_CHAPTER_RE.match(md.name)
-        if m:
-            chapters.append((int(m.group("no")), md))
-        else:
-            appendix.append(md)
+        chapter = (readme.parent / target).resolve()
+        try:
+            chapter.relative_to(REPO_ROOT)
+        except ValueError:
+            continue
+        if "/docs/" not in chapter.as_posix():
+            continue
+        if chapter == readme.resolve():
+            continue
+        last[chapter] = index
 
-    # 章节按编号排序（同号按文件名稳定排序）
-    chapters = sorted(chapters, key=lambda x: (x[0], x[1].name))
-    return chapters, appendix
-
-
-def short_chapter_nav_title(chapter_no: int, md_path: Path) -> str:
-    # 优先给出“短目录标题”（更像书的目录）
-    fixed: dict[int, str] = {
-        0: "00 Start Here",
-        1: "01 Boot",
-        2: "02 IoC（Beans）",
-        3: "03 AOP/Proxy",
-        4: "04 Weaving",
-        5: "05 Tx",
-        6: "06 Web MVC",
-        7: "07 Security",
-        8: "08 Data JPA",
-        9: "09 Cache",
-        10: "10 Async/Scheduling",
-        11: "11 Events",
-        12: "12 Resources",
-        13: "13 Profiles",
-        14: "14 Validation",
-        15: "15 Actuator",
-        16: "16 Web Client",
-        17: "17 Testing",
-        18: "18 Business Case",
-    }
-    if chapter_no in fixed:
-        return fixed[chapter_no]
-
-    # fallback：用文件名推导（去掉 NN- 前缀 + 常见尾缀），尽量短
-    stem = md_path.stem
-    prefix = f"{chapter_no:02d}-"
-    if stem.startswith(prefix):
-        stem = stem[len(prefix) :]
-    stem = stem.replace("-mainline", "").replace("-", " ").strip()
-    tokens = [fmt_token_for_nav(t) for t in stem.split() if t]
-    title = " ".join(tokens).strip()
-    if not title:
-        title = md_path.stem
-    return f"{chapter_no:02d} {title}"
+    return [p for (p, _) in sorted(last.items(), key=lambda it: it[1])]
 
 
-def build_book_only_nav_lines(modules: list[str]) -> list[str]:
+def build_global_book_nav_lines() -> list[str]:
     """
-    生成注入到 mkdocs.yml 的 Book-only 导航：
+    生成注入到 mkdocs.yml 的“全书目录”导航：
 
-    - 章节按“分卷（Part）”分组
-    - 目录标题短化（nav title 短，正文标题可长）
-    - 自动扫描 docs-site/content/book（新增章节无需改脚本）
+    - 以 scripts/book-order.json 为 SSOT（模块顺序 + 分卷）
+    - 每个模块：主线章节（Book-only）→ 模块目录页 → 模块章节清单（按 docs/README.md 链接顺序）
+    - book/index.md 与工具页保留为目录/附录
     """
+    cfg = load_book_order_config()
+
+    parts: list[dict] = list(cfg.get("parts") or [])
+    module_order: list[str] = list(cfg.get("module_order") or [])
+    slug_by_module: dict[str, str] = dict(cfg.get("book", {}).get("mainline_slug_by_module", {}) or {})
+    start_here_slug: str = str(cfg.get("book", {}).get("start_here_slug") or "start-here")
+
+    # 验证模块顺序配置至少覆盖站点实际模块
+    actual_modules = discover_modules(REPO_ROOT)
+    unknown = [m for m in module_order if m not in actual_modules]
+    if unknown:
+        raise SystemExit(f"[ERROR] book-order.json module_order 包含未知模块：{unknown}")
+
     auto_lines: list[str] = []
 
-    book_root = CONTENT_ROOT / "book"
-    chapters, appendix_pages = scan_book_pages(book_root)
-    if not chapters:
-        print("[WARN] 未发现任何 book 章节页（docs-site/content/book/NN-*.md）。", file=sys.stderr)
-
-    # 分卷（保持编号连续，避免目录顺序看起来“跳号”）
-    part_defs: list[tuple[str, int, int]] = [
-        ("Part I：启动与配置", 0, 1),
-        ("Part II：容器（Beans）", 2, 2),
-        ("Part III：AOP / 事务", 3, 5),
-        ("Part IV：Web（MVC / Security）", 6, 7),
-        ("Part V：数据与基础设施", 8, 13),
-        ("Part VI：质量与交付", 14, 18),
-    ]
-
-    def part_for(no: int) -> str:
-        for title, start, end in part_defs:
-            if start <= no <= end:
-                return title
-        return "Part X：未归类"
-
-    parts: dict[str, list[tuple[int, Path]]] = {}
-    for no, md in chapters:
-        parts.setdefault(part_for(no), []).append((no, md))
-
-    # 按 part_defs 顺序输出；未归类放最后
-    for title, _, _ in part_defs:
-        if title not in parts:
+    # 分卷输出（按 parts 顺序）；未被 parts 覆盖的模块放最后兜底
+    part_modules: set[str] = set()
+    for part in parts:
+        title = str(part.get("title") or "").strip()
+        modules_in_part = list(part.get("modules") or [])
+        if not title or not modules_in_part:
             continue
+        for m in modules_in_part:
+            part_modules.add(m)
+
         auto_lines.append(f"      - {yaml_quote(title)}:")
-        for no, md in parts[title]:
-            auto_lines.append(f"          - {yaml_quote(short_chapter_nav_title(no, md))}: book/{md.name}")
 
-    if "Part X：未归类" in parts:
+        # Start Here 放在 Part I 第一行（更像书的序章）
+        if "启动与配置" in title:
+            start_here_page = find_book_page_by_slug(start_here_slug)
+            auto_lines.append(
+                f"          - {yaml_quote(read_first_h1_title(start_here_page))}: {content_rel_path(start_here_page)}"
+            )
+
+        for module in modules_in_part:
+            auto_lines.append(f"          - {yaml_quote(module)}:")
+
+            slug = slug_by_module.get(module)
+            if not slug:
+                raise SystemExit(f"[ERROR] book-order.json 缺少主线章节映射：module={module}")
+            book_page = find_book_page_by_slug(slug)
+            auto_lines.append(
+                f"              - {yaml_quote(read_first_h1_title(book_page))}: {content_rel_path(book_page)}"
+            )
+            auto_lines.append(f"              - {yaml_quote('模块目录')}: {module}/docs/README.md")
+
+            for md in iter_module_chapters_ordered_by_last_occurrence(module):
+                page_title = read_first_h1_title(md)
+                rel_to_repo = md.relative_to(REPO_ROOT).as_posix()
+                auto_lines.append(f"              - {yaml_quote(page_title)}: {rel_to_repo}")
+
+    # 未归类模块（理论上不应出现）
+    remaining = [m for m in module_order if m not in part_modules]
+    if remaining:
         auto_lines.append(f"      - {yaml_quote('Part X：未归类')}:")
-        for no, md in parts["Part X：未归类"]:
-            auto_lines.append(f"          - {yaml_quote(short_chapter_nav_title(no, md))}: book/{md.name}")
+        for module in remaining:
+            auto_lines.append(f"          - {yaml_quote(module)}:")
+            auto_lines.append(f"              - {yaml_quote('模块目录')}: {module}/docs/README.md")
+            for md in iter_module_chapters_ordered_by_last_occurrence(module):
+                page_title = read_first_h1_title(md)
+                rel_to_repo = md.relative_to(REPO_ROOT).as_posix()
+                auto_lines.append(f"              - {yaml_quote(page_title)}: {rel_to_repo}")
 
-    # 附录（分区更清晰：工具/知识库/模块入口/其它页面）
+    # 附录（工具/参考/知识库/模块总览）
     auto_lines.append(f"      - {yaml_quote('附录')}:")
 
-    # 1) 工具页（固定顺序）
+    # 工具页（固定顺序）
     auto_lines.append(f"          - {yaml_quote('工具')}:")
     tool_pages = [
         ("Labs 索引", "book/labs-index.md"),
@@ -407,7 +407,7 @@ def build_book_only_nav_lines(modules: list[str]) -> list[str]:
     for title, path in tool_pages:
         auto_lines.append(f"              - {yaml_quote(title)}: {path}")
 
-    # 2) 参考（写作指南 + 知识库）
+    # 参考（写作指南 + 知识库）
     auto_lines.append(f"          - {yaml_quote('参考')}:")
     auto_lines.append(f"              - {yaml_quote('写作指南')}: book-style.md")
     auto_lines.append(f"              - {yaml_quote('知识库')}:")
@@ -420,30 +420,19 @@ def build_book_only_nav_lines(modules: list[str]) -> list[str]:
     for title, path in kb_pages:
         auto_lines.append(f"                  - {yaml_quote(title)}: {path}")
 
-    # 3) 模块 docs 快速入口（素材库）
-    auto_lines.append(f"          - {yaml_quote('模块入口（素材库）')}:")
-    auto_lines.append(f"              - {yaml_quote('模块总览')}: modules/index.md")
-    for module in sorted(modules):
-        auto_lines.append(f"              - {yaml_quote(module)}: {module}/docs/README.md")
-
-    # 4) book/ 目录下其它未被固定索引覆盖的页面（自动发现，避免漏页）
-    known_appendix = {Path(p).name for _, p in tool_pages}
-    remaining = [p for p in appendix_pages if p.name not in known_appendix]
-    if remaining:
-        auto_lines.append(f"          - {yaml_quote('其它')}:")
-        for md in remaining:
-            auto_lines.append(f"              - {yaml_quote(read_first_h1_title(md))}: book/{md.name}")
+    # 模块总览
+    auto_lines.append(f"          - {yaml_quote('模块总览')}: modules/index.md")
 
     return auto_lines
 
 
 def generate_mkdocs_config(modules: list[str]) -> None:
     """
-    生成 docs-site/.generated/mkdocs.yml：在基础 mkdocs.yml 上注入“书（Book-only）目录”。
+    生成 docs-site/.generated/mkdocs.yml：在基础 mkdocs.yml 上注入“全书目录（章节顺序）”。
 
     设计目标：
-    1) 侧边栏仅展示“主线之书”章节树；
-    2) 各模块 docs 仍会同步到站点 docs_dir（作为素材库/搜索命中/书内引用目标），但不再生成到 nav。
+    1) 侧边栏展示“全书章节顺序”（按分卷→模块→章节）；
+    2) 模块 docs 与 Book-only 主线均纳入顺读序列（每个 doc 即一章）。
     """
     if not BASE_MKDOCS_YML.exists():
         return
@@ -477,7 +466,7 @@ def generate_mkdocs_config(modules: list[str]) -> None:
         print("[WARN] 未在 docs-site/mkdocs.yml 中找到 AUTO BOOK NAV 标记，跳过生成 mkdocs 配置。", file=sys.stderr)
         return
 
-    auto_lines = build_book_only_nav_lines(modules)
+    auto_lines = build_global_book_nav_lines()
 
     GENERATED_MKDOCS_YML.parent.mkdir(parents=True, exist_ok=True)
     out_lines = template_lines[:begin_idx] + auto_lines + template_lines[end_idx + 1 :]

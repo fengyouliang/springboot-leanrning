@@ -4,18 +4,18 @@
 
 ## 从这里开始（建议顺序）
 
-1. [主线时间线](part-00-guide/03-mainline-timeline.md)
-2. [深挖导读](part-00-guide/00-deep-dive-guide.md)
+1. [主线时间线](part-00-guide/043-03-mainline-timeline.md)
+2. [深挖导读](part-00-guide/044-00-deep-dive-guide.md)
 
 ## 顺读主线
 
-- [代理 vs 织入](part-01-mental-model/01-proxy-vs-weaving.md)
-- [LTW 基础](part-02-ltw/02-ltw-basics.md)
-- [CTW 基础](part-03-ctw/03-ctw-basics.md)
-- [Join Point 菜谱](part-04-join-points/04-join-point-cookbook.md)
+- [代理 vs 织入](part-01-mental-model/045-01-proxy-vs-weaving.md)
+- [LTW 基础](part-02-ltw/046-02-ltw-basics.md)
+- [CTW 基础](part-03-ctw/047-03-ctw-basics.md)
+- [Join Point 菜谱](part-04-join-points/048-04-join-point-cookbook.md)
 
 ## 排坑与自检
 
-- [常见坑](appendix/90-common-pitfalls.md)
-- [自检](appendix/99-self-check.md)
+- [常见坑](appendix/049-90-common-pitfalls.md)
+- [自检](appendix/050-99-self-check.md)
 

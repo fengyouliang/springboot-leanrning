@@ -133,6 +133,6 @@
 - Lab：`BootWebMvcErrorViewLabTest` / `BootWebMvcViewSpringBootLabTest`
 - Test file：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part02_view_mvc/BootWebMvcErrorViewLabTest.java` / `springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part02_view_mvc/BootWebMvcViewSpringBootLabTest.java`
 
-上一章：[part-02-view-mvc/02-form-binding-validation-prg.md](02-form-binding-validation-prg.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[appendix/90-common-pitfalls.md](../appendix/90-common-pitfalls.md)
+上一章：[part-02-view-mvc/02-form-binding-validation-prg.md](02-form-binding-validation-prg.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[appendix/90-common-pitfalls.md](../appendix/082-90-common-pitfalls.md)
 
 <!-- BOOKIFY:END -->

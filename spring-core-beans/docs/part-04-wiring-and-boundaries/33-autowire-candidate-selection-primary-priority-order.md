@@ -80,7 +80,7 @@ Spring 里很多“规则”只在特定场景成立。最关键的分界线就�
 
 ## 5. 延伸阅读（把规则放回更完整的 DI 体系）
 
-- DI 解析总览：`@Qualifier/@Primary` 的基本语义：[03. 依赖注入解析](../part-01-ioc-container/03-dependency-injection-resolution.md)
+- DI 解析总览：`@Qualifier/@Primary` 的基本语义：[03. 依赖注入解析](../part-01-ioc-container/014-03-dependency-injection-resolution.md)
 - 如果你在看容器扩展点顺序（BPP/BFPP）：顺序体系更复杂（另一个层面）：[14. 顺序：PriorityOrdered / Ordered / 无序](../part-03-container-internals/14-post-processor-ordering.md)
 
 - `DefaultListableBeanFactory#doResolveDependency`：单依赖注入的主入口（候选收集 → 选胜者 → 注入）

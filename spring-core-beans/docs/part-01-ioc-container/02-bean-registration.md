@@ -17,6 +17,6 @@
 - Exercise：`SpringCoreBeansImportExerciseTest`
 - Solution：`SpringCoreBeansImportExerciseSolutionTest`
 
-上一章：[01. Bean 心智模型与注册入口：从 BeanDefinition 到 Bean 实例](01-bean-mental-model.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[03. 依赖注入解析：类型/名称/@Qualifier/@Primary](03-dependency-injection-resolution.md)
+上一章：[01. Bean 心智模型与注册入口：从 BeanDefinition 到 Bean 实例](020-01-bean-mental-model.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[03. 依赖注入解析：类型/名称/@Qualifier/@Primary](014-03-dependency-injection-resolution.md)
 
 <!-- BOOKIFY:END -->

@@ -38,7 +38,7 @@
 也就是说：`@Value` 是否“严格”，取决于 **BeanFactory 里安装的 embedded value resolver**。
 
 对照阅读（为什么注解能生效）：  
-- [12. 容器启动与基础设施处理器：为什么注解能工作？](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
+- [12. 容器启动与基础设施处理器：为什么注解能工作？](../part-03-container-internals/022-12-container-bootstrap-and-infrastructure.md)
 
 ## 2. 默认行为：Environment resolver（non-strict）可能让缺失占位符“悄悄通过”
 
@@ -68,7 +68,7 @@
 - refresh 直接失败（root cause 通常是 `IllegalArgumentException: Could not resolve placeholder ...`）
 
 对照阅读（BFPP vs BPP，谁更早）：  
-- [06. 容器扩展点：BFPP vs BPP](../part-01-ioc-container/06-post-processors.md)
+- [06. 容器扩展点：BFPP vs BPP](../part-01-ioc-container/017-06-post-processors.md)
 
 当你遇到 `@Value` 解析异常或“没报错但值不对”时，建议按这个顺序：
 
@@ -133,7 +133,7 @@ Lab 里我们显式设置：
 - 如果你希望配置缺失能尽早暴露：考虑启用 strict placeholder（Lab 已演示）
 - 如果你在 Boot 应用里看到行为不同：优先把场景缩小到“纯容器”来验证机制，再回到 Boot 叠加条件（参考本模块的调试章节）
 
-- 调试与自检：如何“看见”容器正在做什么：[11. Debugging and Observability](../part-02-boot-autoconfig/11-debugging-and-observability.md)
+- 调试与自检：如何“看见”容器正在做什么：[11. Debugging and Observability](../part-02-boot-autoconfig/019-11-debugging-and-observability.md)
 
 ## 源码锚点（建议从这里下断点）
 
@@ -150,7 +150,7 @@ Lab 里我们显式设置：
 
 - “`@Value("${missing}")` 没失败，值变成原样字符串” → **优先定义层（resolver 语义）**：当前容器可能只装了 non-strict resolver（本章第 2 节）
 - “启用 strict 后启动直接失败” → **定义层（BFPP 提前失败）**：`PropertySourcesPlaceholderConfigurer` 会在实例化前就 fail-fast（本章第 3 节）
-- “`@Value` 完全不生效/字段没被注入” → **优先定义层/基础设施问题**：是否具备注解处理能力？（回看 [12](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)）
+- “`@Value` 完全不生效/字段没被注入” → **优先定义层/基础设施问题**：是否具备注解处理能力？（回看 [12](../part-03-container-internals/022-12-container-bootstrap-and-infrastructure.md)）
 - “值不对但不报错” → **先拆分路径**：确认 property source 是否包含 key，再确认 strict/non-strict（本章第 4 节 + `resolveEmbeddedValue`）
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansValuePlaceholderResolutionLabTest.java`
 推荐断点：`PropertySourcesPlaceholderConfigurer#postProcessBeanFactory`、`AbstractBeanFactory#resolveEmbeddedValue`、`AutowiredAnnotationBeanPostProcessor#postProcessProperties`

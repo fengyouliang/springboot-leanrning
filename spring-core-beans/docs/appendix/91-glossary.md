@@ -24,49 +24,49 @@
 ## 容器与定义
 
 - **Bean**：被 Spring 容器管理的对象（最终 `getBean()` 拿到的“对外暴露对象”，可能是原始对象也可能是代理）。  
-  章节：[`01`](../part-01-ioc-container/01-bean-mental-model.md)
+  章节：[`01`](../part-01-ioc-container/020-01-bean-mental-model.md)
 - **BeanDefinition**：定义层元数据，描述“如何创建一个 bean”（class/factory method/scope/lazy/dependsOn/回调等）。  
-  章节：[`01`](../part-01-ioc-container/01-bean-mental-model.md)、[`35`](../part-04-wiring-and-boundaries/35-merged-bean-definition.md)
+  章节：[`01`](../part-01-ioc-container/020-01-bean-mental-model.md)、[`35`](../part-04-wiring-and-boundaries/35-merged-bean-definition.md)
 - **RootBeanDefinition / MergedBeanDefinition**：创建时实际参与计算的“合并后的最终配方”。  
   章节：[`35`](../part-04-wiring-and-boundaries/35-merged-bean-definition.md)
 - **BeanFactory**：最核心的 IoC 容器能力（创建/注入/scope/生命周期骨架）。  
-  章节：[`01`](../part-01-ioc-container/01-bean-mental-model.md)
+  章节：[`01`](../part-01-ioc-container/020-01-bean-mental-model.md)
 - **ApplicationContext**：在 BeanFactory 上叠加事件、资源、环境等“应用级能力”，并提供 `refresh()` 主线。  
-  章节：[`01`](../part-01-ioc-container/01-bean-mental-model.md)、[`12`](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
+  章节：[`01`](../part-01-ioc-container/020-01-bean-mental-model.md)、[`12`](../part-03-container-internals/022-12-container-bootstrap-and-infrastructure.md)
 - **refresh**：容器启动的主线流程（定义注册→执行 BFPP/BDRPP→注册 BPP→创建单例→收尾事件）。  
-  章节：[`00`](../part-00-guide/00-deep-dive-guide.md)、[`12`](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
+  章节：[`00`](../part-00-guide/011-00-deep-dive-guide.md)、[`12`](../part-03-container-internals/022-12-container-bootstrap-and-infrastructure.md)
 
 ---
 
 ## 注入与候选
 
 - **DependencyDescriptor**：注入点的“描述符”（需要什么类型/是否 required/是否带泛型/有哪些注解/名称等）。  
-  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)
+  章节：[`03`](../part-01-ioc-container/014-03-dependency-injection-resolution.md)
 - **候选（candidates）**：按类型匹配得到的候选集合；单依赖需要进一步收敛为唯一胜者，否则失败（NoUnique）。  
-  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)、[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
+  章节：[`03`](../part-01-ioc-container/014-03-dependency-injection-resolution.md)、[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
 - **`@Qualifier` / AutowireCandidateResolver**：缩小候选集合（精确选择）；包含 meta-annotation 的 Qualifier 也在此阶段参与过滤。  
-  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)、[`45`](../part-05-aot-and-real-world/45-custom-qualifier-meta-annotation.md)
+  章节：[`03`](../part-01-ioc-container/014-03-dependency-injection-resolution.md)、[`45`](../part-05-aot-and-real-world/45-custom-qualifier-meta-annotation.md)
 - **`@Primary` / `@Priority`**：候选收敛的默认胜者/优先级线索（注意：并不等价于集合排序）。  
   章节：[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
 - **`@Order` / Ordered**：主要影响集合注入/链路顺序，不等价于“单依赖选谁”。  
   章节：[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)、[`14`](../part-03-container-internals/14-post-processor-ordering.md)
 - **ObjectProvider**：把“获取依赖”延迟到使用时（常用于 prototype 注入 singleton、可选依赖等）。  
-  章节：[`04`](../part-01-ioc-container/04-scope-and-prototype.md)
+  章节：[`04`](../part-01-ioc-container/015-04-scope-and-prototype.md)
 
 ---
 
 ## 生命周期与扩展点
 
 - **生命周期（lifecycle callbacks）**：实例化→属性填充→初始化回调（Aware/@PostConstruct 等）→对外暴露→销毁回调。  
-  章节：[`05`](../part-01-ioc-container/05-lifecycle-and-callbacks.md)、[`17`](../part-03-container-internals/17-lifecycle-callback-order.md)
+  章节：[`05`](../part-01-ioc-container/016-05-lifecycle-and-callbacks.md)、[`17`](../part-03-container-internals/17-lifecycle-callback-order.md)
 - **Aware**：让 bean “感知容器能力”的回调族（BeanName/BeanFactory/ApplicationContext 等）。  
-  章节：[`12`](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
+  章节：[`12`](../part-03-container-internals/022-12-container-bootstrap-and-infrastructure.md)
 - **BFPP（BeanFactoryPostProcessor）**：作用于定义层（BeanDefinition），发生在实例化之前。  
-  章节：[`06`](../part-01-ioc-container/06-post-processors.md)、[`14`](../part-03-container-internals/14-post-processor-ordering.md)
+  章节：[`06`](../part-01-ioc-container/017-06-post-processors.md)、[`14`](../part-03-container-internals/14-post-processor-ordering.md)
 - **BDRPP（BeanDefinitionRegistryPostProcessor）**：BFPP 的增强版，可以再注册更多 BeanDefinition。  
   章节：[`13`](../part-03-container-internals/13-bdrpp-definition-registration.md)
 - **BPP（BeanPostProcessor）**：作用于实例层（创建过程中/初始化前后），可以包装/替换最终暴露对象（proxy）。  
-  章节：[`06`](../part-01-ioc-container/06-post-processors.md)、[`31`](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)
+  章节：[`06`](../part-01-ioc-container/017-06-post-processors.md)、[`31`](../part-04-wiring-and-boundaries/31-proxying-phase-bpp-wraps-bean.md)
 - **PriorityOrdered / Ordered**：处理器排序的两层契约（分段执行 + 组内排序）。  
   章节：[`14`](../part-03-container-internals/14-post-processor-ordering.md)
 
@@ -97,7 +97,7 @@
 ## AOT 与真实世界补齐
 
 - **AOT（Ahead-of-Time）**：把原本运行期才能完成的工作（分析/生成/裁剪元信息）前移到构建期执行，以换取更快启动与更强可预知性。  
-  章节：[`40`](../part-05-aot-and-real-world/40-aot-and-native-overview.md)
+  章节：[`40`](../part-05-aot-and-real-world/024-40-aot-and-native-overview.md)
 - **RuntimeHints / RuntimeHintsRegistrar**：AOT/Native 下的“构建期契约”数据结构与注册入口，用于声明反射/代理/资源等运行期需求。  
   章节：[`41`](../part-05-aot-and-real-world/41-runtimehints-basics.md)
 - **XmlBeanDefinitionReader / BeanDefinitionReader**：把输入源（XML/properties/groovy 等）解析为 BeanDefinition 并注册到 BeanFactory 的 reader 家族（定义层输入）。  
@@ -138,11 +138,11 @@
 ## 常见坑与边界
 
 - **DependencyDescriptor**：注入点的“描述符”（需要什么类型/是否 required/是否带泛型/有哪些注解/名称等）。  
-  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)
+  章节：[`03`](../part-01-ioc-container/014-03-dependency-injection-resolution.md)
 - **候选（candidates）**：按类型匹配得到的候选集合；单依赖需要进一步收敛为唯一胜者，否则失败。  
-  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)、[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
+  章节：[`03`](../part-01-ioc-container/014-03-dependency-injection-resolution.md)、[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
 - **`@Qualifier`**：缩小候选集合（精确选择）。  
-  章节：[`03`](../part-01-ioc-container/03-dependency-injection-resolution.md)
+  章节：[`03`](../part-01-ioc-container/014-03-dependency-injection-resolution.md)
 - **`@Primary`**：默认胜者（没有更强限定条件时）。  
   章节：[`33`](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
 - **`@Order` / Ordered**：主要影响集合注入/链路执行顺序，不等价于“单依赖选谁”。  
@@ -162,6 +162,6 @@
 
 - Lab：`SpringCoreBeansContainerLabTest`
 
-上一章：[90. 常见坑清单（建议反复对照）](90-common-pitfalls.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[92. 知识点地图（Concept → Chapter → Lab）](92-knowledge-map.md)
+上一章：[90. 常见坑清单（建议反复对照）](025-90-common-pitfalls.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[92. 知识点地图（Concept → Chapter → Lab）](92-knowledge-map.md)
 
 <!-- BOOKIFY:END -->

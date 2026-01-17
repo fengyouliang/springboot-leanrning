@@ -212,6 +212,6 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansBeanDefinitionValueResolutionLab
 - Lab：`SpringCoreBeansBeanDefinitionValueResolutionLabTest` / `SpringCoreBeansPropertyEditorLabTest`
 - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansPropertyEditorLabTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part05_aot_and_real_world/SpringCoreBeansBeanDefinitionValueResolutionLabTest.java`
 
-上一章：[49. 内置 FactoryBean 图鉴：MethodInvoking / ServiceLocator / & 前缀](49-built-in-factorybeans-gallery.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[90. 常见坑清单（建议反复对照）](../appendix/90-common-pitfalls.md)
+上一章：[49. 内置 FactoryBean 图鉴：MethodInvoking / ServiceLocator / & 前缀](49-built-in-factorybeans-gallery.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[90. 常见坑清单（建议反复对照）](../appendix/025-90-common-pitfalls.md)
 
 <!-- BOOKIFY:END -->

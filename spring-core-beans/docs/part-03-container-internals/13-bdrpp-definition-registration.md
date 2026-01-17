@@ -257,6 +257,6 @@ BDRPP 的价值在于：它可以在 **第 1 步和第 2 步之间** 动态注�
 - Lab：`SpringCoreBeansRegistryPostProcessorLabTest`
 - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part03_container_internals/SpringCoreBeansRegistryPostProcessorLabTest.java`
 
-上一章：[12. 容器启动与基础设施处理器：为什么注解能工作](12-container-bootstrap-and-infrastructure.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[14. 顺序（Ordering）：PriorityOrdered / Ordered / 无序](14-post-processor-ordering.md)
+上一章：[12. 容器启动与基础设施处理器：为什么注解能工作](022-12-container-bootstrap-and-infrastructure.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[14. 顺序（Ordering）：PriorityOrdered / Ordered / 无序](14-post-processor-ordering.md)
 
 <!-- BOOKIFY:END -->

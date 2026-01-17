@@ -64,7 +64,7 @@
 - Lab：`BootWebMvcContractJacksonLabTest`
 - Lab：`BootWebMvcProblemDetailLabTest`
 
-上一章：[part-04-rest-contract/03-error-contract-hardening.md](03-error-contract-hardening.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-05-real-world-http/01-cors-preflight.md](../part-05-real-world-http/01-cors-preflight.md)
+上一章：[part-04-rest-contract/03-error-contract-hardening.md](03-error-contract-hardening.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-05-real-world-http/01-cors-preflight.md](../part-05-real-world-http/078-01-cors-preflight.md)
 
 <!-- BOOKIFY:END -->
 

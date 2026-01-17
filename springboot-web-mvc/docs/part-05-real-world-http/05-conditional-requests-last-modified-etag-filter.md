@@ -86,7 +86,7 @@ Filter 会在响应写回时：
 
 - Lab：`BootWebMvcRealWorldHttpLabTest`
 
-上一章：[part-05-real-world-http/04-static-resources-and-cache.md](04-static-resources-and-cache.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-06-async-sse/01-servlet-async-and-testing.md](../part-06-async-sse/01-servlet-async-and-testing.md)
+上一章：[part-05-real-world-http/04-static-resources-and-cache.md](04-static-resources-and-cache.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-06-async-sse/01-servlet-async-and-testing.md](../part-06-async-sse/079-01-servlet-async-and-testing.md)
 
 <!-- BOOKIFY:END -->
 

@@ -1,33 +1,17 @@
-# 第 13 章：Profiles 主线
+# （Redirect）Profiles 主线（旧入口）
 
-这一章解决的问题是：**为什么同一个应用在 dev/prod 行为不一样、为什么某个 Bean 在某环境“消失了”、为什么条件装配没生效**。
+<!-- CHAPTER-CARD:START -->
+!!! summary "章节学习卡片（五问闭环）"
 
----
+    - 知识点：Redirect（旧路径兼容）
+    - 怎么使用：本页为旧路径保留；请跳转到新章节继续阅读与运行。
+    - 原理：通过 redirect 页面保留历史入口，避免断链与读者迷路；正文与可跑入口统一在新章节维护。
+    - 源码入口：见新章节
+    - 推荐 Lab：见新章节
+<!-- CHAPTER-CARD:END -->
 
-## 主线（按时间线顺读）
+## 已迁移
+本页为旧入口兼容页，正文已迁移到：[新位置](149-profiles-mainline.md)。
 
-Profile 影响两条线：
-
-1. **配置文件参与与否**：哪些配置源进入 `Environment`
-2. **Bean 注册与否**：哪些配置类/Bean 被注册到容器
-
-因此排障时你要能先分流判断：
-
-- 这是“最终属性值不对”的问题？
-- 还是“Bean 根本没注册/注册错了实现”的问题？
-
----
-
-## 深挖入口（模块 docs）
-
-- 模块目录页：[`spring-core-profiles/docs/README.md`](../spring-core-profiles/docs/README.md)
-- 模块主线时间线（含可跑入口）：[`spring-core-profiles/docs/part-00-guide/03-mainline-timeline.md`](../spring-core-profiles/docs/part-00-guide/03-mainline-timeline.md)
-
----
-
-## 下一章怎么接
-
-配置与 Bean 都到位后，下一类“必须把分支讲清楚”的机制是校验：Validation 的错误是怎么产生、怎么回传、为什么依赖代理。
-
-- 下一章：[第 14 章：Validation 主线](14-validation-mainline.md)
-
+## 返回
+- [全书目录](/book/)

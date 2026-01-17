@@ -43,6 +43,6 @@
 
 - Lab：`BootWebMvcAsyncSseLabTest`
 
-上一章：[part-06-async-sse/01-servlet-async-and-testing.md](01-servlet-async-and-testing.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-06-async-sse/03-deferredresult-and-timeout.md](03-deferredresult-and-timeout.md)
+上一章：[part-06-async-sse/01-servlet-async-and-testing.md](079-01-servlet-async-and-testing.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-06-async-sse/03-deferredresult-and-timeout.md](03-deferredresult-and-timeout.md)
 
 <!-- BOOKIFY:END -->

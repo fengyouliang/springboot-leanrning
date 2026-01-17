@@ -141,6 +141,6 @@
 - Lab：`BootWebMvcViewLabTest`
 - Test file：`springboot-web-mvc/src/test/java/com/learning/springboot/bootwebmvc/part02_view_mvc/BootWebMvcViewLabTest.java`
 
-上一章：[part-02-view-mvc/01-thymeleaf-and-view-resolver.md](01-thymeleaf-and-view-resolver.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-02-view-mvc/03-error-pages-and-content-negotiation.md](03-error-pages-and-content-negotiation.md)
+上一章：[part-02-view-mvc/01-thymeleaf-and-view-resolver.md](076-01-thymeleaf-and-view-resolver.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-02-view-mvc/03-error-pages-and-content-negotiation.md](03-error-pages-and-content-negotiation.md)
 
 <!-- BOOKIFY:END -->

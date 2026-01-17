@@ -68,6 +68,6 @@
 - Lab：`BootWebMvcAsyncSseLabTest`
 - Lab：`BootWebMvcTraceLabTest`
 
-上一章：[part-06-async-sse/02-sse-emitter.md](02-sse-emitter.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-07-testing-debugging/01-webmvc-testing-and-troubleshooting.md](../part-07-testing-debugging/01-webmvc-testing-and-troubleshooting.md)
+上一章：[part-06-async-sse/02-sse-emitter.md](02-sse-emitter.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[part-07-testing-debugging/01-webmvc-testing-and-troubleshooting.md](../part-07-testing-debugging/080-01-webmvc-testing-and-troubleshooting.md)
 
 <!-- BOOKIFY:END -->

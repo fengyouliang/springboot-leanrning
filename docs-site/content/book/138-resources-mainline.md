@@ -1,0 +1,108 @@
+# 第 138 章：Resources 主线
+<!-- CHAPTER-CARD:START -->
+!!! summary "章节学习卡片（五问闭环）"
+
+    - 知识点：Resources 主线
+    - 怎么使用：通过 `ResourceLoader`/`ApplicationContext` 获取 `Resource`；读取优先走 `getInputStream()`；pattern 扫描使用 `PathMatchingResourcePatternResolver`。
+    - 原理：定位（路径/模式）→ 解析为 `Resource`（file/classpath/jar/url）→ 校验（exists/readable）→ 读取（流/编码）；jar 场景下 `getFile()` 不可靠。
+    - 源码入口：`org.springframework.core.io.Resource` / `org.springframework.core.io.ResourceLoader` / `org.springframework.core.io.support.PathMatchingResourcePatternResolver`
+    - 推荐 Lab：`SpringCoreResourcesLabTest`
+<!-- CHAPTER-CARD:END -->
+
+<!-- GLOBAL-BOOK-NAV:START -->
+上一章：[第 137 章：自测题（Spring Core Events）](../spring-core-events/docs/appendix/137-99-self-check.md) ｜ 全书目录：[Book TOC](/book/) ｜ 下一章：[第 139 章：主线时间线：Spring Resources](../spring-core-resources/docs/part-00-guide/139-03-mainline-timeline.md)
+<!-- GLOBAL-BOOK-NAV:END -->
+
+很多“本地没问题、线上就翻车”的问题，最后都会回到资源读取：
+
+- IDE 里 `classpath:` 能读到，打成 jar 后突然读不到；
+- `resource.exists()` 看起来是 true，但 `getFile()` 却直接炸；
+- pattern 扫描在不同运行方式下漏掉/多出一堆资源。
+
+这一章的目标是把资源当成一个统一抽象来理解：**定位 → 解析 → 校验 → 读取**，并且知道 jar 与 filesystem 的差异到底发生在哪里。
+
+---
+
+## 小结与下一章
+
+<!-- BOOKLIKE-V2:SUMMARY:START -->
+- 一句话总结：Resources 主线 —— 通过 `ResourceLoader`/`ApplicationContext` 获取 `Resource`；读取优先走 `getInputStream()`；pattern 扫描使用 `PathMatchingResourcePatternResolver`。
+- 回到主线：定位（路径/模式）→ 解析为 `Resource`（file/classpath/jar/url）→ 校验（exists/readable）→ 读取（流/编码）；jar 场景下 `getFile()` 不可靠。
+- 下一章：建议按模块目录/全书目录继续顺读。
+<!-- BOOKLIKE-V2:SUMMARY:END -->
+
+## 导读
+
+<!-- BOOKLIKE-V2:INTRO:START -->
+这一章围绕「Resources 主线」展开：先把边界说清楚，再沿主线推进到关键分支，最后用可运行入口把结论验证出来。
+
+阅读建议：
+- 先看章首的“章节学习卡片/本章要点”，建立预期；
+- 推荐先跑一遍本章 Lab，再带着问题回到正文。
+<!-- BOOKLIKE-V2:INTRO:END -->
+
+## 你将学到什么（本章目标）
+
+读完本章，你应该能做到：
+
+1. 用一句话解释 `Resource` 抽象解决了什么问题（以及它没解决什么）
+2. 知道哪些操作在 jar 场景下是“天然不可靠”的（典型：`getFile()`）
+3. 能正确使用 `classpath:` / `classpath*:` 与 pattern scanning，并对其边界有预期
+4. 遇到资源问题时，知道先看哪些可观察信号（description/URL/协议/是否可重复读取）
+
+---
+
+## 主线（按时间线顺读）
+
+把资源读取当成四步走，任何一步错了都会表现为“读不到/读错/乱码/路径不一致”：
+
+1. **定位**：你想找的到底是什么？（路径前缀、相对基准、pattern）
+2. **解析**：把“字符串路径”解析成 `Resource`（file/classpath/url/jar 等具体实现）
+3. **校验**：`exists()`/`isReadable()` 只能告诉你“可能读”，不能保证“能 getFile()”
+4. **读取**：优先按流读取（`getInputStream()`），并显式处理编码与关闭
+
+在此基础上，再理解两个高频扩展能力：
+
+- **pattern 扫描**：`PathMatchingResourcePatternResolver` 支持 `classpath*:` 等语法
+- **jar vs filesystem**：能 `getInputStream()` 不代表能 `getFile()`；协议与 classloader 决定了行为差异
+
+---
+
+## 读书式的“证据链”：你该观察什么
+
+资源排障时，最有用的不是“再改一次路径”，而是先把事实看清楚：
+
+- 这个 `Resource` 的 `description`/`URL` 是什么？协议是 `file:` 还是 `jar:`？
+- 你是在 IDE/单测/打包 jar/容器里运行？运行方式决定 classpath 形态
+- 你到底需要的是“流”还是“文件路径”？如果只是读取内容，优先走流
+
+---
+
+## 深挖入口（模块 docs）
+
+- 模块目录页：[`spring-core-resources/docs/README.md`](../spring-core-resources/docs/README.md)
+- 模块主线时间线（含可跑入口）：[`spring-core-resources/docs/part-00-guide/03-mainline-timeline.md`](../spring-core-resources/docs/part-00-guide/139-03-mainline-timeline.md)
+
+---
+
+## 本章可跑入口（最小闭环）
+
+- Lab：`mvn -q -pl spring-core-resources -Dtest=SpringCoreResourcesLabTest test`（`spring-core-resources/src/test/java/com/learning/springboot/springcoreresources/part01_resource_abstraction/SpringCoreResourcesLabTest.java`）
+- Exercise（动手练习，默认 `@Disabled`）：`spring-core-resources/src/test/java/com/learning/springboot/springcoreresources/part00_guide/SpringCoreResourcesExerciseTest.java`
+
+---
+
+## 下一章怎么接
+
+资源与配置经常同时出现：配置文件是否参与、Bean 是否注册，很多时候最后都要回到 “Profile 到底怎么激活”。
+
+- 下一章：[第 149 章：Profiles 主线](149-profiles-mainline.md)
+
+## 证据链（如何验证你真的理解了）
+
+<!-- BOOKLIKE-V2:EVIDENCE:START -->
+- 观察点 1：运行本章推荐入口后，聚焦「Resources 主线」的生效时机/顺序/边界；断点/入口：`org.springframework.core.io.Resource`；断言：你能解释“为什么此处生效/为什么此处不生效”。
+- 观察点 2：运行本章推荐入口后，聚焦「Resources 主线」的生效时机/顺序/边界；断点/入口：`org.springframework.core.io.ResourceLoader`；断言：你能解释“为什么此处生效/为什么此处不生效”。
+- 观察点 3：运行本章推荐入口后，聚焦「Resources 主线」的生效时机/顺序/边界；断点/入口：`org.springframework.core.io.support.PathMatchingResourcePatternResolver`；断言：你能解释“为什么此处生效/为什么此处不生效”。
+- 建议：跑完 ``SpringCoreResourcesLabTest`` 后，把上述观察点逐条对照，写出你自己的 1–2 句结论（可复述）。
+<!-- BOOKLIKE-V2:EVIDENCE:END -->

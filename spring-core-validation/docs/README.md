@@ -4,17 +4,17 @@
 
 ## 从这里开始（建议顺序）
 
-1. [主线时间线](part-00-guide/03-mainline-timeline.md)
-2. [深挖导读](part-00-guide/00-deep-dive-guide.md)
+1. [主线时间线](part-00-guide/156-03-mainline-timeline.md)
+2. [深挖导读](part-00-guide/157-00-deep-dive-guide.md)
 
 ## 顺读主线
 
-- [约束心智模型](part-01-validation-core/01-constraint-mental-model.md)
-- [Programmatic Validator](part-01-validation-core/02-programmatic-validator.md)
-- [方法校验与代理](part-01-validation-core/03-method-validation-proxy.md)
-- [Groups](part-01-validation-core/04-groups.md)
-- [自定义约束](part-01-validation-core/05-custom-constraint.md)
-- [调试](part-01-validation-core/06-debugging.md)
+- [约束心智模型](part-01-validation-core/158-01-constraint-mental-model.md)
+- [Programmatic Validator](part-01-validation-core/159-02-programmatic-validator.md)
+- [方法校验与代理](part-01-validation-core/160-03-method-validation-proxy.md)
+- [Groups](part-01-validation-core/161-04-groups.md)
+- [自定义约束](part-01-validation-core/162-05-custom-constraint.md)
+- [调试](part-01-validation-core/163-06-debugging.md)
 
 ## 关联模块（按需串联）
 
@@ -23,6 +23,6 @@
 
 ## 排坑与自检
 
-- [常见坑](appendix/90-common-pitfalls.md)
-- [自检](appendix/99-self-check.md)
+- [常见坑](appendix/164-90-common-pitfalls.md)
+- [自检](appendix/165-99-self-check.md)
 

@@ -44,7 +44,7 @@
 
 对照阅读：
 
-- [03. 依赖注入解析：候选收集→候选收敛→最终注入](../part-01-ioc-container/03-dependency-injection-resolution.md)
+- [03. 依赖注入解析：候选收集→候选收敛→最终注入](../part-01-ioc-container/014-03-dependency-injection-resolution.md)
 - [33. 候选选择与优先级：@Primary/@Priority/@Order 的边界](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
 
 - 两个同类型候选（两个实现）
@@ -112,7 +112,7 @@ mvn -pl spring-core-beans -Dtest=SpringCoreBeansCustomQualifierLabTest test
 
 ## 常见坑与边界
 
-- [03. 依赖注入解析：类型/名称/@Qualifier/@Primary](../part-01-ioc-container/03-dependency-injection-resolution.md)
+- [03. 依赖注入解析：类型/名称/@Qualifier/@Primary](../part-01-ioc-container/014-03-dependency-injection-resolution.md)
 - [33. 候选选择与优先级：@Primary/@Priority/@Order 的边界](../part-04-wiring-and-boundaries/33-autowire-candidate-selection-primary-priority-order.md)
 
 ## 4. 常见误区

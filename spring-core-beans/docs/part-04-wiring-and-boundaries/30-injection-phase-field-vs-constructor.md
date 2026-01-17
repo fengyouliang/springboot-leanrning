@@ -65,7 +65,7 @@
 
 如果你想把“注解能力从哪来”也串起来，请回看：
 
-- [12. 容器启动与基础设施处理器：为什么注解能工作？](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)
+- [12. 容器启动与基础设施处理器：为什么注解能工作？](../part-03-container-internals/022-12-container-bootstrap-and-infrastructure.md)
 
 - **不要在构造器里依赖 field injection 的字段**：那一定是 `null`（这是机制决定的，不是偶然）
 - **必填依赖优先用 constructor injection**：更早失败、更容易测试、也更符合不可变设计
@@ -140,8 +140,8 @@ mvn -q -pl spring-core-beans -Dtest=SpringCoreBeansInjectionPhaseLabTest test
 
 - “构造器里访问 field injection 字段为 null” → **这是实例层阶段差异（预期）**：field injection 在实例化之后才发生（本章第 1 节）
 - “constructor injection 没走到带参构造器/选错构造器” → **实例层（构造器解析）**：看 `determineCandidateConstructors` 与 `autowireConstructor`（本章源码锚点）
-- “`@Autowired/@Value` 完全不生效” → **优先定义层/基础设施问题**：注解处理器是否注册？（见 [12](../part-03-container-internals/12-container-bootstrap-and-infrastructure.md)）
-- “注入发生了但候选选择不符合预期” → **实例层（依赖解析）**：转到 [03](../part-01-ioc-container/03-dependency-injection-resolution.md)/[33](33-autowire-candidate-selection-primary-priority-order.md)
+- “`@Autowired/@Value` 完全不生效” → **优先定义层/基础设施问题**：注解处理器是否注册？（见 [12](../part-03-container-internals/022-12-container-bootstrap-and-infrastructure.md)）
+- “注入发生了但候选选择不符合预期” → **实例层（依赖解析）**：转到 [03](../part-01-ioc-container/014-03-dependency-injection-resolution.md)/[33](33-autowire-candidate-selection-primary-priority-order.md)
 对应 Lab/Test：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/part04_wiring_and_boundaries/SpringCoreBeansInjectionPhaseLabTest.java`
 推荐断点：`AutowiredAnnotationBeanPostProcessor#postProcessProperties`、`AbstractAutowireCapableBeanFactory#populateBean`、`DefaultListableBeanFactory#doResolveDependency`
 

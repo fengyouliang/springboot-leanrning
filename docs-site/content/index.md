@@ -7,7 +7,7 @@
 ## Start Here（推荐入口）
 
 - 书的目录与阅读方法：[主线之书 · 目录](book/index.md)
-- 直接开始跑与读：[第 0 章：Start Here](book/00-start-here.md)
+- 直接开始跑与读：[第 1 章：Start Here](book/001-start-here.md)
 
 ---
 

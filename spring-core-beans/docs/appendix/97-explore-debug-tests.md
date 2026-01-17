@@ -96,7 +96,7 @@ mvn -pl spring-core-beans -Dspringcorebeans.explore=true test
    - Explore 测试会用反射读取内部字段（例如 `DefaultSingletonBeanRegistry` 的缓存字段），属于“观察型断点材料”，不是稳定 API。
    - 因此它们默认不参与回归，避免版本升级时误伤主线测试。
 3) **误区：把 Explore 输出当成“生产诊断手段”**
-   - Explore 的目标是帮助你在学习阶段“看见容器内部数据结构变化”，生产排障仍以主线章节（尤其是 [11](../part-02-boot-autoconfig/11-debugging-and-observability.md)）的方法论为主。
+   - Explore 的目标是帮助你在学习阶段“看见容器内部数据结构变化”，生产排障仍以主线章节（尤其是 [11](../part-02-boot-autoconfig/019-11-debugging-and-observability.md)）的方法论为主。
 
 ## 小结与下一章
 
@@ -109,6 +109,6 @@ mvn -pl spring-core-beans -Dspringcorebeans.explore=true test
 - Lab：`SpringCoreBeansAotFactoriesLabTest` / `SpringCoreBeansAotRuntimeHintsLabTest`
 - Test file：`spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/appendix/SpringCoreBeansSingletonCacheExploreTest.java` / `spring-core-beans/src/test/java/com/learning/springboot/springcorebeans/appendix/SpringCoreBeansCachedIntrospectionExploreTest.java`
 
-上一章：[96. spring-beans Public API Gap 清单（按包/机制域分批深化）](96-spring-beans-public-api-gap.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[99. 自测题（Self Check）](99-self-check.md)
+上一章：[96. spring-beans Public API Gap 清单（按包/机制域分批深化）](96-spring-beans-public-api-gap.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[99. 自测题（Self Check）](026-99-self-check.md)
 
 <!-- BOOKIFY:END -->

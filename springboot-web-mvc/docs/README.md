@@ -4,37 +4,37 @@
 
 ## 从这里开始（建议顺序）
 
-1. [主线时间线](part-00-guide/03-mainline-timeline.md)
-2. [深挖导读](part-00-guide/00-deep-dive-guide.md)
-3. [知识地图（先看全图）](part-00-guide/01-knowledge-map.md)
-4. [断点图（排障优先）](part-00-guide/02-breakpoint-map.md)
+1. [主线时间线](part-00-guide/063-03-mainline-timeline.md)
+2. [深挖导读](part-00-guide/064-00-deep-dive-guide.md)
+3. [知识地图（先看全图）](part-00-guide/065-01-knowledge-map.md)
+4. [断点图（排障优先）](part-00-guide/066-02-breakpoint-map.md)
 
 ## 顺读主线（先把请求跑通）
 
-- [DispatcherServlet 调用链（含参数解析/绑定）](part-03-web-mvc-internals/01-dispatcherservlet-call-chain.md)
-- [消息转换与返回值](part-03-web-mvc-internals/03-message-converters-and-return-values.md)
-- [异常收敛与错误流](part-03-web-mvc-internals/04-exception-resolvers-and-error-flow.md)
-- [@ControllerAdvice 匹配与顺序](part-03-web-mvc-internals/05-controlleradvice-matching-and-ordering.md)
+- [DispatcherServlet 调用链（含参数解析/绑定）](part-03-web-mvc-internals/067-01-dispatcherservlet-call-chain.md)
+- [消息转换与返回值](part-03-web-mvc-internals/068-03-message-converters-and-return-values.md)
+- [异常收敛与错误流](part-03-web-mvc-internals/069-04-exception-resolvers-and-error-flow.md)
+- [@ControllerAdvice 匹配与顺序](part-03-web-mvc-internals/070-05-controlleradvice-matching-and-ordering.md)
 
 ## 回到应用层（把常见需求接回主线）
 
-- [校验与错误塑形](part-01-web-mvc/01-validation-and-error-shaping.md)
-- [异常处理](part-01-web-mvc/02-exception-handling.md)
-- [绑定与 Converter](part-01-web-mvc/03-binding-and-converters.md)
-- [拦截器与过滤器顺序](part-01-web-mvc/04-interceptor-and-filter-ordering.md)
-- [异步拦截器生命周期](part-01-web-mvc/05-interceptor-async-lifecycle.md)
+- [校验与错误塑形](part-01-web-mvc/071-01-validation-and-error-shaping.md)
+- [异常处理](part-01-web-mvc/072-02-exception-handling.md)
+- [绑定与 Converter](part-01-web-mvc/073-03-binding-and-converters.md)
+- [拦截器与过滤器顺序](part-01-web-mvc/074-04-interceptor-and-filter-ordering.md)
+- [异步拦截器生命周期](part-01-web-mvc/075-05-interceptor-async-lifecycle.md)
 
 ## 场景扩展（按需挑选）
 
-- View MVC（模板与错误页）：从 [01](part-02-view-mvc/01-thymeleaf-and-view-resolver.md) 开始
-- REST 合同（406/415/Jackson）：从 [01](part-04-rest-contract/01-content-negotiation-406-415.md) 开始
-- 真实 HTTP 场景（CORS/上传/下载/静态资源）：从 [01](part-05-real-world-http/01-cors-preflight.md) 开始
-- 异步与 SSE：从 [01](part-06-async-sse/01-servlet-async-and-testing.md) 开始
-- 测试与排障：[01](part-07-testing-debugging/01-webmvc-testing-and-troubleshooting.md)
-- 安全与观测：从 [01](part-08-security-observability/01-security-filterchain-and-mvc.md) 开始
+- View MVC（模板与错误页）：从 [01](part-02-view-mvc/076-01-thymeleaf-and-view-resolver.md) 开始
+- REST 合同（406/415/Jackson）：从 [01](part-04-rest-contract/077-01-content-negotiation-406-415.md) 开始
+- 真实 HTTP 场景（CORS/上传/下载/静态资源）：从 [01](part-05-real-world-http/078-01-cors-preflight.md) 开始
+- 异步与 SSE：从 [01](part-06-async-sse/079-01-servlet-async-and-testing.md) 开始
+- 测试与排障：[01](part-07-testing-debugging/080-01-webmvc-testing-and-troubleshooting.md)
+- 安全与观测：从 [01](part-08-security-observability/081-01-security-filterchain-and-mvc.md) 开始
 
 ## 排坑与自检
 
-- [常见坑](appendix/90-common-pitfalls.md)
-- [自检](appendix/99-self-check.md)
+- [常见坑](appendix/082-90-common-pitfalls.md)
+- [自检](appendix/083-99-self-check.md)
 

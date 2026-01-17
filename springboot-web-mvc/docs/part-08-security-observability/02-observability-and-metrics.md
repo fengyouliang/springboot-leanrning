@@ -58,7 +58,7 @@
 
 - Lab：`BootWebMvcObservabilityLabTest`
 
-上一章：[part-08-security-observability/01-security-filterchain-and-mvc.md](01-security-filterchain-and-mvc.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[appendix/90-common-pitfalls.md](../appendix/90-common-pitfalls.md)
+上一章：[part-08-security-observability/01-security-filterchain-and-mvc.md](081-01-security-filterchain-and-mvc.md) ｜ 目录：[Docs TOC](../README.md) ｜ 下一章：[appendix/90-common-pitfalls.md](../appendix/082-90-common-pitfalls.md)
 
 <!-- BOOKIFY:END -->
 

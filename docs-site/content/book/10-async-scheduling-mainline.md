@@ -1,29 +1,17 @@
-# 第 10 章：Async/Scheduling 主线
+# （Redirect）Async/Scheduling 主线（旧入口）
 
-这一章解决的问题是：**为什么加上 `@Async` 方法就不在当前线程跑了、为什么定时任务会并发/堆积、线程池怎么选**。
+<!-- CHAPTER-CARD:START -->
+!!! summary "章节学习卡片（五问闭环）"
 
----
+    - 知识点：Redirect（旧路径兼容）
+    - 怎么使用：本页为旧路径保留；请跳转到新章节继续阅读与运行。
+    - 原理：通过 redirect 页面保留历史入口，避免断链与读者迷路；正文与可跑入口统一在新章节维护。
+    - 源码入口：见新章节
+    - 推荐 Lab：见新章节
+<!-- CHAPTER-CARD:END -->
 
-## 主线（按时间线顺读）
+## 已迁移
+本页为旧入口兼容页，正文已迁移到：[新位置](116-async-scheduling-mainline.md)。
 
-1. `@Async` 的本质仍是代理：调用边界进入异步拦截器
-2. 任务被提交到 `TaskExecutor`（线程池）执行
-3. 异步返回值语义：`void`/`Future`/`CompletableFuture` 的差异
-4. Scheduling：`@Scheduled` 把任务按 cron/fixedDelay/fixedRate 交给 scheduler
-5. 常见坑：线程池默认值、异常吞掉、上下文传播（ThreadLocal）、测试中如何稳定断言异步
-
----
-
-## 深挖入口（模块 docs）
-
-- 模块目录页：[`springboot-async-scheduling/docs/README.md`](../springboot-async-scheduling/docs/README.md)
-- 模块主线时间线（含可跑入口）：[`springboot-async-scheduling/docs/part-00-guide/03-mainline-timeline.md`](../springboot-async-scheduling/docs/part-00-guide/03-mainline-timeline.md)
-
----
-
-## 下一章怎么接
-
-异步的另一种常见形态是“发布事件”：我们进入 Events 主线。
-
-- 下一章：[第 11 章：Events 主线](11-events-mainline.md)
-
+## 返回
+- [全书目录](/book/)

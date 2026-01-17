@@ -4,15 +4,15 @@
 
 ## 从这里开始（建议顺序）
 
-1. [主线时间线](part-00-guide/03-mainline-timeline.md)
-2. [深挖导读](part-00-guide/00-deep-dive-guide.md)
+1. [主线时间线](part-00-guide/167-03-mainline-timeline.md)
+2. [深挖导读](part-00-guide/168-00-deep-dive-guide.md)
 
 ## 顺读主线
 
-- [Actuator 基础](part-01-actuator/01-actuator-basics.md)
+- [Actuator 基础](part-01-actuator/169-01-actuator-basics.md)
 
 ## 排坑与自检
 
-- [常见坑](appendix/90-common-pitfalls.md)
-- [自检](appendix/99-self-check.md)
+- [常见坑](appendix/170-90-common-pitfalls.md)
+- [自检](appendix/171-99-self-check.md)
 
